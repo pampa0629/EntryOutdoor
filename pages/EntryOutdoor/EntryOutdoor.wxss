@@ -1,0 +1,21 @@
+/* pages/Member/EntryOutdoor.wxss */
+
+.multi_row{
+  display: flex;
+  flex-direction: row;
+}
+
+.btn {
+  width: 40%;
+  margin-top: 10rpx;
+}
+
+
+.btn_hover {
+  background-color:gainsboro;
+}
+
+
+.tip{
+  color:#F65959;
+}

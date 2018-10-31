@@ -1,0 +1,117 @@
+<!--活动标题信息-->
+<van-panel title="{{title.whole}}" desc="自动生成">
+  <!--只有在“拟定中”的活动，才能修改活动基本信息-->
+  <block wx:if="{{status=='拟定中'}}">
+    <van-field label="活动地点" required value="{{title.place}}" placeholder="请输入活动地点"  bind:change="bindPlace" />
+    <picker mode="date" value="{{title.date}}" start="{{startDate}}" end="{{endDate}}" bindchange="bindDateChange">
+      <van-field label="活动日期" disabled required value="{{title.date}}" placeholder="请选择活动日期"/>
+    </picker>
+    <picker bindchange="bindChangeDuring" value="{{title.during}}" range="{{Durings}}">
+      <van-field label="几日活动" disabled value="{{title.during}}" placeholder="请选择活动时长"/>
+    </picker>
+    <picker bindchange="bindChangeLoaded" value="{{title.loaded}}" range="{{Loadeds}}">
+      <van-field label="负重" disabled value="{{title.loaded}}" placeholder="请选择负重情况"/>
+    </picker>
+    <van-cell title="活动强度" label="自动计算" value="{{title.level}}"/>
+    <van-cell title="累积距离：{{title.addedLength}}公里" >
+      <van-stepper value="{{title.addedLength}}" min="1" max="100" bind:change="bindAddedLength" />
+    </van-cell>
+    <van-cell title="累积上升：{{title.addedUp}}00米" >
+      <van-stepper value="{{title.addedUp}}" min="1" max="100" bind:change="bindAddedUp" />
+    </van-cell>
+    <van-cell title="强度调整：{{title.adjustLevel}}%" border="{{ false }}">
+      <van-stepper value="{{title.adjustLevel}}" min="50" max="200" step="5"  bind:change="bindAdjustLevel" />
+    </van-cell>
+  </block>
+</van-panel>
+  
+  <!--集合地点-->
+<van-panel title="集合地点">
+  <van-cell title="必须选择集合地点"  value="点击编辑集合地点" required is-link url="EditMeets"/>
+  <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{leader.entryInfo.meetsIndex}}" bind:change="changeMeets">
+    <van-cell clickable data-name="{{index}}" bind:click="clickMeets"  title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" border="{{index<meets.length-1}}">
+      <van-radio name="{{index}}"/>
+    </van-cell>
+  </van-radio-group>
+</van-panel>
+
+  <!--活动路线-->
+<van-panel title="活动路线">
+  <van-cell title="途径点"  value="点击编辑活动路线" is-link url="EditRoute"/>
+  <van-cell-group wx:for="{{route}}" wx:key="place+time">
+    <van-cell data-name="{{index}}" title="{{index+1}}）{{item.place}}" value="{{item.date}}，{{item.time}}" border="{{index<route.length-1}}" />
+  </van-cell-group>
+</van-panel>
+
+<!--活动介绍和图片-->
+<van-panel title="活动图文介绍" use-footer-slot>
+  <van-field label="文字介绍"  value="{{brief.disc}}" autosize type="textarea" placeholder="请输入活动介绍"  bind:confirm="bindBriefText" icon="arrow-left" bind:click-icon="pasteBriefDisc" />
+  <van-tag type="danger" plain wx:if="{{!outdoorid}}">必须先“保存草稿”或“发布活动”，才能“上传照片”</van-tag>
+  <van-cell title="活动照片" label="好照片胜过千言万语" value="点击上传/删除活动照片" border="{{false}}" clickable="{{outdoorid}}" is-link bind:click="clickUploadPics"/>
+  <view wx:for="{{brief.pics}}" wx:key="src">
+    <van-row>
+      <van-col span="20" offset="2">
+        <image mode="aspectFit" src="{{item.src}}"></image>
+      </van-col>
+    </van-row>
+  </view>
+</van-panel>
+
+<!--免责条款-->
+<van-cell title="免责条款" label="户外有风险" value="点击编辑免责条款" is-link url="EditDisclaimer" border="{{false}}"/>
+
+<!--附加要求-->
+<van-cell title="附加要求" label="对队员/装备/人数/时间等的要求" value="点击设置附加要求" is-link url="EditLimits" border="{{false}}"/>
+
+<!--活动报名状态-->
+<van-tag type="primary" plain>活动状态：{{status}}</van-tag>
+<van-tag wx:if="{{!canPublish&&status=='拟定中'}}" plain type="danger">\n必须设定带(*)号的内容才能发布活动</van-tag>
+
+<!--发布活动和保存草稿按钮-->
+<van-row wx:if="{{status=='拟定中'}}">
+  <van-col span="9" offset="2">
+    <van-button type="primary" plain size="large" disabled="{{!canPublish}}" bind:click='publishOutdoor'>发布活动</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <van-button plain size="large" disabled="{{!hasModified}}" bind:click='saveDraft'>保存草稿</van-button>
+  </van-col>
+</van-row>
+
+<!--新建活动和保存修改按钮-->
+<van-row>
+  <van-col span="9" offset="2">
+    <van-button wx:if="{{status!='拟定中'}}" type="primary" plain size="large" disabled="{{!canPublish}}" bind:click='newOutdoor'>新建活动</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <van-button wx:if="{{status=='已发布'}}" disabled="{{!hasModified}}" plain size="large" disabled="{{!hasModified}}" bind:click='saveModified'>保存修改</van-button>
+  </van-col>
+</van-row>
+
+<!--活动截止/取消/恢复等按钮-->
+<van-row>
+  <van-col span="9" offset="2">
+    <van-button wx:if="{{status=='已发布'}}" plain size="large" type="warning" bind:click='stopEntry'>报名截止</van-button>
+    <van-button wx:if="{{status=='报名截止'}}" plain size="large" bind:click='continueEntry'>继续报名</van-button>
+</van-col>
+  <van-col span="9" offset="2">
+    <van-button wx:if="{{status=='已发布'||status=='报名截止'}}" plain size="large" type="warning" bind:click='cancelOutdoor'>活动取消</van-button>
+    <van-button wx:if="{{status=='已取消'}}" plain size="large" bind:click='resumeOutdoor'>活动恢复</van-button>
+  </van-col>
+</van-row>
+  
+<!--分享活动按钮-->
+<van-row wx:if="{{status=='已发布' ||status=='报名截止'}}">
+  <van-col span="9" offset="2">
+    <van-button open-type="share" plain size="large" bind:click='onShareAppMessage'>分享活动</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <van-button  plain size="large" bind:click='onShare2Circle'>分享到朋友圈</van-button>
+  </van-col>
+</van-row>
+
+<!--打印活动按钮-->
+<van-row>
+  <van-col span="20" offset="2">
+    <van-button wx:if="{{status!='拟定中'}}" plain size="large" bind:click='printOutdoor'>打印活动详情</van-button>
+  </van-col>
+</van-row>

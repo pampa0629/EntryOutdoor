@@ -1,0 +1,28 @@
+/* pages/detail/detail.wxss */
+.swiper-tab{
+    width: 100%;
+    border-bottom: 2rpx solid #ccc;
+    text-align: center;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+.swiper-tab-item{
+    width: 30%; 
+    color:#434343;
+}
+.active{
+    color:#F65959;
+    border-bottom: 4rpx solid #F65959;
+}
+.swiper{
+  text-align: center;
+}
+
+.list-hover{
+  background-color:gainsboro;
+}
+
+.big_font{
+  font-size:larger;
+}

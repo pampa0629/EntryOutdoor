@@ -1,0 +1,5 @@
+<!--pages/EntryOutdoor/LookRoute.wxml-->
+<van-cell-group>
+  <van-cell title="途经点" value="预计到达时间"/>
+  <van-cell wx:for="{{route}}" wx:key="place+time" title="{{index+1}}）{{item.place}}" value="{{item.date}}，{{item.time}}"/> 
+</van-cell-group>

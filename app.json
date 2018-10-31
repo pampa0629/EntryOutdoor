@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/MyInfo/MyInfo",
+    "pages/Test/OneOutdoor",
+    "pages/EntryOutdoor/EntryOutdoor",
+    "pages/PrintOutdoor/PrintOutdoor",
+    "pages/MyOutdoors/MyOutdoors",
+    "pages/CreateOutdoor/CreateOutdoor",
+    "pages/MyInfo/ModifyInfo",
+    "pages/CreateOutdoor/EditMeets",
+    "pages/CreateOutdoor/EditOneMeet",
+    "pages/CreateOutdoor/EditRoute",
+    "pages/CreateOutdoor/EditOneStop",
+    "pages/CreateOutdoor/UploadPics",
+    "pages/EntryOutdoor/LookMembers",
+    "pages/EntryOutdoor/LookRoute",
+    "pages/CreateOutdoor/EditDisclaimer",
+    "pages/EntryOutdoor/LookDisclaimer",
+    "pages/CreateOutdoor/EditLimits"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "户外报名",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#3cc51f",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/CreateOutdoor/CreateOutdoor",
+        "text": "发起活动"
+      },
+      {
+        "pagePath": "pages/MyOutdoors/MyOutdoors",
+        "text": "我的活动"
+      },
+      {
+        "pagePath": "pages/MyInfo/MyInfo",
+        "text": "我的信息"
+      }
+    ]
+  }
+}

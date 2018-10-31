@@ -1,0 +1,6 @@
+
+<van-panel title="免责条款详细内容" desc="">
+  <view>
+    <text style="font-size:12pt">{{disclaimer}}</text>
+  </view>
+</van-panel>

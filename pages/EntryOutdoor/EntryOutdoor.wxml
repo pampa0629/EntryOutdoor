@@ -1,0 +1,113 @@
+<!--pages/Member/EntryOutdoor.wxml-->
+<!--活动信息-->
+<van-panel title="{{title.whole}}">
+    <van-cell title="地点" value="{{title.place}}"/>
+    <van-cell title="日期" value="{{title.date}}"/>
+    <van-cell title="时长负重" value="{{title.during}}，{{title.loaded}}"/>
+    <van-cell title="强度" label="强度值：{{title.level}}" value="累积距离{{title.addedLength}}公里，累积上升{{title.addedUp}}00米" border="{{false}}"/>
+</van-panel>
+
+<!--活动图文介绍-->
+<van-panel title="活动图文介绍">
+  <van-field value="{{brief.disc}}" autosize type="textarea" disabled border="{{false}}"/>
+  <view wx:for="{{brief.pics}}" wx:key="src">
+    <van-row>
+      <van-col span="20" offset="2">
+        <image mode="aspectFit" src="{{item.src}}"></image>
+      </van-col>
+    </van-row>
+  </view>
+</van-panel>
+
+<!--活动路线-->
+<van-cell-group>
+  <van-cell title="活动路线" label="{{route.length}}个途经点" value="点击查看详细路线" is-link url="LookRoute" border="{{false}}"/>
+</van-cell-group>
+
+<!--队员列表-->
+<van-cell-group>
+  <van-cell title="队员列表" label="已报名{{members.length}}人（{{limits.maxPerson?'限limits.personCount':'不限人数'}}）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}"/>
+</van-cell-group>
+
+<!--集合地点-->
+<van-panel title="集合点选择">
+  <van-cell required title="必须选择集合地点"  value="已选择第{{entryInfo.meetsIndex+1}}集合点"/>
+  <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{entryInfo.meetsIndex}}" bind:change="changeMeets">
+    <van-cell clickable data-name="{{index}}" bind:click="clickMeets"  title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" border="{{index<meets.length-1}}">
+      <van-radio name="{{index}}"/>
+    </van-cell>
+  </van-radio-group>
+</van-panel>
+
+<!--免责条款与是否认路-->  
+<van-cell title="免责条款"  value="点击查看条款详细内容" clickable is-link url="LookDisclaimer"/>
+<van-checkbox-group>
+  <van-cell title="我已阅读并同意所有条款" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
+    <van-checkbox value="{{entryInfo.agreedDisclaimer}}" bind:change="checkDisclaimer"/>
+  </van-cell>
+  <van-cell title="是否认路" label="{{entryInfo.knowWay?'认路':'不认路'}}" clickable bind:click="checkKnowWay" border="{{false}}">
+    <van-checkbox value="{{entryInfo.knowWay}}" bind:change="checkKnowWay"/>
+  </van-cell>
+</van-checkbox-group>
+  
+<!--状态判断-->
+<van-tag type="primary" plain>活动状态：{{status}}；报名状态：{{entryInfo.status}}</van-tag>
+<van-tag wx:if="{{entryInfo.meetsIndex<0}}" plain type="danger">\n请选择集合地点，然后才能报名。</van-tag>
+<van-tag wx:if="{{!entryInfo.agreedDisclaimer}}" plain type="danger">\n请勾选免责条款，然后才能报名。</van-tag>
+
+<!--报名按钮-->
+<van-row wx:if="{{status=='已发布'}}">
+  <block wx:if="{{limits.maxPerson && members.length>=limits.personCount}}">
+  <van-tag plain type="danger">\n报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
+    <block wx:if="{{entryInfo.status=='浏览中'}}">
+      <van-col span="9" offset="2">
+        <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" plain size="large"  bind:click='tapBench'>我要替补</van-button>
+      </van-col>
+    </block>
+  </block>
+  <block wx:else>
+    <block wx:if="{{entryInfo.status=='浏览中'}}">
+      <van-col span="9" offset="2">
+        <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" plain size="large"  bind:click='tapOcuppy'>我要占坑</van-button>
+      </van-col>
+    </block>
+    <block wx:if="{{entryInfo.status=='浏览中'||entryInfo.status=='占坑中'}}">
+      <van-col span="9" offset="2">
+      <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" type="primary" plain size="large"  bind:click='tapEntry'>我要报名</van-button>
+      </van-col>
+    </block>
+  </block>
+  <block wx:if="{{entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中'}}">
+    <van-col span="9" offset="2">
+      <van-button  type="warning" plain size="large"  bind:click='tapQuit'>我要退出</van-button>
+    </van-col>
+  </block>
+</van-row>
+
+<!--分享与打印按钮-->
+<van-row>
+  <van-col span="9" offset="2">
+    <van-button wx:if="{{status!='已取消'}}" open-type="share" plain size="large" bind:click='onShareAppMessage'>分享到微信群</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <van-button wx:if="{{status!='已取消'}}" plain size="large" bind:click='onShare2Circle'>分享到朋友圈</van-button>
+  </van-col>
+</van-row>
+
+<!--关注与首页按钮-->
+<van-row>
+  <van-col span="9" offset="2">
+    <van-button wx:if="{{hasCared}}" plain size="large" bind:click='cancelCare'>取消关注</van-button>
+    <van-button wx:else plain size="large" bind:click='careOutdoor'>关注活动</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <van-button plain size="large" bind:click='printOutdoor'>打印活动详情</van-button>
+  </van-col>
+</van-row>
+
+<!--回到首页按钮-->
+<van-row>
+  <van-col span="20" offset="2">
+    <van-button  plain size="large" type="primary" bind:click='toMainpage'>回到首页</van-button>
+  </van-col>
+</van-row>

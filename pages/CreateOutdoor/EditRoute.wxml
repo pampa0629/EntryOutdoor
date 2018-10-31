@@ -1,0 +1,16 @@
+
+<van-cell title="已有路线途经点"/>
+<van-cell wx:for="{{route}}" wx:key="place"  title="{{item.place}}" value="{{item.date}}，{{item.time}}" clickable bind:click="clickStop{{index}}">
+  <van-icon slot="right-icon" name="edit-data" class="van-cell__right-icon" />
+</van-cell>
+
+<van-button size="large" type="primary" bindtap='addStop'>增加途经点</van-button>
+    
+<!--弹出功能选项-->
+<van-action-sheet
+  show="{{ showAction }}"
+  actions="{{ Actions }}"
+  cancel-text="取消"
+  bind:cancel="onCancelAction"
+  bind:select="onSelectAction"
+/>

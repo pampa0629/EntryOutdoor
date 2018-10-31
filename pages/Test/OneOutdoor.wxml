@@ -1,0 +1,27 @@
+<van-row>
+  <van-col span="9" offset="2">
+  <van-button size="large" type="primary" bind:click="onLogin">登录org</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+  <van-button size="large" type="primary"  bind:click="onRegister">注册org</van-button>
+  </van-col>
+</van-row>
+
+<van-row>
+  <van-col span="9" offset="2">
+  <van-button size="large" type="primary" bind:click="onCreate">发帖</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+  <van-button size="large" type="primary"  bind:click="onEntry">报名</van-button>
+  </van-col>
+</van-row>
+
+
+<van-row>
+  <van-col span="9" offset="2">
+  <van-button size="large" type="primary" bind:click="onEntryOther">代报名</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+  <van-button size="large" type="primary"  bind:click="onSame">同步</van-button>
+  </van-col>
+</van-row>

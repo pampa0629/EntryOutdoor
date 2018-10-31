@@ -1,0 +1,10 @@
+/* pages/Leader/PrintOutdoor.wxss */
+
+.tip{
+  color:#F65959;
+}
+
+.multi_row{
+   display: flex;
+  flex-direction: row;
+}

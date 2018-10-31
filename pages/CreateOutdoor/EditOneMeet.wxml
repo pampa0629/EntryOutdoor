@@ -1,0 +1,14 @@
+
+<van-field label="集合地点" required value="{{meet.place}}" placeholder="请输入集合地点" bindinput="inputMeetPlace"/>
+
+<!--集合日期，如：当天-->
+<picker bindchange="changMeetDate" value="{{meetDatesIndex}}" range="{{MeetDates}}">
+    <van-field label="集合日期" disabled required value="{{meet.date}}" placeholder="请选择集合日期"/>
+  </picker>
+
+<!--集合时间点：8:00-->
+<picker mode="time" value="{{meet.time}}" start="06:00" end="23:00" bindchange="changMeetTime">
+  <van-field label="集合时间" disabled required value="{{meet.time}}" placeholder="请选择集合时间"/>
+</picker>
+
+<van-button size="large" type="primary"   disabled="{{!meet.place||!meet.date||!meet.time}}" bind:click='clickSaveAndBack'>保存并返回</van-button>

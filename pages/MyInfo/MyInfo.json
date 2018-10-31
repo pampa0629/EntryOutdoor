@@ -1,0 +1,13 @@
+{
+  "navigationBarTitleText": "我的信息",
+  "usingComponents": {
+    "van-icon": "/vant-weapp/icon/index",
+    "van-button": "/vant-weapp/button/index",
+    "van-dialog": "/vant-weapp/dialog/index",
+    "van-cell": "/vant-weapp/cell/index",
+    "van-cell-group": "/vant-weapp/cell-group/index",
+    "van-row": "/vant-weapp/row/index",
+    "van-col": "/vant-weapp/col/index",
+    "van-tag": "/vant-weapp/tag/index"
+  }
+}

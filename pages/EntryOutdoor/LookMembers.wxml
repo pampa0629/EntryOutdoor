@@ -1,0 +1,5 @@
+
+<van-cell-group>
+  <van-cell title="户外昵称（性别）" label="已报名{{members.length}}人" value="是否认路/集合地点（报名状态）"/>
+  <van-cell wx:for="{{members}}" wx:key="personid" title="{{item.userInfo.nickName}}（{{item.userInfo.gender}}）" value="{{item.entryInfo.knowWay}}/第{{item.entryInfo.meetsIndex+1}}集合地点({{item.entryInfo.status}})"/> 
+</van-cell-group>

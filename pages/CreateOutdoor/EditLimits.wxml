@@ -1,0 +1,31 @@
+<!--pages/CreateOutdoor/EditLimits.wxml-->
+
+<!--活动人数限制-->
+<van-panel title="活动人数限制" >
+  <van-checkbox-group>
+    <van-cell title="{{limits.maxPerson?'限制人数':'不限制人数'}}" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
+        <van-checkbox value="{{limits.maxPerson}}" bind:change="checkMaxPerson"/>
+    </van-cell>
+  </van-checkbox-group>
+  <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}">
+    <van-stepper value="{{limits.personCount}}" min="1" max="100" bind:change="bindAddPerson" />
+  </van-cell>
+</van-panel>
+
+<van-panel title="截止时间设置" >
+  <!--占坑截止时间-->
+  <picker bindchange="changOcuppyDate" value="{{limits.ocuppy.date}}" range="{{OcuppyDates}}">
+      <van-field label="占坑截止日期" disabled  value="{{limits.ocuppy.date}}" placeholder="请选择占坑截止日期"/>
+    </picker>
+  <picker mode="time" value="{{limits.ocuppy.time}}" start="00:00" end="24:00" bindchange="changOcuppyTime">
+    <van-field label="占坑截止时间" disabled  value="{{limits.ocuppy.time}}" placeholder="请选择占坑截止时间"/>
+  </picker>
+
+  <!--报名截止时间-->
+  <picker bindchange="changEntryDate" value="{{limits.entry.date}}" range="{{EntryDates}}">
+      <van-field label="报名截止日期" disabled  value="{{limits.entry.date}}" placeholder="请选择报名截止日期"/>
+    </picker>
+  <picker mode="time" value="{{limits.entry.time}}" start="00:00" end="24:00" bindchange="changEntryTime">
+    <van-field label="报名截止时间" disabled  value="{{limits.entry.time}}" placeholder="请选择报名截止时间"/>
+  </picker>
+</van-panel>

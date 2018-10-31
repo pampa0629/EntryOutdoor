@@ -1,0 +1,14 @@
+
+.btn {
+  width: 45%;
+  margin-top: 10rpx;
+}
+
+.btn_hover {
+ background-color:gainsboro;
+}
+
+.multi_row{
+  display: flex;
+  flex-direction: row;
+}

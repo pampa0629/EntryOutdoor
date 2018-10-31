@@ -1,0 +1,20 @@
+{
+  "navigationBarTitleText": "编辑活动路线",
+  "usingComponents": {
+    "van-icon": "/vant-weapp/icon/index",
+    "van-button": "/vant-weapp/button/index",
+    "van-dialog": "/vant-weapp/dialog/index",
+    "van-field": "/vant-weapp/field/index",
+    "van-radio": "/vant-weapp/radio/index",
+    "van-radio-group": "/vant-weapp/radio-group/index",
+    "van-cell": "/vant-weapp/cell/index",
+    "van-cell-group": "/vant-weapp/cell-group/index",
+    "van-row": "/vant-weapp/row/index",
+    "van-col": "/vant-weapp/col/index",
+    "van-switch-cell": "/vant-weapp/switch-cell/index",
+    "van-stepper": "/vant-weapp/stepper/index",
+    "van-slider": "/vant-weapp/slider/index",
+    "van-tag": "/vant-weapp/tag/index",
+    "van-action-sheet": "/vant-weapp/action-sheet/index"
+  }
+}

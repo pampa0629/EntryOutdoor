@@ -26,7 +26,8 @@
 
 <!--队员列表-->
 <van-cell-group>
-  <van-cell title="队员列表" label="已报名{{members.length}}人（{{limits.maxPerson?'限limits.personCount':'不限人数'}}）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}"/>
+  <van-cell wx:if="limits.maxPerson" title="队员列表" label="已报名{{members.length}}人（限{{limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}"/>
+  <van-cell wx:else title="队员列表" label="已报名{{members.length}}人（不限人数）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}"/>
 </van-cell-group>
 
 <!--集合地点-->
@@ -50,36 +51,41 @@
   </van-cell>
 </van-checkbox-group>
   
-<!--状态判断-->
+<!--状态提示-->
 <van-tag type="primary" plain>活动状态：{{status}}；报名状态：{{entryInfo.status}}</van-tag>
 <van-tag wx:if="{{entryInfo.meetsIndex<0}}" plain type="danger">\n请选择集合地点，然后才能报名。</van-tag>
 <van-tag wx:if="{{!entryInfo.agreedDisclaimer}}" plain type="danger">\n请勾选免责条款，然后才能报名。</van-tag>
+<!--截止时间提示-->
+<van-tag wx:if="{{remainOccupyTime<0}}" plain type="danger">\n已过占坑截止时间</van-tag>
+<van-tag wx:else plain type="primary" >\n距离占坑截止时间还剩：{{remainOccupyTime}}</van-tag>
+<van-tag wx:if="{{remainEntryTime<0}}" plain type="danger">\n已过报名截止时间</van-tag>
+<van-tag wx:else plain type="primary" >\n距离报名截止时间还剩：{{remainEntryTime}}</van-tag>
 
 <!--报名按钮-->
 <van-row wx:if="{{status=='已发布'}}">
   <block wx:if="{{limits.maxPerson && members.length>=limits.personCount}}">
-  <van-tag plain type="danger">\n报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
+    <van-tag plain type="danger">\n报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
     <block wx:if="{{entryInfo.status=='浏览中'}}">
       <van-col span="9" offset="2">
-        <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" plain size="large"  bind:click='tapBench'>我要替补</van-button>
+        <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer||remainOccupyTime<0}}" plain size="large"  bind:click='tapBench'>我要替补</van-button>
       </van-col>
     </block>
   </block>
   <block wx:else>
     <block wx:if="{{entryInfo.status=='浏览中'}}">
       <van-col span="9" offset="2">
-        <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" plain size="large"  bind:click='tapOcuppy'>我要占坑</van-button>
+        <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer||remainOccupyTime<0}}" plain size="large"  bind:click='tapOcuppy'>我要占坑</van-button>
       </van-col>
     </block>
     <block wx:if="{{entryInfo.status=='浏览中'||entryInfo.status=='占坑中'}}">
       <van-col span="9" offset="2">
-      <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" type="primary" plain size="large"  bind:click='tapEntry'>我要报名</van-button>
+      <van-button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer||remainEntryTime<0}}" type="primary" plain size="large"  bind:click='tapEntry'>我要报名</van-button>
       </van-col>
     </block>
   </block>
   <block wx:if="{{entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中'}}">
     <van-col span="9" offset="2">
-      <van-button  type="warning" plain size="large"  bind:click='tapQuit'>我要退出</van-button>
+      <van-button  type="warning" plain size="large" disabled="{{remainEntryTime<0}}" bind:click='tapQuit'>我要退出</van-button>
     </van-col>
   </block>
 </van-row>

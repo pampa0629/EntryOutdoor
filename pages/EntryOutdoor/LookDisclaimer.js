@@ -1,4 +1,8 @@
-// pages/EntryOutdoor/LookDisclaimer.js
+const app = getApp()
+wx.cloud.init()
+const db = wx.cloud.database({})
+const dbPersons = db.collection('Persons')
+
 Page({
 
   data: {
@@ -16,6 +20,22 @@ Page({
         disclaimer: prevPage.data.limits.disclaimer,
       })
     }
+  },
+
+  copyDisclaimer: function () {
+    const self = this
+    wx.setClipboardData({
+      data: self.data.disclaimer,
+    })
+  },
+
+  saveMyDisclaimer: function () {
+    const self = this;
+    dbPersons.doc(app.globalData.personid).update({
+      data: {
+        disclaimer: self.data.disclaimer,
+      }
+    })
   },
 
 })

@@ -50,6 +50,16 @@ Page({
     })
   },
 
+  loadMyDisclaimer: function () {
+    const self = this;
+    dbPersons.doc(app.globalData.personid).get()
+    .then(res=>{
+      self.setData({
+        disclaimer: res.data.disclaimer
+      })
+    })
+  },
+
   saveMyDisclaimer: function () {
     const self = this;
     dbPersons.doc(app.globalData.personid).update({

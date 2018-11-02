@@ -1,4 +1,3 @@
-// pages/Leader/PrintOutdoor.js
 const app = getApp()
 const util = require('../../utils/util.js')
 wx.cloud.init()
@@ -9,9 +8,6 @@ const _ = db.command
 
 Page({
 
-  /**
-   * 页面的初始数据
-   */
   data: {
     outdoorid: null, // 活动id
     title: {}, // 活动主题信息，内容从数据库中读取
@@ -49,6 +45,7 @@ Page({
           status: res.data.status,
         })
         self.dealCompatibility()
+        console.log(self.data)
 
         if (self.data.isLeader) { // 是领队：分组，缓存checked
           // 把队员按照集合地点进行排列
@@ -68,22 +65,21 @@ Page({
       if (item.entryInfo.agreedDisclaimer) {
         item.entryInfo.agreedDisclaimer = "已同意免责条款"
       }
-
       // 转化是否认路
-      if (index > 0) { // 第一个是领队，不管TA是否认路
-        if (item.entryInfo.knowWay) {
-          item.entryInfo.knowWay = "认路"
-        } else {
-          item.entryInfo.knowWay = "不认路"
-        }
+      if (item.entryInfo.knowWay || index == 0) { // 第一个是领队，必须认路
+        item.entryInfo.knowWay = "认路"
+      } else {
+        item.entryInfo.knowWay = "不认路"
       }
+
+      // next 
+    
+      // 设置回去
       self.setData({
         ['members[' + index + '].entryInfo']: item.entryInfo,
       })
     })
-
-    // next 
-  },
+  }, 
 
   // 把队员按照集合地点进行排列
   groupMembersByMeets: function() {
@@ -133,15 +129,17 @@ Page({
           checks.forEach((item, index) => {
             if (item == this.data.meetMembers[i][j].personid) {
               this.data.meetMembers[i][j].checked = true;
+              console.log(this.data.meetMembers[i][j])
             }
           })
         }
       }
-      //console.log("PrintOutdoor.js in onShow fun, meetMembers is:" + JSON.stringify(this.data.meetMembersmeetMembers, null, 2))
+      
       this.setData({
         meetMembers: this.data.meetMembers,
       })
     }
+    console.log(this.data.meetMembers)
   },
 
   getChecksFromStorage: function(outdoorid) {
@@ -187,7 +185,4 @@ Page({
     wx.setStorageSync(this.data.outdoorid, checks)
   },
 
-  onShareAppMessage: function() {
-
-  },
 })

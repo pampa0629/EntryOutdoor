@@ -3,4 +3,8 @@
   <view>
     <text style="font-size:12pt">{{disclaimer}}</text>
   </view>
+  <view class="multi_row">
+    <button class="btn" hover-class='btn_hover'  bindtap="copyDisclaimer">拷贝到剪切板</button>
+    <button class="btn" hover-class='btn_hover'  bindtap="saveMyDisclaimer">存为我的条款</button>
+  </view>
 </van-panel>

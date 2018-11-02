@@ -45,7 +45,7 @@
 
 <!--活动介绍和图片-->
 <van-panel title="活动图文介绍" use-footer-slot>
-  <van-field label="文字介绍"  value="{{brief.disc}}" autosize type="textarea" placeholder="请输入活动介绍"  bind:confirm="bindBriefText" icon="arrow-left" bind:click-icon="pasteBriefDisc" />
+  <van-field label="文字介绍"  value="{{brief.disc}}" autosize type="textarea" placeholder="请输入活动介绍"  bind:confirm="bindBriefText" bind:change="bindBriefText" icon="arrow-left" bind:click-icon="pasteBriefDisc" />
   <van-tag type="danger" plain wx:if="{{!outdoorid}}">必须先“保存草稿”或“发布活动”，才能“上传照片”</van-tag>
   <van-cell title="活动照片" label="好照片胜过千言万语" value="点击上传/删除活动照片" border="{{false}}" clickable="{{outdoorid}}" is-link bind:click="clickUploadPics"/>
   <view wx:for="{{brief.pics}}" wx:key="src">
@@ -65,6 +65,7 @@
 
 <!--活动报名状态-->
 <van-tag type="primary" plain>活动状态：{{status}}</van-tag>
+<van-tag wx:if="{{status!='拟定中'}}" type="primary" plain>参加活动人数：{{members.length}}</van-tag>
 <van-tag wx:if="{{!canPublish&&status=='拟定中'}}" plain type="danger">\n必须设定带(*)号的内容才能发布活动</van-tag>
 
 <!--发布活动和保存草稿按钮-->
@@ -102,7 +103,7 @@
 <!--分享活动按钮-->
 <van-row wx:if="{{status=='已发布' ||status=='报名截止'}}">
   <van-col span="9" offset="2">
-    <van-button open-type="share" plain size="large" bind:click='onShareAppMessage'>分享活动</van-button>
+    <van-button open-type="share" plain size="large" bind:click='onShareAppMessage'>分享到微信群</van-button>
   </van-col>
   <van-col span="9" offset="2">
     <van-button  plain size="large" bind:click='onShare2Circle'>分享到朋友圈</van-button>

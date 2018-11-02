@@ -16,6 +16,12 @@ const formatTime = date => {
   return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':')
 }
 
+// 把2018-11-01的日期格式，转化为11/02/2018的格式
+const Ymd2Mdy= (date)=>{
+  var dates = date.split("-")
+  return dates[1] + "/" + dates[2] + "/" + dates[0]
+}
+
 const nextDate = (date, num) => {
   var next = new Date()
   next.setDate(date.getDate() + num)
@@ -178,6 +184,35 @@ const getDay=(date) =>{
   return text;
 }
 
+// 汉字转数字
+const CChars = ['零','一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '多']
+const parseChar = (cchar) => { 
+  CChars.forEach((item, index)=>{
+    if(item == cchar){
+      return index
+    }
+  })
+  return -1
+}
+
+// 得到截止日期数组
+const getLimitDates = () => {
+  var LimitDates= ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"] // 截止日期
+  return LimitDates;
+}
+
+// 根据字符信息，得到截止日期的索引
+const getLimitDateIndex = (date) => {
+  var LimitDates = ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"] // 截止日期
+  var result = 0
+  LimitDates.forEach((item, index)=>{
+    if(item == date){
+      result = index
+    }
+  })
+  return result
+}
+
 // 构建图片存储的路径
 const buildPicSrc = (outdoorid, index) => { // index:0,1,2 图片顺序
   // 没有办法，只能先用时间（毫秒）作为随时文件名，等待微信解决bug
@@ -186,6 +221,7 @@ const buildPicSrc = (outdoorid, index) => { // index:0,1,2 图片顺序
 
 module.exports = {
   formatTime: formatTime,
+  Ymd2Mdy: Ymd2Mdy,
   formatDate: formatDate,
   nextDate: nextDate,
   // openid
@@ -205,13 +241,17 @@ module.exports = {
   loadNicknameID: loadNicknameID,
   clearNicknameID: clearNicknameID,
   // 性别转化
-  toWxGender: toWxGender,
+  toWxGender: toWxGender, 
   fromWxGender: fromWxGender,
   // 创造队员
   createMember: createMember,
   // 根据userInfo（非微信）创建Person
   createPerson: createPerson,
   getDay: getDay,
+  parseChar: parseChar,
   // 图片在云存储上的位置
   buildPicSrc: buildPicSrc,
+  // 截止日期数组和字符串的相互转化
+  getLimitDates: getLimitDates,
+  getLimitDateIndex: getLimitDateIndex,
  }

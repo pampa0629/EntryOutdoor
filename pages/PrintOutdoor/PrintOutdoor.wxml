@@ -6,7 +6,7 @@
   <van-tag type="primary" plain>请截长屏保存</van-tag>
   <text>\n{{title.whole}}\n</text>
   <text class="tip">地点：</text>
-  <text>{{title.place}}\n</text>
+  <text>{{title.place}}\n</text> 
   <text class="tip">活动日期：</text>
   <text>{{title.date}}\n</text>
   <text class="tip">活动强度：</text>
@@ -30,13 +30,13 @@
 <!--对领队，要按照集合地点排列名单-->
 <block wx:if="{{isLeader}}">
   <checkbox-group bindchange="cbCallName">
-    <view wx:for="{{meetMebmers}}" wx:key="*this"><text>\n</text>
+    <view wx:for="{{meetMembers}}" wx:key="*this">
       <view  class="multi_row">
         <checkbox-group bindchange="cbCallNamebyMeet{{index}}">
-          <checkbox class="tip" value="{{index}}" checked="{{meetMebmers[index].checked}}">第{{index+1}}集合地点（共{{meetMebmers[index].length}}人）\n</checkbox>
+          <checkbox class="tip" value="{{index}}" checked="{{meetMembers[index].checked}}">第{{index+1}}集合地点（共{{meetMebmers[index].length}}人）\n</checkbox>
         </checkbox-group>
       </view>
-      <view class="multi_row" wx:for="{{meetMebmers[index]}}" wx:key="personid" wx:for-item="cell" wx:for-index="cellindex">
+      <view class="multi_row" wx:for="{{meetMembers[index]}}" wx:key="personid" wx:for-item="cell" wx:for-index="cellindex">
         <checkbox value="{{cell.personid}}" checked="{{cell.checked}}">{{cell.userInfo.nickName}}/{{cell.userInfo.gender}}/{{cell.userInfo.phone}}/{{item.entryInfo.knowWay}}/{{item.entryInfo.agreedDisclaimer}}({{cell.entryInfo.status}})</checkbox>
       </view>
     </view>

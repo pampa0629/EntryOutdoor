@@ -13,14 +13,16 @@ Page({
     entryInfo: { //报名信息
       status: "浏览中", // 报名状态：浏览中；占坑中；替补中；已报名；领队；
       meetsIndex: -1, // 选择的集合地点，若只有一个地点则无需选择
-      agreedDisclaimer:false, // 认同免责条款
-      knowWay:false, // 是否认路
+      agreedDisclaimer: false, // 认同免责条款
+      knowWay: false, // 是否认路
     },
     title: {}, // 活动主题信息，内容从数据库中读取
     route: [], // 活动路线，由多个站点（stop）组成
     meets: [], //集合点，可多个
     brief: {}, // 活动介绍，文字加图片
-    limits:{}, // 领队设定的各类限制条款
+    limits: {}, // 领队设定的各类限制条款
+    remainOccupyTime: 10 * 24 * 60, // 距离占坑截止还剩余的时间（单位：分钟）
+    remainEntryTime: 10 * 24 * 60, // 距离报名截止还剩余的时间（单位：分钟）
     status: null, //活动状态 
     members: null, // 队员报名信息，包括:personid,基本信息（userInfo)内容从Persons数据库中读取; 报名信息（entryInfo），报名时填写
     // 还是把userinfo和outdoors信息都保存下来方便使用
@@ -33,9 +35,9 @@ Page({
   onLoad: function(options) {
     console.log(options)
     var outdoorid = null;
-    if (options.outdoorid){
+    if (options.outdoorid) {
       outdoorid = options.outdoorid
-    } else if (options.scene){
+    } else if (options.scene) {
       console.log(options.scene)
       const scene = decodeURIComponent(options.scene)
       console.log(scene)
@@ -56,7 +58,7 @@ Page({
   },
 
   // 处理是否登录的问题
-  checkLogin: function (outdoorid) {
+  checkLogin: function(outdoorid) {
     if (app.globalData.hasUserInfo && app.globalData.userInfo != null) {
       this.setData({
         userInfo: app.globalData.userInfo,
@@ -88,7 +90,7 @@ Page({
   },
 
   // 从数据库中装载信息
-  loadInfo: function (outdoorid) {
+  loadInfo: function(outdoorid) {
     const self = this;
     // 这里得到活动id，读取数据库，加载各类信息
     console.log("EntryOutdoor.js in loadInfo fun, outdoorid is:" + outdoorid)
@@ -105,6 +107,7 @@ Page({
           // brief,limits： 需要做兼容性处理，放到下面专门的函数中
         })
         self.dealOutdoorCompatibility(res) // 处理Outdoors表中数据的兼容性
+        self.checkOcuppyLimitDate() // 处理占坑截止时间过了得退坑的问题
 
         if (res.data.meets.length <= 1) { // 若只有一个集合地点，默认设置就好了
           self.setData({
@@ -136,6 +139,26 @@ Page({
       })
   },
 
+  // 处理占坑截止时间过了得退坑的问题
+  checkOcuppyLimitDate: function() {
+    const self = this
+    if (self.data.limits.remainOccupyTime < 0) {
+      self.data.members.forEach((item, index) => {
+        if (item.entryInfo.status == "占坑中"){
+          self.data.members.splice(index,1)
+        }
+      })
+      // 删完了还得存到数据库中，调用云函数写入
+      wx.cloud.callFunction({
+        name: 'updateMember', // 云函数名称
+        data: {
+          outdoorid: self.data.outdoorid,
+          members: self.data.members
+        }
+      })
+    }
+  },
+
   // 处理Outdoors表中数据的兼容性
   dealOutdoorCompatibility: function(res) {
     const self = this;
@@ -165,12 +188,67 @@ Page({
         "limits.maxPerson": false,
       })
     }
+    // 占坑和报名截止时间
+    if (!res.data.limits) {
+      res.data.limits = {
+        occppy: null,
+        entry: null
+      }
+    }
+    console.log(res.data.limits)
+    self.setData({
+      remainOccupyTime: self.calcLimitTime(self.data.title.date, res.data.limits.ocuppy),
+      remainEntryTime: self.calcLimitTime(self.data.title.date, res.data.limits.entry)
+    })
 
     // next 
+
   },
 
+  // 计算当前距离截止时间还剩余的时间（单位：分钟）
+  // 若 limitItem 为空，则说明为不限
+  calcLimitTime: function(outdoorDate, limitItem) {
+    console.log(limitItem)
+    if (!limitItem) {
+      limitItem = {
+        date: "不限",
+        time: null
+      }
+    }
+    console.log(outdoorDate)
+    console.log(limitItem)
+    var outdoorMinute = Date.parse(util.Ymd2Mdy(outdoorDate)) / 1000.0 / 60 // 得到活动日期的分钟时间数
+    var dayCount = util.getLimitDateIndex(limitItem.date)
+    console.log("dayCount:"+dayCount)
+    var minute = 24 * 60; // 一天多少分钟
+    console.log(limitItem.time)
+    if (limitItem.time) {
+      var hour_minute = limitItem.time.split(":")
+      minute = minute - (parseInt(hour_minute[0]) * 60 + parseInt(hour_minute[1]))
+      console.log("hour_minute:" + hour_minute)
+      console.log("minute:"+minute)
+    }
+    minute += (dayCount - 1) * 24 * 60 // 截止时间和活动日期两者之间间隔的分钟数
+    console.log("minute" + minute)
+    var limitMinute = outdoorMinute - minute // 截止时间的分钟数
+
+    var nowMinute = Date.parse(new Date()) / 1000.0 / 60
+    var remainMinute = limitMinute - nowMinute
+    console.log(remainMinute)
+    if (remainMinute > 0) {
+      var remainDay = Math.trunc(remainMinute / 24.0 / 60.0)
+      remainMinute -= remainDay * 24 * 60
+      var remainHour = Math.trunc(remainMinute / 60)
+      remainMinute = Math.trunc(remainMinute - remainHour * 60)
+      remainMinute = remainDay + "天" + remainHour + "小时" + remainMinute + "分钟"
+    }
+    console.log(remainMinute)
+    return remainMinute
+  },
+
+
   // 处理报名信息的兼容性
-  dealEntryInfoCompatibility: function () {
+  dealEntryInfoCompatibility: function() {
     const self = this
     if (!self.data.entryInfo.agreedDisclaimer) { // 是否同意免责条款
       self.setData({
@@ -222,7 +300,7 @@ Page({
   },
 
   // 分享到朋友圈
-  onShare2Circle: function(){
+  onShare2Circle: function() {
     const self = this;
     app.onShare2Circle(self.data.outdoorid, self.data.title.whole, false)
   },
@@ -302,7 +380,7 @@ Page({
   },
 
   // 替补
-  tapBench: function () {
+  tapBench: function() {
     this.entryOutdoor("替补中")
   },
 
@@ -336,7 +414,7 @@ Page({
         }
 
         for (var i = 0; i < self.data.members.length; i++) {
-          if (changeStatus && self.data.members[i].entryInfo.status == "替补中"){
+          if (changeStatus && self.data.members[i].entryInfo.status == "替补中") {
             self.data.members[i].entryInfo.status == "报名中"
             changeStatus = false // 自己退出，只能补上排在最前面的替补
           }
@@ -388,7 +466,7 @@ Page({
     })
   },
 
-  clickMeets: function (e) {
+  clickMeets: function(e) {
     console.log(e)
     this.setData({
       "entryInfo.meetsIndex": parseInt(e.target.dataset.name),
@@ -405,15 +483,15 @@ Page({
   },
 
   // 勾选同意免责条款
-  checkDisclaimer: function (e) {
-    const self = this; 
+  checkDisclaimer: function(e) {
+    const self = this;
     self.setData({
       "entryInfo.agreedDisclaimer": !self.data.entryInfo.agreedDisclaimer,
     })
   },
 
   // 勾选是否认路
-  checkKnowWay: function (e) {
+  checkKnowWay: function(e) {
     const self = this;
     console.log(self.data.entryInfo.knowWay)
     self.setData({

@@ -1,9 +1,10 @@
-// pages/CreateOutdoor/EditLimits.js
+const util = require('../../utils/util.js')
+
 Page({
 
   data: {
-    OcuppyDates: ["不限", "前一天", "前两天", "前三天", "前四天", "前五天","前六天"], // 占坑截止日期
-    EntryDates: ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"], // 报名截止日期
+    OcuppyDates: null, //["不限", "前一天", "前两天", "前三天", "前四天", "前五天","前六天"], // 占坑截止日期
+    EntryDates: null, // ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"], // 报名截止日期
 
     limits: { 
       maxPerson:false, // 是否进行人数限制
@@ -16,6 +17,11 @@ Page({
 
   onLoad: function (options) {
     const self = this;
+    self.setData({
+      OcuppyDates: util.getLimitDates(),
+      EntryDates: util.getLimitDates(),
+    })
+
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({

@@ -33,6 +33,7 @@ Page({
 
     route: [], // 活动路线
     meets: [], //集合点，可加多个
+    members:[], // 已报名成员（含领队）
     leader: { // 领队的信息也要记录起来
       personid: null,
       userInfo: null,
@@ -87,6 +88,7 @@ Page({
             meets: res.data.meets,
             // brief: res.data.brief, 新增加的大的存储内容，都放到dealCompatibility中处理了
             leader: res.data.members[0],
+            members: res.data.members,
           })
           // 读取之前活动数据时的兼容性处理
           self.dealCompatibility(res);
@@ -169,7 +171,7 @@ Page({
       "leader.entryInfo.knowWay": true,
     })
     // 几日活动，老存储：durings duringIndex
-    if (!res.data.title.during && res.data.title.durings && res.data.title.duringIndex){
+    if (!res.data.title.during && res.data.title.durings){
       self.setData({
         "title.during": res.data.title.durings[res.data.title.duringIndex],
       })
@@ -216,7 +218,7 @@ Page({
       result += "地点待定"
     }
     // 时长
-    result += this.data.title.durings[this.data.title.duringIndex]
+    result += this.data.title.during
     // 轻装or重装
     result += this.data.title.loaded
     // 强度
@@ -324,8 +326,10 @@ Page({
       level *= 0.5
     }
     // 多日活动：除以天数乘以1.5
-    if (this.data.title.duringIndex > 0) {
-      level = level * 1.5 / (parseFloat(this.data.title.duringIndex) + 1)
+    console.log(this.data.title)
+    var duringCount = util.parseChar(this.data.title.during[0])
+    if (duringCount > 1) { 
+      level = level * 1.5 / (duringCount + 1)
     }
 
     // 领队调节强度系数
@@ -578,7 +582,7 @@ Page({
     this.setData({
       "brief.disc": e.detail,
       hasModified: true,
-    })
+    }) 
   },
 
   pasteBriefDisc: function () {

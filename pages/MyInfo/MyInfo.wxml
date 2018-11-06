@@ -6,7 +6,7 @@
       <open-data type="userAvatarUrl"></open-data>
     </view>
   </view>
-   
+    
   <van-cell-group>
     <van-cell title="户外昵称" value="{{userInfo.nickName}}" label="好听、易记、非真名"  is-link bind:click="clickModify"/>
     <van-cell title="性别" value="{{userInfo.gender}}"  is-link bind:click="clickModify"/>

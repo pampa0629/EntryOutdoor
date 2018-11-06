@@ -7,6 +7,7 @@ const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 
 Page({
+  
   data: {
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
     userInfo: {
@@ -18,7 +19,9 @@ Page({
     myOutdoors: [], // 活动id
     entriedOutdoors: [],
     caredOutdoors: [],
-    lastOutdoorid: null, // 是否有最近的活动
+    lastOutdoorid: null, // 最近访问过的活动ID
+
+    // 与org对接
 
     isTesting: true, // for test， false true
   },
@@ -182,7 +185,7 @@ Page({
           showCancel: false,
           confirmText: "知道了",
           content: "已经复制本小程序的帮助文档网页地址，请粘贴到浏览器中查看详细内容。"+
-                  "\n当前版本号：0.5.4  \n作者：攀爬",
+                  "\n当前版本号：0.5.5  \n作者：攀爬",
         })
       }
     })

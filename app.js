@@ -17,7 +17,6 @@ App({
   onLaunch: function() {
     // 判断微信版本号，太低的给予提示
     var versions = wx.getSystemInfoSync().version.split(".");
-    //console.log("app.js in onLaunch fun, versions is:" + JSON.stringify(versions, null, 2))
     if (versions[0] < '6' || (versions[0] == '6' && versions[1] < '6')) {
       // 版本不能低于 6.6.0
       wx.showToast({

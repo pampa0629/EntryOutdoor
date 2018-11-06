@@ -21,8 +21,14 @@ Page({
     meets: [], //集合点，可多个
     brief: {}, // 活动介绍，文字加图片
     limits: {}, // 领队设定的各类限制条款
-    remainOccupyTime: 10 * 24 * 60, // 距离占坑截止还剩余的时间（单位：分钟）
-    remainEntryTime: 10 * 24 * 60, // 距离报名截止还剩余的时间（单位：分钟）
+
+    remains: {
+      //remainOccupyTime: 10 * 24 * 60, // 距离占坑截止还剩余的时间（单位：分钟）
+      //remainEntryTime: 10 * 24 * 60, // 距离报名截止还剩余的时间（单位：分钟）
+      occupy:{time:null, text:""},
+      entry: { time: null, text: "" },
+    },
+    
     status: null, //活动状态 
     members: null, // 队员报名信息，包括:personid,基本信息（userInfo)内容从Persons数据库中读取; 报名信息（entryInfo），报名时填写
     // 还是把userinfo和outdoors信息都保存下来方便使用
@@ -183,9 +189,17 @@ Page({
       })
     }
     // 人数限制
+    console.log("res.data.limits: ")
+    console.log(res.data.limits)
     if (!res.data.limits || !res.data.limits.maxPerson) {
       self.setData({
         "limits.maxPerson": false,
+      })
+    }
+    // 是否允许空降，默认不允许
+    if (!res.data.limits || !res.data.limits.allowPopup) {
+      self.setData({
+        "limits.allowPopup": false,
       })
     }
     // 占坑和报名截止时间
@@ -195,19 +209,34 @@ Page({
         entry: null
       }
     }
-    console.log(res.data.limits)
     self.setData({
-      remainOccupyTime: self.calcLimitTime(self.data.title.date, res.data.limits.ocuppy),
-      remainEntryTime: self.calcLimitTime(self.data.title.date, res.data.limits.entry)
+      "remains.occupy.time": self.calcRemainTime(self.data.title.date, res.data.limits.ocuppy),
+      "remains.entry.time": self.calcRemainTime(self.data.title.date, res.data.limits.entry)
+    })
+    self.setData({
+      "remains.occupy.text": self.buildRemainText(self.data.remains.occupy.time),
+      "remains.entry.text": self.buildRemainText(self.data.remains.entry.time)
     })
 
     // next 
 
   },
 
+  buildRemainText: function (remainMinute){
+    var remainText="";
+    if (remainMinute > 0) {
+      var remainDay = Math.trunc(remainMinute / 24.0 / 60.0)
+      remainMinute -= remainDay * 24 * 60
+      var remainHour = Math.trunc(remainMinute / 60)
+      remainMinute = Math.trunc(remainMinute - remainHour * 60)
+      remainText = remainDay + "天" + remainHour + "小时" + remainMinute + "分钟"
+    }
+    return remainText
+  },
+
   // 计算当前距离截止时间还剩余的时间（单位：分钟）
   // 若 limitItem 为空，则说明为不限
-  calcLimitTime: function(outdoorDate, limitItem) {
+  calcRemainTime: function(outdoorDate, limitItem) {
     console.log(limitItem)
     if (!limitItem) {
       limitItem = {
@@ -234,14 +263,7 @@ Page({
 
     var nowMinute = Date.parse(new Date()) / 1000.0 / 60
     var remainMinute = limitMinute - nowMinute
-    console.log(remainMinute)
-    if (remainMinute > 0) {
-      var remainDay = Math.trunc(remainMinute / 24.0 / 60.0)
-      remainMinute -= remainDay * 24 * 60
-      var remainHour = Math.trunc(remainMinute / 60)
-      remainMinute = Math.trunc(remainMinute - remainHour * 60)
-      remainMinute = remainDay + "天" + remainHour + "小时" + remainMinute + "分钟"
-    }
+    
     console.log(remainMinute)
     return remainMinute
   },
@@ -341,10 +363,12 @@ Page({
         })
     } else { // 完全新报名，增加一条记录
       // 先从Person表中找到自己的信息
+      console.log(self.data.entryInfo)
       self.setData({
         "entryInfo.status": status,
         entryInfo: self.data.entryInfo,
       })
+      console.log(self.data.entryInfo)
 
       var member = util.createMember(app.globalData.personid, self.data.userInfo, self.data.entryInfo)
       console.log("EntryOutdoors.js in entryOutdoor fun, call addMember cloud fun， member is: " + JSON.stringify(member, null, 2))
@@ -355,7 +379,6 @@ Page({
           member: member
         },
         complete: res => {
-          console.log("EntryOutdoors.js in entryOutdoor fun, call addMember cloud fun complete, res is:" + JSON.stringify(res, null, 2))
           // 刷新一下队员列表
           dbOutdoors.doc(self.data.outdoorid).get()
             .then(res => {
@@ -392,6 +415,9 @@ Page({
   // 报名
   tapEntry: function() {
     this.entryOutdoor("报名中")
+    // <block wx:if="{{(entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中') && remains.entry.time>=0}}">
+    console.log(this.data.entryInfo.status)
+    console.log(this.data.remains.entry)
   },
 
   // 退出

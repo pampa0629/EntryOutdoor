@@ -10,6 +10,13 @@
   <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}">
     <van-stepper value="{{limits.personCount}}" min="1" max="100" bind:change="bindAddPerson" />
   </van-cell>
+  <block wx:if="{{!limits.maxPerson}}">
+    <van-checkbox-group>
+      <van-cell title="{{limits.allowPopup?'允许空降':'不允许空降'}}" clickable bind:click="checkAllowPopup" border="{{false}}">
+          <van-checkbox value="{{limits.allowPopup}}" bind:change="checkAllowPopup"/>
+      </van-cell>
+    </van-checkbox-group>
+  </block>
 </van-panel>
 
 <van-panel title="截止时间设置" >

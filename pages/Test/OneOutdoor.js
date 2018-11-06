@@ -1,4 +1,5 @@
 import Page from 'page';
+const app = getApp()
 
 Page({
   data: {
@@ -105,10 +106,10 @@ Page({
     })
   },
 
-// suijitest
-// test_lvyeorg@sina.com
-// xx123zzm
-// 抱歉，您目前处于见习期间，需要等待 600 分钟后才能进行本操作
+  // suijitest
+  // test_lvyeorg@sina.com
+  // xx123zzm
+  // 抱歉，您目前处于见习期间，需要等待 600 分钟后才能进行本操作
   onRegister() {
     var that = this;
 
@@ -146,14 +147,80 @@ Page({
     })
   },
 
-  showErrModal: function (err_msg) {
+
+  // fid: 67  论坛的id
+  onCreate: function () {
+    const that = this
+    wx.request({
+      url: that.data.svr_url + "add_thread.php",
+      method: "POST",
+      header: {
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      data: {
+        token: wx.getStorageSync("token"),
+        fid: "67",
+        subject:"测试主题",
+        message: "攀爬小程序发帖测试",
+      },
+      success: function (resp) {
+        console.log(resp);
+        var resp_dict = resp.data;
+        if (resp_dict.err_code == 0) {
+          wx.showToast({
+            title: '发帖成功',
+          });
+          wx.setStorage({
+            key: 'token',
+            data: resp_dict.data.token,
+          });
+        } else {
+          that.showSvrErrModal(resp);
+        }
+      }
+    })
+  },
+
+  // tid:44434166 帖子的id
+  onEntry:function(){
+    const that = this
+    wx.request({
+      url: that.data.svr_url + "add_post.php",
+      method: "POST",
+      header: {
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      data: {
+        token: wx.getStorageSync("token"),
+        tid: "44434166",
+        message: "攀爬小程序测试",
+      },
+      success: function (resp) {
+        console.log(resp);
+        var resp_dict = resp.data;
+        if (resp_dict.err_code == 0) {
+          wx.showToast({
+            title: '跟帖成功',
+          });
+          wx.setStorage({
+            key: 'token',
+            data: resp_dict.data.token,
+          });
+        } else {
+          that.showSvrErrModal(resp);
+        }
+      }
+    })
+  },
+
+  showErrModal: function(err_msg) {
     wx.showModal({
       content: err_msg,
       showCancel: false
     });
   },
 
-  showSvrErrModal: function (resp) {
+  showSvrErrModal: function(resp) {
     var that = this;
 
     if (resp.data.err_code != 0 && resp.data.err_msg) {
@@ -164,17 +231,85 @@ Page({
       wx.request({
         url: that.data.svr_url + 'report_error.php',
         method: 'POST',
-        header: { "content-type": "application/x-www-form-urlencoded" },
+        header: {
+          "content-type": "application/x-www-form-urlencoded"
+        },
         data: {
           token: wx.getStorageSync("token"),
           error_log: resp.data,
           svr_url: that.data.svr_url,
         },
-        success: function (resp) {
+        success: function(resp) {
           console.log("showSvrErrModal:" + resp);
         }
       })
     }
   },
+
+  onContact: function(e) {
+    console.log(JSON.stringify(e, null, 2))
+    wx.showModal({
+      title: '客服消息',
+      content: JSON.stringify(e, null, 2),
+    })
+  },
+
+  onTest: function(e) {
+
+    console.log(e.detail.errMsg)
+    console.log(e.detail.iv)
+    console.log(e.detail.encryptedData)
+
+  },
+
+  reg: function(e) {
+    console.log(e);
+    console.log(e.detail.formId);
+    
+
+    // POST https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=ACCESS_TOKEN
+
+    wx.cloud.callFunction({
+      name: 'getAccessToken', // 云函数名称
+    }).then(res => {
+      console.log(res.result);
+
+      console.log(JSON.parse(res.result))
+      var access_token = JSON.parse(res.result).access_token
+      console.log(access_token)
+      console.log("wx.request")
+      wx.request({
+        url: 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=' + access_token,
+        method: "POST",
+        data: {
+          // ogNmG5P3ZlT29kXGhWfGX5nC_sqA ogNmG5KFPConlOTeQNYciQrW5SE4
+          // touser: app.globalData.openid,//openId
+          touser: "ogNmG5P3ZlT29kXGhWfGX5nC_sqA", 
+          template_id: "6yT3OTFpgiVohiqSOly-e744802MYBnnOuCwJgYaxWA",
+          page: 'pages/EntryOutdoor/EntryOutdoor', // ?outdoorid=' + self.data.outdoorid
+          form_id: "1541424696118", // e.detail.formId,//formID
+          data: {//下面的keyword*是设置的模板消息的关键词变量  
+            "keyword1": {
+              "value": "339208499"
+            },
+            "keyword2": {
+              "value": "2015年01月05日 12:30"
+            },
+            "keyword3": {
+              "value": "攀爬"
+            },
+          },
+        },
+        header: {
+          'content-type': 'application/json' // 默认值
+        },
+        success(res) {
+          console.log("res.data: ")
+          console.log(res.data)
+        }
+      })
+    })
+  }
+
 
 });

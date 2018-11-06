@@ -8,7 +8,7 @@ const _ = db.command
 
 Page({
 
-  data: {
+  data: {   
     outdoorid: null, // 活动id
     title: {}, // 活动主题信息，内容从数据库中读取
     members: null, // 队员报名信息，包括:基本信息（userInfo)内容从Persons数据库中读取; 报名信息（entryInfo），报名时填写

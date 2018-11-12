@@ -48,6 +48,7 @@ Page({
     prevPage.setData({
       limits: self.data.limits,
       hasModified: self.data.hasModified,
+      "modifys.limits": self.data.hasModified,
     })
   },
 

@@ -98,6 +98,7 @@ Page({
     prevPage.setData({
       route: self.data.route,
       hasModified: self.data.hasModified,
+      "modifys.route": self.data.hasModified,
     })
   },
 

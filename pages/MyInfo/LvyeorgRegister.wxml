@@ -1,0 +1,8 @@
+<!--新用户注册-->
+<van-cell-group>
+<van-field value="{{email}}" label="电子邮箱：" placeholder="请输入电子邮箱" error-message="{{emailMessage}}" required bind:change="changeEmail"/>
+  <van-field value="{{username}}" label="账号：" placeholder="请输入要注册的账号名" required bind:change="changeUsername"/>
+  <van-field value="{{password1}}" label="密码：" placeholder="请输入要设置的密码" required type="password" bind:change="changePassword1" />
+  <van-field value="{{password2}}" label="密码：" placeholder="请重复输入密码" required type="password" bind:change="changePassword2" border="{{false}}" />
+  <van-button size="large" type="primary" bindtap='tapLvyeorgRegister'>新用户注册</van-button>
+</van-cell-group>

@@ -15,17 +15,13 @@ Page({
     this.get_token()
   },
 
-  get_token: function() {
+  get_token: function(callback) {
     var that = this;
     wx.login({
       success: function(res) {
         if (res.code) {
-          var code = res.code // "001BmXZe2RcXhC0tQe0f2DZ30f2BmXZ5" // res.code
-          console.log("code");
-          console.log(code);
+          var code = res.code 
           var token = wx.getStorageSync("token")
-          console.log("token");
-          console.log(token);
           wx.request({
             url: that.data.svr_url + 'get_token.php',
             method: 'POST',
@@ -148,7 +144,7 @@ Page({
   },
 
 
-  // fid: 67  论坛的id
+  // fid: 67  户外运动论坛的id 
   onCreate: function () {
     const that = this
     wx.request({
@@ -191,9 +187,9 @@ Page({
         "content-type": "application/x-www-form-urlencoded"
       },
       data: {
-        token: wx.getStorageSync("token"),
-        tid: "44434166",
-        message: "攀爬小程序测试",
+        token: wx.getStorageSync("LvyeOrgToken"),
+        tid: "44434182",
+        message: "攀爬小程序换行<br>测试"+"这样换\r\n行呢？ 或者这样\<br\>换呢？",
       },
       success: function (resp) {
         console.log(resp);
@@ -203,7 +199,7 @@ Page({
             title: '跟帖成功',
           });
           wx.setStorage({
-            key: 'token',
+            key: 'LvyeOrgToken',
             data: resp_dict.data.token,
           });
         } else {
@@ -309,7 +305,63 @@ Page({
         }
       })
     })
-  }
+  },
+
+  onUploadImage:function(){
+    const that = this
+    wx.chooseImage({
+      count: 1, // 
+      sizeType: ['compressed'], //['original', 'compressed'], // 当前只提供压缩图  
+      sourceType: ['album'], // ['album', 'camera'], // 当前只能相册选取
+      success: function (resChoose) {
+        console.log(resChoose)
+        
+        var token = wx.getStorageSync("LvyeOrgToken")
+        console.log(token)
+
+        wx.uploadFile({
+          url: that.data.svr_url + 'add_image.php',
+          filePath: resChoose.tempFilePaths[0],
+          name: "myfile", 
+          formData: {
+            token: token,
+          },
+          success: function (resp) {
+            console.log(resp);
+            var resp_dict = JSON.parse(resp.data)
+            console.log(resp_dict)
+            if (resp_dict.err_code == 0) {
+              console.log(resp_dict.data.file_url)
+              console.log(resp_dict.data.aid)
+            } else {
+              app.showLvyeOrgError(resp);
+            }
+          }
+        })
+      }
+    })
+  },
+
+  onSame: function () {
+    var data = ["a","b","c"]
+    this.onSameInner(data)
+  }, 
+
+  onSameInner:function(data){
+    console.log(data.length)
+    if (data.length>0){
+      this.doOne(data.shift(), res=>{
+        this.onSameInner(data)
+      })
+    }
+  },
+
+  doOne:function(one, callback){
+    console.log(one)
+    if (callback){
+      callback()
+    }
+  },
 
 
 });

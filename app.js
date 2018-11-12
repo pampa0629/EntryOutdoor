@@ -1,5 +1,8 @@
 const promisify = require('./utils/promisify.js')
 const util = require('./utils/util.js')
+const qrcode = require('./utils/qrcode.js')
+const lvyeorg = require('./utils/lvyeorg.js')
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
@@ -9,9 +12,14 @@ App({
   globalData: {
     openid: null, // 每个微信用户的内部唯一id
     personid: null, // Persons表中的当前用户_id
+
     // 用户信息
     hasUserInfo: false,
-    userInfo: null
+    userInfo: null,
+
+    // 与户外网站对接
+    lvyeorgInfo: null,
+    lvyeorgLogin: false,
   },
 
   onLaunch: function() {
@@ -72,6 +80,7 @@ App({
       .then(res => { // 顺利读取到，万事大吉
         self.globalData.userInfo = res.data.userInfo;
         self.globalData.hasUserInfo = true
+        self.dealCompatibility(res.data) // 处理兼容性问题
         // callback 第一种情况：数据库直接读取personid成功
         console.log("app.js in getPersonInfo fun, 1 callback personid is:" + self.globalData.personid)
         // console.log("app.js in getPersonInfo fun, 1 callback fun is:" + self.personidCallback)
@@ -87,6 +96,7 @@ App({
           if (res.data.length > 0) { // 找到了
             self.globalData.userInfo = res.data[0].userInfo;
             self.globalData.hasUserInfo = true;
+            self.dealCompatibility(res.data[0]) // 处理兼容性问题
             // 同时设置到globalData中
             self.globalData.personid = res.data[0]._id;
             util.savePersonID(self.globalData.personid);
@@ -112,108 +122,38 @@ App({
     wx.hideLoading()
   },
 
-  // 生成二维码，保存到本地，然后手动发朋友圈
-  onShare2Circle: function(outdoorid, title, isLeader) {
+  // 处理Person表的兼容性问题，关键是与网站的对接信息
+  dealCompatibility: function(data) {
     const self = this
-    console.log(outdoorid)
-    // 首先处理写本地相册的授权问题
-    wx.getSetting({
-      success(res) {
-        if (!res.authSetting['scope.writePhotosAlbum']) {
-          wx.authorize({
-            scope: 'scope.writePhotosAlbum',
-            success() {
-              console.log('scope.writePhotosAlbum OK')
-              self.createQrCode(outdoorid, title, isLeader)
-            },
-            fail() {
-              wx.showModal({
-                title: '必须授权',
-                content: '必须取得写相册授权，才能保存生成的活动二维码，以便在朋友圈分享活动',
-              })
-            }
-          })
-        } else {
-          self.createQrCode(outdoorid, title, isLeader)
-        }
-      }
-    })
+    // www.lvye.org
+    if (data.websites && data.websites.lvyeorgInfo) {
+      console.log(data.websites)
+      self.globalData.lvyeorgInfo = data.websites.lvyeorgInfo
+      self.loginLvyeOrg()
+    }
+    // next 
   },
 
-  // 得到二维码图片的云存储路径
-  getQrCodeCloudPath: function(outdoorid, callback) {
+  // 登录绿野网站，用callback得到登录结果
+  loginLvyeOrg: function() {
     const self = this
-    // 先看看数据库中是否
-    dbOutdoors.doc(outdoorid).get()
-      .then(res => {
-        if (res.data.QcCode) {
-          console.log("Outdoors is:"+res.data.QcCode)
-          callback(res.data.QcCode)
-        } else {
-          wx.cloud.callFunction({
-            name: 'getAccessToken', // 云函数名称
-          }).then(res => {
-            console.log(res)
-
-            wx.cloud.callFunction({
-              name: 'createQrCode', // 云函数名称，返回二维码图片的云储存路径
-              data: {
-                outdoorid: outdoorid,
-                access_token: JSON.parse(res.result).access_token,
-              },
-            }).then(res => {
-              console.log("createQrCode: "+res)
-              callback(res.result)
-            })
-          })
+    if (self.globalData.lvyeorgInfo){
+      if (self.globalData.lvyeorgLogin){
+        // 回调函数，让外部知道是否登录了，哪个账号登录的
+        if (self.callbackLoginLvyeorg){
+          self.callbackLoginLvyeorg(self.globalData.lvyeorgInfo.username)
         }
-      })
-  },
-
-  createQrCode: function(outdoorid, title, isLeader) {
-    const self = this
-    self.getQrCodeCloudPath(outdoorid, (QcCode)=>{
-      console.log("QcCode: " + QcCode)
-
-      wx.cloud.downloadFile({
-        fileID: QcCode
-      }).then(res => {
-        console.log(res.tempFilePath)
-
-        wx.saveImageToPhotosAlbum({
-          filePath: res.tempFilePath,
-          fail(err) {
-            console.log(err)
-          },
-          success(res) {
-            console.log(res)
-            console.log(isLeader)
-            // 把活动信息拷贝到剪贴板中
-            var message = ""
-            if (isLeader) { // 领队的
-              message = "一起出去走走吧，这个户外活动：“" + title + "”我是领队哦！\n点击图片，长按识别小程序码即可报名参加了。"
-            } else { // 队员的
-              message = "一起出去走走吧，这个户外活动不错：“" + title + "”！\n点击图片，长按识别小程序码即可报名参加了。"
-            }
-            console.log(message)
-            wx.setClipboardData({
-              data: message,
-              fail(err) {
-                console.log(err)
-              },
-              success(res) {
-                wx.showModal({
-                  title: '准备就绪',
-                  content: '活动二维码保存到本地相册，活动信息也已复制到内存，直接去朋友圈发图片和文字即可',
-                  showCancel: false,
-                  confirmText: "马上就去"
-                })
-              }
-            })
+      } else {
+        var password = wx.getStorageSync("lvyeorg." + self.globalData.lvyeorgInfo.username)
+        lvyeorg.login(self.globalData.lvyeorgInfo.username, password, username => {
+          self.globalData.lvyeorgLogin = true
+          // 回调函数，让外部知道是否登录了，哪个账号登录的
+          if (self.callbackLoginLvyeorg) {
+            self.callbackLoginLvyeorg(username)
           }
         })
-      })
-    })
+      }
+    }
   },
 
 })

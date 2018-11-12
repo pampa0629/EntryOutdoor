@@ -1,5 +1,8 @@
 const app = getApp()
 const util = require('../../utils/util.js')
+const lvyeorg = require('../../utils/lvyeorg.js')
+const qrcode = require('../../utils/qrcode.js')
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -11,16 +14,24 @@ Page({
     memOutdoorid: null, // 刚加载的活动，在数据库中的id，用来判断避免onShow中重复加载（与缓存中的id进行对比）
     canPublish: false, // 判断是否可发布，必须定义关键的几项：地点、日期、集合时间地点等,不保存
     hasModified: false, // 是否被修改了，可以保存起来
+    modifys: { // 到底更新了哪些条目，这里做一个临时记录
+      brief: false, // 文字介绍，图片暂时不管
+      meets: false, // 集合地点
+      route: false, // 活动路线
+      limits: false, // 各类限制条件
+      disclaimer: false, // 免责条款
+      status:false, // 活动状态变化
+    },
 
     // 常量定义
-    Loadeds: ["轻装", "重装", "休闲"],  // 枚举型：轻装、重装、休闲装
+    Loadeds: ["轻装", "重装", "休闲"], // 枚举型：轻装、重装、休闲装
     Durings: ["一日", "两日", "三日", "四日", "五日", "多日"], // 活动时长枚举
 
     title: { // 活动标题，通过下面子项随时自动生成；
       whole: null, // 自动生成，也存起来
       place: null, // String; 地点描述。必填
       date: null, //必填。util.formatDate(util.nextDate(new Date(), 5)), //Date; 活动日期，能自动判断出：周六/周日/非周末; 默认活动日期为：当天的五天后
-      during:"一日" , // 默认为一日活动
+      during: "一日", // 默认为一日活动
       // duringIndex: 0, // +1 为活动天数
       loaded: "轻装", // 枚举型：轻装、重装、休闲装
       level: 1.0, //自动生成； Float，活动强度，自动计算得到，计算公式：sqrt(addedLength* addedUp/ 100)
@@ -33,13 +44,13 @@ Page({
 
     route: [], // 活动路线
     meets: [], //集合点，可加多个
-    members:[], // 已报名成员（含领队）
+    members: [], // 已报名成员（含领队）
     leader: { // 领队的信息也要记录起来
       personid: null,
       userInfo: null,
       entryInfo: {
         meetsIndex: -1,
-        knowWay:true, // 领队默认为认路
+        knowWay: true, // 领队默认为认路
         status: "领队"
       },
     },
@@ -51,6 +62,34 @@ Page({
       disclaimer: "" //免责条款
     },
     status: "拟定中", // 活动本身的状态，分为：拟定中，已发布，报名截止，已取消
+
+    // 同步到网站的信息
+    websites: {
+      lvyeorg: {
+        fid: null, // 版块id
+        tid: null, // 帖子id
+        keepSame:false, // 是否保持同步
+        waitings: [], // 要同步但尚未同步的信息列表
+      }
+    },
+  },
+
+  // 设置临时修改项目全部为false或true，包括整体是否修改标记
+  setModifys(result) {
+    this.data.hasModified = result
+    this.data.modifys = { // 到底更新了哪些条目，这里做一个临时记录
+      brief: result,
+      meets: result,
+      route: result,
+      limits: result,
+      disclaimer: result,
+      status: result,
+    }
+  },
+
+  // 判断是否有任一被修改了
+  anyModify(modifys) {
+    return modifys.brief || modifys.meets || modifys.route || modifys.limits || modifys.disclaimer || modifys.status
   },
 
   onLoad: function() {
@@ -86,13 +125,12 @@ Page({
             status: res.data.status,
             route: res.data.route,
             meets: res.data.meets,
-            // brief: res.data.brief, 新增加的大的存储内容，都放到dealCompatibility中处理了
             leader: res.data.members[0],
             members: res.data.members,
           })
           // 读取之前活动数据时的兼容性处理
           self.dealCompatibility(res);
-          self.loadDisclaimer(); // 还需要单独处理“免责条款”的内容弄
+          self.loadDisclaimer(); // 还需要单独处理“免责条款”的内容
 
           // 这里要判断从本地缓存中读取到的outdoorid是自己创建的，还是用来当模板的
           // 依据是 从数据库读取的leader是否为自己
@@ -101,10 +139,26 @@ Page({
           }
           self.createAutoInfo();
           self.checkPublish(); // 判断一下是否能发布活动
+          self.keepSameWithWebsites() // 网站同步
         })
     } else { // 本地缓存没有id，则说明是要新创建活动
       self.newOutdoor();
       self.createAutoInfo();
+    }
+  },
+
+  // 判断是否需要与网站同步
+  keepSameWithWebsites: function() {
+    const self = this
+    console.log("keepSameWithWebsites")
+    console.log(self.data.websites)
+    if (self.data.websites 
+      && self.data.websites.lvyeorg 
+      && (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
+      && self.data.leader.personid == app.globalData.personid // 并且还是自己的活动
+      && self.data.outdoorid // 活动id必须有了
+    ) {
+      this.keepSameWithLvyeorg() // 同步到org上
     }
   },
 
@@ -129,12 +183,22 @@ Page({
       "title.date": null, // 新创建活动，关键是把日期置空了
       status: "拟定中",
     })
+    self.setWebsitesDefault() // 把网址同步的设置置空
   },
 
+  setWebsitesDefault:function(){
+    this.setData({
+      "websites.lvyeorg.tid":null,
+      "websites.lvyeorg.waitings": [],
+      "websites.lvyeorg.keepSame": (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame:false),
+    })
+    console.log(this.data.websites)
+  },
+  
   onShow: function() {
     const self = this;
     var outdoorid = util.loadOutdoorID()
-    
+
     if (outdoorid != null && outdoorid != self.data.memOutdoorid) {
       // 缓存中有id，且还和内存中加载的outdoorid不一样，则说明要重新加载
       self.loadOutdoorInTable(outdoorid);
@@ -171,11 +235,18 @@ Page({
       "leader.entryInfo.knowWay": true,
     })
     // 几日活动，老存储：durings duringIndex
-    if (!res.data.title.during && res.data.title.durings){
+    if (!res.data.title.during && res.data.title.durings) {
       self.setData({
         "title.during": res.data.title.durings[res.data.title.duringIndex],
       })
     }
+    // 网站同步信息
+    if (res.data.websites) {
+      self.setData({
+        "websites": res.data.websites,
+      })
+    }
+    console.log(self.data.websites)
     // next 
   },
 
@@ -275,7 +346,7 @@ Page({
     this.createTitle()
   },
 
-  bindChangeLoaded: function (e) {
+  bindChangeLoaded: function(e) {
     console.log(e)
     const self = this
     this.setData({
@@ -328,7 +399,7 @@ Page({
     // 多日活动：除以天数乘以1.5
     console.log(this.data.title)
     var duringCount = util.parseChar(this.data.title.during[0])
-    if (duringCount > 1) { 
+    if (duringCount > 1) {
       level = level * 1.5 / (duringCount + 1)
     }
 
@@ -412,6 +483,10 @@ Page({
       data: {
         status: self.data.status,
       }
+    }).then(res=>{
+      // 同步到网站
+      self.data.modifys.status = true // 标记一下：活动状态改变了
+      self.keepSameWithWebsites()
     })
   },
 
@@ -512,6 +587,56 @@ Page({
     util.saveOutdoorID(self.data.outdoorid)
     self.data.memOutdoorid = self.data.outdoorid;
     self.copyPics(); // 把照片中不是自己的，拷贝一份给自己用
+    // 这里处理和ORG网站同步的事情
+    self.keepSameWithLvyeorg()
+  },
+
+  // 保存修改时，在org网站跟帖发布信息
+  postModifys: function() {
+    console.log("postModifys:function")
+    console.log(this.data.modifys)
+    if (this.anyModify(this.data.modifys)) { // 有一点修改，才有必要 跟帖发布
+      var message = lvyeorg.buildOutdoorMesage(this.data, false, this.data.modifys, "领队对以下内容作了更新，请报名者留意！", this.data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
+      lvyeorg.postMessage(this.data.outdoorid, this.data.websites.lvyeorg.tid, message)
+      // 用完了得把modifys都设置为false
+      this.setModifys(false)
+    }
+  },
+
+  // 这里处理和ORG网站同步的事情
+  keepSameWithLvyeorg: function() {
+    const self = this
+    console.log(self.data.websites)
+    console.log(app.globalData.lvyeorgInfo)
+    // 逻辑关系：
+    // 看 outdoors中是否设置了 同步
+    if (self.data.websites && self.data.websites.lvyeorg){
+      if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
+        app.callbackLoginLvyeorg = (username) => {
+          self.post2LvyeorgInner()
+        }
+      } else { // 登录了直接发布信息就好
+        self.post2LvyeorgInner()
+      }
+    }
+  },
+
+  // 内部处理函数，避免重复代码
+  post2LvyeorgInner:function(){
+    console.log("post2LvyeorgInner:function")
+    const self = this
+    // 没有 tid，则先生成tid；再处理waitings
+    if (!self.data.websites.lvyeorg.tid) {
+      lvyeorg.addThread(self.data.outdoorid, self.data, tid => {
+        self.data.websites.lvyeorg.tid = tid
+        lvyeorg.postWaitings(self.data.outdoorid, tid)
+      })
+    } else {
+      // 有tid，则先处理“保存更新”
+      self.postModifys() // 有tid，是跟帖，更新活动信息
+      // 最后处理 waitings
+      lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
+    }
   },
 
   // 这里还应该把 Person表中对应的MyOutdoors中的title更新一下
@@ -554,9 +679,9 @@ Page({
     }
   },
 
-  onShare2Circle: function () {
+  onShare2Circle: function() {
     const self = this;
-    app.onShare2Circle(self.data.outdoorid, self.data.title.whole, true)
+    qrcode.share2Circle(self.data.outdoorid, self.data.title.whole, true)
   },
 
   clickMeets: function(e) {
@@ -582,17 +707,19 @@ Page({
     this.setData({
       "brief.disc": e.detail,
       hasModified: true,
-    }) 
+      "modifys.brief": true,
+    })
   },
 
-  pasteBriefDisc: function () {
+  pasteBriefDisc: function() {
     const self = this
     wx.getClipboardData({
-      success: function (res) {
+      success: function(res) {
         console.log(res.data)
         self.setData({
           "brief.disc": res.data,
           hasModified: true,
+          "modifys.brief": true,
         })
       }
     })

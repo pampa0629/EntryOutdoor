@@ -1,6 +1,8 @@
-// pages/Member/EntryOutdoor.js
 const app = getApp()
 const util = require('../../utils/util.js')
+const qrcode = require('../../utils/qrcode.js')
+const lvyeorg = require('../../utils/lvyeorg.js')
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -25,10 +27,25 @@ Page({
     remains: {
       //remainOccupyTime: 10 * 24 * 60, // 距离占坑截止还剩余的时间（单位：分钟）
       //remainEntryTime: 10 * 24 * 60, // 距离报名截止还剩余的时间（单位：分钟）
-      occupy:{time:null, text:""},
-      entry: { time: null, text: "" },
+      occupy: {
+        time: null,
+        text: ""
+      },
+      entry: {
+        time: null,
+        text: ""
+      },
     },
-    
+
+    // 同步到网站的信息
+    websites: {
+      lvyeorg: {
+        fid: null, // 版块id
+        tid: null, // 帖子id
+        waitings: [], // 要同步但尚未同步的信息列表
+      }
+    },
+
     status: null, //活动状态 
     members: null, // 队员报名信息，包括:personid,基本信息（userInfo)内容从Persons数据库中读取; 报名信息（entryInfo），报名时填写
     // 还是把userinfo和outdoors信息都保存下来方便使用
@@ -55,7 +72,6 @@ Page({
     if (app.globalData.openid == null || app.globalData.openid.length == 0) {
       app.openidCallback = (openid) => {
         app.globalData.openid = openid // 其实屁事没有，就是要等到app的onLaunch中得到openid
-        console.log("EntryOutdoor.js in onLoad fun，openid is：" + openid)
         this.checkLogin(outdoorid);
       }
     } else {
@@ -72,7 +88,6 @@ Page({
       this.loadInfo(outdoorid); // 这里调用 personid相关的代码
     } else {
       app.personidCallback = (personid, userInfo) => {
-        console.log("EntryOutdoor.js in checkLogin fun, callback's personid is: " + personid)
         if (personid != null) {
           this.setData({
             userInfo: userInfo,
@@ -99,7 +114,6 @@ Page({
   loadInfo: function(outdoorid) {
     const self = this;
     // 这里得到活动id，读取数据库，加载各类信息
-    console.log("EntryOutdoor.js in loadInfo fun, outdoorid is:" + outdoorid)
     self.data.outdoorid = outdoorid
     dbOutdoors.doc(self.data.outdoorid).get()
       .then(res => {
@@ -143,6 +157,25 @@ Page({
             })
         })
       })
+
+    // 最后帮助把之前积累的信息同步到网站上
+    self.postWaitings()
+  },
+
+  // 判断是否需要与网站同步
+  postWaitings: function() {
+    const self = this
+    // 先判断本活动是否需要同步到org上
+    if (self.data.websites && self.data.websites.lvyeorg.tid){
+      // 登录后，先把已有的waitings信息同步一下
+      if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
+        app.callbackLoginLvyeorg = (username) => {
+          lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
+        }
+      } else { // 登录了直接设置就好
+        lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
+      }
+    }
   },
 
   // 处理占坑截止时间过了得退坑的问题
@@ -150,8 +183,8 @@ Page({
     const self = this
     if (self.data.limits.remainOccupyTime < 0) {
       self.data.members.forEach((item, index) => {
-        if (item.entryInfo.status == "占坑中"){
-          self.data.members.splice(index,1)
+        if (item.entryInfo.status == "占坑中") {
+          self.data.members.splice(index, 1)
         }
       })
       // 删完了还得存到数据库中，调用云函数写入
@@ -218,12 +251,19 @@ Page({
       "remains.entry.text": self.buildRemainText(self.data.remains.entry.time)
     })
 
+    // 网站同步信息
+    if (res.data.websites) {
+      self.setData({
+        "websites": res.data.websites,
+      })
+    }
+
     // next 
 
   },
 
-  buildRemainText: function (remainMinute){
-    var remainText="";
+  buildRemainText: function(remainMinute) {
+    var remainText = "";
     if (remainMinute > 0) {
       var remainDay = Math.trunc(remainMinute / 24.0 / 60.0)
       remainMinute -= remainDay * 24 * 60
@@ -248,14 +288,14 @@ Page({
     console.log(limitItem)
     var outdoorMinute = Date.parse(util.Ymd2Mdy(outdoorDate)) / 1000.0 / 60 // 得到活动日期的分钟时间数
     var dayCount = util.getLimitDateIndex(limitItem.date)
-    console.log("dayCount:"+dayCount)
+    console.log("dayCount:" + dayCount)
     var minute = 24 * 60; // 一天多少分钟
     console.log(limitItem.time)
     if (limitItem.time) {
       var hour_minute = limitItem.time.split(":")
       minute = minute - (parseInt(hour_minute[0]) * 60 + parseInt(hour_minute[1]))
       console.log("hour_minute:" + hour_minute)
-      console.log("minute:"+minute)
+      console.log("minute:" + minute)
     }
     minute += (dayCount - 1) * 24 * 60 // 截止时间和活动日期两者之间间隔的分钟数
     console.log("minute" + minute)
@@ -263,7 +303,7 @@ Page({
 
     var nowMinute = Date.parse(new Date()) / 1000.0 / 60
     var remainMinute = limitMinute - nowMinute
-    
+
     console.log(remainMinute)
     return remainMinute
   },
@@ -311,7 +351,6 @@ Page({
 
   onShareAppMessage: function(options) {
     const self = this;
-    console.log("EntryOutdoor.js in onShareAppMessage fun, outdoorid is:" + self.data.outdoorid)
     if (self.data.outdoorid) { // 数据库里面有，才能分享出去
       return {
         title: self.data.title.whole,
@@ -324,9 +363,8 @@ Page({
   // 分享到朋友圈
   onShare2Circle: function() {
     const self = this;
-    app.onShare2Circle(self.data.outdoorid, self.data.title.whole, false)
+    qrcode.share2Circle(self.data.outdoorid, self.data.title.whole, false)
   },
-
 
   // 报名就是在活动表中加上自己的id，同时还要在Person表中加上活动的id
   entryOutdoor: function(status) {
@@ -371,7 +409,6 @@ Page({
       console.log(self.data.entryInfo)
 
       var member = util.createMember(app.globalData.personid, self.data.userInfo, self.data.entryInfo)
-      console.log("EntryOutdoors.js in entryOutdoor fun, call addMember cloud fun， member is: " + JSON.stringify(member, null, 2))
       wx.cloud.callFunction({ // 把当前信息加入到 Outdoors的members中
         name: 'addMember', // 云函数名称
         data: {
@@ -400,6 +437,32 @@ Page({
         }
       })
     }
+
+    // 把自己的报名信息同步到网站上
+    self.postEntry2Websites(false)
+  },
+
+  // 把信息同步到网站上
+  postEntry2Websites: function(isQuit) {
+    const self = this
+    console.log(self.data.websites)
+    // 先判断活动可以同步
+    if (self.data.websites && self.data.websites.lvyeorg && self.data.websites.lvyeorg.keepSame) {
+      var message = lvyeorg.buildEntryMessage(self.data.userInfo, self.data.entryInfo, isQuit) // 构建报名信息
+      console.log(message)
+      console.log(app.globalData.lvyeorgLogin)
+      if (app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid) { // 登录了就直接发
+        lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, message)
+      } else if (app.globalData.lvyeorgInfo && !app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid ) { // 注册又没登录，就登录一下
+        app.callbackLoginLvyeorg = (username) => { // 设置回调
+          console.log("app.callbackLoginLvyeorg")
+          lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, message)
+        }
+        app.loginLvyeOrg() // 登录
+      } else { // 没注册就记录到waitings中
+        lvyeorg.add2Waitings(self.data.outdoorid, message)
+      }
+    }
   },
 
   // 替补
@@ -415,16 +478,11 @@ Page({
   // 报名
   tapEntry: function() {
     this.entryOutdoor("报名中")
-    // <block wx:if="{{(entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中') && remains.entry.time>=0}}">
-    console.log(this.data.entryInfo.status)
-    console.log(this.data.remains.entry)
   },
 
   // 退出
   tapQuit: function() {
     const self = this;
-    console.log("EntryOutdoor.js in tapQuit fun, call deleteMember cloud fun, outdoorid is: " + self.data.outdoorid + "; personid is: " + app.globalData.personid)
-
     // 先重新获取members，再删除personid，再调用云函数
     // 刷新一下队员列表
     dbOutdoors.doc(self.data.outdoorid).get()
@@ -477,6 +535,9 @@ Page({
           })
         })
       })
+
+    // 退出信息也要同步到网站
+    self.postEntry2Websites(true)
   },
 
   // 查看报名情况，同时可以截屏保存起来
@@ -501,7 +562,6 @@ Page({
 
   // 选择或改变集合地点选择
   changeMeets: function(e) {
-    console.log("EntryOutdoors.js in changeMeets fun, e is:" + JSON.stringify(e, null, 2))
     const self = this;
     self.setData({
       "entryInfo.meetsIndex": parseInt(e.detail),

@@ -26,7 +26,7 @@
 
 <!--队员列表-->
 <van-cell-group>
-  <van-cell wx:if="limits.maxPerson" title="队员列表" label="已报名{{members.length}}人（限{{limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}"/>
+  <van-cell wx:if="{{limits.maxPerson}}" title="队员列表" label="已报名{{members.length}}人（限{{limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}"/>
   <van-cell wx:else title="队员列表" label="已报名{{members.length}}人（不限人数）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}"/>
 </van-cell-group>
 
@@ -63,6 +63,7 @@
 <van-tag wx:else plain type="primary" >\n距离报名截止时间还剩：{{remains.entry.text}}</van-tag>
 <van-tag wx:if="{{limits.maxPerson && members.length>=limits.personCount}}" plain type="danger">\n报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
 <van-tag wx:if="{{remains.entry.time<0&&limits.allowPopup}}" plain type="primary">\n该活动允许空降</van-tag>
+<van-tag wx:if="{{websites.lvyeorg.tid}}" plain type="danger">\n该活动已被设置为与绿野ORG网站同步，您的报名信息将自动同步到网站！</van-tag>
 
 <!--报名按钮-->
 <van-row wx:if="{{status=='已发布'}}">

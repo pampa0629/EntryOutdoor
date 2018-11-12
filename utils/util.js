@@ -219,6 +219,20 @@ const buildPicSrc = (outdoorid, index) => { // index:0,1,2 图片顺序
   return "Outdoors/" + outdoorid + "/" + new Date().getTime() + ".jpg"
 }
 
+// 按照绿野习惯，发布出去的电话号码做谐音处理，防止网络爬虫获取隐私
+// 第一步实现：0->O，1->I；其他如2->Z，5->S，8->B，9->q 再议
+const changePhone =(phone)=>{
+  phone.replace("0", "O")
+  phone.replace("1", "I")
+  return phone
+}
+
+// 隐藏手机号码的中间三位
+const hidePhone= (phone)=> {
+  return  phone.substring(0, 3) + "***" + phone.substring(7)
+}
+
+
 module.exports = {
   formatTime: formatTime,
   Ymd2Mdy: Ymd2Mdy,
@@ -254,4 +268,7 @@ module.exports = {
   // 截止日期数组和字符串的相互转化
   getLimitDates: getLimitDates,
   getLimitDateIndex: getLimitDateIndex,
+  // 手机号码处理
+  changePhone: changePhone,
+  hidePhone: hidePhone,
  }

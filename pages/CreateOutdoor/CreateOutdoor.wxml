@@ -83,7 +83,7 @@
   <van-col span="9" offset="2">
     <van-button wx:if="{{status!='拟定中'}}" type="primary" plain size="large" disabled="{{!canPublish}}" bind:click='newOutdoor'>新建活动</van-button>
   </van-col>
-  <van-col span="9" offset="2">
+  <van-col span="9" offset="2"> 
     <van-button wx:if="{{status=='已发布'}}" disabled="{{!hasModified}}" plain size="large" disabled="{{!hasModified}}" bind:click='saveModified'>保存修改</van-button>
   </van-col>
 </van-row>

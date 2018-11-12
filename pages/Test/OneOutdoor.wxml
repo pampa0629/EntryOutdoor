@@ -19,7 +19,7 @@
 
 <van-row>
   <van-col span="9" offset="2">
-  <van-button size="large" type="primary" bind:click="onEntryOther">代报名</van-button>
+  <van-button size="large" type="primary" bind:click="onUploadImage">上传图片</van-button>
   </van-col>
   <van-col span="9" offset="2">
   <van-button size="large" type="primary"  bind:click="onSame">同步</van-button>

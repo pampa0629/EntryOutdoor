@@ -99,6 +99,7 @@ Page({
     prevPage.setData({
       meets: self.data.meets,
       hasModified: self.data.hasModified,
+      "modifys.meets": self.data.hasModified,
     })
     // 如果只有一个集合地点，则默认这个了
     if (self.data.meets.length == 1) {

@@ -16,7 +16,9 @@
     "pages/EntryOutdoor/LookRoute",
     "pages/CreateOutdoor/EditDisclaimer",
     "pages/EntryOutdoor/LookDisclaimer",
-    "pages/CreateOutdoor/EditLimits"
+    "pages/CreateOutdoor/EditLimits",
+    "pages/MyInfo/LvyeorgLogin",
+    "pages/MyInfo/LvyeorgRegister"
   ],
   "window": {
     "backgroundTextStyle": "light",

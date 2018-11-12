@@ -6,7 +6,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 
-Page({
+Page({ 
   
   data: {
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
@@ -21,7 +21,9 @@ Page({
     caredOutdoors: [],
     lastOutdoorid: null, // 最近访问过的活动ID
 
-    // 与org对接
+    // 与户外网站对接
+    hasLoginLvyeorg:false, // 是否已经登录了org网站
+    lvyeOrgUsername:"", // 绿野org 登录用户名
 
     isTesting: true, // for test， false true
   },
@@ -36,6 +38,25 @@ Page({
     } else {
       this.loginWeixin(null)
     }
+
+    console.log("ready login org")
+    // 登录org
+    if(!app.globalData.lvyeorgLogin){ // 尚未登录，则等待登录
+      app.callbackLoginLvyeorg = (username)=>{
+        self.setLoginLvyeorg(username)
+      }
+    } else{ // 登录了直接设置就好
+        self.setLoginLvyeorg(username)
+    }
+  },
+
+  // 设置org登录信息
+  setLoginLvyeorg:function(username){
+    this.setData({
+      hasLoginLvyeorg: true,
+      lvyeOrgUsername: username,
+    })
+    console.log("MyInfo onload: " + username)
   },
 
 // 点击 > 图标想修改信息，主要看是否登录了
@@ -82,6 +103,13 @@ Page({
     }
   },
 
+  // 绿野org登录，直接跳转到登录页面
+  lvyeorgLogin:function(){
+    wx.navigateTo({
+      url: './LvyeorgLogin',
+    })
+  },
+
   onShow: function() {
     // 就看看有无最近的活动
     this.setData({
@@ -110,6 +138,7 @@ Page({
                 myOutdoors: self.data.myOutdoors,
                 entriedOutdoors: self.data.entriedOutdoors,
                 caredOutdoors: self.data.caredOutdoors,
+                // websites: self.data.websites,
               }
             }).then(res => {
               self.setPersonInfo(res._id, self.data.userInfo)

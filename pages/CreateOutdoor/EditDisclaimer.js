@@ -27,6 +27,7 @@ Page({
     prevPage.setData({
       "limits.disclaimer": self.data.disclaimer,
       hasModified: self.data.hasModified,
+      "modifys.disclaimer": self.data.hasModified,
     })
   },
 

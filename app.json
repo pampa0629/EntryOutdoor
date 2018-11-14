@@ -45,5 +45,8 @@
         "text": "我的信息"
       }
     ]
-  }
+  },
+  "navigateToMiniProgramAppIdList": [
+    "wx1599b7c8d1e2b4d4"
+  ]
 }

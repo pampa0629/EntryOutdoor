@@ -137,19 +137,27 @@ App({
   // 登录绿野网站，用callback得到登录结果
   loginLvyeOrg: function() {
     const self = this
+    console.log("app.js loginLvyeOrg: function")
+    console.log(self.globalData.lvyeorgInfo)
+    console.log(self.globalData.lvyeorgLogin)
+
     if (self.globalData.lvyeorgInfo){
       if (self.globalData.lvyeorgLogin){
         // 回调函数，让外部知道是否登录了，哪个账号登录的
         if (self.callbackLoginLvyeorg){
-          self.callbackLoginLvyeorg(self.globalData.lvyeorgInfo.username)
+          self.callbackLoginLvyeorg({username:self.globalData.lvyeorgInfo.username})
         }
       } else {
         var password = wx.getStorageSync("lvyeorg." + self.globalData.lvyeorgInfo.username)
-        lvyeorg.login(self.globalData.lvyeorgInfo.username, password, username => {
-          self.globalData.lvyeorgLogin = true
-          // 回调函数，让外部知道是否登录了，哪个账号登录的
-          if (self.callbackLoginLvyeorg) {
-            self.callbackLoginLvyeorg(username)
+        lvyeorg.login(self.globalData.lvyeorgInfo.username, password, res => {
+          if (res.error && self.callbackLoginLvyeorg){
+            self.callbackLoginLvyeorg({ error: res.error })
+          }else {
+            self.globalData.lvyeorgLogin = true
+            // 回调函数，让外部知道是否登录了，哪个账号登录的
+            if (self.callbackLoginLvyeorg) {
+              self.callbackLoginLvyeorg({ username:res.username})
+            }
           }
         })
       }

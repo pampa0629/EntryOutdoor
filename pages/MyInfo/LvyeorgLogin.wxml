@@ -21,17 +21,22 @@
 
 <!--领队设置-->
 <van-panel title="领队选项设置">
-  <van-cell title="活动{{lvyeorgInfo.keepSame?'将自动同步':'不同步'}}到绿野ORG网站" label="{{lvyeorgInfo.keepSame?'':'建议同步'}}" clickable bind:click="checkKeepSame"  border="{{lvyeorgInfo.keepSame}}">
+  <van-cell title="活动{{lvyeorgInfo.keepSame?'将自动同步':'不同步'}}到绿野ORG网站" label="{{lvyeorgInfo.keepSame?'':'建议同步'}}" clickable bind:click="checkKeepSame" border="{{lvyeorgInfo.keepSame}}">
     <van-checkbox value="{{lvyeorgInfo.keepSame}}" />
   </van-cell>
   <block wx:if="{{lvyeorgInfo.keepSame}}">
-    <van-cell title="{{lvyeorgInfo.allowSiteEntry?'允许':'不允许'}}网站直接跟帖报名" label="{{lvyeorgInfo.allowSiteEntry?'不建议允许，允许则领队要自行整理两边的报名名单，且无即将提供的微信消息提示':''}}" clickable bind:click="checkAllowSiteEntry"  border="{{false}}">
+    <van-cell title="{{lvyeorgInfo.allowSiteEntry?'允许':'不允许'}}网站直接跟帖报名" label="{{lvyeorgInfo.allowSiteEntry?'不建议允许，允许则领队要自行整理两边的报名名单，且无即将提供的微信消息提示':''}}" clickable bind:click="checkAllowSiteEntry"  >
       <van-checkbox value="{{lvyeorgInfo.allowSiteEntry}}" />
     </van-cell>
+    <van-cell title="{{lvyeorgInfo.isTesting?'测试发帖':'正式发帖'}}" label="测试帖将发布在“技术小组”版" clickable bind:click="checkTesting"  border="{{false}}">
+    <van-checkbox value="{{lvyeorgInfo.isTesting}}" />
+  </van-cell>
   </block>
+  
 </van-panel>
-
 
 <block wx:if="{{hasLogin}}">
   <van-button size="large"  type="warning" bindtap='tapLvyeorgLogout'>退出登录</van-button>
 </block>
+
+  <van-button size="large" bindtap='tapHall'>绿野活动大厅</van-button>

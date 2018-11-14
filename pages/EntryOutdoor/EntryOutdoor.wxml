@@ -13,7 +13,7 @@
   <view wx:for="{{brief.pics}}" wx:key="src">
     <van-row>
       <van-col span="20" offset="2">
-        <image mode="aspectFit" src="{{item.src}}"></image>
+        <image mode="widthFix" src="{{item.src}}"></image>
       </van-col>
     </van-row>
   </view>
@@ -88,10 +88,10 @@
 <!--分享与打印按钮-->
 <van-row>
   <van-col span="9" offset="2">
-    <button wx:if="{{status!='已取消'}}" open-type="share" plain size="large" bindtap='onShareAppMessage'>分享到微信群</button>
+    <button wx:if="{{status!='已取消'}}" open-type="share" plain size="large" bindtap='onShareAppMessage'>分享到群</button>
   </van-col>
   <van-col span="9" offset="2">
-    <button wx:if="{{status!='已取消'}}" plain size="large" bindtap='onShare2Circle'>分享到朋友圈</button>
+    <button wx:if="{{status!='已取消'}}" plain size="large" bindtap='onShare2Circle'>分享到圈</button>
   </van-col>
 </van-row>
 
@@ -102,7 +102,7 @@
     <button wx:else plain size="large" bindtap='careOutdoor'>关注活动</button>
   </van-col>
   <van-col span="9" offset="2">
-    <button plain size="large" bindtap='printOutdoor'>打印活动详情</button>
+    <button plain size="large" bindtap='printOutdoor'>打印详情</button>
   </van-col>
 </van-row>
 

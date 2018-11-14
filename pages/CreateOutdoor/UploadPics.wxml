@@ -5,5 +5,9 @@
 <van-button disabled="{{pics.length==0}}" size="large" type="warning" bind:click='deletePic'>删除照片</van-button>
 
 <view wx:for="{{pics}}" wx:key="src">
-  <image mode="aspectFit" src="{{item.src}}"></image>
+  <van-row>
+    <van-col span="20" offset="2">
+      <image mode="widthFix" src="{{item.src}}"></image>
+    </van-col>
+  </van-row>
 </view>

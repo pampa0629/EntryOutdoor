@@ -169,8 +169,10 @@ Page({
     if (self.data.websites && self.data.websites.lvyeorg.tid){
       // 登录后，先把已有的waitings信息同步一下
       if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
-        app.callbackLoginLvyeorg = (username) => {
-          lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
+        app.callbackLoginLvyeorg = (res) => {
+          if(res.username){
+            lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
+          }
         }
       } else { // 登录了直接设置就好
         lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
@@ -447,16 +449,25 @@ Page({
     const self = this
     console.log(self.data.websites)
     // 先判断活动可以同步
-    if (self.data.websites && self.data.websites.lvyeorg && self.data.websites.lvyeorg.keepSame) {
-      var message = lvyeorg.buildEntryMessage(self.data.userInfo, self.data.entryInfo, isQuit) // 构建报名信息
+    if (self.data.websites && self.data.websites.lvyeorg 
+      && self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) {
+      var message = lvyeorg.buildEntryMessage(self.data.userInfo, self.data.entryInfo, isQuit, false) // 构建报名信息
       console.log(message)
       console.log(app.globalData.lvyeorgLogin)
       if (app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid) { // 登录了就直接发
-        lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, message)
-      } else if (app.globalData.lvyeorgInfo && !app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid ) { // 注册又没登录，就登录一下
-        app.callbackLoginLvyeorg = (username) => { // 设置回调
-          console.log("app.callbackLoginLvyeorg")
+        lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback=>{
           lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, message)
+        })
+      } else if (app.globalData.lvyeorgInfo && !app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid ) { // 注册了没登录，就登录一下
+        app.callbackLoginLvyeorg = (res) => { // 设置回调
+          if(res.username){
+            console.log("app.callbackLoginLvyeorg")
+            lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback => {
+              lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, message)
+            })
+          } else if (res.error) { // 登录失败也记录到waitings中
+            lvyeorg.add2Waitings(self.data.outdoorid, message)    
+          }
         }
         app.loginLvyeOrg() // 登录
       } else { // 没注册就记录到waitings中

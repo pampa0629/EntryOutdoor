@@ -243,7 +243,11 @@ Page({
     // 网站同步信息
     if (res.data.websites) {
       self.setData({
-        "websites": res.data.websites,
+        websites: res.data.websites,
+      })
+    } else {
+      self.setData({ // 没有的话，就置空，防止稀里糊涂的发帖
+        websites: null,
       })
     }
     console.log(self.data.websites)
@@ -540,6 +544,7 @@ Page({
             status: self.data.status,
             brief: self.data.brief,
             limits: self.data.limits,
+            websites:self.data.websites, // 这里得记录当前用户状态
           }
         }).then(res => {
           self.setData({
@@ -588,7 +593,7 @@ Page({
     self.data.memOutdoorid = self.data.outdoorid;
     self.copyPics(); // 把照片中不是自己的，拷贝一份给自己用
     // 这里处理和ORG网站同步的事情
-    self.keepSameWithLvyeorg()
+    self.keepSameWithWebsites()
   },
 
   // 保存修改时，在org网站跟帖发布信息
@@ -612,30 +617,37 @@ Page({
     // 看 outdoors中是否设置了 同步
     if (self.data.websites && self.data.websites.lvyeorg){
       if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
-        app.callbackLoginLvyeorg = (username) => {
-          self.post2LvyeorgInner()
+        app.callbackLoginLvyeorg = (res) => {
+          if(res.username){
+            self.post2Lvyeorg()
+          }
         }
+        app.loginLvyeOrg()
       } else { // 登录了直接发布信息就好
-        self.post2LvyeorgInner()
+        self.post2Lvyeorg()
       }
     }
   },
 
   // 内部处理函数，避免重复代码
-  post2LvyeorgInner:function(){
-    console.log("post2LvyeorgInner:function")
+  post2Lvyeorg:function(){
+    console.log("post2Lvyeorg:function")
     const self = this
     // 没有 tid，则先生成tid；再处理waitings
-    if (!self.data.websites.lvyeorg.tid) {
-      lvyeorg.addThread(self.data.outdoorid, self.data, tid => {
-        self.data.websites.lvyeorg.tid = tid
-        lvyeorg.postWaitings(self.data.outdoorid, tid)
+    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame) { // 没有tid，则必须有keepSame
+      lvyeorg.addThread(self.data.outdoorid, self.data, app.globalData.lvyeorgInfo.isTesting, tid => {
+        if(tid){
+          self.data.websites.lvyeorg.tid = tid
+          lvyeorg.postWaitings(self.data.outdoorid, tid, null)
+        } else { // 发帖失败，则以后再发；这里似乎没有什么好干的事情
+        }
       })
-    } else {
-      // 有tid，则先处理“保存更新”
-      self.postModifys() // 有tid，是跟帖，更新活动信息
-      // 最后处理 waitings
-      lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
+    } else if (self.data.websites.lvyeorg.tid){
+      // 有tid，则先把waitings发出去
+      lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback=>{
+        // 最后 发布更新信息
+        self.postModifys() 
+      })
     }
   },
 

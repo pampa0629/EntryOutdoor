@@ -51,7 +51,7 @@
   <view wx:for="{{brief.pics}}" wx:key="src">
     <van-row>
       <van-col span="20" offset="2">
-        <image mode="aspectFit" src="{{item.src}}"></image>
+        <image mode="widthFix" src="{{item.src}}"></image>
       </van-col>
     </van-row>
   </view>
@@ -103,16 +103,16 @@
 <!--分享活动按钮-->
 <van-row wx:if="{{status=='已发布' ||status=='报名截止'}}">
   <van-col span="9" offset="2">
-    <van-button open-type="share" plain size="large" bind:click='onShareAppMessage'>分享到微信群</van-button>
+    <van-button open-type="share" plain size="large" bind:click='onShareAppMessage'>分享到群</van-button>
   </van-col>
   <van-col span="9" offset="2">
-    <van-button  plain size="large" bind:click='onShare2Circle'>分享到朋友圈</van-button>
+    <van-button  plain size="large" bind:click='onShare2Circle'>分享到圈</van-button>
   </van-col>
 </van-row>
 
 <!--打印活动按钮-->
 <van-row>
   <van-col span="20" offset="2">
-    <van-button wx:if="{{status!='拟定中'}}" plain size="large" bind:click='printOutdoor'>打印活动详情</van-button>
+    <van-button wx:if="{{status!='拟定中'}}" plain size="large" bind:click='printOutdoor'>打印详情</van-button>
   </van-col>
 </van-row>

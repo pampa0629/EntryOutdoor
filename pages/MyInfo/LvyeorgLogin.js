@@ -16,6 +16,7 @@ Page({
       // 领队需要决定的选项
       keepSame: true, // 发帖信息是否自动同步到org上
       allowSiteEntry: false, // 是否允许网站跟帖报名
+      isTesting: false, // 是否为测试帖，测试帖发布到技术小组版面
     },
     password: "",  // 密码存到本地缓存，不放到数据库中了
 
@@ -25,6 +26,7 @@ Page({
 
   onLoad: function(options) {
     const self = this;
+    self.setDefaultCheck()
     if (app.globalData.lvyeorgLogin && app.globalData.lvyeorgInfo){
       console.log(app.globalData.lvyeorgInfo)
       var password = wx.getStorageSync("lvyeorg." + app.globalData.lvyeorgInfo.username)
@@ -39,14 +41,14 @@ Page({
       .then(res => {
         if (res.data.websites && res.data.websites.lvyeorgInfo) {
           var password = wx.getStorageSync("lvyeorg." + res.data.websites.lvyeorgInfo.username)
-          console.log("load password: " + res.data.websites.lvyeorgInfo.username)
-          console.log(password)
+          console.log(res.data.websites.lvyeorgInfo.username)
+          console.log("load password: " + password)
           self.setData({
             lvyeorgInfo: res.data.websites.lvyeorgInfo,
             password: password,
           })
-          
-          self.loginLvyeorg(null)
+          // 读取后自动登录
+          self.loginLvyeorg()
         }
       })
     }
@@ -66,15 +68,14 @@ Page({
           "websites.lvyeorgInfo": self.data.lvyeorgInfo
         }
       })
-        .then(res => {
-          console.log("save password:")
-          console.log("lvyeorg." + self.data.lvyeorgInfo.username)
-          console.log(self.data.password)
-          wx.setStorageSync("lvyeorg." + self.data.lvyeorgInfo.username, self.data.password)
-          self.setData({
-            hasModified: false,
-          })
+      .then(res => {
+        console.log("lvyeorg." + self.data.lvyeorgInfo.username)
+        console.log("save password:" + self.data.password)
+        wx.setStorageSync("lvyeorg." + self.data.lvyeorgInfo.username, self.data.password)
+        self.setData({
+          hasModified: false,
         })
+      })
     }
   },
 
@@ -96,30 +97,44 @@ Page({
 
   // org登录
   tapLvyeorgLogin: function() {
-    this.loginLvyeorg(null)
+    this.loginLvyeorg()
   },
  
-  // 内部实现，增加回调能力，方便新注册用户直接登录
-  loginLvyeorg:function(loginCallback){
+  // 内部实现
+  loginLvyeorg:function(){
     const self = this;
     // 调用app中的登录函数
-    console.log("tapLvyeorgLogin: function")
+    console.log("loginLvyeorg: function")
     console.log(self.data.lvyeorgInfo)
-    lvyeorg.login(self.data.lvyeorgInfo.username, self.data.password, callback => {
-      console.log("loginLvyeOrg callback")
-      // 并存储到数据库中
-      self.save2Person()
-      self.setDefaultCheck()
-      self.setData({
-        hasLogin: true
-      })
-      console.log(self.data.lvyeorgInfo)
-      if (loginCallback){
-        loginCallback()
+    lvyeorg.login(self.data.lvyeorgInfo.username, self.data.password, res => {
+      if(res.username){
+        console.log("loginLvyeOrg callback")
+        // 并存储到数据库中
+        self.save2Person()
+        self.setData({
+          hasLogin: true
+        })
+        console.log(self.data.lvyeorgInfo)
+        // 记得把全局的设置上
+        app.globalData.lvyeorgInfo = self.data.lvyeorgInfo
+        app.globalData.lvyeorgLogin = true
       }
+      // 修改MyInfo中的按钮中的username名称
+      self.setMyInfoUsername(res)
     })
   },
 
+  // 修改MyInfo中的按钮中的username名称
+  setMyInfoUsername:function(res){
+    console.log(res)
+    const self = this;
+    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+    let prevPage = pages[pages.length - 2];
+    if (prevPage.setLoginLvyeorg){ // 判断是否为MyInfo页面
+      prevPage.setLoginLvyeorg(res)
+    }
+  },
+  
   tapLvyeorgLogout: function () {
     var self = this;
     lvyeorg.logout(callback=>{
@@ -127,6 +142,7 @@ Page({
         hasLogin: false
       })
       app.globalData.lvyeorgLogin = false
+      self.setMyInfoUsername({error:"绿野ORG登录"}) // 退出设置
     })
   },
 
@@ -184,6 +200,26 @@ Page({
       "lvyeorgInfo.allowSiteEntry": !self.data.lvyeorgInfo.allowSiteEntry,
       hasModified: true,
     })
+  },
+
+  checkTesting: function (e) {
+    console.log(e)
+    const self = this;
+    self.setData({
+      "lvyeorgInfo.isTesting": !self.data.lvyeorgInfo.isTesting,
+      hasModified: true,
+    })
+  },
+
+  // 跳转到绿野ORG小程序的活动页面
+  tapHall: function () {
+    wx.navigateToMiniProgram({
+      appId: 'wx1599b7c8d1e2b4d4', // 要跳转的小程序的appid
+      path: "pages/index/index", // 跳转的目标页面
+      success(res) {
+        // 打开成功  
+      }
+    }) 
   },
 
 })

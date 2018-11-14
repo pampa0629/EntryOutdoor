@@ -26,12 +26,19 @@ const getToken = (callback) => {
             token: token,
             code: res.code,
           },
+          fail: function(error) {
+            // showModal("绿野ORG网站连接不上")
+            console.log(error)
+            if (callback) { // 连不上返回0
+              callback(0)
+            }
+          },
           success: function(resp) {
             console.log('Get token: ');
+            console.log(resp)
             var resp_dict = resp.data;
             if (resp_dict.err_code == 0) {
               console.log(resp_dict.data.token);
-              // wx.setStorageSync('LvyeOrgToken', resp_dict.data.token)
               if (callback) {
                 console.log("token callback");
                 callback(resp_dict.data.token)
@@ -42,7 +49,7 @@ const getToken = (callback) => {
           }
         })
       } else {
-        console.log('获取用户ORG登录状态失败！' + res.errMsg)
+        console.log('微信登录失败！' + res.errMsg)
       }
     }
   })
@@ -50,82 +57,105 @@ const getToken = (callback) => {
 
 // 登录绿野网站，用callback得到登录结果
 const login = (username, password, callback) => {
-  console.log("lvyeorg.js login")
+  console.log("lvyeorg.js login fun")
   console.log(username)
   console.log(password)
 
   getToken(token => {
-    console.log("get token ok, is: "+ token)
-    wx.setStorageSync('LvyeOrgToken', token)
+    if (!token && callback) {
+      callback({
+        error: "绿野ORG挂了",
+        username: ""
+      })
+    } else {
+      console.log("get token ok, is: " + token)
+      wx.setStorageSync('LvyeOrgToken', token)
 
-    wx.request({
-      url: LvyeOrgURL + "login.php",
-      method: "post",
-      header: {
-        "content-type": "application/x-www-form-urlencoded"
-      },
-      data: {
-        token: token,
-        username: encodeURI(username),
-        password: password
-      },
-      success: function(resp) {
-        var resp_dict = resp.data;
-        if (resp_dict.err_code == 0) {
-          wx.setStorageSync('LvyeOrgToken', resp_dict.data.token) // 这里必须把token存起来
-          if (callback) { // 回调函数，让外部知道是否登录了，哪个账号登录的
-            callback(username)
-          }
-        } else {
-          showErrModal(resp);
+      wx.request({
+        url: LvyeOrgURL + "login.php",
+        method: "post",
+        header: {
+          "content-type": "application/x-www-form-urlencoded"
+        },
+        data: {
+          token: token,
+          username: encodeURI(username),
+          password: password
+        },
+        fail: function(error) {
           if (callback) { // 登录失败，返回空字符串
-            callback("")
+            callback({
+              error: "绿野ORG挂了",
+              username: ""
+            })
+          }
+        },
+        success: function(resp) {
+          console.log("lvye org login ok")
+          var resp_dict = resp.data;
+          if (resp_dict.err_code == 0) {
+            wx.setStorageSync('LvyeOrgToken', resp_dict.data.token) // 这里必须把token存起来
+            if (callback) { // 回调函数，让外部知道是否登录了，哪个账号登录的
+              callback({
+                username: username
+              })
+            }
+          } else {
+            getError(resp, error => {
+              if (callback) { // 登录失败，返回空字符串
+                callback({
+                  error: error,
+                  username: ""
+                })
+              }
+            })
           }
         }
-      }
-    })
+      })
+    }
   })
 }
 
 // 退出登录
-const logout=  (callback)=> {
+const logout = (callback) => {
   var token = wx.getStorageSync("LvyeOrgToken")
   console.log(token)
 
   wx.request({
     url: LvyeOrgURL + 'logout.php',
     method: 'POST',
-    header: { "content-type": "application/x-www-form-urlencoded" },
+    header: {
+      "content-type": "application/x-www-form-urlencoded"
+    },
     data: {
       token: token,
     },
-    success: function (resp) {
+    success: function(resp) {
       console.log(resp);
       var resp_dict = resp.data;
       if (resp_dict.err_code == 0) {
-        // wx.setStorageSync('LvyeOrgToken', resp_dict.data.token)
-        if(callback){
+        if (callback) {
           callback()
         }
       } else {
-        showErrModal(resp);
+        showErrorModel(resp);
       }
     }
   })
 }
 
 // 注册新账号
-const register = (email, username, password1, password2, callback) =>{
+const register = (email, username, password1, password2, callback) => {
   if (!username) {
-    showErrModal("账号不能为空");
+    showModal("账号不能为空");
     return
   }
   if (!email) {
-    showErrModal("请输入正确的邮箱地址");
+    showModal("请输入正确的邮箱地址");
     return
   }
   if (!password1 || !password2 || !(password1 == password2)) {
-    showErrModal("密码不能为空，且两次密码必须相同");
+    showModal("密码不能为空，且两次密码必须相同");
     return
   }
 
@@ -143,17 +173,17 @@ const register = (email, username, password1, password2, callback) =>{
       password: password1,
       email: email
     },
-    success: function (resp) {
+    success: function(resp) {
       console.log(resp);
       var resp_dict = resp.data;
       if (resp_dict.err_code == 0) {
         // wx.setStorageSync('LvyeOrgToken', resp_dict.data.token)
         // 注册成功后，把信息写入Person表，登录org，告知发帖时间限制，退回到上一页面
-        if(callback){
+        if (callback) {
           callback()
         }
       } else {
-        showErrModal(resp);
+        showErrorModel(resp);
       }
     }
   })
@@ -161,45 +191,54 @@ const register = (email, username, password1, password2, callback) =>{
 
 // 上传一张照片
 const uploadOneImage = (outdoorid, cloudPath, callback) => {
-    // 步骤1：从 cloud中下载图片到临时文件
-    wx.cloud.downloadFile({
-      fileID: cloudPath,
-    }).then(res => {
-      console.log(res.tempFilePath)
-      var token = wx.getStorageSync("LvyeOrgToken")
-      console.log(token)
-      // 步骤2：上传到 org网站，得到 file_url 和 aid
-      wx.uploadFile({
-        url: LvyeOrgURL + 'add_image.php',
-        filePath: res.tempFilePath,
-        name: "myfile",
-        formData: {
-          token: token,
-        },
-        success: function (resp) {
-          console.log(resp);
-          var resp_dict = JSON.parse(resp.data)
-          console.log(resp_dict)
-          if (resp_dict.err_code == 0) {
-            console.log(resp_dict.data.file_url)
-            if (callback) {
-              console.log("callback(image, aid)")
-              callback(resp_dict.data.file_url, resp_dict.data.aid)
-            }
-          } else {
-            showErrModal(resp);
+  console.log("uploadOneImage fun")
+  console.log("cloudPath is:" + cloudPath)
+  // 步骤1：从 cloud中下载图片到临时文件
+  wx.cloud.downloadFile({
+    fileID: cloudPath,
+  }).then(res => {
+    console.log(res.tempFilePath)
+    var token = wx.getStorageSync("LvyeOrgToken")
+    console.log(token)
+    // 步骤2：上传到 org网站，得到 file_url 和 aid
+    wx.uploadFile({
+      url: LvyeOrgURL + 'add_image.php',
+      filePath: res.tempFilePath,
+      name: "myfile",
+      formData: {
+        token: token,
+      },
+      success: function(resp) {
+        console.log(resp);
+        var resp_dict = JSON.parse(resp.data)
+        console.log(resp_dict)
+        if (resp_dict.err_code == 0) {
+          console.log(resp_dict.data.file_url)
+          if (callback) {
+            console.log("uploadOneImage OK, return by callback")
+            callback({
+              image: resp_dict.data.file_url,
+              aid: resp_dict.data.aid
+            })
           }
+        } else {
+          logError(resp)
         }
-      })
+      }
     })
+  })
 }
 
 // 上传二维码
-const uploadQrcode = (outdoorid, callback) => {
-  qrcode.getCloudPath(outdoorid, (qrCode) => {
-    uploadOneImage(outdoorid, qrCode, (image,aid)=>{
-      if(callback){
-        callback(image, aid)
+const uploadQrCode = (outdoorid, callback) => {
+  console.log("uploadQrCode, outdoorid is:" + outdoorid)
+  qrcode.getCloudPath(outdoorid, qrCode => {
+    console.log("qrCode is:" + qrCode)
+    uploadOneImage(outdoorid, qrCode, res => {
+      if (callback) {
+        console.log("uploadQrCode, res is:")
+        console.log(res)
+        callback(res)
       }
     })
   })
@@ -207,43 +246,83 @@ const uploadQrcode = (outdoorid, callback) => {
 
 // 上传活动图片
 const uploadImages = (outdoorid, pics, images, aids, callback) => {
+  console.log("uploadImages fun")
+  console.log("pics are: ")
+  console.log(pics)
   if (pics.length > 0) {
-    uploadOneImage(outdoorid, pics.shift[0], (image, aid) => {
-      images.push(image)
-      aids.push(aid)
+    uploadOneImage(outdoorid, (pics.shift()).src, res => {
+      images.push(res.image)
+      aids.push(res.aid)
       uploadImages(outdoorid, pics, images, aids, callback)
     })
-  }else{
+  } else {
     if (callback) {
-      callback(images, aids)
+      callback({
+        images: images,
+        aids: aids
+      })
     }
   }
 }
 
 // 这里确定活动应发布的版面
-//  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游
-const chooseForum=(title)=> {
+//  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游; 93：技术小组
+const chooseForum = (title, isTesting) => {
   console.log(title)
+  console.log(isTesting)
+
   var fid = 67 // 默认户外
-  var day1 = new Date(title.date); // 活动日期
-  var day2 = new Date(); // 当前日期
-  var dayCount = (day1 - day2) / (1000 * 60 * 60 * 24) // 差了几天
-  if (dayCount > 30) { // 30天算远期
-    fid = 91
-  } else if (title.loaded == "休闲" || title.level < 0.8) {
-    fid = 90
-  } else if (title.loaded == "重装" || title.level >= 1.0) {
-    fid = 67
+  if (isTesting) {
+    fid = 93 // 技术小组版 todo 回头记得注释起来
+  } else {
+    var fid = 67 // 默认户外
+    var day1 = new Date(title.date); // 活动日期
+    var day2 = new Date(); // 当前日期
+    var dayCount = (day1 - day2) / (1000 * 60 * 60 * 24) // 差了几天
+    if (dayCount > 30) { // 30天算远期
+      fid = 91
+    } else if (title.loaded == "休闲" || title.level <= 0.8) {
+      fid = 90
+    } else if (title.loaded == "重装" || title.level >= 1.0) {
+      fid = 67
+    }
   }
   return fid
 }
 
+const NL = "\r\n"
+const NL2 = "\r\n\r\n" // "&#10&#10" // "\r\n\r\n"// "&lt;br&gt;&lt;br&gt;" // "<br><br>" // 换行符
 
+// 按照集合地点分组
+const groupMembersByMeets = (meets, members) => {
+  var meetMembers = []
+  for (var i = 0; i < meets.length; i++) {
+    meetMembers[i] = new Array();
+  }
+  // 遍历所有队员
+  for (var j = 0; j < members.length; j++) {
+    meetMembers[members[j].entryInfo.meetsIndex].push(members[j])
+  }
+  return meetMembers
+}
+
+// 构建队员名单，按照集合地点分组，隐藏队员号码
+const buildMembersMessage = (meets, members) => {
+  var message = "活动名单如下：" + NL
+  var meetMembers = groupMembersByMeets(meets, members)
+  meetMembers.forEach((item, index) => {
+    message += "第" (index + 1) + "）集合地点：" + meets[index].place + "，活动" + meets[index].date + " " + meets[index].time + NL
+    meetMembers[index].forEach((citem, cindex) => {
+      message += buildEntryMessage(meetMembers[index][cindex].userInfo, meetMembers[index][cindex].entryInfo, false, true)
+    })
+    message += NL
+  })
+  message += NL
+  return message
+}
 
 // 构建活动信息，以便发布活动信息到网站
 const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) => {
-  const NL = "\r\n" // "&#10"// "\r\n"// "&lt;br&gt;" // "<br>" // 换行符
-  const NL2 = "\r\n\r\n" // "&#10&#10" // "\r\n\r\n"// "&lt;br&gt;&lt;br&gt;" // "<br><br>" // 换行符
   var message = "（以下内容由“户外报名”小程序同步发出）" + NL2
   if (addMessage && addMessage.length > 0) {
     message += addMessage + NL2
@@ -252,6 +331,10 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   // 活动当前状态
   if (first || modifys.status) {
     message += "活动当前状态：" + NL + data.status + NL2
+    if (data.status == "报名截止") {
+      message += buildMembersMessage(data.meets, data.members)
+    }
+    message += NL
   }
 
   // 活动基本信息
@@ -290,7 +373,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
 
   // 交通及费用 todo 
 
-  // 人员限制和体力要求 空降
+  // 人员限制/体力要求/是否允许空降/截止时间
   if (first || modifys.limits) {
     if (data.limits && data.limits.maxPerson) {
       message += "活动人数：限" + data.limits.personCount + "人" + NL
@@ -299,6 +382,12 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
       message += "本活动允许空降" + NL
     } else {
       message += "本活动不允许空降" + NL
+    }
+    if (data.limits && data.limits.ocuppy) {
+      message += "占坑截止时间：活动" + data.limits.ocuppy.date + " " + data.limits.ocuppy.time + NL
+    }
+    if (data.limits && data.limits.entry) {
+      message += "报名截止时间：活动" + data.limits.entry.date + " " + data.limits.entry.time + NL
     }
     if (data.title.level >= 1.0) {
       message += NL + "体力要求：要求报名人员近期应参加过强度值不小于" + data.title.level + "的活动，体力能满足本活动要求。" + NL
@@ -315,10 +404,10 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     }
   }
 
-// 报名须知：请微信扫描二维码，登录小程序报名； 贴上二维码
-  if(first){
+  // 报名须知：请微信扫描二维码，登录小程序报名； 贴上二维码
+  if (first) {
     message += NL + "报名须知：请用微信扫描二维码，登录小程序报名。" + NL
-  }else {
+  } else {
     message += NL + "报名须知：请到帖子一楼，用微信扫描二维码，登录小程序报名。" + NL
   }
   if (!allowSiteEntry) { // 用当前活动表的设置
@@ -328,36 +417,45 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   return message
 }
 
-// 构建网站报名信息
-const buildEntryMessage = (userInfo, entryInfo, isQuit)=> {
-  var message = "（本内容由“户外报名”小程序自动发出，与发帖人无关；相应责权由" + userInfo.nickName+"承担）\r\n"
+// 构建网站报名信息; isQuit:是否为退出活动； isPrint：是否为集中打印名单时调用
+const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
+  var message = ""
+  if (!isPrint) {
+    message += "（本内容由“户外报名”小程序自动发出，与发帖人无关；相应责权由" + userInfo.nickName + "承担）\r\n"
+  }
   if (isQuit) {
     message += userInfo.nickName + " 因故退出活动，抱歉！"
   } else {
     // 昵称/性别/电话（隐藏中间三位）/认路情况/同意免责/集合地点（报名状态）
-    message += "代报名："+userInfo.nickName + "/" + userInfo.gender + "/"
+    message += "代报名：" + userInfo.nickName + "/" + userInfo.gender + "/"
     // 隐藏手机号码中间三位
-    var phone = userInfo.phone.toString();
-    phone = phone.substring(0, 3) + "***" + phone.substring(7)
+    var phone = util.hidePhone(userInfo.phone.toString());
     var knowWay = entryInfo.knowWay ? "认路" : "不认路"
     message += phone + "/" + knowWay + "/已同意免责条款/"
-    message += "第" + (entryInfo.meetsIndex + 1) + "集合点"
+    if (!isPrint) {
+      message += "第" + (entryInfo.meetsIndex + 1) + "集合点"
+    }
     message += "（" + entryInfo.status + "）"
   }
   return message
 }
 
 // 发布活动
-const addThread= function(outdoorid, data, callback) {
-  var images=[]
-  var aids=[]
-  uploadQrCode(outdoorid, (image,aid)=>{
-    images.push(image)
-    aids.push(aid)
-    uploadImages(outdoorid, data.brief.pics, (tmpImages, tmpAids) => {  
-      images = images.concat(tmpImages)
-      aids = aids.concat(tmpAids)
-      var fid = chooseForum(data.title) // 要发帖的版面
+const addThread = function(outdoorid, data, isTesting, callback) {
+  console.log("addThread fun")
+  var images = []
+  var aids = []
+  uploadQrCode(outdoorid, resQcCode => {
+    console.log("resQcCode is:")
+    console.log(resQcCode)
+    images.push(resQcCode.image)
+    aids.push(resQcCode.aid)
+    uploadImages(outdoorid, data.brief.pics, images, aids, resImages => {
+      console.log("resImages is:")
+      console.log(resImages)
+      images = images.concat(resImages.image)
+      aids = aids.concat(resImages.aid)
+      var fid = chooseForum(data.title, isTesting) // 要发帖的版面
       var message = buildOutdoorMesage(data, true, data.modifys, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
       console.log(message)
       var token = wx.getStorageSync("LvyeOrgToken")
@@ -378,18 +476,33 @@ const addThread= function(outdoorid, data, callback) {
           pic_list: images,
           aid_list: aids,
         },
-        success: function (resp) {
+        fail: function(error) {
+          console.log(error)
+          wx.showModal({
+            title: '同步绿野ORG失败',
+            content: '原因是：' + error.toString() + "。请稍后对活动略做修改，点击“保存修改”即可重发。",
+            showCancel: false,
+            confirmText: "知道了",
+          })
+        },
+        success: function(resp) {
           console.log(resp); // resp.data.data.tid 帖子id；resp.data.data.pid 跟帖id post id
           var resp_dict = resp.data;
           if (resp_dict.err_code == 0) {
             wx.showToast({
               title: '同步绿野ORG发帖成功',
             });
-            // wx.setStorageSync('LvyeOrgToken', resp_dict.data.token)
             if (callback) {
               callback(resp.data.data.tid)
             }
-          } else {
+          } else if (resp.statusCode == 200) { // 最恐惧的在这里：请求成功，但绿野org后台出错，帖子有了，但tid没有
+            wx.showModal({
+              title: '同步绿野ORG异常',
+              content: "可能已发帖到绿野ORG网站，但得不到帖子ID，后续信息无法同步，请联系小程序作者解决。",
+              showCancel: false,
+              confirmText: "知道了",
+            })
+          } else if (resp_dict.err_code != 0) { // 发帖失败了
             getError(resp, (error) => {
               wx.showModal({
                 title: '同步绿野ORG失败',
@@ -399,11 +512,14 @@ const addThread= function(outdoorid, data, callback) {
                 success(res) {
                   if (res.confirm) {
                     console.log('用户点击确定')
-                    addThread(outdoorid, data, callback) // 立刻重发
+                    addThread(outdoorid, data, isTesting, callback) // 立刻重发
                   } else if (res.cancel) {
                     console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
                     // 这里要更新Outdoors表
                     data.websites.lvyeorg.fid = fid
+                    if (callback) { // 不成就返回null
+                      callback(null)
+                    }
                   }
                 }
               })
@@ -427,10 +543,7 @@ const postMessage = (outdoorid, tid, message) => {
   console.log(tid)
   console.log(message)
   var token = wx.getStorageSync("LvyeOrgToken")
-  console.log(token)
 
-  // getToken(token => {
-  //  console.log(token)
   wx.request({
     url: LvyeOrgURL + "add_post.php",
     method: "POST",
@@ -449,7 +562,6 @@ const postMessage = (outdoorid, tid, message) => {
         wx.showToast({
           title: '信息发布绿野ORG成功',
         });
-        // wx.setStorageSync('LvyeOrgToken', resp_dict.data.token)
       } else {
         getError(resp, (error) => {
           wx.showModal({
@@ -482,7 +594,7 @@ const postMessage = (outdoorid, tid, message) => {
 }
 
 // 把未发布出去的信息加到waitings中
-const add2Waitings =(outdoorid, message) => {
+const add2Waitings = (outdoorid, message) => {
   wx.showModal({
     title: '请登录或注册绿野ORG',
     content: '本活动被领队设置为同步到绿野ORG网站，建议您注册ORG账号。系统将自动跳转到“绿野ORG登录”页面，请登录或注册以便报名信息同步',
@@ -506,26 +618,31 @@ const add2Waitings =(outdoorid, message) => {
 }
 
 // 同步绿野org网站等待要发送的信息
-const postWaitings = (outdoorid, tid) => {
+const postWaitings = (outdoorid, tid, callback) => {
   console.log("const postWaitings")
   dbOutdoors.doc(outdoorid).get().then(res => {
     if (res.data.websites && res.data.websites.lvyeorg.waitings) {
-      postWaitingsInner(outdoorid, tid, res.data.websites.lvyeorg.waitings)
+      postWaitingsInner(outdoorid, tid, res.data.websites.lvyeorg.waitings, callback)
     }
   })
 }
 
 // 增加一个内部函数，减少数据库访问
-const postWaitingsInner = (outdoorid, tid, waitings) => {
+const postWaitingsInner = (outdoorid, tid, waitings, callback) => {
   console.log("const postWaitingsInner")
   console.log(outdoorid)
   console.log(tid)
   console.log(waitings.length)
   if (waitings.length > 0) {
-    postOneWaiting(outdoorid, tid, waitings.shift(), () => {
+    var waiting = waitings.shift()
+    postOneWaiting(outdoorid, tid, waiting, () => {
       console.log(waitings.length)
-      postWaitingsInner(outdoorid, tid, waitings) // 这么来保证顺序
+      postWaitingsInner(outdoorid, tid, waitings, callback) // 这么来保证顺序
     })
+  } else if (waitings.length == 0) {
+    if (callback) {
+      callback()
+    }
   }
 }
 
@@ -537,7 +654,7 @@ const postOneWaiting = (outdoorid, tid, waiting, callback) => {
   console.log(waiting)
   var token = wx.getStorageSync("LvyeOrgToken")
   console.log(token)
-  
+
   wx.request({
     url: LvyeOrgURL + "add_post.php",
     method: "POST",
@@ -549,7 +666,7 @@ const postOneWaiting = (outdoorid, tid, waiting, callback) => {
       tid: tid,
       message: encodeURI(waiting),
     },
-    success: function (resp) {
+    success: function(resp) {
       var resp_dict = resp.data;
       console.log(resp_dict)
       if (resp_dict.err_code == 0) {
@@ -558,15 +675,13 @@ const postOneWaiting = (outdoorid, tid, waiting, callback) => {
           data: {
             outdoorid: outdoorid,
           }
-        }).then(res=>{
+        }).then(res => {
           if (callback) { // 回调
-            callback() 
+            callback()
           }
         })
       } else {
-        getError(resp, (error) => {
-          console.log(error)
-        })
+        logError(resp)
       }
     }
   })
@@ -605,15 +720,22 @@ const getError = (resp, callback) => {
   }
 }
 
-// 弹窗绿野org网站反馈的错误信息
-const showError = (resp) => {
+// 日志输出绿野org网站反馈的错误信息
+const logError = (resp) => {
   getError(resp, error => {
-    showErrModal(error)
+    console.log(error)
+  })
+}
+
+// 弹窗绿野org网站反馈的错误信息
+const showErrorModel = (resp) => {
+  getError(resp, error => {
+    showModal(error)
   })
 }
 
 // 弹窗显示错误信息
-const showErrModal = (error) => {
+const showModal = (error) => {
   wx.showModal({
     title: "绿野ORG错误提示",
     content: error,
@@ -637,7 +759,7 @@ module.exports = {
 
   // 处理错误信息
   getError: getError,
-  showError: showError,
-  showErrModal: showErrModal,
+  logError: logError,
+  showErrorModel: showErrorModel,
 
 }

@@ -24,6 +24,7 @@ Page({
     // 与户外网站对接
     hasLoginLvyeorg:false, // 是否已经登录了org网站
     lvyeOrgUsername:"", // 绿野org 登录用户名
+    lvyeOrgButton:"绿野ORG登录", // 按钮上显示的文字
 
     isTesting: true, // for test， false true
   },
@@ -42,21 +43,29 @@ Page({
     console.log("ready login org")
     // 登录org
     if(!app.globalData.lvyeorgLogin){ // 尚未登录，则等待登录
-      app.callbackLoginLvyeorg = (username)=>{
-        self.setLoginLvyeorg(username)
+      app.callbackLoginLvyeorg = (res)=>{
+        self.setLoginLvyeorg(res)
       }
     } else{ // 登录了直接设置就好
-        self.setLoginLvyeorg(username)
+      self.setLoginLvyeorg({username:username})
     }
   },
 
   // 设置org登录信息
-  setLoginLvyeorg:function(username){
-    this.setData({
-      hasLoginLvyeorg: true,
-      lvyeOrgUsername: username,
-    })
-    console.log("MyInfo onload: " + username)
+  setLoginLvyeorg:function(res){
+    console.log("MyInfo setLoginLvyeorg, res is: ")
+    console.log(res)
+    if(res.error){
+      this.setData({
+        hasLoginLvyeorg: false,
+        lvyeOrgButton: res.error,
+      })
+    }else if(res.username){
+      this.setData({
+        hasLoginLvyeorg: true,
+        lvyeOrgUsername: res.username,
+      })
+    }
   },
 
 // 点击 > 图标想修改信息，主要看是否登录了

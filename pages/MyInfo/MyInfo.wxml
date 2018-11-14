@@ -23,7 +23,7 @@
 <van-row>
   <van-col span="20" offset="2">
     <van-button size="large" type="primary" disabled="{{!lastOutdoorid}}"  bind:click="gotoLastOutdoor">回到最近的活动</van-button>
-  </van-col>
+  </van-col> 
 </van-row>
 
 <van-row>
@@ -35,7 +35,7 @@
       <van-button size="large" bind:click="lvyeorgLogin">{{lvyeOrgUsername}}已登录</van-button>
     </block>
     <block wx:else>
-      <van-button size="large" bind:click="lvyeorgLogin">绿野ORG登录</van-button>
+      <van-button size="large" bind:click="lvyeorgLogin">{{lvyeOrgButton}}</van-button>
     </block>
   </van-col>
 </van-row>

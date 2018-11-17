@@ -24,6 +24,9 @@
   <van-cell title="活动路线" label="{{route.length}}个途经点" value="点击查看详细路线" is-link url="LookRoute" border="{{false}}"/>
 </van-cell-group>
 
+<!--活动装备-->
+<van-cell title="活动装备要求" label="推荐的装备列表" value="点击查看活动装备" is-link url="LookEquipments" border="{{false}}"/>
+
 <!--队员列表-->
 <van-cell-group>
   <van-cell wx:if="{{limits.maxPerson}}" title="队员列表" label="已报名{{members.length}}人（限{{limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}"/>
@@ -39,7 +42,7 @@
     </van-cell>
   </van-radio-group>
 </van-panel>
-
+ 
 <!--免责条款与是否认路-->  
 <van-cell title="免责条款"  value="点击查看条款详细内容" clickable is-link url="LookDisclaimer"/>
 <van-checkbox-group>

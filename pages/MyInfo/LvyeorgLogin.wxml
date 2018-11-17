@@ -28,7 +28,7 @@
     <van-cell title="{{lvyeorgInfo.allowSiteEntry?'允许':'不允许'}}网站直接跟帖报名" label="{{lvyeorgInfo.allowSiteEntry?'不建议允许，允许则领队要自行整理两边的报名名单，且无即将提供的微信消息提示':''}}" clickable bind:click="checkAllowSiteEntry"  >
       <van-checkbox value="{{lvyeorgInfo.allowSiteEntry}}" />
     </van-cell>
-    <van-cell title="{{lvyeorgInfo.isTesting?'测试发帖':'正式发帖'}}" label="测试帖将发布在“技术小组”版" clickable bind:click="checkTesting"  border="{{false}}">
+    <van-cell title="{{lvyeorgInfo.isTesting?'测试发帖':'正式发帖'}}" label="{{lvyeorgInfo.isTesting?'帖子将发布在“技术小组”版面':'帖子将发布到正式活动版面'}}" clickable bind:click="checkTesting"  border="{{false}}">
     <van-checkbox value="{{lvyeorgInfo.isTesting}}" />
   </van-cell>
   </block>

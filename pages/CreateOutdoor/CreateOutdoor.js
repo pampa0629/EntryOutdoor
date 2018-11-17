@@ -2,12 +2,13 @@ const app = getApp()
 const util = require('../../utils/util.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 const qrcode = require('../../utils/qrcode.js')
+const outdoor = require('../../utils/outdoor.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
-
+ 
 Page({
   data: {
     outdoorid: null, // 页面活动已经存储到数据库中的活动id
@@ -277,31 +278,9 @@ Page({
 
   // 根据各类信息，生成活动主题信息，修改whole
   createTitle: function() {
-    const self = this;
-    var result = "" // 2018.09.16（周日）大觉寺一日轻装1.0强度休闲游； 
-    // 日期
-    if (this.data.title.date) {
-      result += this.data.title.date
-      result += "(" + util.getDay(this.data.title.date) + ")"
-    } else {
-      result += "日期待定"
-    }
-    // 地点
-    if (this.data.title.place) {
-      result += this.data.title.place
-    } else {
-      result += "地点待定"
-    }
-    // 时长
-    result += this.data.title.during
-    // 轻装or重装
-    result += this.data.title.loaded
-    // 强度
-    result += "强度" + this.data.title.level
-    // 领队
-    result += self.data.leader.userInfo.nickName + "队"
-    this.setData({
-      "title.whole": result
+    const self = this
+    self.setData({
+      "title.whole": outdoor.createTitle(self.data.title, self.data.leader.userInfo.nickName)
     })
   },
 
@@ -363,57 +342,9 @@ Page({
 
   // 计算强度
   calcLevel: function() {
-    // var temp = Math.sqrt(this.data.title.addedLength * this.data.title.addedUp / 100.0)
-    /**强度计算公式，原则：按照鼓励爬升，弱化距离的原则；但超长距离的弱化程度会降低。
-先归一化：公里数/10，爬升米数/1000
-公式：求和（分段距离*距离系数）+爬升高度*爬升系数
-0-10公里部分，距离系数为0.6
-10-20公里部分，距离系数为0.7
-20-50公里部分，距离系数为0.8
-50-100公里部分，距离系数为0.9
-爬升系数为： 2-距离系数 */
-    // 归一化
-    var length = this.data.title.addedLength / 10.0; // 单位：公里
-    var up = this.data.title.addedUp / 10.0; // 单位：千米
-    var lValue = 0; // 距离带来的强度值
-    while (length > 0) {
-      if (length > 5) {
-        lValue += (length - 5) * 0.9;
-        length -= 5;
-      } else if (length > 2) {
-        lValue += (length - 2) * 0.8;
-        length -= 2;
-      } else if (length > 1) {
-        lValue += (length - 1) * 0.7;
-        length -= 1;
-      } else { // length [0,1]
-        lValue += length * 0.6;
-        length -= 1;
-      }
-    }
-    var uQuotiety = 2 - lValue / (this.data.title.addedLength / 10.0);
-    var level = (up * uQuotiety + lValue) / 2;
-
-    // 重装 *1.5，休闲游（如景区）：*0.5
-    if (this.data.title.loaded == "重装") {
-      level *= 1.5
-    } else if (this.data.title.loaded == "休闲装") {
-      level *= 0.5
-    }
-    // 多日活动：除以天数乘以1.5
-    console.log(this.data.title)
-    var duringCount = util.parseChar(this.data.title.during[0])
-    if (duringCount > 1) {
-      level = level * 1.5 / (duringCount + 1)
-    }
-
-    // 领队调节强度系数
-    if (this.data.title.adjustLevel != null) {
-      level *= this.data.title.adjustLevel / 100.0;
-    }
-
+    const self = this
     this.setData({
-      "title.level": level.toFixed(1)
+      "title.level": outdoor.calcLevel(self.data.title)
     })
   },
 

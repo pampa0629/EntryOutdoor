@@ -36,12 +36,7 @@
 </van-panel>
 
   <!--活动路线-->
-<van-panel title="活动路线">
-  <van-cell title="途径点"  value="点击编辑活动路线" is-link url="EditRoute"/>
-  <van-cell-group wx:for="{{route}}" wx:key="place+time">
-    <van-cell data-name="{{index}}" title="{{index+1}}）{{item.place}}" value="{{item.date}}，{{item.time}}" border="{{index<route.length-1}}" />
-  </van-cell-group>
-</van-panel>
+<van-cell title="活动路线" label="共有{{route.length}}个途经点"  value="点击编辑活动路线" is-link url="EditRoute"/>
 
 <!--活动介绍和图片-->
 <van-panel title="活动图文介绍" use-footer-slot>
@@ -113,6 +108,6 @@
 <!--打印活动按钮-->
 <van-row>
   <van-col span="20" offset="2">
-    <van-button wx:if="{{status!='拟定中'}}" plain size="large" bind:click='printOutdoor'>打印详情</van-button>
+    <van-button wx:if="{{status!='拟定中'}}" plain size="large" bind:click='printOutdoor'>打印活动详情</van-button>
   </van-col>
 </van-row>

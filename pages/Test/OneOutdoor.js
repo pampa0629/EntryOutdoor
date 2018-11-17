@@ -9,6 +9,10 @@ Page({
     username: '',
     password: '',
     email: "",
+
+    show: true,
+    username: '',
+    password: ''
   },
 
   onLoad() {
@@ -363,5 +367,23 @@ Page({
     }
   },
 
+  onDialog:function(){
+
+  },
+
+  onClose(event) {
+    if (event.detail === 'confirm') {
+      // 异步关闭弹窗
+      setTimeout(() => {
+        this.setData({
+          show: false
+        });
+      }, 1000);
+    } else {
+      this.setData({
+        show: false
+      });
+    }
+  }
 
 });

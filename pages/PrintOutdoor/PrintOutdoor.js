@@ -33,7 +33,7 @@ Page({
     } else { // 参数不对，就直接返回吧
       return
     }
-
+ 
     console.log("PrintOutdoor.js in onLoad fun, isLeader is:" + self.data.isLeader)
     dbOutdoors.doc(self.data.outdoorid).get()
       .then(res => {

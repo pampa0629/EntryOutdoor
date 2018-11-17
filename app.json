@@ -18,7 +18,10 @@
     "pages/EntryOutdoor/LookDisclaimer",
     "pages/CreateOutdoor/EditLimits",
     "pages/MyInfo/LvyeorgLogin",
-    "pages/MyInfo/LvyeorgRegister"
+    "pages/MyInfo/LvyeorgRegister",
+    "pages/CreateOutdoor/EditEndTimes",
+    "pages/CreateOutdoor/EditEquipments",
+    "pages/EntryOutdoor/LookEquipments"
   ],
   "window": {
     "backgroundTextStyle": "light",

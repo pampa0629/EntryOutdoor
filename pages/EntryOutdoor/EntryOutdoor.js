@@ -2,6 +2,7 @@ const app = getApp()
 const util = require('../../utils/util.js')
 const qrcode = require('../../utils/qrcode.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
+const outdoor = require('../../utils/outdoor.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -174,6 +175,7 @@ Page({
             lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
           }
         }
+        app.loginLvyeOrg() // 登录一下
       } else { // 登录了直接设置就好
         lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
       }
@@ -368,6 +370,30 @@ Page({
     qrcode.share2Circle(self.data.outdoorid, self.data.title.whole, false)
   },
 
+  // 刷新一下 entriedOutdoors 里面的内容：报名的话，把当前活动信息放到第一位；退出则要删除当前活动
+  updateEntriedOutdoors:function(isQuit){
+    const self = this
+    // 先保证把当前活动清除掉
+    self.data.entriedOutdoors.forEach(function (item, index) {
+      if (item.id == self.data.outdoorid) {
+        self.data.entriedOutdoors.splice(index, 1);
+      }
+    })
+    
+    // 若非退出，则加到第一条
+    self.data.entriedOutdoors.unshift({
+      id: self.data.outdoorid,
+      title: self.data.title.whole
+    })
+
+    // 最后更新数据库
+    dbPersons.doc(app.globalData.personid).update({
+      data: {
+        entriedOutdoors: self.data.entriedOutdoors
+      }
+    })
+  },
+
   // 报名就是在活动表中加上自己的id，同时还要在Person表中加上活动的id
   entryOutdoor: function(status) {
     const self = this;
@@ -400,6 +426,8 @@ Page({
               members: self.data.members
             }
           })
+
+          self.updateEntriedOutdoors(false)
         })
     } else { // 完全新报名，增加一条记录
       // 先从Person表中找到自己的信息
@@ -427,15 +455,7 @@ Page({
             })
 
           // Person表中，还要把当前outdoorid记录下来
-          self.data.entriedOutdoors.unshift({
-            id: self.data.outdoorid,
-            title: self.data.title.whole
-          })
-          dbPersons.doc(app.globalData.personid).update({
-            data: {
-              entriedOutdoors: self.data.entriedOutdoors
-            }
-          })
+          self.updateEntriedOutdoors(false)
         }
       })
     }
@@ -529,16 +549,8 @@ Page({
           }
         }).then(res => {
           // 删除Persons表中的entriedOutdoors中的对应id的item
-          self.data.entriedOutdoors.forEach(function(item, index) {
-            if (item.id == self.data.outdoorid) {
-              self.data.entriedOutdoors.splice(index, 1);
-            }
-          })
-          dbPersons.doc(app.globalData.personid).update({
-            data: {
-              entriedOutdoors: self.data.entriedOutdoors
-            }
-          })
+          self.updateEntriedOutdoors(true)
+
           // 退出后还可以继续再报名
           self.setData({
             "entryInfo.status": "浏览中",

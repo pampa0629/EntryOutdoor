@@ -232,6 +232,21 @@ const hidePhone= (phone)=> {
   return  phone.substring(0, 3) + "***" + phone.substring(7)
 }
 
+// 从字符串中识别数字
+const myParseInt = (str) => {
+  var res = ""
+  var temp = ""
+  for(var i=0; i<str.length; i++){
+    if (str.charAt(i) >= "0" && str.charAt(i) <= "9"){
+      res += str.charAt(i)
+    } else if (res.length>0){ // 遇到中间不是数字，则需要清空
+      temp = res
+      res = ""
+    }
+  }
+  return res ? parseInt(res) : parseInt(temp)
+}
+
 
 module.exports = {
   formatTime: formatTime,
@@ -271,4 +286,7 @@ module.exports = {
   // 手机号码处理
   changePhone: changePhone,
   hidePhone: hidePhone,
+  // 字符串转数字
+  myParseInt:myParseInt,
+  
  }

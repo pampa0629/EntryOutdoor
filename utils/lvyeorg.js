@@ -333,8 +333,8 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     message += "活动当前状态：" + NL + data.status + NL2
     if (data.status == "报名截止") {
       message += buildMembersMessage(data.meets, data.members)
+      message += NL
     }
-    message += NL
   }
 
   // 活动基本信息
@@ -383,14 +383,33 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     } else {
       message += "本活动不允许空降" + NL
     }
+    // 占坑/报名截止时间
     if (data.limits && data.limits.ocuppy) {
       message += "占坑截止时间：活动" + data.limits.ocuppy.date + " " + data.limits.ocuppy.time + NL
     }
     if (data.limits && data.limits.entry) {
       message += "报名截止时间：活动" + data.limits.entry.date + " " + data.limits.entry.time + NL
     }
+    // 体力要求
     if (data.title.level >= 1.0) {
       message += NL + "体力要求：要求报名人员近期应参加过强度值不小于" + data.title.level + "的活动，体力能满足本活动要求。" + NL
+    }
+    // 装备要求
+    if (data.limits && data.limits.equipments) {
+      message += NL + "活动装备要求"
+      message += NL+"必须有的装备：" 
+      data.limits.equipments.mustRes.forEach((item, index)=>{
+        message += item + "，"
+      })
+      message += NL +"可以有的装备："
+      data.limits.equipments.canRes.forEach((item, index) => {
+        message += item + "，"
+      })
+      message += NL +"不能有的装备："
+      data.limits.equipments.noRes.forEach((item, index) => {
+        message += item + "，"
+      })
+      message += NL
     }
   }
 
@@ -590,7 +609,6 @@ const postMessage = (outdoorid, tid, message) => {
       }
     }
   })
-  //})
 }
 
 // 把未发布出去的信息加到waitings中

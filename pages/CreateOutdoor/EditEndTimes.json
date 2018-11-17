@@ -1,0 +1,13 @@
+{
+  "navigationBarTitleText": "截止时间设置",
+  "usingComponents": {
+    "van-field": "/vant-weapp/field/index",
+    "van-cell": "/vant-weapp/cell/index",
+    "van-cell-group": "/vant-weapp/cell-group/index",
+    "van-checkbox": "/vant-weapp/checkbox/index",
+    "van-checkbox-group": "/vant-weapp/checkbox-group/index",
+    "van-tag": "/vant-weapp/tag/index",
+    "van-panel": "/vant-weapp/panel/index",
+    "van-action-sheet": "/vant-weapp/action-sheet/index"
+  }
+}

@@ -36,8 +36,40 @@
   </van-col>
 </van-row>
 
+<van-row>
+  <van-col span="9" offset="2">
+  <van-button size="large"   bind:click="onDialog">对话框</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+  <van-button size="large"  open-type="getPhoneNumber" bindgetphonenumber="onTest">测试</van-button>
+  </van-col>
+</van-row>
+
 
 <form bindsubmit="reg" report-submit="true">
     <view>用户：<input type="text" name="username" /></view>
     <view><button type="primary" form-type="submit">注册</button></view>
 </form>
+
+<van-dialog
+  use-slot
+  async-close
+  show="{{ show }}"
+  show-cancel-button
+  confirm-button-open-type="getUserInfo"
+  bind:close="onClose"
+  bind:getuserinfo="getUserInfo"
+>
+<van-field
+  value="{{ username }}"
+  label="用户名"
+  placeholder="请输入用户名"
+/>
+<van-field
+  value="{{ password }}"
+  type="password"
+  label="密码"
+  :border="false"
+  placeholder="请输入密码"
+/>
+</van-dialog>

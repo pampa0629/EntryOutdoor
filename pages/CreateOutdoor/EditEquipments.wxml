@@ -1,0 +1,90 @@
+<!--装备类型-->
+<van-notice-bar text="活动类型：{{loaded}}"/>
+<van-notice-bar wx:if="{{isOutDate}}" text="{{weatherText}}"/>
+<van-notice-bar wx:else text="天气预报：{{weatherText}}"/>
+
+<!--最好有的装备-->
+<van-panel title="必须有的装备" >
+  <van-row wx:for="{{equipments.must}}" wx:key="{{item}}" >
+    <van-checkbox-group value="{{ equipments.mustRes }}" bind:change="changeMust">
+      <van-col span="12" offset="0">
+        <van-checkbox name="{{item}}">{{item}}</van-checkbox>    
+      </van-col> 
+    </van-checkbox-group>
+    <van-col span="4" offset="2">
+      <van-button plain size="small" round bindtap='editMust{{index}}'>编辑</van-button>
+    </van-col>
+    <van-col span="4" offset="1">
+      <van-button plain size="small" round type="warning" bindtap='deleteMust{{index}}'>删除</van-button>
+    </van-col>
+  </van-row>
+</van-panel>
+<van-field value="{{addMust}}" center clearable label="增加必须有装备" placeholder="请输入装备名称" border="{{ false }}" use-button-slot bind:input="inputMust">
+  <van-button slot="button" size="small" round type="primary" bind:click="addMust">添加</van-button>
+</van-field>
+
+<!--可以有的装备-->
+<van-panel title="可以有的装备" >
+  <van-row wx:for="{{equipments.can}}" wx:key="{{item}}" >
+    <van-checkbox-group value="{{ equipments.canRes }}" bind:change="changeCan">
+      <van-col span="12" offset="0">
+        <van-checkbox name="{{item}}">{{item}}</van-checkbox>    
+      </van-col> 
+    </van-checkbox-group>
+    <van-col span="4" offset="2">
+      <van-button plain size="small" round bindtap='editCan{{index}}'>编辑</van-button>
+    </van-col>
+    <van-col span="4" offset="1">
+      <van-button plain size="small" round type="warning" bindtap='deleteCan{{index}}'>删除</van-button>
+    </van-col>
+  </van-row>
+</van-panel>
+<van-field value="{{addCan}}" center clearable label="增加可以有装备" placeholder="请输入要添加的装备名称" border="{{ false }}" use-button-slot bind:input="inputCan">
+  <van-button slot="button" size="small" round type="primary" bind:click="addCan">添加</van-button>
+</van-field>
+
+<!--不能有的装备-->
+<van-panel title="不能有的装备" >
+  <van-row wx:for="{{equipments.no}}" wx:key="{{item}}" >
+    <van-checkbox-group value="{{ equipments.noRes }}" bind:change="changeNo">
+      <van-col span="12" offset="0">
+        <van-checkbox name="{{item}}">{{item}}</van-checkbox>    
+      </van-col> 
+    </van-checkbox-group>
+    <van-col span="4" offset="2">
+      <van-button plain size="small" round bindtap='editNo{{index}}'>编辑</van-button>
+    </van-col>
+    <van-col span="4" offset="1">
+      <van-button plain size="small" round type="warning" bindtap='deleteNo{{index}}'>删除</van-button>
+    </van-col>
+  </van-row>
+</van-panel>
+<van-field value="{{addNo}}" center clearable label="增加不能有装备" placeholder="请输入要添加的装备名称" border="{{ false }}" use-button-slot bind:input="inputNo">
+ <van-button slot="button" size="small" round type="primary" bind:click="addNo">添加</van-button>
+</van-field>
+
+<!--恢复默认-->
+<van-row >
+  <van-col span="20" offset="2">
+    <van-button wx:if="{{!isOutDate}}" plain size="large" type="warning" bindtap='loadDefault'>恢复系统默认</van-button>
+  </van-col>
+</van-row>
+
+<van-dialog
+  use-slot
+  async-close
+  show="{{ dialog.show }}"
+  show-cancel-button
+  bind:close="onClose"
+>
+<van-cell
+  title="修改前：{{ dialog.oldName }}"
+/>
+<van-field
+  value="{{ dialog.newName }}"
+  label="修改后："
+  :border="false"
+  placeholder="请输入修改后的装备内容"
+  bind:input="inputNewName"
+/>
+</van-dialog>

@@ -1,9 +1,9 @@
 const app = getApp()
 const util = require('./util.js')
 var bmap = require('../libs/bmap-wx.min.js');
- 
+
 // 根据各类信息，生成活动主题信息，修改whole
-const createTitle = (title, nickName)=> {
+const createTitle = (title, nickName) => {
   var result = "" // 2018.09.16（周日）大觉寺一日轻装1.0强度休闲游； 
   // 日期
   if (title.date) {
@@ -38,7 +38,7 @@ const createTitle = (title, nickName)=> {
 20-50公里部分，距离系数为0.8
 50-100公里部分，距离系数为0.9
 爬升系数为： 2-距离系数 */
-const calcLevel=(title)=> {
+const calcLevel = (title) => {
   // 归一化
   var length = title.addedLength / 10.0; // 单位：公里
   var up = title.addedUp / 10.0; // 单位：千米
@@ -92,54 +92,127 @@ const buildWeatherMessage = (weather) => {
   return message
 }
 
-// 根据城市和日期，查看天气预报
-// todo 可指定城市
-const getWeather = (city, date, callback) => {
-  var BMap = new bmap.BMapWX({ak: 'zGuNHdYow4wGhrC1IytHDweHPWGxdbaX'}); 
-  BMap.weather({
-    fail: function(fail){},
-    success: function(res){
-      console.log(res)
-   
-      let forecast = res.originalData.results[0].weather_data
-      console.log(forecast)
-      var nowDay = new Date()
-      var lastDay = new Date()
-      lastDay.setDate(nowDay.getDate() + forecast.length)
-      var outdoorDay = new Date(date)
-      var index = forecast.length - 1 // 用哪天的数据
-      if (lastDay >= outdoorDay) {
-        index = Math.ceil((outdoorDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24));
-        if (index >= forecast.length){
-          index = forecast.length - 1
-        }
-      }
-      console.log("outdoorDay is:" + outdoorDay)
-      console.log("nowDay is:" + nowDay)
-      console.log("lastDay is:" + lastDay)
-      console.log(index)
-      var weather = null
-      if (index >= 0 && index < forecast.length){
-        weather = forecast[index]
-        weather.city = res.originalData.results[0].currentCity
-      }
-      console.log(weather)
-      if (callback) {
-        callback(weather)
+const getLocation = (callback) => {
+  wx.getSetting({
+    success(res) {
+      if (!res.authSetting['scope.userLocation']) {
+        wx.authorize({
+          scope: 'scope.userLocationscope.userLocation',
+          success() {
+            console.log('scope.userLocationv OK')
+            wx.getLocation({
+              type: 'wgs84',
+              success: function(res) {
+                if (callback) {
+                  callback(res)
+                }
+              }
+            })
+          },
+          fail() {
+            wx.showModal({
+              title: '请给予授权',
+              content: '授权获取大致位置，才能通过所在城市的天气预报推荐装备，不然装备推荐不准。小程序不会记录您的位置',
+            })
+          }
+        })
+      } else {
+        wx.getLocation({
+          type: 'wgs84',
+          success: function(res) {
+            if (callback) {
+              callback(res)
+            }
+          }
+        })
       }
     }
   })
 }
 
+// 根据地区和日期，查看天气预报
+const getWeather = (area, date, callback) => {
+  var ak = "zGuNHdYow4wGhrC1IytHDweHPWGxdbaX"
+  // 通过area得到经纬度
+  // 'http://api.map.baidu.com/geocoder/v2/?address=' . $address . '&output=json&ak=xxx'
+  wx.request({
+    url: "https://api.map.baidu.com/geocoder/v2/?address=" + area + "&output=json&ak=" + ak,
+    fail: function(error) {
+      console.log(error)
+      if (callback) {
+        callback({
+          result: false,
+          msg: area + "转化经纬度失败，具体原因是：" + error
+        })
+      }
+    },
+    success: function(res) {
+      console.log(res);
+      var latitude = res.data.result.location.lat //维度
+      var longitude = res.data.result.location.lng //经度
+
+      var BMap = new bmap.BMapWX({
+        ak: ak
+      });
+      BMap.weather({
+        location: longitude + "," + latitude,
+        fail: function(error) {
+          console.log(error)
+          if (callback) {
+            callback({
+              result: false,
+              msg: "获取天气预报失败，具体原因是：" + error
+            })
+          }
+        },
+        success: function(res) {
+          console.log(res)
+          let forecast = res.originalData.results[0].weather_data
+          console.log(forecast)
+          var nowDay = new Date()
+          var lastDay = new Date()
+          lastDay.setDate(nowDay.getDate() + forecast.length)
+          var outdoorDay = new Date(date)
+          var index = forecast.length - 1 // 用哪天的数据
+          if (lastDay >= outdoorDay) {
+            index = Math.ceil((outdoorDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24));
+            if (index >= forecast.length) {
+              index = forecast.length - 1
+            }
+          }
+          console.log("outdoorDay is:" + outdoorDay)
+          console.log("nowDay is:" + nowDay)
+          console.log("lastDay is:" + lastDay)
+          console.log(index)
+          var weather = null
+          if (index >= 0 && index < forecast.length) {
+            weather = forecast[index]
+            weather.city = res.originalData.results[0].currentCity
+          }
+          console.log(weather)
+          if (callback) {
+            callback({
+              result: true,
+              weather: weather
+            })
+          }
+        }
+      })
+    }
+  })
+
+}
+
 // 把天气预报的结果转换一个户外装备需要的表达方式
-const convertWeather = weather=> {
+const convertWeather = weather => {
   var result = {
     temperature: "normal",
     wind: "",
     weather: ""
   }
   // 最高温
-  var high = parseInt(weather.temperature.splite("~")[0])
+  var high_low = weather.temperature.split("~")
+  var high = parseInt([0])
   console.log("high: " + high)
   if (high >= 25) {
     result.temperature = "hot"
@@ -161,11 +234,33 @@ const convertWeather = weather=> {
   return result
 }
 
+// 根据日期模拟天气
+const simulateWeather = (date) => {
+  var weather = {
+    temperature: "normal",
+    wind: "",
+    weather: ""
+  }
+  // 也就只能判断一下月份了
+  var month = (new Date(date)).getMonth()
+  if (month > 5 && month < 10) { // 6-9 为夏季
+    weather.temperature = "hot"
+  } else if (month > 10 || month < 4) { // 11-4 为冬季
+    weather.temperature = "cold"
+  }
+  return weather
+}
+
 // 根据负重类型和活动日期，得到默认的装备列表
 // 根据地区和日期，得到天气预报，再推荐合适的装备（防雨、防晒、保温等）
-const loadEquipments = (loaded, date, weather, callback)=> {
+const loadEquipments = (loaded, date, weather, callback) => {
   var e = {}
-  weather = convertWeather(weather)
+  if (weather) {
+    weather = convertWeather(weather)
+  } else { // 获取天气预报失败，则这里模拟一下天气情况
+    weather = simulateWeather(date)
+  }
+
   console.log(weather)
   e.mustRes = ["身份证", "零钱"]
   e.must = ["身份证", "零钱"]
@@ -176,8 +271,8 @@ const loadEquipments = (loaded, date, weather, callback)=> {
     e.mustRes.push("腐败物质") // 结果
     e.must.push("腐败物质") // 候选，可以多一些
   } else {
-    e.mustRes.push("登山鞋", "头灯/手电") // 结果
-    e.must.push("登山鞋", "头灯/手电") // 候选，可以多一些
+    e.mustRes.push("登山鞋", "头灯") // 结果
+    e.must.push("登山鞋", "头灯") // 候选，可以多一些
     e.canRes.push("登山杖", "护膝", "魔术头巾", "手台", "户外GPS", "腐败物质") // 结果
     e.can.push("登山杖", "护膝", "魔术头巾", "手台", "户外GPS", "腐败物质") // 候选，可以多一些
     e.noRes = ["棉质内衣", "高跟鞋/皮鞋"]
@@ -229,11 +324,11 @@ const loadEquipments = (loaded, date, weather, callback)=> {
     var waterGG = (Math.ceil(water * 1.5 * 2) / 2).toFixed(1)
     var waterMM = (Math.ceil(water * 2) / 2).toFixed(1)
     var waterRes = "水（男" + waterGG + "升/女" + waterMM + "升，酌情调整）"
-    e.mustRes.push(waterRes) 
-    e.must.push(waterRes) 
+    e.mustRes.push(waterRes)
+    e.must.push(waterRes)
   }
 
-  if(callback){
+  if (callback) {
     callback(e)
   }
 }

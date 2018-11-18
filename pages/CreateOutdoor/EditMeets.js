@@ -11,7 +11,7 @@ Page({
         name: '编辑',
         subname: "编辑当前集合点"
       },
-      {
+      { 
         name: '删除',
         subname: "删除当前集合点"
       },

@@ -1,11 +1,12 @@
 const util = require('../../utils/util.js')
 const outdoor = require('../../utils/outdoor.js')
+const area = require('../../libs/area.js')
 
 Page({
 
   data: {
     equipments: {
-      mustRes: [],
+      mustRes: [], 
       canRes: [],
       noRes: [],
       must: [], 
@@ -18,6 +19,10 @@ Page({
     isOutDate:false, // 活动是否过期
     hasModified: false,
 
+    area:"", // 选中的地区
+    areaList: null, // 地区列表
+    showPopup:false, // 是否显示弹窗
+    
     dialog:{
       show:false,
       oldName:"", // 原来的装备名称
@@ -34,6 +39,7 @@ Page({
     self.setData({
       loaded: data.title.loaded,
       date: data.title.date,
+      areaList: area.default, // 系统默认
     })
 
     // 处理过期活动
@@ -44,7 +50,7 @@ Page({
       })
     }
 
-    var hasEquipments = prevPage.data.limits && prevPage.data.limits.equipments 
+    var hasEquipments = prevPage.data.limits && prevPage.data.limits.equipments && (prevPage.data.limits.equipments.must.length || prevPage.data.limits.equipments.can.length || prevPage.data.limits.equipments.no.length)
     if (hasEquipments) { // 有就直接读取
       console.log(prevPage.data.limits.equipments)
       self.setData({
@@ -53,31 +59,55 @@ Page({
       })
       self.createButtonFun()
     }
+  },
 
-    if (!self.data.isOutDate){ // 没过期，则查询天气预报
-      outdoor.getWeather(null, data.title.date, weather => {
-        if (weather) {
-          self.setData({
-            weather: weather,
-            weatherText: outdoor.buildWeatherMessage(weather),
-          })
-        } else {
-          self.setData({
-            weatherText: "获取天气预报失败",
-          })
-        }
+  inputArea(e){
+    console.log(e)
+    this.setData({
+      area:e.detail,
+    })
+  },
 
-        if (weather && !hasEquipments) { // 没有装备，才读取系统默认的
-          outdoor.loadEquipments(data.title.loaded, data.title.date, weather, equipments => {
-            self.setData({
-              equipments: equipments,
-              hasModified: true,
-            })
-            self.createButtonFun()
-          })
-        }
-      })
-    } 
+  onPopup(){
+    console.log("onPopup")
+    this.setData({
+      showPopup:true,
+    })
+  },
+
+  closePopup(){
+    console.log("closePopup")
+    this.setData({
+      showPopup: false,
+    })
+  },
+
+  confirmArea(e){
+    console.log("confirmArea")
+    console.log(e)
+    this.setData({
+      showPopup: false,
+    })
+    this.changeArea(e)
+  },
+
+  changeArea(e){
+    console.log("changeArea")
+    console.log(e)
+    var area=""
+    e.detail.values.forEach((item, index)=>{
+      area += item.name
+    })
+    this.setData({
+      area: area,
+    })
+  },
+
+  cancelArea(){
+    console.log("cancelArea")
+    this.setData({
+      showPopup: false,
+    })
   },
 
   // 创建编辑/删除按钮对应的函数
@@ -114,13 +144,27 @@ Page({
   // 恢复默认装备推荐
   loadDefault:function(){
     const self = this
-    outdoor.loadEquipments(self.data.loaded, self.data.date, self.data.weather, equipments => {
-      self.setData({
-        equipments: equipments,
-        hasModified: true,
+    if (!self.data.isOutDate) { // 没过期，则查询天气预报
+      outdoor.getWeather(self.data.area, self.data.date, weather => {
+        if (weather.result) {
+          self.setData({
+            weather: weather.weather,
+            weatherText: outdoor.buildWeatherMessage(weather.weather),
+          })
+          outdoor.loadEquipments(self.data.loaded, self.data.date, weather.weather, equipments => {
+            self.setData({
+              equipments: equipments,
+              hasModified: true,
+            })
+            self.createButtonFun()
+          })
+        } else {
+          self.setData({
+            weatherText: weather.msg,
+          })
+        }
       })
-      self.createButtonFun()
-    })
+    } 
   },
 
   onShow(){
@@ -287,7 +331,7 @@ Page({
           hasModified: true,
           "dialog.show": false
         });
-        self.onLoad()
+        self.onShow()
       }, 100);
     } else {
       this.setData({
@@ -312,11 +356,57 @@ Page({
       self.setData({
         "equipments.must": self.data.equipments.must,
         "equipments.mustRes": self.data.equipments.mustRes,
-        addMust:null,
+        addMust:"",
         hasModified: true,
       })
       self.createButtonFun()
     }
-  }
+  },
+
+  inputCan(e) {
+    console.log(e)
+    this.setData({
+      addCan: e.detail,
+    })
+  },
+
+  addCan() {
+    const self = this
+    console.log(self.data.addCan)
+    if (self.data.addCan) {
+      self.data.equipments.can.push(self.data.addCan)
+      self.data.equipments.canRes.push(self.data.addCan)
+      self.setData({
+        "equipments.can": self.data.equipments.can,
+        "equipments.canRes": self.data.equipments.canRes,
+        addCan: "",
+        hasModified: true,
+      })
+      self.createButtonFun()
+    }
+  },
+
+  inputNo(e) {
+    console.log(e)
+    this.setData({
+      addNo: e.detail,
+    })
+  },
+
+  addNo() {
+    const self = this
+    console.log(self.data.addNo)
+    if (self.data.addNo) {
+      self.data.equipments.no.push(self.data.addNo)
+      self.data.equipments.noRes.push(self.data.addNo)
+      self.setData({
+        "equipments.no": self.data.equipments.no,
+        "equipments.noRes": self.data.equipments.noRes,
+        addNo: "",
+        hasModified: true,
+      })
+      self.createButtonFun()
+    }
+  },
 
 })

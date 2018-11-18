@@ -6,7 +6,7 @@
 </van-cell>
 
 <van-button size="large" type="primary" bindtap='addMeet'>增加集合点</van-button>
-    
+     
 <!--弹出功能选项-->
 <van-action-sheet
   show="{{ showAction }}"

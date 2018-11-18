@@ -27,15 +27,17 @@
 </van-row>
 
 <van-row>
-  <van-col span="9" offset="2">
+  <van-col span="20" offset="2">
     <van-button size="large" bind:click="bindHelp">帮助说明</van-button>
   </van-col>
   <van-col span="9" offset="2">
+    <block wx:if="{{isUseOrg}}">
     <block wx:if="{{hasLoginLvyeorg}}">
       <van-button size="large" bind:click="lvyeorgLogin">{{lvyeOrgUsername}}已登录</van-button>
     </block>
     <block wx:else>
       <van-button size="large" bind:click="lvyeorgLogin">{{lvyeOrgButton}}</van-button>
+    </block>
     </block>
   </van-col>
 </van-row>

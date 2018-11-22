@@ -1,25 +1,26 @@
 const util = require('../../utils/util.js')
 const outdoor = require('../../utils/outdoor.js')
-const area = require('../../libs/area.js')
+const select = require('../../libs/select.js')
 
 Page({
-
+ 
   data: {
     equipments: {
       mustRes: [], 
       canRes: [],
-      noRes: [],
+      noRes: [], 
       must: [], 
       can: [],
       no: [],
+      area: "北京市", // 选中的地区
     },
     loaded: null, // 负重情况
     weatherText: "", // 天气预报文本
     date:null, // 活动日期
+    day:null, // 活动是周几
     isOutDate:false, // 活动是否过期
     hasModified: false,
 
-    area:"", // 选中的地区
     areaList: null, // 地区列表
     showPopup:false, // 是否显示弹窗
     
@@ -39,17 +40,39 @@ Page({
     self.setData({
       loaded: data.title.loaded,
       date: data.title.date,
-      areaList: area.default, // 系统默认
+      day: util.getDay(data.title.date),
+      areaList: select.area, // 系统默认
     })
 
+    console.log(prevPage.data.limits)
+    if (prevPage.data.limits.equipments && prevPage.data.limits.equipments.area) { // 没过期，有活动地区，则查询天气预报
+      self.setData({
+        "equipments.area": prevPage.data.limits.equipments.area,
+      })
+    }
+
+    console.log(self.data.equipments.area)
     // 处理过期活动
     if ((new Date()) > new Date(data.title.date)){ // 过期活动，不能用天气预报，也就无法推荐装备了
       self.setData({
         isOutDate:true,
         weatherText: "活动过期，无法获取天气预报，系统也无法推荐装备",
       })
+    } else if (self.data.equipments.area){ // 没过期，有活动地区，则查询天气预报
+      outdoor.getWeather(self.data.equipments.area, self.data.date, weather => {
+        if (weather.result) {
+          self.setData({
+            weather: weather.weather,
+            weatherText: outdoor.buildWeatherMessage(weather.weather),
+          })
+        } else {
+          self.setData({
+            weatherText: weather.msg,
+          })
+        }
+      })
     }
-
+    
     var hasEquipments = prevPage.data.limits && prevPage.data.limits.equipments && (prevPage.data.limits.equipments.must.length || prevPage.data.limits.equipments.can.length || prevPage.data.limits.equipments.no.length)
     if (hasEquipments) { // 有就直接读取
       console.log(prevPage.data.limits.equipments)
@@ -58,13 +81,50 @@ Page({
         hasModified: prevPage.data.hasModified,
       })
       self.createButtonFun()
+    } else if(self.data.weather){ // 没有装备，有天气预报，就默认推荐一下
+      self.loadEquipments(self.data.weather)
+    }
+  },
+
+  loadEquipments(weather){
+    const self = this
+    var area = self.data.equipments.area
+    outdoor.loadEquipments(self.data.loaded, self.data.date, weather, equipments => {
+      self.setData({
+        equipments: equipments,
+        "equipments.area": area,
+        hasModified: true,
+      })
+      self.createButtonFun()
+    })
+  },
+
+  // 恢复默认装备推荐
+  loadDefault: function () {
+    const self = this
+    // 没有天气预报，又没有过期，就查询一下
+    if (!self.data.isOutDate) { // 没过期，又没有给天气预报，则查询天气预报
+      outdoor.getWeather(self.data.equipments.area, self.data.date, weather => {
+        if (weather.result) {
+          self.setData({
+            weather: weather.weather,
+            weatherText: outdoor.buildWeatherMessage(weather.weather),
+          })
+          self.loadEquipments(self.data.weather)
+        } else {
+          self.setData({
+            weatherText: weather.msg,
+          })
+        }
+      })
     }
   },
 
   inputArea(e){
     console.log(e)
     this.setData({
-      area:e.detail,
+      "equipments.area":e.detail,
+      hasModified: true,
     })
   },
 
@@ -85,21 +145,16 @@ Page({
   confirmArea(e){
     console.log("confirmArea")
     console.log(e)
+    var area = ""
+    e.detail.values.forEach((item, index) => {
+      if(index != 0 ){ // 省份就不要了
+        area += item.name
+      }
+    })
     this.setData({
+      "equipments.area": area,
+      hasModified: true,
       showPopup: false,
-    })
-    this.changeArea(e)
-  },
-
-  changeArea(e){
-    console.log("changeArea")
-    console.log(e)
-    var area=""
-    e.detail.values.forEach((item, index)=>{
-      area += item.name
-    })
-    this.setData({
-      area: area,
     })
   },
 
@@ -140,32 +195,6 @@ Page({
       }
     })
   }, 
-
-  // 恢复默认装备推荐
-  loadDefault:function(){
-    const self = this
-    if (!self.data.isOutDate) { // 没过期，则查询天气预报
-      outdoor.getWeather(self.data.area, self.data.date, weather => {
-        if (weather.result) {
-          self.setData({
-            weather: weather.weather,
-            weatherText: outdoor.buildWeatherMessage(weather.weather),
-          })
-          outdoor.loadEquipments(self.data.loaded, self.data.date, weather.weather, equipments => {
-            self.setData({
-              equipments: equipments,
-              hasModified: true,
-            })
-            self.createButtonFun()
-          })
-        } else {
-          self.setData({
-            weatherText: weather.msg,
-          })
-        }
-      })
-    } 
-  },
 
   onShow(){
     const self = this

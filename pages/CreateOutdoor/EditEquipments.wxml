@@ -1,29 +1,29 @@
-<!--装备类型-->
-<van-notice-bar text="活动类型：{{loaded}}"/>
+<!--装备类型--> 
+<van-notice-bar text="活动类型：{{loaded}}，活动日期：{{date}}({{day}})"/>
 <van-notice-bar wx:if="{{isOutDate}}" text="{{weatherText}}"/>
 <van-notice-bar wx:else text="天气预报：{{weatherText}}"/>
-
+ 
 <!--选择地区--> 
-<block wx:if="!isOutDate">
-  <van-tag type="primary" plain>只有选择活动地区，才能通过天气预报推荐合适的装备</van-tag>
-  <van-field value="{{area}}" center required clearable label="活动所在地区" placeholder="请选择/输入城市或区县" border="{{ false }}" use-button-slot bind:input="inputArea">
+<block wx:if="{{!isOutDate}}">
+  <van-tag wx:if="{{!equipments.area}}" type="primary" plain>只有选择活动地区，才能通过天气预报推荐合适的装备</van-tag>
+  <van-field value="{{equipments.area}}" center required clearable label="活动所在地区" placeholder="请选择/输入城市或区县" border="{{ false }}" use-button-slot bind:input="inputArea">
     <van-button slot="button" size="small" round plain type="primary" bind:click="onPopup">选择地区</van-button>
   </van-field>
   <van-popup show="{{ showPopup }}" position="bottom" custom-class="center" bind:close="closePopup">
-    <van-area title="活动所在区县" area-list="{{ areaList }}" bind:confirm="confirmArea" bind:change="changeArea" bind:cancel="cancelArea"/>
+    <van-area title="活动所在区县" area-list="{{ areaList }}"  bind:confirm="confirmArea" bind:cancel="cancelArea"/>
   </van-popup>
 
   <!--加载默认--> 
   <van-row >
     <van-col span="20" offset="2">
-      <van-button wx:if="{{!isOutDate}}" disabled="{{!area}}" plain size="large" type="primary" bind:click='loadDefault'>加载系统推荐</van-button>
+      <van-button wx:if="{{!isOutDate}}" disabled="{{!equipments.area}}" plain size="large" type="primary" bind:click='loadDefault'>加载系统推荐</van-button>
     </van-col>
   </van-row>
 </block>
 
-
 <!--最好有的装备-->
-<van-panel title="必须有的装备" >
+<van-panel tit="tip" >
+  <view class="tip" slot="header">必须有的装备</view>
   <van-row wx:for="{{equipments.must}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.mustRes }}" bind:change="changeMust">
       <van-col span="12" offset="1">
@@ -43,7 +43,8 @@
 </van-field>
 
 <!--可以有的装备-->
-<van-panel title="可以有的装备" >
+<van-panel>
+  <view class="tip" slot="header">可以有的装备</view>
   <van-row wx:for="{{equipments.can}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.canRes }}" bind:change="changeCan">
       <van-col span="12" offset="1">
@@ -63,7 +64,8 @@
 </van-field>
 
 <!--不能有的装备-->
-<van-panel title="不能有的装备" >
+<van-panel>
+  <view class="tip" slot="header">不能有的装备</view>
   <van-row wx:for="{{equipments.no}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.noRes }}" bind:change="changeNo">
       <van-col span="12" offset="1">

@@ -18,6 +18,7 @@ Page({
     modifys: { // 到底更新了哪些条目，这里做一个临时记录
       brief: false, // 文字介绍，图片暂时不管
       meets: false, // 集合地点
+      traffic:false, // 交通方式
       route: false, // 活动路线
       limits: false, // 各类限制条件
       disclaimer: false, // 免责条款
@@ -45,6 +46,7 @@ Page({
 
     route: [], // 活动路线
     meets: [], //集合点，可加多个
+    traffic:null, // 交通方式
     members: [], // 已报名成员（含领队）
     leader: { // 领队的信息也要记录起来
       personid: null,
@@ -81,6 +83,7 @@ Page({
     this.data.modifys = { // 到底更新了哪些条目，这里做一个临时记录
       brief: result,
       meets: result,
+      traffic:result, 
       route: result,
       limits: result,
       disclaimer: result,
@@ -90,7 +93,7 @@ Page({
 
   // 判断是否有任一被修改了
   anyModify(modifys) {
-    return modifys.brief || modifys.meets || modifys.route || modifys.limits || modifys.disclaimer || modifys.status
+    return modifys.brief || modifys.meets || modifys.traffic || modifys.route || modifys.limits || modifys.disclaimer || modifys.status
   },
 
   onLoad: function() {
@@ -252,6 +255,12 @@ Page({
       })
     }
     console.log(self.data.websites)
+    // 交通方式
+    if (res.data.traffic){
+      self.setData({
+        traffic: res.data.traffic,
+      })
+    }
     // next 
   },
 
@@ -433,6 +442,7 @@ Page({
   // 更新信息
   updateOutdoorInTable: function() {
     const self = this;
+    console.log(self.data.limits.equipments)
     // 领队信息也要更新一下
     var members = [self.data.leader];
     dbOutdoors.doc(self.data.outdoorid).update({
@@ -440,6 +450,7 @@ Page({
         title: self.data.title,
         route: self.data.route,
         meets: self.data.meets,
+        traffic: self.data.traffic,
         status: self.data.status,
         members: members,
         brief: self.data.brief,
@@ -471,6 +482,7 @@ Page({
             title: self.data.title,
             route: self.data.route,
             meets: self.data.meets,
+            traffic: self.data.traffic,
             members: members, // 写入领队信息
             status: self.data.status,
             brief: self.data.brief,

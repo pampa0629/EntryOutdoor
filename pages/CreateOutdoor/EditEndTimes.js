@@ -9,7 +9,7 @@ Page({
     ocuppy: { date: "不限", time: null }, // 占坑截止时间
     entry: { date: "不限", time: null }, // 报名截止时间
     hasModified: false,
-  },
+  }, 
 
   onLoad: function (options) {
     const self = this;
@@ -17,7 +17,7 @@ Page({
       OcuppyDates: util.getLimitDates(),
       EntryDates: util.getLimitDates(),
     })
-
+ 
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({

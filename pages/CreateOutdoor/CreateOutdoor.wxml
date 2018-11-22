@@ -35,6 +35,9 @@
   </van-radio-group>
 </van-panel>
 
+<!--交通方式-->
+<van-cell title="交通方式" label="从集合地到出发地"  value="点击设置交通方式" is-link url="EditTraffic"/>
+
 <!--活动路线-->
 <van-cell title="活动路线" label="共有{{route.length}}个途经点"  value="点击编辑活动路线" is-link url="EditRoute"/>
 

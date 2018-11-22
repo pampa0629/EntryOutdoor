@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "查看活动装备",
+  "navigationBarTitleText": "设置交通方式",
   "usingComponents": {
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",
@@ -16,9 +16,8 @@
     "van-slider": "/vant-weapp/slider/index",
     "van-tag": "/vant-weapp/tag/index",
     "van-panel": "/vant-weapp/panel/index",
-    "van-notice-bar": "/vant-weapp/notice-bar/index",
-    "van-popup": "/vant-weapp/popup/index",
     "van-area": "/vant-weapp/area/index",
+    "van-popup": "/vant-weapp/popup/index",
     "van-action-sheet": "/vant-weapp/action-sheet/index"
   }
 }

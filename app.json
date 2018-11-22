@@ -21,7 +21,8 @@
     "pages/MyInfo/LvyeorgRegister",
     "pages/CreateOutdoor/EditEndTimes",
     "pages/CreateOutdoor/EditEquipments",
-    "pages/EntryOutdoor/LookEquipments"
+    "pages/EntryOutdoor/LookEquipments",
+    "pages/CreateOutdoor/EditTraffic"
   ],
   "window": {
     "backgroundTextStyle": "light",

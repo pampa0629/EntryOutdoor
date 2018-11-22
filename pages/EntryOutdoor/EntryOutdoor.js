@@ -54,7 +54,7 @@ Page({
     entriedOutdoors: null, // 报名的id列表
     caredOutdoors: null, // 关注的活动id列表
     hasCared: false, // 该活动是否已经加了关注
-  },
+  }, 
 
   onLoad: function(options) {
     console.log(options)
@@ -261,7 +261,12 @@ Page({
         "websites": res.data.websites,
       })
     }
-
+    // 交通方式
+    if(res.data.traffic){
+      self.setData({
+        "traffic": res.data.traffic,
+      })
+    }
     // next 
 
   },

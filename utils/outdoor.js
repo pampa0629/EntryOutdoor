@@ -5,7 +5,7 @@ var bmap = require('../libs/bmap-wx.min.js');
 // 根据各类信息，生成活动主题信息，修改whole
 const createTitle = (title, nickName) => {
   var result = "" // 2018.09.16（周日）大觉寺一日轻装1.0强度休闲游； 
-  // 日期
+  // 日期 
   if (title.date) {
     result += title.date
     result += "(" + util.getDay(title.date) + ")"
@@ -84,7 +84,7 @@ const calcLevel = (title) => {
 // 把天气预报的请求结果构建为人可阅读的文字
 const buildWeatherMessage = (weather) => {
   console.log(weather)
-  var message = weather.city + "，"
+  var message = weather.area + "，"
   message += weather.date + "，"
   message += weather.weather + "，"
   message += weather.temperature + "，"
@@ -133,9 +133,7 @@ const getLocation = (callback) => {
 // 根据地区和日期，查看天气预报
 const getWeather = (area, date, callback) => {
   var ak = "zGuNHdYow4wGhrC1IytHDweHPWGxdbaX"
-  // 通过area得到经纬度
-  // 'http://api.map.baidu.com/geocoder/v2/?address=' . $address . '&output=json&ak=xxx'
-  wx.request({
+  wx.request({ // 通过area得到经纬度
     url: "https://api.map.baidu.com/geocoder/v2/?address=" + area + "&output=json&ak=" + ak,
     fail: function(error) {
       console.log(error)
@@ -150,10 +148,7 @@ const getWeather = (area, date, callback) => {
       console.log(res);
       var latitude = res.data.result.location.lat //维度
       var longitude = res.data.result.location.lng //经度
-
-      var BMap = new bmap.BMapWX({
-        ak: ak
-      });
+      var BMap = new bmap.BMapWX({ak: ak});
       BMap.weather({
         location: longitude + "," + latitude,
         fail: function(error) {
@@ -187,7 +182,7 @@ const getWeather = (area, date, callback) => {
           var weather = null
           if (index >= 0 && index < forecast.length) {
             weather = forecast[index]
-            weather.city = res.originalData.results[0].currentCity
+            weather.area = area
           }
           console.log(weather)
           if (callback) {
@@ -295,17 +290,19 @@ const loadEquipments = (loaded, date, weather, callback) => {
 
     // 看天气情况推荐：刮风
     if (weather.wind == "big") {
-      e.mustRes.push("冲锋衣") // 结果
-      e.must.push("冲锋衣") // 候选，可以多一些
+      e.mustRes.push("冲锋衣") 
+      e.must.push("冲锋衣") 
     }
 
     // 看天气情况推荐：天晴下雨
     if (weather.weather == "sunny") {
-      e.canRes.push("遮阳帽") // 结果
-      e.can.push("遮阳帽", "防晒霜") // 候选，可以多一些
+      e.canRes.push("遮阳帽") 
+      e.can.push("遮阳帽", "防晒霜") 
+      water *= 1.2
     } else if (weather.weather == "rain") {
-      e.mustRes.push("雨披") // 结果
-      e.must.push("雨披") // 候选，可以多一些
+      e.mustRes.push("雨披") 
+      e.must.push("雨披") 
+      water *= 0.8
     }
 
     // 看轻装还是重装推荐

@@ -4,7 +4,7 @@
 <van-panel title="活动人数限制" >
   <van-checkbox-group>
     <van-cell title="{{limits.maxPerson?'限制人数':'不限制人数'}}" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
-        <van-checkbox value="{{limits.maxPerson}}" bind:change="checkMaxPerson"/>
+      <van-checkbox value="{{limits.maxPerson}}" bind:change="checkMaxPerson"/>
     </van-cell>
   </van-checkbox-group>
   <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}">

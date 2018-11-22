@@ -1,18 +1,32 @@
-<van-notice-bar text="天气预报：{{weather}}"/>
+<van-notice-bar text="活动类型：{{loaded}}，活动日期：{{date}}({{day}})"/>
+<van-notice-bar text="天气预报：{{weatherText}}"/>
+
+<!--选择地区--> 
+<block wx:if="{{!isOutDate && !leaderDo}}">
+  <van-field value="{{equipments.area}}" center disabled label="活动所在地区" placeholder="请选择区县" border="{{ false }}" use-button-slot>
+    <van-button slot="button" size="small" round plain type="primary" bind:click="onPopup">选择地区</van-button>
+  </van-field>
+  <van-popup show="{{ showPopup }}" position="bottom" custom-class="center" bind:close="closePopup">
+    <van-area title="活动所在区县" area-list="{{ areaList }}"  bind:confirm="confirmArea" bind:change="changeArea" bind:cancel="cancelArea"/>
+  </van-popup>
+</block>
+
 <van-notice-bar wx:if="{{leaderDo}}" text="领队推荐装备如下（仅供参考）"/>
 <van-notice-bar wx:else text="领队好像忘记推荐装备了，系统推荐如下（仅供参考）"/>
-
 <!--最好有的装备--> 
-<van-panel title="必须有的装备" >
+<van-panel tit="tip" >
+  <view class="tip" slot="header">必须有的装备</view>
   <van-cell  wx:for="{{equipments.mustRes}}" wx:key="{{item}}" title="{{item}}" />
 </van-panel>
-
+ 
 <!--可以有的装备-->
-<van-panel title="可以有的装备" >
+<van-panel>
+  <view class="tip" slot="header">可以有的装备</view>
   <van-cell  wx:for="{{equipments.canRes}}" wx:key="{{item}}" title="{{item}}" />
 </van-panel>
 
 <!--不能有的装备-->
-<van-panel title="不能有的装备" >
+<van-panel>
+  <view class="tip" slot="header">不能有的装备</view>
   <van-cell  wx:for="{{equipments.noRes}}" wx:key="{{item}}" title="{{item}}" />
 </van-panel>

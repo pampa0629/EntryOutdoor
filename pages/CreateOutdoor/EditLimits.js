@@ -59,7 +59,7 @@ Page({
     })
     if (self.data.limits.maxPerson && !self.data.limits.personCount) {
       self.setData({
-        "limits.personCount": 25, // 限制人数，默认为25人（中巴车）
+        "limits.personCount": 20, // 限制人数，默认为20人（中巴车）
       })
     }
     if (self.data.limits.maxPerson){ // 如果设置了最大人数限制，则肯定不能空降了

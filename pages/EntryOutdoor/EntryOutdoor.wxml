@@ -42,6 +42,9 @@
     </van-cell>
   </van-radio-group>
 </van-panel>
+
+<!--交通方式-->
+<van-cell wx:if="{{traffic}}" title="交通方式：{{traffic.mode}}，{{traffic.cost}}" label="车辆信息：{{traffic.car.brand}}，{{traffic.car.color}}，车牌{{traffic.car.number}}" value="{{traffic.cost=='免费'?'免费':'大致费用：'+traffic.money+'元'}}" border="{{false}}"/>
  
 <!--免责条款与是否认路-->  
 <van-cell title="免责条款"  value="点击查看条款详细内容" clickable is-link url="LookDisclaimer"/>

@@ -342,7 +342,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     // 文字介绍
     message += "活动介绍：" + NL + data.brief.disc + NL2
     // 领队，联系方式
-    message += "领队：" + data.leader.userInfo.nickName + " " + util.changePhone(data.leader.userInfo.phone) + NL2
+    message += "领队：" + data.leader.userInfo.nickName + " " + util.changePhone(data.leader.userInfo.phone) + NL2 
     // 活动时间：
     message += "活动时间：" + data.title.date + "（" + util.getDay(data.title.date) + "）" + NL2
     // 活动地点：
@@ -371,7 +371,23 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     message += NL
   }
 
-  // 交通及费用 todo 
+  // 交通及费用 
+  if (first || modifys.traffic) {
+    message += NL + "交通方式及费用：" + NL
+    message += data.traffic.mode
+    message += "，" + data.traffic.cost
+    if (data.traffic.cost != "免费"){
+      message += "，" + data.traffic.money + "元，以实际发生为准"
+    }
+    if (data.traffic.mode!="公共交通" && data.traffic.car) {
+      message += NL + "车辆信息：" + data.traffic.car.brand
+      if (data.traffic.mode == "自驾"){
+        message += "，" + data.traffic.car.color
+      }
+      message += "，车牌尾号：" + data.traffic.car.number
+    }
+    message += NL2
+  }
 
   // 人员限制/体力要求/是否允许空降/截止时间
   if (first || modifys.limits) {
@@ -384,10 +400,10 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
       message += "本活动不允许空降" + NL
     }
     // 占坑/报名截止时间
-    if (data.limits && data.limits.ocuppy) {
+    if (data.limits && data.limits.ocuppy && data.limits.ocuppy.date != "不限") {
       message += "占坑截止时间：活动" + data.limits.ocuppy.date + " " + data.limits.ocuppy.time + NL
     }
-    if (data.limits && data.limits.entry) {
+    if (data.limits && data.limits.entry && data.limits.entry.date != "不限") {
       message += "报名截止时间：活动" + data.limits.entry.date + " " + data.limits.entry.time + NL
     }
     // 体力要求
@@ -425,7 +441,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
 
   // 报名须知：请微信扫描二维码，登录小程序报名； 贴上二维码
   if (first) {
-    message += NL + "报名须知：请用微信扫描二维码，登录小程序报名。" + NL
+    message += NL + "报名须知：请到帖子末尾，用微信扫描二维码，登录小程序报名。" + NL
   } else {
     message += NL + "报名须知：请到帖子一楼，用微信扫描二维码，登录小程序报名。" + NL
   }
@@ -464,16 +480,17 @@ const addThread = function(outdoorid, data, isTesting, callback) {
   console.log("addThread fun")
   var images = []
   var aids = []
-  uploadQrCode(outdoorid, resQcCode => {
-    console.log("resQcCode is:")
-    console.log(resQcCode)
-    images.push(resQcCode.image)
-    aids.push(resQcCode.aid)
-    uploadImages(outdoorid, data.brief.pics, images, aids, resImages => {
-      console.log("resImages is:")
-      console.log(resImages)
-      images = images.concat(resImages.image)
-      aids = aids.concat(resImages.aid)
+  uploadImages(outdoorid, data.brief.pics, images, aids, resImages => {
+    console.log("resImages is:")
+    console.log(resImages)
+    images = images.concat(resImages.image)
+    aids = aids.concat(resImages.aid)
+    uploadQrCode(outdoorid, resQcCode => {
+      console.log("resQcCode is:")
+      console.log(resQcCode)
+      images.push(resQcCode.image)
+      aids.push(resQcCode.aid)
+    
       var fid = chooseForum(data.title, isTesting) // 要发帖的版面
       var message = buildOutdoorMesage(data, true, data.modifys, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
       console.log(message)

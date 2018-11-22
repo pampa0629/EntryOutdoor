@@ -16,7 +16,7 @@ const share2Circle = (outdoorid, title, isLeader) => {
           scope: 'scope.writePhotosAlbum',
           success() {
             console.log('scope.writePhotosAlbum OK')
-            qrcode.save2Album(outdoorid, title, isLeader)
+            save2Album(outdoorid, title, isLeader)
           },
           fail() {
             wx.showModal({
@@ -26,7 +26,7 @@ const share2Circle = (outdoorid, title, isLeader) => {
           }
         })
       } else {
-        qrcode.save2Album(outdoorid, title, isLeader)
+        save2Album(outdoorid, title, isLeader)
       }
     }
   })
@@ -34,7 +34,7 @@ const share2Circle = (outdoorid, title, isLeader) => {
 
 // 生成二维码，并存储到本地相册中
 const save2Album = (outdoorid, title, isLeader) => {
-  qrcode.getCloudPath(outdoorid, (qrCode) => {
+  getCloudPath(outdoorid, (qrCode) => {
     console.log("QcCode: " + qrCode)
     wx.cloud.downloadFile({
       fileID: qrCode

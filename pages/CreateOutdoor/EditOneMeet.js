@@ -1,16 +1,21 @@
+const util = require('../..//utils/util.js')
+
 Page({
 
   data: {
     MeetDates: ["前三天", "前两天", "前一天", "当天"],
     meetDatesIndex: 3, // 默认是当天集合
-    
+
     meet: {
-      place: "",
+      place: "", // 人输入的位置描述
       date: "当天",
       time: "",
+      name: "", // 地图上选择的地名描述 
+      latitude: null, // 维度
+      longitude: null, // 经度
     },
     index: -1,
-    hasModified:false,
+    hasModified: false,
 
     action: null, // 发起这个页面的行为
   },
@@ -42,7 +47,7 @@ Page({
     console.log(e)
     this.setData({
       "meet.place": e.detail,
-      hasModified:true,
+      hasModified: true,
     })
   },
 
@@ -65,6 +70,34 @@ Page({
     })
   },
 
+  chooseMeetAddress() {
+    const self = this
+    if (self.data.meet.place) { // 之前有输入，则把输入拷贝到内存中，方便后面地图上搜索
+      wx.setClipboardData({　　　　　　
+        data: self.data.meet.place,
+      })
+    }
+    var message = "同意授权“使用我的地理位置”才能调用微信地图；小程序不会记录您的位置，请放心"
+    util.authorize("userLocation", message, res => {
+      wx.chooseLocation({
+        success(res) {
+          console.log(res)
+          self.setData({
+            "meet.name": res.name,
+            "meet.latitude": res.latitude,
+            "meet.longitude": res.longitude,
+            hasModified: true,
+          })
+          if (!self.data.meet.place) {
+            self.setData({
+              "meet.place": res.name, // 帮着设置一下
+            })
+          }
+        }
+      })
+    })
+  },
+
   clickSaveAndBack: function() {
     const self = this
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -83,7 +116,7 @@ Page({
       } else if (self.data.action == "addBefore") {
         prevPage.data.meets.splice(self.data.index, 0, self.data.meet)
       } else if (self.data.action == "addAfter") {
-        prevPage.data.meets.splice(self.data.index+1, 0, self.data.meet)
+        prevPage.data.meets.splice(self.data.index + 1, 0, self.data.meet)
       }
       prevPage.setData({
         meets: prevPage.data.meets,
@@ -91,7 +124,7 @@ Page({
       })
       prevPage.rebuildClickMeetFun()
     }
-    
+
     wx.navigateBack({})
   },
 

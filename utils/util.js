@@ -245,6 +245,46 @@ const myParseInt = (str) => {
   return res ? parseInt(res) : parseInt(temp)
 }
 
+// 授权的统一函数
+const authorize = (which, message, callback) => {
+  var scope = 'scope.' + which
+  console.log("scope is: " + scope)
+  wx.getSetting({
+    success(res) {
+      if (!res.authSetting[scope]) {
+        wx.authorize({
+          scope: scope,
+          success() {
+            console.log(scope+" OK")
+            if(callback){
+              callback()
+            }
+          },
+          fail() {
+            wx.showModal({
+              title: '必须授权',
+              content: message,
+              cancelText:"暂不授权",
+              confirmText:"这就授权",
+              success(res) {
+                if (res.confirm) {
+                  console.log('用户点击确定')
+                  wx.openSetting({})
+                } else if (res.cancel) {
+                  console.log('用户点击取消')
+                }
+              }
+            })
+          }
+        })
+      } else {
+        if (callback) {
+          callback()
+        }
+      }
+    }
+  })
+}
 
 module.exports = {
   formatTime: formatTime,
@@ -275,7 +315,7 @@ module.exports = {
   // 根据userInfo（非微信）创建Person
   createPerson: createPerson,
   getDay: getDay,
-  parseChar: parseChar,
+  parseChar: parseChar, 
   // 图片在云存储上的位置
   buildPicSrc: buildPicSrc,
   // 截止日期数组和字符串的相互转化
@@ -286,5 +326,6 @@ module.exports = {
   hidePhone: hidePhone,
   // 字符串转数字
   myParseInt:myParseInt,
-  
- }
+  // 统一授权入口
+  authorize: authorize, 
+}

@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "查看免责条款",
+  "navigationBarTitleText": "免责条款与活动规则",
   "usingComponents": {
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",

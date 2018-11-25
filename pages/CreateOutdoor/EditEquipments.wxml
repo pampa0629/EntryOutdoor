@@ -22,7 +22,7 @@
 </block>
 
 <!--最好有的装备-->
-<van-panel tit="tip" >
+<van-panel>
   <view class="tip" slot="header">必须有的装备</view>
   <van-row wx:for="{{equipments.must}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.mustRes }}" bind:change="changeMust">
@@ -31,10 +31,10 @@
       </van-col> 
     </van-checkbox-group>
     <van-col span="4" offset="2">
-      <van-button plain size="small" round bindtap='editMust{{index}}'>编辑</van-button>
+      <van-button plain size="small" round bind:click='editMust{{index}}'>编辑</van-button>
     </van-col>
     <van-col span="4" offset="1">
-      <van-button plain size="small" round type="warning" bindtap='deleteMust{{index}}'>删除</van-button>
+      <van-button plain size="small" round type="warning" bind:click='deleteMust{{index}}'>删除</van-button>
     </van-col>
   </van-row>
 </van-panel>
@@ -52,10 +52,10 @@
       </van-col> 
     </van-checkbox-group>
     <van-col span="4" offset="2">
-      <van-button plain size="small" round bindtap='editCan{{index}}'>编辑</van-button>
+      <van-button plain size="small" round bind:click='editCan{{index}}'>编辑</van-button>
     </van-col>
     <van-col span="4" offset="1">
-      <van-button plain size="small" round type="warning" bindtap='deleteCan{{index}}'>删除</van-button>
+      <van-button plain size="small" round type="warning" bind:click='deleteCan{{index}}'>删除</van-button>
     </van-col>
   </van-row>
 </van-panel>
@@ -73,10 +73,10 @@
       </van-col> 
     </van-checkbox-group>
     <van-col span="4" offset="2">
-      <van-button plain size="small" round bindtap='editNo{{index}}'>编辑</van-button>
+      <van-button plain size="small" round bind:click='editNo{{index}}'>编辑</van-button>
     </van-col>
     <van-col span="4" offset="1">
-      <van-button plain size="small" round type="warning" bindtap='deleteNo{{index}}'>删除</van-button>
+      <van-button plain size="small" round type="warning" bind:click='deleteNo{{index}}'>删除</van-button>
     </van-col>
   </van-row>
 </van-panel>

@@ -9,7 +9,7 @@
   </van-checkbox-group>
   <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}">
     <van-stepper value="{{limits.personCount}}" min="1" max="100" bind:change="bindAddPerson" />
-  </van-cell>
+  </van-cell> 
   <block wx:if="{{!limits.maxPerson}}">
     <van-checkbox-group>
       <van-cell title="{{limits.allowPopup?'允许空降':'不允许空降'}}" clickable bind:click="checkAllowPopup" border="{{false}}">
@@ -19,8 +19,21 @@
   </block>
 </van-panel>
 
+<!--活动装备-->
+<van-panel title="活动规则" >
+  <van-checkbox-group>
+    <van-cell title="环保" label="野外不得丢弃不可降解物品" clickable bind:click="checkEnvironment">
+      <van-checkbox value="{{limits.isEnvironment}}" bind:change="checkEnvironment"/>
+    </van-cell>
+      <van-cell title="守时" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime">
+        <van-checkbox value="{{limits.isKeepTime}}" bind:change="checkKeepTime"/>
+    </van-cell>
+  </van-checkbox-group>
+</van-panel>
+
 <!--附加要求-->
 <van-cell title="占坑/报名截止时间" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{false}}"/>
 
 <!--活动装备-->
 <van-cell title="活动装备要求" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{false}}"/>
+

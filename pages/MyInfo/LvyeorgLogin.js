@@ -1,7 +1,7 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
-
+ 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')

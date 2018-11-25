@@ -6,7 +6,7 @@ const util = require('./util.js')
 wx.cloud.init()
 const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
-
+ 
 const LvyeOrgURL = 'https://www.lvye.net/panpa/'
 
 // 得到登录org网站所需要的token， 用callback传回
@@ -56,6 +56,7 @@ const getToken = (callback) => {
 }
 
 // 登录绿野网站，用callback得到登录结果
+// 
 const login = (username, password, callback) => {
   console.log("lvyeorg.js login fun")
   console.log(username)
@@ -216,10 +217,7 @@ const uploadOneImage = (outdoorid, cloudPath, callback) => {
           console.log(resp_dict.data.file_url)
           if (callback) {
             console.log("uploadOneImage OK, return by callback")
-            callback({
-              image: resp_dict.data.file_url,
-              aid: resp_dict.data.aid
-            })
+            callback(resp_dict.data.aid)
           }
         } else {
           logError(resp)
@@ -234,33 +232,29 @@ const uploadQrCode = (outdoorid, callback) => {
   console.log("uploadQrCode, outdoorid is:" + outdoorid)
   qrcode.getCloudPath(outdoorid, qrCode => {
     console.log("qrCode is:" + qrCode)
-    uploadOneImage(outdoorid, qrCode, res => {
+    uploadOneImage(outdoorid, qrCode, aid => {
       if (callback) {
-        console.log("uploadQrCode, res is:")
-        console.log(res)
-        callback(res)
+        console.log("uploadQrCode, aid is:")
+        console.log(aid)
+        callback(aid)
       }
     })
   })
 }
 
 // 上传活动图片
-const uploadImages = (outdoorid, pics, images, aids, callback) => {
+const uploadImages = (outdoorid, pics, aids, callback) => {
   console.log("uploadImages fun")
   console.log("pics are: ")
   console.log(pics)
   if (pics.length > 0) {
     uploadOneImage(outdoorid, (pics.shift()).src, res => {
-      images.push(res.image)
-      aids.push(res.aid)
-      uploadImages(outdoorid, pics, images, aids, callback)
+      aids.push(res)
+      uploadImages(outdoorid, pics, aids, callback)
     })
   } else {
     if (callback) {
-      callback({
-        images: images,
-        aids: aids
-      })
+      callback(aids)
     }
   }
 }
@@ -313,7 +307,8 @@ const buildMembersMessage = (meets, members) => {
   meetMembers.forEach((item, index) => {
     message += "第" (index + 1) + "）集合地点：" + meets[index].place + "，活动" + meets[index].date + " " + meets[index].time + NL
     meetMembers[index].forEach((citem, cindex) => {
-      message += buildEntryMessage(meetMembers[index][cindex].userInfo, meetMembers[index][cindex].entryInfo, false, true)
+      var result = buildEntryMessage(meetMembers[index][cindex].userInfo, meetMembers[index][cindex].entryInfo, false, true)
+      message += result.message
     })
     message += NL
   })
@@ -381,10 +376,12 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     }
     if (data.traffic.mode!="公共交通" && data.traffic.car) {
       message += NL + "车辆信息：" + data.traffic.car.brand
-      if (data.traffic.mode == "自驾"){
+      if (data.traffic.mode == "自驾" && data.traffic.car.color){
         message += "，" + data.traffic.car.color
       }
-      message += "，车牌尾号：" + data.traffic.car.number
+      if (data.traffic.car.number){
+        message += "，车牌尾号：" + data.traffic.car.number
+      }
     }
     message += NL2
   }
@@ -455,51 +452,54 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
 // 构建网站报名信息; isQuit:是否为退出活动； isPrint：是否为集中打印名单时调用
 const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
   var message = ""
+  var title = ""
   if (!isPrint) {
     message += "（本内容由“户外报名”小程序自动发出，与发帖人无关；相应责权由" + userInfo.nickName + "承担）\r\n"
   }
   if (isQuit) {
-    message += userInfo.nickName + " 因故退出活动，抱歉！"
+    var temp = userInfo.nickName + " 因故退出活动，抱歉！"
+    message += temp
+    title += temp
   } else {
     // 昵称/性别/电话（隐藏中间三位）/认路情况/同意免责/集合地点（报名状态）
-    message += "代报名：" + userInfo.nickName + "/" + userInfo.gender + "/"
+    var temp = userInfo.nickName + "/" + userInfo.gender + "/"
+    
     // 隐藏手机号码中间三位
     var phone = util.hidePhone(userInfo.phone.toString());
     var knowWay = entryInfo.knowWay ? "认路" : "不认路"
-    message += phone + "/" + knowWay + "/已同意免责条款/"
+    temp += phone + "/" + knowWay + "/已同意免责条款/"
     if (!isPrint) {
-      message += "第" + (entryInfo.meetsIndex + 1) + "集合点"
+      temp += "第" + (entryInfo.meetsIndex + 1) + "集合点"
     }
-    message += "（" + entryInfo.status + "）"
+    temp += "（" + entryInfo.status + "）"
+
+    message += "代报名：" + temp
+    title += temp
   }
-  return message
+  return {title: title,message: message,}
 }
 
 // 发布活动
 const addThread = function(outdoorid, data, isTesting, callback) {
   console.log("addThread fun")
-  var images = []
-  var aids = []
-  uploadImages(outdoorid, data.brief.pics, images, aids, resImages => {
-    console.log("resImages is:")
-    console.log(resImages)
-    images = images.concat(resImages.image)
-    aids = aids.concat(resImages.aid)
+  var temp = []
+  uploadImages(outdoorid, data.brief.pics, temp, resAids => {
+    console.log("resAids is:")
+    console.log(resAids)
     uploadQrCode(outdoorid, resQcCode => {
       console.log("resQcCode is:")
       console.log(resQcCode)
-      images.push(resQcCode.image)
-      aids.push(resQcCode.aid)
-    
+      resAids.push(resQcCode)
+      
       var fid = chooseForum(data.title, isTesting) // 要发帖的版面
       var message = buildOutdoorMesage(data, true, data.modifys, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
-      console.log(message)
+      // console.log(message)
       var token = wx.getStorageSync("LvyeOrgToken")
       console.log(token)
 
       // 发帖
       wx.request({
-        url: LvyeOrgURL + "add_thread.php",
+        url: LvyeOrgURL + "add_thread.php", 
         method: "POST",
         header: {
           "content-type": "application/x-www-form-urlencoded"
@@ -509,8 +509,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
           fid: fid,
           subject: data.title.whole,
           message: message,
-          pic_list: images,
-          aid_list: aids,
+          aid_list: resAids,
         },
         fail: function(error) {
           console.log(error)
@@ -526,7 +525,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
           var resp_dict = resp.data;
           if (resp_dict.err_code == 0) {
             wx.showToast({
-              title: '同步绿野ORG发帖成功',
+              title: 'ORG发帖成功',
             });
             if (callback) {
               callback(resp.data.data.tid)
@@ -552,7 +551,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
                   } else if (res.cancel) {
                     console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
                     // 这里要更新Outdoors表
-                    data.websites.lvyeorg.fid = fid
+                    // data.websites.lvyeorg.fid = fid
                     if (callback) { // 不成就返回null
                       callback(null)
                     }
@@ -573,7 +572,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
 }
 
 // 即时发布一条消息到绿野org网站，发布失败则记录到数据库中
-const postMessage = (outdoorid, tid, message) => {
+const postMessage = (outdoorid, tid, title, message) => {
   console.log("const postMessage")
   console.log(outdoorid)
   console.log(tid)
@@ -581,7 +580,7 @@ const postMessage = (outdoorid, tid, message) => {
   var token = wx.getStorageSync("LvyeOrgToken")
 
   wx.request({
-    url: LvyeOrgURL + "add_post.php",
+    url: LvyeOrgURL + "add_post3.php",
     method: "POST",
     header: {
       "content-type": "application/x-www-form-urlencoded"
@@ -589,14 +588,17 @@ const postMessage = (outdoorid, tid, message) => {
     data: {
       token: token,
       tid: tid,
+      // pid: "44440649", // todo 没用
+      subject: title, // 
       message: encodeURI(message),
     },
     success: function(resp) {
-      console.log(resp);
+      console.log("跟帖成功：")
+      console.log(resp)
       var resp_dict = resp.data;
       if (resp_dict.err_code == 0) {
         wx.showToast({
-          title: '信息发布绿野ORG成功',
+          title: 'ORG同步成功',
         });
       } else {
         getError(resp, (error) => {
@@ -608,7 +610,7 @@ const postMessage = (outdoorid, tid, message) => {
             success(res) {
               if (res.confirm) {
                 console.log('用户点击确定')
-                postMessage(outdoorid, tid, message) // 立刻重发
+                postMessage(outdoorid, tid, title, message) // 立刻重发
               } else if (res.cancel) {
                 console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
                 // 这里要更新Outdoors表

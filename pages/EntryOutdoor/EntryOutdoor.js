@@ -8,7 +8,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
-const _ = db.command
+const _ = db.command 
 
 Page({
   data: {
@@ -20,7 +20,7 @@ Page({
       knowWay: false, // 是否认路
     },
     title: {}, // 活动主题信息，内容从数据库中读取
-    route: [], // 活动路线，由多个站点（stop）组成
+    route: {}, // 活动路线，由wayPoints（多个途经点）和trackFiles（多个轨迹文件）组成
     meets: [], //集合点，可多个
     brief: {}, // 活动介绍，文字加图片
     limits: {}, // 领队设定的各类限制条款
@@ -121,7 +121,7 @@ Page({
         self.setData({
           outdoorid: self.data.outdoorid,
           title: res.data.title,
-          route: res.data.route,
+          // route: res.data.route, 做兼容性处理了
           meets: res.data.meets,
           members: res.data.members,
           status: res.data.status,
@@ -265,6 +265,17 @@ Page({
     if(res.data.traffic){
       self.setData({
         "traffic": res.data.traffic,
+      })
+    }
+    // 活动路线，增加轨迹文件
+    if (res.data.route instanceof Array) { // 说明是老格式
+      self.setData({
+        "route.wayPoints": res.data.route, // 途经点
+        "route.trackFiles": null, // 轨迹文件
+      })
+    } else { // 新格式直接设置
+      self.setData({
+        route: res.data.route,
       })
     }
     // next 
@@ -476,22 +487,22 @@ Page({
     // 先判断活动可以同步
     if (self.data.websites && self.data.websites.lvyeorg 
       && self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) {
-      var message = lvyeorg.buildEntryMessage(self.data.userInfo, self.data.entryInfo, isQuit, false) // 构建报名信息
-      console.log(message)
+      var entryMessage = lvyeorg.buildEntryMessage(self.data.userInfo, self.data.entryInfo, isQuit, false) // 构建报名信息
+      console.log(entryMessage)
       console.log(app.globalData.lvyeorgLogin)
       if (app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid) { // 登录了就直接发
         lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback=>{
-          lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, message)
+          lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, entryMessage.title, entryMessage.message)
         })
       } else if (app.globalData.lvyeorgInfo && !app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid ) { // 注册了没登录，就登录一下
         app.callbackLoginLvyeorg = (res) => { // 设置回调
           if(res.username){
             console.log("app.callbackLoginLvyeorg")
             lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback => {
-              lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, message)
+              lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, entryMessage.title, entryMessage.messageentryMessage.title, entryMessage.message)
             })
-          } else if (res.error) { // 登录失败也记录到waitings中
-            lvyeorg.add2Waitings(self.data.outdoorid, message)    
+          } else if (res.error) { // 登录失败也记录到waitings中 // todo 标题先不加了
+            lvyeorg.add2Waitings(self.data.outdoorid, entryMessage.message)    
           }
         }
         app.loginLvyeOrg() // 登录
@@ -594,6 +605,25 @@ Page({
     self.setData({
       "entryInfo.meetsIndex": parseInt(e.detail),
     })
+  },
+
+  // 查看集合地点的地图设置，并可导航
+  lookMeetMap(){
+    const self = this
+    const index = self.data.entryInfo.meetsIndex
+    // 选中了集合地点，并且有经纬度，才开启选择地图
+    if (index >= 0 && self.data.meets[index].latitude){ 
+      var message = "同意授权“使用我的地理位置”才能调用微信地图；小程序不会记录您的位置，请放心"
+      util.authorize("userLocation", message, res => {
+        const latitude = self.data.meets[index].latitude
+        const longitude = self.data.meets[index].longitude
+        wx.openLocation({
+          latitude,
+          longitude,
+          scale: 18
+        })
+      })
+    }
   },
 
   // 勾选同意免责条款

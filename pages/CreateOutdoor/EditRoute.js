@@ -1,27 +1,32 @@
 Page({
 
   data: {
-    route: [], //活动路线，可加多个途经点
+    //活动路线，可加多个途经点和轨迹文件
+    route: {
+      wayPoints: [], // 途经点
+      trackFiles: [], // 轨迹文件
+    },
+    
     index: 0, // 当前要处理的index
-    hasModified:false,
+    hasModified: false,
 
     showAction: false,
     Actions: [{
-      name: '编辑',
-      subname: "编辑当前途经点"
-    },
-    {
-      name: '删除',
-      subname: "删除当前途经点"
-    },
-    {
-      name: '追加(前面)',
-      subname: "在前面追加途经点"
-    },
-    {
-      name: '追加(后面)',
-      subname: "在后面追加途经点"
-    },
+        name: '编辑',
+        subname: "编辑当前途经点"
+      },
+      {
+        name: '删除',
+        subname: "删除当前途经点"
+      },
+      {
+        name: '追加(前面)',
+        subname: "在前面追加途经点"
+      },
+      {
+        name: '追加(后面)',
+        subname: "在后面追加途经点"
+      },
     ],
   },
 
@@ -32,12 +37,12 @@ Page({
   },
 
   onSelectAction(e) {
-    console.log(e); 
+    console.log(e);
     const self = this
     if (e.detail.name == "删除") {
-      self.data.route.splice(self.data.index, 1)
+      self.data.route.wayPoints.splice(self.data.index, 1)
       this.setData({
-        route: self.data.route,
+        "route.wayPoints": self.data.route.wayPoints,
         hasModified: true,
       })
     } else {
@@ -59,7 +64,7 @@ Page({
   },
 
   // 弹出选项：在前面追加，在后面追加，编辑，删除
-  clickStop: function (index, e) {
+  clickStop: function(index, e) {
     console.log(index) // 这里知道要处理哪个集合点
     this.setData({
       index: index,
@@ -67,7 +72,7 @@ Page({
     });
   },
 
-  onLoad: function (options) {
+  onLoad: function(options) {
     console.log("onLoad")
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -79,8 +84,8 @@ Page({
     self.rebuildClickStopFun()
   },
 
-  rebuildClickStopFun: function () {
-    for (var i = 0; i < this.data.route.length; i++) {
+  rebuildClickStopFun: function() {
+    for (var i = 0; i < this.data.route.wayPoints.length; i++) {
       // 这里动态创建给click cell的函数
       let index = i; // 还必须用let才行
       this["clickStop" + index] = (e) => {
@@ -89,7 +94,7 @@ Page({
     }
   },
 
-  onUnload: function () {
+  onUnload: function() {
     console.log("onUnload")
     // 这里把数据写回去
     const self = this;
@@ -103,10 +108,18 @@ Page({
   },
 
   // 调出新页面，增加途经点
-  addStop: function () {
+  addStop: function() {
     wx.navigateTo({
       url: "EditOneStop?action=addLast",
     })
+  },
+
+  // todo
+  addTrack(){
+  }, 
+
+  // todo
+  deleteTrack(index){
   },
 
 })

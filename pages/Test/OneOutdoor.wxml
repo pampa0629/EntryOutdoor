@@ -1,34 +1,5 @@
 <van-row>
   <van-col span="9" offset="2">
-  <van-button size="large" type="primary" bind:click="onLogin">登录org</van-button>
-  </van-col>
-  <van-col span="9" offset="2">
-  <van-button size="large" type="primary"  bind:click="onRegister">注册org</van-button>
-  </van-col>
-</van-row>
-
-<van-row>
-  <van-col span="9" offset="2">
-  <van-button size="large" type="primary" bind:click="onCreate">发帖</van-button>
-  </van-col>
-  <van-col span="9" offset="2">
-  <van-button size="large" type="primary"  bind:click="onEntry">报名</van-button>
-  </van-col>
-</van-row>
-
-
-<van-row>
-  <van-col span="9" offset="2">
-  <van-button size="large" type="primary" bind:click="onUploadImage">上传图片</van-button>
-  </van-col>
-  <van-col span="9" offset="2">
-  <van-button size="large" type="primary"  bind:click="onSame">同步</van-button>
-  </van-col>
-</van-row>
-
-
-<van-row>
-  <van-col span="9" offset="2">
   <van-button size="large"  open-type="contact" bind:contact="onContact">联系客服</van-button>
   </van-col>
   <van-col span="9" offset="2">
@@ -38,38 +9,21 @@
 
 <van-row>
   <van-col span="9" offset="2">
-  <van-button size="large"   bind:click="onDialog">对话框</van-button>
+  <van-button size="large"   bind:click="selectLocation">选择位置</van-button>
   </van-col>
   <van-col span="9" offset="2">
-  <van-button size="large"  open-type="getPhoneNumber" bindgetphonenumber="onTest">测试</van-button>
+  <van-button size="large"  bind:click="openLocation" >打开位置</van-button>
   </van-col>
 </van-row>
 
-
-<form bindsubmit="reg" report-submit="true">
-    <view>用户：<input type="text" name="username" /></view>
-    <view><button type="primary" form-type="submit">注册</button></view>
+<form bindsubmit="getFormid" report-submit="true">
+  <button  form-type="submit"  class="btn">
+    <view class="aa">
+      <form bindsubmit="getFormid" report-submit="true">
+        <button form-type="submit"  >1)收集FormID</button>
+      </form>
+    </view>
+  </button>
 </form>
 
-<van-dialog
-  use-slot
-  async-close
-  show="{{ show }}"
-  show-cancel-button
-  confirm-button-open-type="getUserInfo"
-  bind:close="onClose"
-  bind:getuserinfo="getUserInfo"
->
-<van-field
-  value="{{ username }}"
-  label="用户名"
-  placeholder="请输入用户名"
-/>
-<van-field
-  value="{{ password }}"
-  type="password"
-  label="密码"
-  :border="false"
-  placeholder="请输入密码"
-/>
-</van-dialog>
+<van-button size="large"    bind:click="sendMessage">2)发消息</van-button>

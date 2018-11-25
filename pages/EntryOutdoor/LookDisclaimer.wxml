@@ -1,4 +1,12 @@
+<!--活动规则-->  
+<van-panel title="活动规则" desc="">
+  <van-cell-group>
+    <van-cell wx:if="isEnvironment" title="环保"  value="野外不得丢弃不可降解物品"/>
+    <van-cell wx:if="isKeepTime" title="守时"  value="户外路远天黑危险，集合过时不候，费用照A" border="{{ false }}"/>
+    </van-cell-group>
+</van-panel>
 
+<!--免责条款详细内容-->  
 <van-panel title="免责条款详细内容" desc="">
   <view>
     <text style="font-size:12pt">{{disclaimer}}</text>

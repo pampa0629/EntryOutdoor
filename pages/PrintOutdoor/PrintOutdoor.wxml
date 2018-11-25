@@ -15,7 +15,7 @@
 
 <!--活动路线-->
 <text class="tip">\n活动路线</text>
-  <view wx:for="{{route}}" wx:key="place+time" data-pos='{{index}}'>途经点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
+  <view wx:for="{{route.wayPoints}}" wx:key="place+time" data-pos='{{index}}'>途经点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
 
 <!--集合地点-->
 <text class="tip">\n集合地点</text>

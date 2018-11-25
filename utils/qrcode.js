@@ -1,5 +1,5 @@
 // 把和lvyeorg对接的具体实现代码都放到这里来
-
+const util = require('./util.js')
 const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database()
@@ -9,26 +9,9 @@ const dbOutdoors = db.collection('Outdoors')
 const share2Circle = (outdoorid, title, isLeader) => {
   console.log(outdoorid)
   // 首先处理写本地相册的授权问题
-  wx.getSetting({
-    success(res) {
-      if (!res.authSetting['scope.writePhotosAlbum']) {
-        wx.authorize({
-          scope: 'scope.writePhotosAlbum',
-          success() {
-            console.log('scope.writePhotosAlbum OK')
-            save2Album(outdoorid, title, isLeader)
-          },
-          fail() {
-            wx.showModal({
-              title: '必须授权',
-              content: '必须取得写相册授权，才能保存生成的活动二维码，以便在朋友圈分享活动',
-            })
-          }
-        })
-      } else {
-        save2Album(outdoorid, title, isLeader)
-      }
-    }
+  var message = "同意授权“保存到相册”才能保存二维码图片"
+  util.authorize("writePhotosAlbum", message, res => {
+    save2Album(outdoorid, title, isLeader)
   })
 }
 

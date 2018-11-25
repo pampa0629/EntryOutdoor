@@ -7,7 +7,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
 const dbOutdoors = db.collection('Outdoors')
-
+ 
 App({
   globalData: {
     openid: null, // 每个微信用户的内部唯一id

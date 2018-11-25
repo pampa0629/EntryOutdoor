@@ -7,6 +7,8 @@ Page({
 
   data: {
     disclaimer: "", //免责条款
+    isEnvironment: null, // 环保
+    isKeepTime: null, // 守时
   },
 
   onLoad: function(options) {
@@ -18,6 +20,16 @@ Page({
     if (prevPage.data.limits.disclaimer) {
       self.setData({
         disclaimer: prevPage.data.limits.disclaimer,
+      })
+    }
+    if (prevPage.data.limits.isEnvironment) {
+      self.setData({
+        isEnvironment: prevPage.data.limits.isEnvironment,
+      })
+    }
+    if (prevPage.data.limits.isKeepTime) {
+      self.setData({
+        isKeepTime: prevPage.data.limits.isKeepTime,
       })
     }
   },

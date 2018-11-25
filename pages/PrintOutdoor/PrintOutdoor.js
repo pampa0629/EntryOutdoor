@@ -12,7 +12,7 @@ Page({
     outdoorid: null, // 活动id
     title: {}, // 活动主题信息，内容从数据库中读取
     members: null, // 队员报名信息，包括:基本信息（userInfo)内容从Persons数据库中读取; 报名信息（entryInfo），报名时填写
-    route: [], // 活动路线，由多个站点（stop）组成
+    route: {}, // 活动路线
     meets: [], //集合点，可多个
     meetMembers: [], // 按照集合地点分组的队员名单
     isLeader: false, // 是否是领队：领队能看到队员的电话，非领队看不到；领队按照集合地点排列名单，队员不需要
@@ -40,11 +40,11 @@ Page({
         self.setData({
           title: res.data.title,
           members: res.data.members,
-          route: res.data.route,
+          // route: res.data.route, 要做兼容性处理
           meets: res.data.meets,
           status: res.data.status,
         })
-        self.dealCompatibility()
+        self.dealCompatibility(res)
         console.log(self.data)
 
         if (self.data.isLeader) { // 是领队：分组，缓存checked
@@ -58,7 +58,7 @@ Page({
   },
 
   // 处理兼容性
-  dealCompatibility: function() {
+  dealCompatibility: function(res) {
     const self = this;
     self.data.members.forEach((item, index) => {
       // 处理免责条款，把true转化为文字
@@ -71,14 +71,25 @@ Page({
       } else {
         item.entryInfo.knowWay = "不认路"
       }
-
-      // next 
-    
       // 设置回去
       self.setData({
         ['members[' + index + '].entryInfo']: item.entryInfo,
       })
     })
+    
+    // 活动路线，增加轨迹文件
+    if (res.data.route instanceof Array) { // 说明是老格式
+      self.setData({
+        "route.wayPoints": res.data.route, // 途经点
+        "route.trackFiles": [], // 轨迹文件
+      })
+    } else { // 新格式直接设置
+      self.setData({
+        route: res.data.route,
+      })
+    }
+
+    // next
   }, 
 
   // 把队员按照集合地点进行排列

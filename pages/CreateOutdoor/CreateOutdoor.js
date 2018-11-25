@@ -44,7 +44,7 @@ Page({
     startDate: util.formatDate(new Date()), // 起始日期，格式化为字符串；只能从今天开始
     endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，格式化为字符串，不保存；不能发半年之后的活动
 
-    route: [], // 活动路线
+    route: {}, // 活动路线，包括途经点和轨迹文件
     meets: [], //集合点，可加多个
     traffic:null, // 交通方式
     members: [], // 已报名成员（含领队）
@@ -69,7 +69,7 @@ Page({
     // 同步到网站的信息
     websites: {
       lvyeorg: {
-        fid: null, // 版块id
+        //fid: null, // 版块id
         tid: null, // 帖子id
         keepSame:false, // 是否保持同步
         waitings: [], // 要同步但尚未同步的信息列表
@@ -127,7 +127,7 @@ Page({
             memOutdoorid: outdoorid, // 加载活动，记得设置memOutdoorid
             title: res.data.title,
             status: res.data.status,
-            route: res.data.route,
+            // route: res.data.route, // 做兼容性处理了
             meets: res.data.meets,
             leader: res.data.members[0],
             members: res.data.members,
@@ -156,7 +156,7 @@ Page({
     const self = this
     console.log("keepSameWithWebsites")
     console.log(self.data.websites)
-    if (self.data.websites 
+    if (self.data.websites  
       && self.data.websites.lvyeorg 
       && (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
       && self.data.leader.personid == app.globalData.personid // 并且还是自己的活动
@@ -259,6 +259,18 @@ Page({
     if (res.data.traffic){
       self.setData({
         traffic: res.data.traffic,
+      })
+    }
+    // 活动路线，增加轨迹文件
+    console.log(self.data.route)
+    if (res.data.route instanceof Array){ // 说明是老格式
+      self.setData({
+        "route.wayPoints": res.data.route, // 途经点
+        "route.trackFiles": [], // 轨迹文件
+      })
+    } else { // 新格式直接设置
+      self.setData({
+        route: res.data.route,
       })
     }
     // next 
@@ -445,13 +457,14 @@ Page({
     console.log(self.data.limits.equipments)
     // 领队信息也要更新一下
     var members = [self.data.leader];
-    dbOutdoors.doc(self.data.outdoorid).update({
+    console.log(self.data.route)
+    dbOutdoors.doc(self.data.outdoorid).set({ // 用set，解决数据类型变化的问题
       data: {
         title: self.data.title,
         route: self.data.route,
         meets: self.data.meets,
         traffic: self.data.traffic,
-        status: self.data.status,
+        status: self.data.status, 
         members: members,
         brief: self.data.brief,
         limits: self.data.limits,
@@ -544,8 +557,9 @@ Page({
     console.log("postModifys:function")
     console.log(this.data.modifys)
     if (this.anyModify(this.data.modifys)) { // 有一点修改，才有必要 跟帖发布
-      var message = lvyeorg.buildOutdoorMesage(this.data, false, this.data.modifys, "领队对以下内容作了更新，请报名者留意！", this.data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
-      lvyeorg.postMessage(this.data.outdoorid, this.data.websites.lvyeorg.tid, message)
+      var addedMessage = "领队对以下内容作了更新，请报名者留意！"
+      var message = lvyeorg.buildOutdoorMesage(this.data, false, this.data.modifys, addedMessage, this.data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
+      lvyeorg.postMessage(this.data.outdoorid, this.data.websites.lvyeorg.tid, addedMessage, message)
       // 用完了得把modifys都设置为false
       this.setModifys(false)
     }
@@ -577,7 +591,7 @@ Page({
     console.log("post2Lvyeorg:function")
     const self = this
     // 没有 tid，则先生成tid；再处理waitings
-    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame) { // 没有tid，则必须有keepSame
+    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && self.data.status=="已发布" ) { // 没有tid，则必须有keepSame，同时还必须是“已发布”状态的活动
       lvyeorg.addThread(self.data.outdoorid, self.data, app.globalData.lvyeorgInfo.isTesting, tid => {
         if(tid){
           self.data.websites.lvyeorg.tid = tid
@@ -679,7 +693,7 @@ Page({
       }
     })
   },
-
+ 
   // 调出上传照片页面
   clickUploadPics: function() {
     if (this.data.outdoorid) {

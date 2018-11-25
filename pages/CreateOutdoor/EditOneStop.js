@@ -31,7 +31,7 @@ Page({
         let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
         let prevPage = pages[pages.length - 2];
         self.setData({
-          stop: prevPage.data.route[options.index]
+          stop: prevPage.data.route.wayPoints[options.index]
         })
       }
     }
@@ -72,20 +72,20 @@ Page({
     console.log(self.data.action)
     if (self.data.action == "edit") {
       prevPage.setData({
-        ['route[' + self.data.index + ']']: self.data.stop,
+        ['route.wayPoints[' + self.data.index + ']']: self.data.stop,
         hasModified: self.data.hasModified,
       })
     } else {
       if (self.data.action == "addLast") {
         // 往最后追加一个途经点
-        prevPage.data.route.push(self.data.stop)
+        prevPage.data.route.wayPoints.push(self.data.stop)
       } else if (self.data.action == "addBefore") {
-        prevPage.data.route.splice(self.data.index, 0, self.data.stop)
+        prevPage.data.route.wayPoints.splice(self.data.index, 0, self.data.stop)
       } else if (self.data.action == "addAfter") {
-        prevPage.data.route.splice(self.data.index + 1, 0, self.data.stop)
+        prevPage.data.route.wayPoints.splice(self.data.index + 1, 0, self.data.stop)
       }
       prevPage.setData({
-        route: prevPage.data.route,
+        "route.wayPoints": prevPage.data.route.wayPoints,
         hasModified: true,
       })
       prevPage.rebuildClickStopFun()

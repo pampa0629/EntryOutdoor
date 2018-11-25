@@ -6,7 +6,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 
-Page({  
+Page({   
   
   data: {
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
@@ -26,7 +26,7 @@ Page({
     lvyeOrgUsername:"", // 绿野org 登录用户名
     lvyeOrgButton:"绿野ORG登录", // 按钮上显示的文字
 
-    isUseOrg: false, // 等待org解决发帖不返回tid的问题；另：php服务如何发帖带标题
+    isUseOrg: true, // todo：php服务如何发帖带标题
     isTesting: false, // for test， false true
   },
 
@@ -39,33 +39,6 @@ Page({
       }
     } else {
       this.loginWeixin(null)
-    }
-
-    console.log("ready login org")
-    // 登录org
-    if(!app.globalData.lvyeorgLogin){ // 尚未登录，则等待登录
-      app.callbackLoginLvyeorg = (res)=>{
-        self.setLoginLvyeorg(res)
-      }
-    } else{ // 登录了直接设置就好
-      self.setLoginLvyeorg({username:username})
-    }
-  },
-
-  // 设置org登录信息
-  setLoginLvyeorg:function(res){
-    console.log("MyInfo setLoginLvyeorg, res is: ")
-    console.log(res)
-    if(res.error){
-      this.setData({
-        hasLoginLvyeorg: false,
-        lvyeOrgButton: res.error,
-      })
-    }else if(res.username){
-      this.setData({
-        hasLoginLvyeorg: true,
-        lvyeOrgUsername: res.username,
-      })
     }
   },
 
@@ -121,12 +94,48 @@ Page({
   },
 
   onShow: function() {
+    const self = this
     // 就看看有无最近的活动
     this.setData({
       lastOutdoorid: util.loadOutdoorID()
     })
+
+    // 同时看看org是否登录了
+    console.log("ready login org")
+    // 登录org
+    if (app.globalData.lvyeorgInfo){ // 数据库读取有了
+      if(!app.globalData.lvyeorgLogin) { // 尚未登录，则主动登录
+        app.callbackLoginLvyeorg = (res) => {
+          self.setLoginLvyeorg(res)
+        }
+        app.loginLvyeOrg()
+      } else { // 登录了直接设置就好
+        self.setLoginLvyeorg({ username: app.globalData.lvyeorgInfo.username })
+      }
+    } else { //数据度还没有读好，或者没有，则只能等着
+      app.callbackLoginLvyeorg = (res) => {
+        self.setLoginLvyeorg(res)
+      }
+    } 
   },
 
+  // 设置org登录信息
+  setLoginLvyeorg: function (res) {
+    console.log("MyInfo setLoginLvyeorg, res is: ")
+    console.log(res)
+    if (res.error) {
+      this.setData({
+        hasLoginLvyeorg: false,
+        lvyeOrgButton: res.error,
+      })
+    } else if (res.username) {
+      this.setData({
+        hasLoginLvyeorg: true,
+        lvyeOrgUsername: res.username,
+      })
+    }
+  },
+  
   createOnePerson: function(e) {
     const self = this;
     if (e != null) {
@@ -224,7 +233,7 @@ Page({
           showCancel: false,
           confirmText: "知道了",
           content: "已经复制本小程序的帮助文档网页地址，请粘贴到浏览器中查看详细内容。"+
-                  "\n当前版本号：0.5.7  \n作者：攀爬",
+                  "\n当前版本号：0.6.1  \n作者：攀爬",
         })
       }
     })

@@ -9,6 +9,8 @@ Page({
       allowPopup:false, // 是否允许空降。当限制人数时，则肯定不能空降
       occppy:{date:"不限", time:null}, // 占坑截止时间
       entry: { date: "不限", time: null }, // 报名截止时间
+      isEnvironment:true, // 环保
+      isKeepTime: true, // 守时
       },
     hasModified: false,
   },
@@ -32,7 +34,12 @@ Page({
     if (!self.data.limits || !self.data.limits.maxPerson){
       self.setData({ 
         "limits.maxPerson": false,
-        // hasModified: true
+      })
+    }
+    if (!self.data.limits) {
+      self.setData({
+        isEnvironment: true, // 环保
+        isKeepTime: true, // 守时
       })
     }
   },
@@ -56,6 +63,7 @@ Page({
     console.log(self.data.limits.maxPerson)
     self.setData({
       "limits.maxPerson": !self.data.limits.maxPerson,
+      hasModified: true
     })
     if (self.data.limits.maxPerson && !self.data.limits.personCount) {
       self.setData({
@@ -84,6 +92,29 @@ Page({
     console.log(self.data.limits.allowPopup)
     self.setData({
       "limits.allowPopup": !self.data.limits.allowPopup,
+      hasModified: true
+    })
+  },
+
+  // 勾选是否要求环保
+  checkEnvironment: function (e) {
+    console.log(e)
+    const self = this;
+    console.log(self.data.limits.isEnvironment)
+    self.setData({
+      "limits.isEnvironment": !self.data.limits.isEnvironment,
+      hasModified: true
+    })
+  },
+
+  // 勾选是否要求守时
+  checkKeepTime: function (e) {
+    console.log(e)
+    const self = this;
+    console.log(self.data.limits.isKeepTime)
+    self.setData({
+      "limits.isKeepTime": !self.data.limits.isKeepTime,
+      hasModified: true
     })
   },
 

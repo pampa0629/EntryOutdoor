@@ -1,0 +1,75 @@
+<van-row>
+  <van-col span="9" offset="2">
+    <van-button size="large" open-type="contact" bind:contact="onContact">联系客服</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <van-button size="large" open-type="getPhoneNumber" bindgetphonenumber="onTest">测试</van-button>
+  </van-col>
+</van-row>
+
+
+<!--装备编辑对话框-->
+<van-dialog
+  use-slot
+  async-close
+  show="{{ false }}"
+  show-cancel-button
+  bind:close="onClose"
+>
+<van-cell
+  title="修改前：{{ dialog.oldName }}"
+/>
+    <form bindsubmit="getFormid" report-submit="true">
+      <button form-type="submit" class="no_btn">
+        <form bindsubmit="getFormid" report-submit="true">
+          <button form-type="submit" class="no_btn">
+            <view class="fix">
+              <form bindsubmit="getFormid" report-submit="true">
+                <button  form-type="submit">1)收集FormID</button>
+              </form>
+            </view>
+          </button>
+        </form>
+      </button>
+    </form>
+  
+</van-dialog>
+
+
+
+<van-row>
+  <van-col wx:if="{{false}}" span="9" offset="2">
+    <form bindsubmit="getFormid" report-submit="true">
+      <button form-type="submit" class="no_btn">
+        <form bindsubmit="getFormid" report-submit="true">
+          <button form-type="submit" class="no_btn">
+            <view class="fix">
+              <form bindsubmit="getFormid" report-submit="true">
+                <button  form-type="submit">1)收集FormID</button>
+              </form>
+            </view>
+          </button>
+        </form>
+      </button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="getFormid" report-submit="true">
+      <button form-type="submit" class="no_btn">
+        <form bindsubmit="getFormid" report-submit="true">
+          <button form-type="submit" class="no_btn">
+            <view class="fix">
+              <form bindsubmit="getFormid" report-submit="true">
+                <button form-type="submit">1)收集FormID</button>
+              </form>
+            </view>
+          </button>
+        </form>
+      </button>
+    </form>
+  </van-col>
+</van-row>
+
+
+<van-button size="large" bind:click="sendMessage">2)发消息</van-button>
+<van-button size="large" bind:click="clearIDs">3)清空ID</van-button>

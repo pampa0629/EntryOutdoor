@@ -1,5 +1,5 @@
 {
-	"description": "项目配置文件",
+	"description": "项目配置文件。",
 	"packOptions": {
 		"ignore": []
 	},
@@ -8,17 +8,15 @@
 		"es6": true,
 		"postcss": true,
 		"minified": true,
-		"newFeature": true
+		"newFeature": true,
+		"nodeModules": true
 	},
-  "miniprogramRoot":"./miniprogram",
-  "cloudfunctionRoot":"./cloud-functions",
+  "miniprogramRoot":"./",
+	"cloudfunctionRoot": "../cloud-functions/",
 	"compileType": "miniprogram",
-	"libVersion": "2.4.1",
+	"libVersion": "2.3.0",
 	"appid": "wx20edd5723fb67799",
 	"projectname": "%E6%88%B7%E5%A4%96%E6%8A%A5%E5%90%8D",
-	"debugOptions": {
-		"hidedInDevtools": []
-	},
 	"isGameTourist": false,
 	"condition": {
 		"search": {

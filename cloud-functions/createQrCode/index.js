@@ -11,7 +11,7 @@ exports.main = async(event, context) => {
   console.log(event)
   var url = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=" + event.access_token
   console.log(url)
-  var data = {
+  var data = { 
       scene: event.outdoorid,
       width: "280px",
       page: "pages/EntryOutdoor/EntryOutdoor",
@@ -20,7 +20,7 @@ exports.main = async(event, context) => {
     url: url,
     method: "POST",
     body: JSON.stringify(data),
-    encoding : null // 最坑的一句代码，没有得到的二进制image内容就是错乱的
+    encoding : null // 最坑的一句代码，没有的话，得到的二进制image内容就是错乱的
     //responseType: 'arraybuffer', 小程序端要这么写
   };
   console.log(options)

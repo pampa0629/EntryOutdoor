@@ -1,0 +1,68 @@
+/* pages/Leader/CreateOutdoor.wxss */
+
+.picker{
+  padding: 19rpx 26rpx;
+  background-color: #FFFFFF;
+}
+
+.btn {
+  width: 40%;
+  margin-top: 10rpx;
+}
+
+.btn_hover {
+ background-color:gainsboro;
+}
+
+.multi_row{
+  display: flex;
+  flex-direction: row;
+}
+
+.block{
+  outline-color:blue;
+  outline-width:2px;
+  outline-style:auto;
+}
+
+.tip{
+  color:#F65959;
+}
+
+.icon_tip{
+  font-family:黑体;
+  font-size:10pt
+}
+
+.tp_btn{
+  width: 60rpx;
+  height: 60rpx;
+  margin:0;
+  padding:0;
+  border-color:transparent;
+  border-width:0px;
+  border-style: none;
+  outline-color:transparent;
+  outline-style: none;
+  outline-width:0px;
+  background-color:transparent;
+}
+
+.no_btn{
+  width: 1rpx;
+  height: 1rpx;
+  margin: 0;
+  padding: 0;
+  /* position: fixed; */
+  /* top: 150rpx; */
+  border-color:transparent;
+  border:none;
+  background-color:transparent;
+}
+
+.fix{
+  height:80rpx;
+  width:300rpx;
+  position:fixed;
+  bottom: 10rpx;
+}

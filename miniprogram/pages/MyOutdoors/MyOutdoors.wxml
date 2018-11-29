@@ -1,0 +1,37 @@
+<!--滑动页面-->
+<van-tabs active="{{currentTab}}" bind:change="changeTab">
+  <van-tab title="我发起的"></van-tab>
+  <van-tab title="我参加的"></van-tab>
+  <van-tab title="我关注的"></van-tab>
+</van-tabs>
+
+<!--活动列表-->
+<swiper current="{{currentTab}}" duration="200" style="height:{{screenHeight}}px"  bindchange="swiperTab">
+  <!--我发起的-->
+  <swiper-item> 
+    <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
+    <van-cell  wx:for="{{myOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable data-pos='{{index}}' title="{{item.title}}" bind:click="tapMyOutdoors" bindlongpress="longTap"/>
+    </scroll-view>
+  </swiper-item>
+  <!--我参加的-->
+  <swiper-item>
+    <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
+      <van-cell wx:for="{{entriedOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable catchtap="tapEntriedOutdoors" title="{{item.title}}" data-pos='{{index}}' bindlongpress="longTap" />
+      </scroll-view>
+  </swiper-item>
+  <!--我关注的-->
+  <swiper-item>
+    <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
+      <van-cell wx:for="{{caredOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable catchtap="tapCaredOutdoors" data-pos='{{index}}' title="{{item.title}}" bindlongpress="longTap"/>
+      </scroll-view>
+  </swiper-item>
+</swiper>
+
+<!--弹出更多功能-->
+<van-action-sheet
+  show="{{ showAction }}"
+  actions="{{ Actions }}" 
+  cancel-text="取消"
+  bind:cancel="onCancelAction"
+  bind:select="onSelectAction"
+/>

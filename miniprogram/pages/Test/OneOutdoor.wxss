@@ -1,0 +1,26 @@
+.content {
+  padding: 20px;
+}
+
+
+.no_btn{
+  width: 1rpx;
+  height: 1rpx;
+  margin: 0;
+  padding: 0;
+  /* position: fixed; */
+  /* top: 150rpx; */
+  border-color:transparent;
+  border:none;
+  background-color:transparent;
+}
+
+.fix{
+  height:64rpx;
+  width:400rpx;
+  position:fixed;
+  bottom: 50rpx;
+}
+button::after{
+  border: none;
+}

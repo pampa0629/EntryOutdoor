@@ -1,0 +1,188 @@
+<!--弹出分享按钮-->
+<van-popup show="{{ showPopup }}" position="bottom" custom-class="center" bind:close="closePopup">
+  <van-button type="primary" plain size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
+  <van-button plain size="large"  bind:click="onShare2Circle">分享到朋友圈</van-button>
+</van-popup>
+
+<!--图标按钮-->
+<van-row>
+  <!--分享-->
+  <van-col span="2" offset="12">
+    <view wx:if="{{status!='已取消'}}" style="flex-direction:column">
+      <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
+      <view class="icon_tip">分享</view>
+    </view>
+  </van-col>
+  <!--关注与订阅-->
+  <van-col span="2" offset="1">
+    <view wx:if="{{hasCared}}" style="flex-direction:column">
+      <van-icon name="like" size="24px" color="#F65959" bind:click="cancelCare"></van-icon>
+      <view class="icon_tip">取关</view>
+    </view>
+    <view wx:else style="flex-direction:column">
+      <van-icon name="like-o" size="24px" color="#1aad19" bind:click="careOutdoor"></van-icon>
+      <view class="icon_tip">关注</view>
+    </view>
+  </van-col>
+  <van-col wx:if="{{false}}" span="2" offset="1">
+    <view wx:if="{{hasSubscribed}}" style="flex-direction:column">
+      <van-icon name="add" size="24px" color="#F65959" bind:click="cancelSubscribe"></van-icon>
+      <view class="icon_tip">订阅</view>
+    </view>
+    <view wx:else style="flex-direction:column">
+      <van-icon name="add-o" size="24px" color="#1aad19" bind:click="subscribeLeader"></van-icon>
+      <view class="icon_tip">取订</view>
+    </view>
+  </van-col>
+  <!--打印详情与回到首页-->
+  <van-col span="2" offset="1">
+    <view style="flex-direction:column">
+      <van-icon name="pending-orders" size="24px" color="#1aad19" bind:click="printOutdoor"></van-icon>
+      <view class="icon_tip">详情</view>
+    </view>
+  </van-col>
+  <van-col span="2" offset="1">
+    <view style="flex-direction:column">
+      <van-icon name="wap-home" size="24px" color="#1aad19" bind:click="toMainpage"></van-icon>
+      <view class="icon_tip">首页</view>
+    </view>
+  </van-col>
+</van-row>
+
+<!--活动信息-->
+<van-panel title="{{title.whole}}">
+  <van-cell title="地点" value="{{title.place}}" />
+  <van-cell title="日期" value="{{title.date}}" />
+  <van-cell title="时长负重" value="{{title.during}}，{{title.loaded}}" />
+  <van-cell title="强度" label="强度值：{{title.level}}" value="累积距离{{title.addedLength}}公里，累积上升{{title.addedUp}}00米" border="{{false}}" />
+</van-panel>
+
+<!--活动图文介绍-->
+<van-panel title="活动图文介绍">
+  <van-field value="{{brief.disc}}" autosize type="textarea" disabled border="{{false}}" />
+  <view wx:for="{{brief.pics}}" wx:key="src">
+    <van-row>
+      <van-col span="20" offset="2">
+        <image mode="widthFix" src="{{item.src}}"></image>
+      </van-col>
+    </van-row>
+  </view>
+</van-panel>
+
+<!--活动路线-->
+<van-cell-group>
+  <van-cell title="活动路线" label="{{route.wayPoints.length}}个途经点" value="点击查看详细路线" is-link url="LookRoute" border="{{false}}" />
+</van-cell-group>
+
+<!--活动装备-->
+<van-cell title="活动装备要求" label="推荐的装备列表" value="点击查看活动装备" is-link url="LookEquipments" border="{{false}}" />
+
+<!--队员列表-->
+<van-cell-group>
+  <van-cell wx:if="{{limits.maxPerson}}" title="队员列表" label="已报名{{members.length}}人（限{{limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
+  <van-cell wx:else title="队员列表" label="已报名{{members.length}}人（不限人数）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
+</van-cell-group>
+
+<!--集合地点-->
+<van-panel title="集合点选择">
+  <van-cell required title="必须选择集合地点" clickable value="已选择第{{entryInfo.meetsIndex+1}}集合点" bind:click="lookMeetMap">
+    <van-icon wx:if="{{entryInfo.meetsIndex>=0 &&meets[entryInfo.meetsIndex].latitude }}" slot="right-icon" name="location" bind:click="lookMeetMap" />
+  </van-cell>
+  <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{entryInfo.meetsIndex}}" bind:change="changeMeets">
+    <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" border="{{index<meets.length-1}}">
+      <van-radio name="{{index}}" />
+    </van-cell>
+  </van-radio-group>
+</van-panel>
+
+<!--交通方式-->
+<van-cell wx:if="{{traffic}}" title="交通方式：{{traffic.mode}}，{{traffic.cost}}" label="车辆信息 {{traffic.car.brand}} {{traffic.car.color}} {{traffic.car.number}}" value="{{traffic.cost=='免费'?'免费':'大致费用：'+traffic.money+'元'}}" border="{{false}}" />
+
+<!--免责条款与是否认路-->
+<van-cell title="免责条款与活动规则" value="点击查看详细内容" clickable is-link url="LookDisclaimer" />
+<van-checkbox-group>
+  <van-cell required title="我已阅读并同意条款和规则内容" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
+    <van-checkbox value="{{entryInfo.agreedDisclaimer}}" bind:change="checkDisclaimer" />
+  </van-cell>
+  <van-cell title="是否认路" label="{{entryInfo.knowWay?'认路':'不认路'}}" clickable bind:click="checkKnowWay" border="{{false}}">
+    <van-checkbox value="{{entryInfo.knowWay}}" bind:change="checkKnowWay" />
+  </van-cell>
+</van-checkbox-group>
+
+<!--状态提示-->
+<van-tag type="primary" plain>活动状态：{{status}}</van-tag>
+<van-tag type="primary" plain>报名状态：{{entryInfo.status}}</van-tag>
+<van-tag wx:if="{{entryInfo.meetsIndex<0}}" plain type="danger">\n请选择集合地点，然后才能报名。</van-tag>
+<van-tag wx:if="{{!entryInfo.agreedDisclaimer}}" plain type="danger">\n请勾选免责条款，然后才能报名。</van-tag>
+<!--截止时间提示-->
+<van-tag wx:if="{{remains.occupy.time<0}}" plain type="danger">\n已过占坑截止时间</van-tag>
+<van-tag wx:else plain type="primary">\n距离占坑截止时间还剩：{{remains.occupy.text}}</van-tag>
+<van-tag wx:if="{{remains.entry.time<0}}" plain type="danger">\n已过报名截止时间</van-tag>
+<van-tag wx:else plain type="primary">\n距离报名截止时间还剩：{{remains.entry.text}}</van-tag>
+<van-tag wx:if="{{limits.maxPerson && members.length>=limits.personCount}}" plain type="danger">\n报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
+<van-tag wx:if="{{remains.entry.time<0&&limits.allowPopup}}" plain type="primary">\n该活动允许空降</van-tag>
+<van-tag wx:if="{{websites.lvyeorg.tid}}" plain type="danger">\n该活动已被设置为与绿野ORG网站同步，您的报名信息将自动同步到网站！</van-tag>
+
+<!--故意空白，防止遮挡-->
+<van-cell  title="  " border="{{false}}"/>
+<van-cell  title="  " border="{{false}}"/>
+<van-cell  title="  " border="{{false}}"/>
+
+<!--报名按钮-->
+<block wx:if="{{status=='已发布'}}">
+  <!--替补-->
+  <block wx:if="{{(limits.maxPerson && members.length>=limits.personCount) && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
+    <form bindsubmit="tapBench" report-submit="true">
+      <button form-type="submit" class="no_btn">
+        <form bindsubmit="tapBench" report-submit="true">
+          <button form-type="submit" class="no_btn">
+            <view class="fix" style="left:30rpx">
+              <form bindsubmit="tapBench" report-submit="true">
+                <button style="color:#1aad19;background-color:#ffffff" disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" size="large" plain>替补</button>
+              </form>
+            </view>
+          </button>
+        </form>
+      </button>
+    </form>
+  </block>
+  <!--占坑-->
+  <block wx:if="{{(!limits.maxPerson || members.length<limits.personCount) && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
+    <form bindsubmit="tapOcuppy" report-submit="true">
+      <button form-type="submit" class="no_btn">
+        <form bindsubmit="tapOcuppy" report-submit="true">
+          <button form-type="submit" class="no_btn">
+            <view class="fix" style="left:200rpx">
+              <form bindsubmit="tapOcuppy" report-submit="true">
+                <button style="color:#1aad19;background-color:#ffffff" form-type="submit" disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" size="large" plain>占坑</button>
+              </form>
+            </view>
+          </button>
+        </form>
+      </button>
+    </form>
+  </block>
+  <!--报名-->
+  <block wx:if="{{(!limits.maxPerson || members.length<limits.personCount) && (entryInfo.status=='浏览中'||entryInfo.status=='占坑中') && remains.entry.time>=0}}">
+    <form bindsubmit="tapEntry" report-submit="true">
+      <button form-type="submit" class="no_btn">
+        <form bindsubmit="tapEntry" report-submit="true">
+          <button form-type="submit" class="no_btn">
+            <view class="fix" style="left:370rpx">
+              <form bindsubmit="tapEntry" report-submit="true">
+                <button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" style="color:#1aad19;background-color:#ffffff" size="large" plain >报名</button>
+              </form>
+            </view>
+          </button>
+        </form>
+      </button>
+    </form>
+  </block>
+  <!--退出-->
+  <block  wx:if="{{(entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中') && remains.entry.time>=0}}">
+    <view class="fix" style="left:540rpx">
+      <button style="color:#F65959;background-color:#ffffff" plain size="large" bindtap='tapQuit'>退出</button>
+    </view>
+  </block> 
+</block>
+

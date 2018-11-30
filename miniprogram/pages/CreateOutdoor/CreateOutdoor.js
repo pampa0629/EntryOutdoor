@@ -9,7 +9,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
- 
+
 Page({
   data: {
     outdoorid: null, // 页面活动已经存储到数据库中的活动id
@@ -19,11 +19,11 @@ Page({
     modifys: { // 到底更新了哪些条目，这里做一个临时记录
       brief: false, // 文字介绍，图片暂时不管
       meets: false, // 集合地点
-      traffic:false, // 交通方式
+      traffic: false, // 交通方式
       route: false, // 活动路线
       limits: false, // 各类限制条件
       disclaimer: false, // 免责条款
-      status:false, // 活动状态变化
+      status: false, // 活动状态变化
     },
 
     // 常量定义
@@ -47,7 +47,7 @@ Page({
 
     route: {}, // 活动路线，包括途经点和轨迹文件
     meets: [], //集合点，可加多个
-    traffic:null, // 交通方式
+    traffic: null, // 交通方式
     members: [], // 已报名成员（含领队）
     leader: { // 领队的信息也要记录起来
       personid: null,
@@ -72,11 +72,16 @@ Page({
       lvyeorg: {
         //fid: null, // 版块id
         tid: null, // 帖子id
-        keepSame:false, // 是否保持同步
+        keepSame: false, // 是否保持同步
         waitings: [], // 要同步但尚未同步的信息列表
       }
     },
     showPopup: false, // 分享弹出菜单
+    cancelDlg: { // 活动取消对话框
+      show: false,
+      reason: "",
+      Reasons: ["人数不够", "空气污染太重", "天气状况不适合户外活动", "领队临时有事","其他原因"],
+    } 
   },
 
   // 设置临时修改项目全部为false或true，包括整体是否修改标记
@@ -85,7 +90,7 @@ Page({
     this.data.modifys = { // 到底更新了哪些条目，这里做一个临时记录
       brief: result,
       meets: result,
-      traffic:result, 
+      traffic: result,
       route: result,
       limits: result,
       disclaimer: result,
@@ -158,11 +163,13 @@ Page({
     const self = this
     console.log("keepSameWithWebsites")
     console.log(self.data.websites)
-    if (self.data.websites  
-      && self.data.websites.lvyeorg 
-      && (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
-      && self.data.leader.personid == app.globalData.personid // 并且还是自己的活动
-      && self.data.outdoorid // 活动id必须有了
+    if (self.data.websites &&
+      self.data.websites.lvyeorg &&
+      (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
+      &&
+      self.data.leader.personid == app.globalData.personid // 并且还是自己的活动
+      &&
+      self.data.outdoorid // 活动id必须有了
     ) {
       this.keepSameWithLvyeorg() // 同步到org上
     }
@@ -170,11 +177,11 @@ Page({
 
   // 新建活动就是把 outdoor id清空，把关键信息删除
   newOutdoor: function(e) {
-    if(e){
+    if (e) {
       console.log(e.detail)
-      template.saveFormid(this.data.personid, e.detail.formId)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId)
     }
-    if(this.data.outdoorid){
+    if (this.data.outdoorid) {
       this.setData({
         outdoorid: null,
       })
@@ -197,15 +204,15 @@ Page({
     self.setWebsitesDefault() // 把网址同步的设置置空
   },
 
-  setWebsitesDefault:function(){
+  setWebsitesDefault: function() {
     this.setData({
-      "websites.lvyeorg.tid":null,
+      "websites.lvyeorg.tid": null,
       "websites.lvyeorg.waitings": [],
-      "websites.lvyeorg.keepSame": (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame:false),
+      "websites.lvyeorg.keepSame": (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame : false),
     })
     console.log(this.data.websites)
   },
-  
+
   onShow: function() {
     const self = this;
     var outdoorid = util.loadOutdoorID()
@@ -263,14 +270,14 @@ Page({
     }
     console.log(self.data.websites)
     // 交通方式
-    if (res.data.traffic){
+    if (res.data.traffic) {
       self.setData({
         traffic: res.data.traffic,
       })
     }
     // 活动路线，增加轨迹文件
     console.log(self.data.route)
-    if (res.data.route instanceof Array){ // 说明是老格式
+    if (res.data.route instanceof Array) { // 说明是老格式
       self.setData({
         "route.wayPoints": res.data.route, // 途经点
         "route.trackFiles": [], // 轨迹文件
@@ -404,10 +411,59 @@ Page({
     this.createTitle()
   },
 
+  closeCancelDlg(e) {
+    console.log(e)
+    this.setData({
+      "cancelDlg.show": false
+    })
+  },
+
+  confirmCancelDlg(e) {
+    console.log(e)
+    console.log(this.data.cancelDlg.reason)
+    if(this.data.cancelDlg.reason){
+      this.updateStatus("已取消")
+      // 活动取消，得给所有已报名队员发消息
+      this.postCancel2Template()
+      this.setData({
+        "cancelDlg.show": false
+      })
+    } else {
+      this.setData({
+        "cancelDlg.show": true
+      })
+      wx.showModal({
+        title: '必须选择',
+        content: '取消活动必须选择一个取消原因',
+        confirmText:"知道了",
+        showCancel:false,
+      })
+    }
+  },
+
+  changeCancelReason(e) {
+    console.log(e)
+    this.setData({
+      "cancelDlg.reason": e.detail
+    })
+  },
+
+  // 把取消的事情通告队员
+  postCancel2Template() {
+    const self = this
+    self.data.members.forEach((item, index) => {
+      if (index > 0) { // 跳过领队
+        template.sendCancelMsg2Member(item.personid, self.data.title.whole, self.data.outdoorid, self.data.leader.userInfo.nickName, self.data.cancelDlg.reason) 
+      }
+    })
+  },
+
   // 活动一旦发起，就不能删除，只能取消
   // 取消活动就是修改 Outdoors表中的status
   cancelOutdoor: function() {
-    this.updateStatus("已取消")
+    this.setData({
+      "cancelDlg.show": true
+    })
   },
 
   // 恢复活动
@@ -428,7 +484,7 @@ Page({
   // 在活动还没有发布的时候，保存活动草稿
   saveDraft: function(e) {
     console.log(e.detail.formId)
-    template.saveFormid(this.data.leader.personid, e.detail.formId)
+    template.saveOutdoorFormid(this.data.outdoorid, e.detail.formId)
     if (this.data.hasModified) {
       console.log("saveDraft")
       this.saveOutdoor("拟定中")
@@ -436,19 +492,19 @@ Page({
   },
 
   // 发布活动
-  publishOutdoor: function(e) { 
+  publishOutdoor: function(e) {
     console.log(e.detail.formId)
-    template.saveFormid(this.data.leader.personid, e.detail.formId)
-    if (this.data.status != "已发布"){
+    template.saveOutdoorFormid(this.data.outdoorid, e.detail.formId)
+    if (this.data.status != "已发布") {
       console.log("publishOutdoor")
       this.saveOutdoor("已发布")
     }
   },
 
   // 保存 活动的更新信息
-  saveModified: function (e) {
+  saveModified: function(e) {
     console.log(e.detail.formId)
-    template.saveFormid(this.data.leader.personid, e.detail.formId)
+    template.saveOutdoorFormid(this.data.outdoorid, e.detail.formId)
     if (this.data.hasModified) {
       console.log("saveModified")
       this.saveOutdoor("已发布")
@@ -465,7 +521,7 @@ Page({
       data: {
         status: self.data.status,
       }
-    }).then(res=>{
+    }).then(res => {
       // 同步到网站
       self.data.modifys.status = true // 标记一下：活动状态改变了
       self.keepSameWithWebsites()
@@ -484,7 +540,7 @@ Page({
         route: self.data.route,
         meets: self.data.meets,
         traffic: self.data.traffic,
-        status: self.data.status, 
+        status: self.data.status,
         members: members,
         brief: self.data.brief,
         limits: self.data.limits,
@@ -520,7 +576,7 @@ Page({
             status: self.data.status,
             brief: self.data.brief,
             limits: self.data.limits,
-            websites:self.data.websites, // 这里得记录当前用户状态
+            websites: self.data.websites, // 这里得记录当前用户状态
           }
         }).then(res => {
           self.setData({
@@ -592,10 +648,10 @@ Page({
     console.log(app.globalData.lvyeorgInfo)
     // 逻辑关系：
     // 看 outdoors中是否设置了 同步
-    if (self.data.websites && self.data.websites.lvyeorg){
+    if (self.data.websites && self.data.websites.lvyeorg) {
       if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
         app.callbackLoginLvyeorg = (res) => {
-          if(res.username){
+          if (res.username) {
             self.post2Lvyeorg()
           }
         }
@@ -607,23 +663,23 @@ Page({
   },
 
   // 内部处理函数，避免重复代码
-  post2Lvyeorg:function(){
+  post2Lvyeorg: function() {
     console.log("post2Lvyeorg:function")
     const self = this
     // 没有 tid，则先生成tid；再处理waitings
-    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && self.data.status=="已发布" ) { // 没有tid，则必须有keepSame，同时还必须是“已发布”状态的活动
+    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && self.data.status == "已发布") { // 没有tid，则必须有keepSame，同时还必须是“已发布”状态的活动
       lvyeorg.addThread(self.data.outdoorid, self.data, app.globalData.lvyeorgInfo.isTesting, tid => {
-        if(tid){
+        if (tid) {
           self.data.websites.lvyeorg.tid = tid
           lvyeorg.postWaitings(self.data.outdoorid, tid, null)
         } else { // 发帖失败，则以后再发；这里似乎没有什么好干的事情
         }
       })
-    } else if (self.data.websites.lvyeorg.tid){
+    } else if (self.data.websites.lvyeorg.tid) {
       // 有tid，则先把waitings发出去
-      lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback=>{
+      lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback => {
         // 最后 发布更新信息
-        self.postModifys() 
+        self.postModifys()
       })
     }
   },
@@ -729,7 +785,7 @@ Page({
       }
     })
   },
- 
+
   // 调出上传照片页面
   clickUploadPics: function() {
     if (this.data.outdoorid) {

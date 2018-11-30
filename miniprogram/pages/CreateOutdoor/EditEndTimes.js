@@ -8,7 +8,7 @@ Page({
 
     ocuppy: { date: "不限", time: null }, // 占坑截止时间
     entry: { date: "不限", time: null }, // 报名截止时间
-    hasModified: false,
+    hasModified: false, 
   }, 
 
   onLoad: function (options) {

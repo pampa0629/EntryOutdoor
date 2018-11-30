@@ -22,7 +22,8 @@
     "pages/CreateOutdoor/EditEndTimes",
     "pages/CreateOutdoor/EditEquipments",
     "pages/EntryOutdoor/LookEquipments",
-    "pages/CreateOutdoor/EditTraffic"
+    "pages/CreateOutdoor/EditTraffic",
+    "pages/CreateOutdoor/EditWxnotice"
   ],
   "window": {
     "backgroundTextStyle": "light",

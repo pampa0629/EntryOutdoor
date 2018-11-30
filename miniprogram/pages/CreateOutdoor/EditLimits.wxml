@@ -1,5 +1,3 @@
-<!--pages/CreateOutdoor/EditLimits.wxml-->
-
 <!--活动人数限制-->
 <van-panel title="活动人数限制" >
   <van-checkbox-group>
@@ -31,9 +29,12 @@
   </van-checkbox-group>
 </van-panel>
 
-<!--附加要求-->
+<!--截止时间-->
 <van-cell title="占坑/报名截止时间" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{false}}"/>
 
 <!--活动装备-->
 <van-cell title="活动装备要求" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{false}}"/>
+
+<!--微信服务通知-->
+<van-cell title="微信服务通知" label="" value="点击设置微信通知" is-link url="EditWxnotice" border="{{false}}"/>
 

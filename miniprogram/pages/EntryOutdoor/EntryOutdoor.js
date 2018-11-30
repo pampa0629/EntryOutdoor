@@ -10,7 +10,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command 
-
+ 
 Page({
     
   data: {
@@ -283,6 +283,12 @@ Page({
         route: res.data.route,
       })
     }
+    // 微信服务通知
+    if (!res.data.limits || !res.data.limits.wxnotice) {
+      self.setData({
+        "limits.wxnotice": template.getDefaultNotice()
+      })
+    }
     // next 
 
   },
@@ -506,13 +512,33 @@ Page({
 
   // 把报名消息给领队发个微信模板消息
   postEntry2Template(){
+    const self = this
+    let notice = self.data.limits.wxnotice
     console.log("postEntry2Template")
-    var key = this.data.outdoorid + "." + this.data.entryInfo.personid
-    var count = parseInt(wx.getStorageSync(key))
-    console.log(count)
-    if (count<10000){ // 每个人只发送一次
-      template.sendEntryMessage(this.data.members[0].personid, this.data.userInfo, this.data.entryInfo, this.data.title.whole, this.data.outdoorid)
-      wx.setStorageSync(key, count+1)
+    // 如果领队设定活动不需要审核，则给自己发微信消息
+    if(true){ // todo
+      // 活动主题，领队联系方式，自己的昵称，报名状态，
+      template.setEntryMsg2Self(app.globalData.personid, this.data.title.whole, this.data.members[0].userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.outdoorid)
+    }
+
+    if (notice.accept) { // 领队设置接收微信消息
+      if ( (notice.entryCount > notice.alreadyCount) || (notice.fullNotice && (self.data.limit.maxPerson && self.data.members.length >= self.data.limit.personCount)) ) { // 前几个报名，或者接收最后一个报名，才发送微信消息
+        var key = this.data.outdoorid + "." + this.data.entryInfo.personid
+        var count = parseInt(wx.getStorageSync(key))
+        console.log(count)
+        if (count < 1) { // 每个人只发送一次
+          template.sendEntryMsg2Leader(this.data.members[0].personid, this.data.userInfo, this.data.entryInfo, this.data.title.whole, this.data.outdoorid)
+          wx.setStorageSync(key, count + 1)
+          // 发送结束，得往数据库里面加一条；还必须调用云函数
+          wx.cloud.callFunction({
+            name: 'addAlreadyNotice', // 云函数名称
+            data: {
+              outdoorid: self.data.outdoorid,
+              count: 1,
+            }
+          })
+        }
+      }
     }
   },
 
@@ -551,7 +577,7 @@ Page({
   // 替补
   tapBench: function(e) {
     console.log(e.detail)
-    template.saveFormid(this.data.personid, e.detail.formId)
+    template.savePersonFormid(this.data.personid, e.detail.formId)
     if (this.data.entryInfo.status != "替补中") {
       this.entryOutdoor("替补中")
     }
@@ -560,7 +586,7 @@ Page({
   // 占坑
   tapOcuppy: function(e) {
     console.log(e.detail) 
-    template.saveFormid(this.data.personid, e.detail.formId)
+    template.savePersonFormid(this.data.personid, e.detail.formId)
     if (this.data.entryInfo.status != "占坑中"){
       this.entryOutdoor("占坑中")
     }
@@ -569,7 +595,7 @@ Page({
   // 报名
   tapEntry: function(e) {
     console.log(e.detail)
-    template.saveFormid(this.data.personid, e.detail.formId)
+    template.savePersonFormid(this.data.personid, e.detail.formId)
     if (this.data.entryInfo.status != "报名中") {
       this.entryOutdoor("报名中")
     }
@@ -591,16 +617,25 @@ Page({
         if (self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "报名中") {
           changeStatus = true;
         }
-        self.data.members.forEach((item, index)=>{
-          if (changeStatus && item.entryInfo.status == "替补中") {
-            item.entryInfo.status = "报名中"
-            changeStatus = false // 自己退出，只能补上排在最前面的替补
-          }
-          //从members中删掉自己
+        // 删除自己的
+        var selfIndex = -1;
+        self.data.members.forEach((item, index) => {
           if (item.personid == app.globalData.personid) {
-            self.data.members.splice(index, 1)
+            selfIndex = index
           }
         })
+        if (selfIndex>=0){
+          self.data.members.splice(selfIndex, 1)
+        }
+        // 把第一个替补改为“报名中”
+        if (changeStatus){
+          self.data.members.forEach((item, index)=>{
+            if (changeStatus && self.data.members[index].entryInfo.status == "替补中") {
+              self.data.members[index].entryInfo.status = "报名中"
+              changeStatus = false // 自己退出，只能补上排在最前面的替补
+            }
+          })
+        }
         
         // 云函数
         wx.cloud.callFunction({

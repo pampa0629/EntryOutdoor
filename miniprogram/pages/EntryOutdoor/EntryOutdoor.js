@@ -439,7 +439,7 @@ Page({
   },
 
   // 报名就是在活动表中加上自己的id，同时还要在Person表中加上活动的id
-  entryOutdoor: function(status) {
+  entryOutdoor: function(status, formid) {
     const self = this;
     console.log("EntryOutdoors.js in entryOutdoor fun, status is:" + JSON.stringify(status, null, 2))
     // 再判断一下是否属于 修改报名的类型，即在“占坑”和“报名”中切换
@@ -507,28 +507,30 @@ Page({
     // 把自己的报名信息同步到网站上
     self.postEntry2Websites(false)
     // 报名后给领队发个微信模板消息
-    self.postEntry2Template()
+    self.postEntry2Template(formid)
   },
 
   // 把报名消息给领队发个微信模板消息
-  postEntry2Template(){
+  postEntry2Template(formid){
     const self = this
     let notice = self.data.limits.wxnotice
     console.log("postEntry2Template")
     // 如果领队设定活动不需要审核，则给自己发微信消息
     if(true){ // todo
       // 活动主题，领队联系方式，自己的昵称，报名状态，
-      template.setEntryMsg2Self(app.globalData.personid, this.data.title.whole, this.data.members[0].userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.outdoorid)
+      template.sendEntryMsg2Self(app.globalData.personid, this.data.title.whole, this.data.members[0].userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.outdoorid, formid)
     }
 
+    console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
       if ( (notice.entryCount > notice.alreadyCount) || (notice.fullNotice && (self.data.limit.maxPerson && self.data.members.length >= self.data.limit.personCount)) ) { // 前几个报名，或者接收最后一个报名，才发送微信消息
         var key = this.data.outdoorid + "." + this.data.entryInfo.personid
         var count = parseInt(wx.getStorageSync(key))
-        console.log(count)
+        if (!count) { count = 0 }
+        console.log("count:" + count)
         if (count < 1) { // 每个人只发送一次
           template.sendEntryMsg2Leader(this.data.members[0].personid, this.data.userInfo, this.data.entryInfo, this.data.title.whole, this.data.outdoorid)
-          wx.setStorageSync(key, count + 1)
+          wx.setStorageSync(key, parseInt(count) + 1)
           // 发送结束，得往数据库里面加一条；还必须调用云函数
           wx.cloud.callFunction({
             name: 'addAlreadyNotice', // 云函数名称
@@ -576,28 +578,27 @@ Page({
 
   // 替补
   tapBench: function(e) {
-    console.log(e.detail)
-    template.savePersonFormid(this.data.personid, e.detail.formId)
-    if (this.data.entryInfo.status != "替补中") {
-      this.entryOutdoor("替补中")
-    }
+    this.doEntry("替补中", e.detail.formId)
   },
 
   // 占坑
   tapOcuppy: function(e) {
-    console.log(e.detail) 
-    template.savePersonFormid(this.data.personid, e.detail.formId)
-    if (this.data.entryInfo.status != "占坑中"){
-      this.entryOutdoor("占坑中")
-    }
+    this.doEntry("占坑中", e.detail.formId)
   },
 
   // 报名
   tapEntry: function(e) {
-    console.log(e.detail)
-    template.savePersonFormid(this.data.personid, e.detail.formId)
-    if (this.data.entryInfo.status != "报名中") {
-      this.entryOutdoor("报名中")
+    this.doEntry("报名中", e.detail.formId)
+  },
+
+  // 替补、占坑、报名，用同一个函数，减少重复代码
+  doEntry(status, formid){
+    console.log(status) 
+    console.log(formid) 
+    if (this.data.entryInfo.status != status) {
+      this.entryOutdoor(status, formid)
+    } else {
+      template.savePersonFormid(this.data.personid, formid, null)
     }
   },
 

@@ -1,28 +1,25 @@
 <!--微信服务通知-->
 <van-panel title="微信服务通知">
-  <van-checkbox-group>
-    <van-cell title="{{wxnotice.accept?'接收通知':'不接收通知'}}" clickable bind:click="checkAccept" border="{{wxnotice.accept}}">
-      <van-checkbox value="{{wxnotice.accept}}" bind:change="checkAccept" />
-    </van-cell>
-  </van-checkbox-group>
+  <van-cell title="{{wxnotice.accept?'接收通知':'不接收通知'}}" clickable bind:click="checkAccept" border="{{wxnotice.accept}}">
+    <van-checkbox value="{{wxnotice.accept}}" bind:change="checkAccept" />
+  </van-cell>
+  
   <block wx:if="{{wxnotice.accept}}">
     <!--接收前几位的报名通知-->
     <van-cell title="接收前{{wxnotice.entryCount}}位队员报名的微信通知" border="{{false}}">
       <van-stepper value="{{wxnotice.entryCount}}" min="1" max="{{wxnotice.formids.length}}" bind:change="bindAddEntry" /> 
     </van-cell>
     <!--是否接收满员通知-->
-    <van-checkbox-group>
-      <van-cell title="{{wxnotice.fullNotice?'满员时通知':'满员时不通知'}}" clickable bind:click="checkFullNotice" border="{{false}}">
-        <van-checkbox value="{{wxnotice.fullNotice}}" bind:change="checkFullNotice" />
-      </van-cell>
-    </van-checkbox-group>
+    <van-cell title="{{wxnotice.fullNotice?'满员时通知':'满员时不通知'}}" clickable bind:click="checkFullNotice" border="{{false}}">
+      <van-checkbox value="{{wxnotice.fullNotice}}" bind:change="checkFullNotice" />
+    </van-cell>
   </block>
 </van-panel>
 
 <!--提示和增加通知数量上限-->
-<van-tag type="primary" plain>当前可接收微信通知数量的上限是：{{wxnotice.formids.length}}，您可点击下面按钮增加通知数量
+<van-tag type="primary" plain>当前可接收微信通知数量的上限是：{{wxnotice.formids.length}}，您可点击下面按钮增加上限。
 </van-tag>
-<van-tag type="danger" plain>注意：由于微信限制，通知有效期为七天，过期将无法收到，需重新点击按钮。</van-tag>
+<van-tag type="danger" plain>注意：由于微信限制，通知有效期为七天，过期将无法收到，需重新点击下面按钮。</van-tag>
 
 <form bindsubmit="addCount" report-submit="true">
   <button form-type="submit" class="no_btn">

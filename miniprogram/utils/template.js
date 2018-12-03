@@ -19,11 +19,10 @@ const getDefaultNotice = () => {
 }
 
 const buildOneFormid = (formid) => {
-  var id = parseInt(formid)
-  var expire = util.nextDate(new Date(), 7).getTime()
-  if (id) { // 模拟的不要
+  if (formid.indexOf("mock") == -1) { // 模拟的不要
+    var expire = util.nextDate(new Date(), 7).getTime()
     return {
-      "formid": id,
+      "formid": formid,
       'expire': expire
     }
   } else {
@@ -32,13 +31,18 @@ const buildOneFormid = (formid) => {
 }
 
 // 把获得的formid给指定人员存起来，还有过期时间
-const savePersonFormid = (personid, formid) => {
-  console.log(formid)
+const savePersonFormid = (personid, formid, callback) => {
+  console.log("savePersonFormid")
   var result = buildOneFormid(formid)
   if (result) {
     dbPersons.doc(personid).update({
       data: {
         formids: _.push(result)
+      }
+    }).then(res => {
+      console.log("savePersonFormid OK: " + formid)
+      if (callback) {
+        callback()
       }
     })
   }
@@ -60,6 +64,8 @@ const saveOutdoorFormid = (outdoorid, formid) => {
 const loadOutdoorFormids = (outdoorid, callback) => {
   dbOutdoors.doc(outdoorid).get().then(res => {
     if (callback && res.data.limits && res.data.limits.wxnotice) {
+      console.log("loadOutdoorFormids OK")
+      console.log(res.data.limits.wxnotice.formids)
       callback(res.data.limits.wxnotice.formids)
     }
   })
@@ -93,8 +99,9 @@ const sendCancelMsg2Member = (personid, title, outdoorid, leader, reason) => {
       },
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-    var formid = fetchPersonFormid(personid, res.data.formids)
-    sendMessage(openid, tempid, formid, page, data)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
   })
 }
 
@@ -104,8 +111,8 @@ const buildPage = (page, outdoorid) => {
 }
 
 // 给自己发报名消息
-const setEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid)=>{
-  console.log("setEntryMsg2Self")
+const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid, formid) => {
+  console.log("sendEntryMsg2Self")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
     var tempid = "IL3BSL-coDIGoIcLwxj6OzC-F68qCMknJTNlk--tL2M"
@@ -124,8 +131,8 @@ const setEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid)=>
       }
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-    var formid = fetchPersonFormid(personid, res.data.formids)
     sendMessage(openid, tempid, formid, page, data)
+    //fetchPersonFormid(personid, res.data.formids, formid=>{ })
   })
 }
 
@@ -149,89 +156,106 @@ const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) =>
         "value": userInfo.phone
       },
       "keyword5": { // 是否认路
-        "value": entryInfo.knowWay
+        "value": (entryInfo.knowWay ? "认路" : "不认路")
       },
       "keyword6": { // 集合地点
-        "value": entryInfo.meetsIndex + 1
+        "value": "第" + (entryInfo.meetsIndex + 1) + "集合地点"
       }
     }
     var page = buildPage("CreateOutdoor", outdoorid)
-    var formid = fetchOutdoorFormid(leaderid)
-    sendMessage(openid, tempid, formid, page, data)
+    fetchOutdoorFormid(outdoorid, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
   })
 }
 
 // 得到活动的form id
-const fetchOutdoorFormid = (outdoorid) => {
+const fetchOutdoorFormid = (outdoorid, callback) => {
   // 得到formids
   loadOutdoorFormids(outdoorid, formids => {
     // 找到第一个能用的formid，把前面没用的删掉
-    var result = findFirstFormid(formids)
-    // 最后调用云函数写回去
-    wx.cloud.callFunction({
-      name: 'updateOutdoorFormids', // 云函数名称
-      data: {
-        outdoorid: outdoorid,
-        formids: result.formids,
-      },
+    findFirstFormid(formids, result => {
+      // 最后调用云函数写回去
+      wx.cloud.callFunction({
+        name: 'updateOutdoorFormids', // 云函数名称
+        data: {
+          outdoorid: outdoorid,
+          formids: result.formids,
+        },
+      })
+      if (callback) {
+        callback(result.formid)
+      }
     })
-    return result.formid
   })
 }
 
 // 找到第一个能用的formid，把前面没用的删掉（找到的也得删掉）
-const findFirstFormid = (formids) => {
+const findFirstFormid = (formids, callback) => {
+  console.log("findFirstFormid")
   if (formids) {
     var formid = ""
     var hasFind = false
     var findIndex = -1
+    console.log("before find, formids are: ")
+    console.log(formids)
     formids.forEach((item, index) => {
       if (!hasFind && item.expire > (new Date()).getTime()) {
         formid = item.formid
         hasFind = true
         findIndex = index
+        console.log("find formid, is: " + formid)
+        formids.splice(0, findIndex + 1) // 前面的全部删除，包括找到的这个
+        if (callback) {
+          callback({
+            "formid": formid,
+            "formids": formids
+          })
+          return // 返回
+        }
+      } else if (!hasFind && index == formids.length - 1) { // 到最后仍然没找到
+        formids = [] // 清空
+        if (callback) {
+          callback({
+            "formid": "no find formid",
+            "formids": []
+          })
+          return // 返回
+        }
       }
     })
-    if (hasFind && findIndex >= 0) {
-      console.log(findIndex)
-      formids.splice(0, findIndex + 1) // 前面的全部删除，包括找到的这个
-    } else if (!hasFind) {
-      formids = [] // 清空
-    }
-    return {
-      "formid": formid,
-      "formids": formids
-    }
-  }
-  return {
-    "formid": "",
-    "formids": []
   }
 }
 
 // 得到某人的form id
-const fetchPersonFormid = (personid, formids) => {
+const fetchPersonFormid = (personid, formids, callback) => {
+  console.log("fetchPersonFormid")
   // 这里得调用云函数才行了，拿到第一个合格的formid，不合格的全部删掉 
-  var result = findFirstFormid(formids)
+  findFirstFormid(formids, result => {
+    console.log("find result:")
+    console.log(result)
 
-  // 最后调用云函数写回去
-  wx.cloud.callFunction({
-    name: 'updatePersonFormids', // 云函数名称
-    data: {
-      personid: personid,
-      formids: result.formids,
-    },
+    // 最后调用云函数写回去
+    wx.cloud.callFunction({
+      name: 'updatePersonFormids', // 云函数名称
+      data: {
+        personid: personid,
+        formids: result.formids,
+      },
+    })
+    if (callback) {
+      callback(result.formid)
+    }
   })
-  return result.formid
 }
 
 // 给特定openid发特定id的模板消息
 const sendMessage = (openid, tempid, formid, page, data) => {
   console.log("sendMessage")
-  console.log(openid)
-  console.log(tempid)
-  console.log(formid)
-  console.log(page)
+  console.log("openid: " + openid)
+  console.log("tempid: " + tempid)
+  console.log("formid: " + formid)
+  console.log("page: " + page)
   console.log(data)
   if (formid) {
     wx.cloud.callFunction({
@@ -263,6 +287,6 @@ module.exports = {
   saveOutdoorFormid: saveOutdoorFormid,
 
   sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息
-  setEntryMsg2Self: setEntryMsg2Self, //  给自己发报名消息
+  sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
   sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
 }

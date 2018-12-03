@@ -9,7 +9,7 @@ Page({
 
   data: {
     outdoorid:null,
-    wxnotice:null, 
+    wxnotice:{}, 
     hasModified: false, 
   },
 
@@ -65,16 +65,15 @@ Page({
       hasModified: true
     })
     console.log(this.data.wxnotice.entryCount)
-    console.log(this.data.wxnotice.entryCount)
   },
 
   checkFullNotice(){
     const self = this;
-    console.log(self.data.wxnotice.fullNotice)
     self.setData({
       "wxnotice.fullNotice": !self.data.wxnotice.fullNotice,
       hasModified: true
     })
+    console.log(self.data.wxnotice.fullNotice)
   },
 
   addCount(e){

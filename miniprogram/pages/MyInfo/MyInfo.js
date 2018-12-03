@@ -26,7 +26,7 @@ Page({
     lvyeOrgUsername:"", // 绿野org 登录用户名
     lvyeOrgButton:"绿野ORG登录", // 按钮上显示的文字
 
-    isTesting: true, // for test， false true
+    isTesting: false, // for test， false true
   },
 
   onLoad: function() {
@@ -232,7 +232,7 @@ Page({
           showCancel: false,
           confirmText: "知道了",
           content: "已经复制本小程序的帮助文档网页地址，请粘贴到浏览器中查看详细内容。"+
-                  "\n当前版本号：0.6.2  \n作者：攀爬",
+                  "\n当前版本号：0.6.3  \n作者：攀爬",
         })
       }
     })

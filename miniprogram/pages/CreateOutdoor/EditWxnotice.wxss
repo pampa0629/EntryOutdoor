@@ -16,5 +16,5 @@
   height:150rpx;
   width:500rpx;
   position:fixed;
-  bottom: 600rpx;
+  bottom: 400rpx;
 }

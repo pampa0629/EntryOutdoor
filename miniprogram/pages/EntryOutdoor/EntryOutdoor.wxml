@@ -47,6 +47,12 @@
       <view class="icon_tip">首页</view>
     </view>
   </van-col>
+  <!--取消通知-->
+  <van-col wx:if="{{status=='已取消'}}" span="10" offset="2">
+    <view style="flex-direction:column">
+      <view style="color:#F65959;font-size:20pt">本活动已取消</view>
+    </view>
+  </van-col>
 </van-row>
 
 <!--活动信息-->
@@ -179,7 +185,7 @@
     </form>
   </block>
   <!--报名-->
-  <block wx:if="{{(!limits.maxPerson || members.length<limits.personCount) && (entryInfo.status=='浏览中'||entryInfo.status=='占坑中') && remains.entry.time>=0}}">
+  <block wx:if="{{( (entryInfo.status=='浏览中' && (!limits.maxPerson || members.length<limits.personCount)) ||entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">
     <form bindsubmit="tapEntry" report-submit="true">
       <button form-type="submit" class="no_btn">
         <form bindsubmit="tapEntry" report-submit="true">

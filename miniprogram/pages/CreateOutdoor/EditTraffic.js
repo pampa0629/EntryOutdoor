@@ -1,7 +1,7 @@
 const select = require('../../libs/select.js')
 
 Page({
-
+ 
   data: {
     Modes: ["公共交通", "包车", "自驾"],
     traffic: {
@@ -9,6 +9,7 @@ Page({
       cost: null, // 费用AA，自理（公交时），免费（市内自驾）
       money: 50, // 大约多少钱
       car: {
+        carInfo: "", // 汇总显示的车辆信息
         brand: "", // 车型(包车/自驾时选用) 
         color: "", // 颜色 
         plate: "", // 车牌号码(后四位)
@@ -61,6 +62,7 @@ Page({
   },
 
   flashByMode() {
+    const self = this
     if (this.data.traffic.mode == "公共交通") {
       this.setData({
         Costs: ["费用自理"],
@@ -74,7 +76,6 @@ Page({
     } else if (this.data.traffic.mode == "自驾") {
       this.setData({
         Costs: ["费用AA", "免费"],
-        // "traffic.cost": "费用AA",
       })
     }
   },

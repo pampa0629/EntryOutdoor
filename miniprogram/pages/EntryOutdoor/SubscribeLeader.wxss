@@ -1,0 +1,20 @@
+/* miniprogram/pages/EntryOutdoor/SubscribeLeader.wxss */
+
+.no_btn{
+  width: 1rpx;
+  height: 1rpx;
+  margin: 0;
+  padding: 0;
+  /* position: fixed; */
+  /* top: 150rpx; */
+  border-color:transparent;
+  border:none;
+  background-color:transparent;
+}
+
+.fix{
+  height:150rpx;
+  width:300rpx;
+  position:fixed;
+  top: 10rpx;
+}

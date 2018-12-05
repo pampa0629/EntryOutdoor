@@ -23,7 +23,8 @@
     "pages/CreateOutdoor/EditEquipments",
     "pages/EntryOutdoor/LookEquipments",
     "pages/CreateOutdoor/EditTraffic",
-    "pages/CreateOutdoor/EditWxnotice"
+    "pages/CreateOutdoor/EditWxnotice",
+    "pages/EntryOutdoor/SubscribeLeader"
   ],
   "window": {
     "backgroundTextStyle": "light",

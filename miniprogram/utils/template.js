@@ -81,6 +81,30 @@ const personid2openid = (personid, callback) => {
   })
 }
 
+// 给订阅者发“新活动”消息
+const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone) =>{
+  console.log("sendCreateMsg2Subscriber")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "TpeH_K6s2zQSk49oJT3koMSlaSXQIoZjatxB4Wd_dBE"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 内容
+        "value": title
+      },
+      "keyword2": { // 备注
+        "value": "由于微信限制，不得已用此标题，见谅！"
+      },
+      "keyword3": { // 联系电话
+        "value": phone
+      },
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
 // 发送活动取消的消息
 const sendCancelMsg2Member = (personid, title, outdoorid, leader, reason) => {
   console.log("sendCancelMsg2Member")
@@ -174,7 +198,7 @@ const fetchOutdoorFormid = (outdoorid, callback) => {
   // 得到formids
   loadOutdoorFormids(outdoorid, formids => {
     // 找到第一个能用的formid，把前面没用的删掉
-    findFirstFormid(formids, result => {
+    findFirstFormid(formids, true, result => {
       // 最后调用云函数写回去
       wx.cloud.callFunction({
         name: 'updateOutdoorFormids', // 云函数名称
@@ -190,8 +214,29 @@ const fetchOutdoorFormid = (outdoorid, callback) => {
   })
 }
 
-// 找到第一个能用的formid，把前面没用的删掉（找到的也得删掉）
-const findFirstFormid = (formids, callback) => {
+// 清理过期的formids，回调返回可用的formids
+const clearPersonFormids=(personid, callback)=>{
+  dbPersons.doc(personid).get().then(res=>{
+    var oldCount = res.data.formids
+    findFirstFormid(res.data.formids, false, resFormids=>{
+      if (oldCount > resFormids.formids.length) {
+        wx.cloud.callFunction({
+          name: 'updatePersonFormids', // 云函数名称
+          data: {
+            personid: personid,
+            formids: resFormids.formids,
+          },
+        })
+      }
+      if(callback) {
+        callback(resFormids.formids)
+      }
+    })
+  })
+}
+
+// 找到第一个能用的formid， 把前面没用的删掉（isDelFind表示是否删除找到的id）
+const findFirstFormid = (formids, isDelFind, callback) => {
   console.log("findFirstFormid")
   if (formids) {
     var formid = ""
@@ -205,7 +250,8 @@ const findFirstFormid = (formids, callback) => {
         hasFind = true
         findIndex = index
         console.log("find formid, is: " + formid)
-        formids.splice(0, findIndex + 1) // 前面的全部删除，包括找到的这个
+        var delCount = isDelFind ? (findIndex + 1) : findIndex
+        formids.splice(0, delCount) 
         if (callback) {
           callback({
             "formid": formid,
@@ -231,7 +277,7 @@ const findFirstFormid = (formids, callback) => {
 const fetchPersonFormid = (personid, formids, callback) => {
   console.log("fetchPersonFormid")
   // 这里得调用云函数才行了，拿到第一个合格的formid，不合格的全部删掉 
-  findFirstFormid(formids, result => {
+  findFirstFormid(formids, true, result => {
     console.log("find result:")
     console.log(result)
 
@@ -286,7 +332,10 @@ module.exports = {
   savePersonFormid: savePersonFormid,
   saveOutdoorFormid: saveOutdoorFormid,
 
+  clearPersonFormids: clearPersonFormids, // 清理并得到有效的个人formids
+
   sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息
   sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
+  sendCreateMsg2Subscriber: sendCreateMsg2Subscriber, // 给订阅者发“新活动”消息
   sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
 }

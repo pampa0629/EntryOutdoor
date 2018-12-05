@@ -358,9 +358,9 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   }
 
   // 活动路线
-  if (first || modifys.route) {
+  if ((first || modifys.route) && data.route.wayPoints ) {
     message += NL + "活动路线及行程安排：" + NL
-    data.route.forEach((item, index) => {
+    data.route.wayPoints.forEach((item, index) => {
       message += (index + 1) + "） " + (item.date ? item.date : '当天') + " " + (item.time ? item.time : ' ') + " " + item.place + NL
     })
     message += NL

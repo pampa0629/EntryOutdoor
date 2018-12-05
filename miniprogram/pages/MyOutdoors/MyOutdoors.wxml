@@ -18,7 +18,7 @@
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
       <van-cell wx:for="{{entriedOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable catchtap="tapEntriedOutdoors" title="{{item.title}}" data-pos='{{index}}' bindlongpress="longTap" />
       </scroll-view>
-  </swiper-item>
+  </swiper-item> 
   <!--我关注的-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">

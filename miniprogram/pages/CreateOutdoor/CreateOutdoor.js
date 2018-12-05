@@ -117,12 +117,13 @@ Page({
         }
       })
       return; // 没有登录直接返回
-    } else {
-      this.loadOutdoorInTable(util.loadOutdoorID());
+    } else { // 貌似 onshow中加载即可，这里不需要加载
+    //  this.loadOutdoorInTable(util.loadOutdoorID());
     }
   },
 
   loadOutdoorInTable: function(outdoorid) {
+    console.log("loadOutdoorInTable")
     const self = this
     self.setDefault(); // 每次先把几个关键信息置空，并加载当前用户为leader
     // 判断是否应加载一个在数据库中的活动信息
@@ -498,7 +499,32 @@ Page({
     if (this.data.status != "已发布") {
       console.log("publishOutdoor")
       this.saveOutdoor("已发布")
+      this.post2Subscribe() // 给自己的订阅者发消息
     }
+  },
+
+// 给自己的订阅者发消息
+  post2Subscribe() {
+    const self = this
+    dbPersons.doc(app.globalData.personid).get().then(res => {
+      for (var key in res.data.subscribers) {
+        console.log("key: " + key);
+        console.log(res.data.subscribers[key]);
+        // 加到cared列表中
+        wx.cloud.callFunction({
+          name: 'unshiftPersonCare', // 云函数名称
+          data: {
+            personid: key,
+            outdoorid: self.data.outdoorid,
+            title: self.data.title.whole,
+          },
+        })
+        // 发微信消息
+        if (res.data.subscribers[key].acceptNotice) {
+          template.sendCreateMsg2Subscriber(key, self.data.title.whole, self.data.outdoorid, app.globalData.userInfo.phone)
+        }
+      }
+    })
   },
 
   // 保存 活动的更新信息

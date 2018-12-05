@@ -330,10 +330,31 @@ const loadEquipments = (loaded, date, weather, callback) => {
   }
 }
 
+// 把车辆信息输出为一个短语
+const buildCarInfo=(traffic)=>{
+  var carInfo = ""
+  if (traffic.mode == "公共交通") {
+    carInfo = "无"
+  } else if (traffic.car) {
+    if (traffic.car.brand) {
+      carInfo += traffic.car.brand
+    }
+    if (traffic.car.color) {
+      carInfo += "，" + traffic.car.color
+    }
+    if (traffic.car.plate) {
+      carInfo += "，尾号" + traffic.car.plate
+    }
+  }
+  console.log(carInfo)
+  return carInfo
+}
+
 module.exports = {
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
   buildWeatherMessage: buildWeatherMessage, // 构建天气预报字符串
   getWeather: getWeather, // 获取天气预报
   loadEquipments: loadEquipments, // 推荐的装备
+  buildCarInfo: buildCarInfo, // 构建车辆信息
 }

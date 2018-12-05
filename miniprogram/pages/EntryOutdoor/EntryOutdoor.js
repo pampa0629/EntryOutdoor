@@ -269,6 +269,7 @@ Page({
     if(res.data.traffic){
       self.setData({
         "traffic": res.data.traffic,
+        "traffic.carInfo": outdoor.buildCarInfo(res.data.traffic),
       })
     }
     console.log(self.data.traffic)
@@ -765,6 +766,13 @@ Page({
         })
       })
     }
+  },
+
+  // 跳转到“订阅领队”页面
+  clickLeader(){
+    wx.navigateTo({
+      url: '../EntryOutdoor/SubscribeLeader?leaderid=' + this.data.members[0].personid,
+    })
   },
 
   // 回到首页

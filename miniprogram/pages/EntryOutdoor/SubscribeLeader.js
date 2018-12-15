@@ -1,5 +1,6 @@
 const app = getApp()
 const template = require('../../utils/template.js')
+const cloudfun = require('../../utils/cloudfun.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -44,20 +45,13 @@ Page({
       console.log(self.data.formids.length)
     })
   },
-
+ 
   onUnload(){
     const self = this
     // 领队用云函数
     console.log(self.data.mine)
-    wx.cloud.callFunction({
-      name: 'updatePersonSubscriber', // 云函数名称
-      data: {
-        leaderid: self.data.leaderid,
-        memberid: app.globalData.personid,
-        subscribe: self.data.mine,
-      },
-    })
-  },
+    cloudfun.updatePersonSubscriber(self.data.leaderid, app.globalData.personid, self.data.mine)
+   },
 
   // 订阅领队/取消订阅
   SubscribeLeader(e){ 

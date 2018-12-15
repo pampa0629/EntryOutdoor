@@ -1,4 +1,6 @@
 const util = require('./util.js')
+const cloudfun = require('./cloudfun.js')
+
 const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database()
@@ -137,7 +139,7 @@ const buildPage = (page, outdoorid) => {
 // 给自己发报名消息
 const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid, formid) => {
   console.log("sendEntryMsg2Self")
-  dbPersons.doc(personid).get().then(res => {
+  dbPersons.doc(personid).get().then(res => { 
     var openid = res.data._openid
     var tempid = "IL3BSL-coDIGoIcLwxj6OzC-F68qCMknJTNlk--tL2M"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -155,8 +157,15 @@ const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid, 
       }
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-    sendMessage(openid, tempid, formid, page, data)
-    //fetchPersonFormid(personid, res.data.formids, formid=>{ })
+    console.log(formid)
+    if (formid.indexOf("mock") >= 0) { // 模拟的不能用
+      fetchPersonFormid(personid, res.data.formids, formid=>{
+        console.log(formid)
+        sendMessage(openid, tempid, formid, page, data)
+      })
+    } else {
+      sendMessage(openid, tempid, formid, page, data)
+    }
   })
 }
 
@@ -193,6 +202,64 @@ const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) =>
   })
 }
 
+// 给报名者发消息，询问情况
+const sendChatMsg2Member=(personid, title, outdoorid, nickName, phone, content)=>{
+  console.log("sendChatMsg2Member")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "n97BC6ch3RGsOgmmJeDIvi1Auo830o1A-qr44ZZeg68"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 留言项目
+        "value": title
+      },
+      "keyword2": { // 留言内容
+        "value": content
+      },
+      "keyword3": { // 留言人
+        "value": nickName
+      },
+      "keyword4": { // 电话
+        "value": phone
+      }
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+  
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      console.log(formid)
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
+// 给报名被驳回者发消息
+const sendRejectMsg2Member = (personid, title, outdoorid, nickName, phone, content) => {
+  console.log("sendRejectMsg2Member")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "IXScAdQZb_QmXCHXWCpjXwjwqii9_yOILJtCiGg1al0"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 活动名称
+        "value": title
+      },
+      "keyword2": { // 未通过原因
+        "value": content
+      },
+      "keyword3": { // 审核人
+        "value": nickName
+      },
+      "keyword4": { // 联系电话
+        "value": phone
+      }
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      console.log(formid)
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
 // 得到活动的form id
 const fetchOutdoorFormid = (outdoorid, callback) => {
   // 得到formids
@@ -200,13 +267,7 @@ const fetchOutdoorFormid = (outdoorid, callback) => {
     // 找到第一个能用的formid，把前面没用的删掉
     findFirstFormid(formids, true, result => {
       // 最后调用云函数写回去
-      wx.cloud.callFunction({
-        name: 'updateOutdoorFormids', // 云函数名称
-        data: {
-          outdoorid: outdoorid,
-          formids: result.formids,
-        },
-      })
+      cloudfun.updateOutdoorFormids(outdoorid, result.formids)
       if (callback) {
         callback(result.formid)
       }
@@ -215,18 +276,12 @@ const fetchOutdoorFormid = (outdoorid, callback) => {
 }
 
 // 清理过期的formids，回调返回可用的formids
-const clearPersonFormids=(personid, callback)=>{
+const clearPersonFormids=(personid, callback)=>{ 
   dbPersons.doc(personid).get().then(res=>{
     var oldCount = res.data.formids
     findFirstFormid(res.data.formids, false, resFormids=>{
       if (oldCount > resFormids.formids.length) {
-        wx.cloud.callFunction({
-          name: 'updatePersonFormids', // 云函数名称
-          data: {
-            personid: personid,
-            formids: resFormids.formids,
-          },
-        })
+        cloudfun.updatePersonFormids(personid, resFormids.formids)
       }
       if(callback) {
         callback(resFormids.formids)
@@ -282,13 +337,7 @@ const fetchPersonFormid = (personid, formids, callback) => {
     console.log(result)
 
     // 最后调用云函数写回去
-    wx.cloud.callFunction({
-      name: 'updatePersonFormids', // 云函数名称
-      data: {
-        personid: personid,
-        formids: result.formids,
-      },
-    })
+    cloudfun.updatePersonFormids(personid, result.formids)
     if (callback) {
       callback(result.formid)
     }
@@ -338,4 +387,6 @@ module.exports = {
   sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
   sendCreateMsg2Subscriber: sendCreateMsg2Subscriber, // 给订阅者发“新活动”消息
   sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
+  sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况
+  sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息
 }

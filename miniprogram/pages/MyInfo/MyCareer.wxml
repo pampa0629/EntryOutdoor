@@ -1,0 +1,28 @@
+<!--户外评测-->
+<van-panel title="户外评测">
+  <van-cell wx:if="{{!career.evaluation}}" title="新人户外评测"  value="点击进行户外评测" is-link url="MyEvaluate" border="{{false}}" />
+  <van-cell wx:else title="户外评测" label="户外达人指数为：{{career.evaluation.level}}" value="点击再次评测" is-link url="MyEvaluate" border="{{false}}" />
+</van-panel>
+
+<!--Top N 活动-->
+<van-panel title="我的最佳战绩（Top 3）">
+  <van-cell wx:for="{{career.topn}}" wx:key="item.title" title="Top{{index+1}}路线：{{item.title}}" label="说明：{{item.disc}}"  value="成绩：{{item.result}}" is-link url="EditTopN?n={{index}}" border="{{index<career.topn.length-1}}" />
+</van-panel>
+
+<!--文字描述-->
+<van-panel title="参加的其它户外活动" desc="非小程序报名">
+  <van-row>
+    <van-col span="22" offset="1">
+      <view><text style="font-size:12pt">{{career.other}}</text></view>
+    </van-col>
+  </van-row>
+  
+  <van-row>
+    <van-col span="9" offset="2">
+      <van-button size="large" bind:click="inOther">拷入</van-button>
+    </van-col>
+    <van-col span="9" offset="2">
+      <van-button size="large" bind:click="outOther">拷出</van-button>
+    </van-col>
+  </van-row>
+</van-panel>

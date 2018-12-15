@@ -1,0 +1,43 @@
+
+.page-tail {
+  left: 0;  
+  position: fixed;  
+  bottom: 0;  
+  width: 100%;  
+  z-index: 100;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1rpx solid #dfdfdf;
+}
+
+.resp-input {
+  height: 60rpx;
+  padding-left: 20rpx;
+  margin: 15rpx 0 15rpx 25rpx;
+  /* width: 100%; */
+  border:1px solid #ccc;
+  border-radius: 30rpx;
+}
+
+.resp-at-cell {
+  width: 14%;
+  margin-right: 20rpx;
+}
+
+.resp-input-cell {
+  width: 70%;
+  margin-right: 20rpx;
+}
+
+.resp-btn {
+  height: 60rpx;
+  width: 16%;
+  line-height: 60rpx;
+  text-align: center;
+  margin-right:8rpx;  
+  color: #4b0;
+  font-size: 30rpx;
+}

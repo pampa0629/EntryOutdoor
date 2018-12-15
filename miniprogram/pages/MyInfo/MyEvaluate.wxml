@@ -1,0 +1,21 @@
+<!--题目-->
+<van-panel wx:for="{{Questions}}" wx:key="item.question" wx:if="{{item.show}}" >
+  <van-cell title="{{item.question}}" disabled/>
+  <van-radio-group value="{{item.select}}" bind:change="changeAnswer{{index}}">
+    <van-cell-group>
+      <van-cell wx:for="{{item.answers}}" wx:for-item="subItem" wx:for-index="subIndex" wx:key="subItem" title="{{subItem}}" clickable data-name="{{subIndex}}" bind:click="clickAnsweer{{index}}">
+        <van-radio name="{{subIndex}}" />
+      </van-cell>
+    </van-cell-group>
+  </van-radio-group>
+  <van-button size="large" plain type="primary" disabled='{{parseInt(item.select)>-1}}' bind:click="clickNext{{index}}">下一题</van-button>
+</van-panel>
+
+<!--结论-->
+<block wx:if="{{evaluation.level}}">
+  <van-notice-bar text="您适合参加强度值在{{evaluation.level}}及其以下的户外活动。"/>
+  <van-notice-bar wx:if="{{evaluation.campEquipment && evaluation.campExperience}}" text="您适合参加重装扎营活动。"/>
+  <van-notice-bar wx:elif="{{evaluation.campEquipment || evaluation.campExperience}}" text="请咨询领队后参加重装扎营活动。"/>
+  <van-notice-bar wx:else text="请慎重参加重装扎营活动。"/>
+  <van-button size="large" plain type="primary"   bind:click="evaluateAgain">重新测评</van-button>
+</block>

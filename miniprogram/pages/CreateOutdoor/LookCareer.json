@@ -1,6 +1,5 @@
 {
-  "navigationBarTitleText": "发起活动",
-  "enablePullDownRefresh": true,
+  "navigationBarTitleText": "查看队员履历",
   "usingComponents": {
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",
@@ -10,13 +9,18 @@
     "van-radio-group": "/vant-weapp/radio-group/index",
     "van-cell": "/vant-weapp/cell/index",
     "van-cell-group": "/vant-weapp/cell-group/index",
+    "van-checkbox": "/vant-weapp/checkbox/index",
+    "van-checkbox-group": "/vant-weapp/checkbox-group/index",
     "van-row": "/vant-weapp/row/index",
     "van-col": "/vant-weapp/col/index",
     "van-switch-cell": "/vant-weapp/switch-cell/index",
     "van-stepper": "/vant-weapp/stepper/index",
-    "van-slider":"/vant-weapp/slider/index",
+    "van-slider": "/vant-weapp/slider/index",
+    "van-tag": "/vant-weapp/tag/index",
     "van-panel": "/vant-weapp/panel/index",
+    "van-notice-bar": "/vant-weapp/notice-bar/index",
     "van-popup": "/vant-weapp/popup/index",
-    "van-tag": "/vant-weapp/tag/index"
+    "van-area": "/vant-weapp/area/index",
+    "van-action-sheet": "/vant-weapp/action-sheet/index"
   }
 }

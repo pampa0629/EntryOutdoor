@@ -1,0 +1,27 @@
+<!--评测结果-->
+<van-panel title="户外评测结果" wx:if="{{career && career.evaluation}}">
+  <van-notice-bar text="适合参加的户外活动强度为：{{career.evaluation.level}}。"/>
+  <van-notice-bar wx:if="{{career.evaluation.campExperience}}" text="有户外扎营经历"/>
+  <van-notice-bar wx:else text="无户外扎营经历"/>
+  <van-notice-bar wx:if="{{career.evaluation.campEquipment}}" text="有户外扎营装备"/>
+  <van-notice-bar wx:else text="无户外扎营装备"/>
+</van-panel>
+
+<!--发起的活动-->
+<van-panel title="发起过的活动" wx:if="{{myOutdoors && myOutdoors.length>0}}">
+  <van-cell wx:for="{{myOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<myOutdoors.length-1}}"/>
+</van-panel>
+
+<!--参加的活动-->
+<van-panel title="参加过的活动" wx:if="{{entriedOutdoors && entriedOutdoors.length>0}}">
+  <van-cell wx:for="{{entriedOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<entriedOutdoors.length-1}}"/>
+</van-panel>
+
+<!--其他户外履历-->
+<van-panel title="其它户外履历" wx:if="{{career && career.other}}">
+  <van-row>
+    <van-col span="22" offset="1">
+      <view><text style="font-size:12pt">{{career.other}}</text></view>
+    </van-col>
+  </van-row>
+</van-panel>

@@ -2,6 +2,7 @@
 const app = getApp()
 const qrcode = require('./qrcode.js')
 const util = require('./util.js')
+const cloudfun = require('./cloudfun.js')
 
 wx.cloud.init()
 const db = wx.cloud.database()
@@ -614,13 +615,7 @@ const postMessage = (outdoorid, tid, title, message) => {
               } else if (res.cancel) {
                 console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
                 // 这里要更新Outdoors表
-                wx.cloud.callFunction({ // 把当前信息加入到 Outdoors的members中
-                  name: 'addWaiting', // 云函数名称
-                  data: {
-                    outdoorid: outdoorid,
-                    "website.lvyeorg.waitings": message
-                  },
-                })
+                cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
               }
             }
           })
@@ -645,13 +640,7 @@ const add2Waitings = (outdoorid, message) => {
   })
 
   console.log(message)
-  wx.cloud.callFunction({ // 把当前信息加入到 Outdoors的members中
-    name: 'addWaiting', // 云函数名称
-    data: {
-      outdoorid: outdoorid,
-      waiting: message,
-    },
-  })
+  cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
 }
 
 // 同步绿野org网站等待要发送的信息
@@ -707,12 +696,7 @@ const postOneWaiting = (outdoorid, tid, waiting, callback) => {
       var resp_dict = resp.data;
       console.log(resp_dict)
       if (resp_dict.err_code == 0) {
-        wx.cloud.callFunction({
-          name: 'shiftWaitings', // 云函数名称
-          data: {
-            outdoorid: outdoorid,
-          }
-        }).then(res => {
+        cloudfun.shiftOutdoorLvyeWaitings(outdoorid, res=>{
           if (callback) { // 回调
             callback()
           }

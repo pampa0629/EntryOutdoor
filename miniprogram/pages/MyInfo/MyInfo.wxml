@@ -1,17 +1,25 @@
-<view class="multi_row">
-  <text decode="{{true}}">&ensp;&ensp;</text>
-  <view class="userinfo-avatar">
+<!--头像&帮助-->
+<van-row>
+  <van-col span="4" offset="1">
     <open-data type="userAvatarUrl"></open-data>
-  </view>
-</view> 
-   
+  </van-col>
+  <van-col span="2" offset="15">
+    <view style="flex-direction:column">
+      <van-icon size='32px' name="info-o" bind:click="bindHelp"/>
+      <view style='font-family:黑体;font-size:11pt'>v0.6.7</view>
+    </view>
+  </van-col>
+</van-row>
+
+<!--个人信息-->
 <van-cell-group>
-  <van-cell title="户外昵称" value="{{userInfo.nickName}}" label="好听、易记、非真名"  is-link bind:click="clickModify"/>
-  <van-cell title="性别" value="{{userInfo.gender}}"  is-link bind:click="clickModify"/>
-  <van-cell title="手机号码" value="{{userInfo.phone}}" label="真实有效、方便领队联系"  is-link bind:click="clickModify" border="{{ false }}"/>
+  <van-cell title="户外昵称" value="{{userInfo.nickName}}" label="好听、易记、非真名" is-link bind:click="clickModify" />
+  <van-cell title="性别" value="{{userInfo.gender}}" is-link bind:click="clickModify" />
+  <van-cell title="手机号码" value="{{userInfo.phone}}" label="真实有效、方便领队联系" is-link bind:click="clickModify" border="{{ false }}" />
 </van-cell-group>
 
-<view wx:if="{{!hasLogin}}"> 
+<!--微信登录-->
+<view wx:if="{{!hasLogin}}">
   <van-tag type="danger">首次使用请点击“微信登录”按钮，并请允许微信授权\n</van-tag>
   <van-row>
     <van-col span="20" offset="2">
@@ -20,15 +28,17 @@
   </van-row>
 </view>
 
+<!--最近的活动-->
 <van-row>
   <van-col span="20" offset="2">
-    <van-button size="large" type="primary" disabled="{{!lastOutdoorid}}"  bind:click="gotoLastOutdoor">回到最近的活动</van-button>
-  </van-col> 
+    <van-button size="large" type="primary" disabled="{{!lastOutdoorid}}" bind:click="gotoLastOutdoor">回到最近的活动</van-button>
+  </van-col>
 </van-row>
 
+<!--户外履历 & 绿野ORG登录-->
 <van-row>
   <van-col span="9" offset="2">
-    <van-button size="large" bind:click="bindHelp">帮助说明</van-button>
+    <van-button size="large" bind:click="bindCareer">户外履历</van-button>
   </van-col>
   <van-col span="9" offset="2">
     <block wx:if="{{hasLoginLvyeorg}}">
@@ -40,6 +50,7 @@
   </van-col>
 </van-row>
 
+<!--测试页面-->
 <block wx:if="{{isTesting}}">
-  <van-button size="large"  bind:click="bindTest">Test</van-button>
+  <van-button size="large" bind:click="bindTest">Test</van-button>
 </block>

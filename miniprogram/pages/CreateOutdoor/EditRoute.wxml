@@ -17,13 +17,34 @@
   bind:select="onSelectAction"
 />
 
+<!--六只脚、两步路等户外轨迹--> 
+<van-panel title="户外网站轨迹">
+  <block wx:for="{{route.trackSites}}" wx:key="name">
+    <van-cell title="{{item.name}}" clickable bind:click="checkTrackSites{{index}}" border="{{item.useit}}">
+      <van-checkbox value="{{item.useit}}" bind:change="checkTrackSites{{index}}"/>
+    </van-cell>
+    <block wx:if="{{item.useit}}">
+      <van-field  label="轨迹编号" type="number" value="{{item.trackid}}" placeholder="请输入{{item.name}}中对应的轨迹编号" bind:change="changeTrackid{{index}}"/>
+      <van-field  label="轨迹网址" value="{{item.url}}" placeholder="请拷入{{item.name}}中对应轨迹的网址" disabled use-button-slot border="{{false}}"/>
+      <van-row>
+        <van-col span="4" offset="14">
+          <van-button size="small" type="primary" bind:click='copyinUrl{{index}}'>拷入</van-button>
+        </van-col>
+        <van-col span="4" offset="1">
+          <van-button size="small" bind:click='copyoutUrl{{index}}'>拷出</van-button>
+        </van-col>
+      </van-row>
+    </block>
+  </block>
+</van-panel>
+
 <!--轨迹文件 todo 等微信提供上传文件能力再开发--> 
 <van-panel wx:if="{{false}}" title="轨迹文件" status="等待微信开放上传非图片文件能力" use-footer-slot>
   <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}"  disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
-    <van-button slot="button" size="small" type="primary" bind:click='deleteTrack{{index}}'>删除</van-button>
+    <van-button slot="button" size="small" type="primary" bind:click='deleteTrackFile{{index}}'>删除</van-button>
   </van-field>
   <view slot="footer">
-    <van-button size="large" type="primary" disabled bind:click='addTrack'>增加轨迹文件</van-button>
+    <van-button size="large" type="primary" disabled bind:click='addTrackFile'>增加轨迹文件</van-button>
   </view>
 </van-panel>
 

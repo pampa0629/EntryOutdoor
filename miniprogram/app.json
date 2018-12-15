@@ -3,7 +3,7 @@
     "pages/MyInfo/MyInfo",
     "pages/Test/OneOutdoor",
     "pages/EntryOutdoor/EntryOutdoor",
-    "pages/PrintOutdoor/PrintOutdoor",
+    "pages/AboutOutdoor/PrintOutdoor",
     "pages/MyOutdoors/MyOutdoors",
     "pages/CreateOutdoor/CreateOutdoor",
     "pages/MyInfo/ModifyInfo",
@@ -24,13 +24,20 @@
     "pages/EntryOutdoor/LookEquipments",
     "pages/CreateOutdoor/EditTraffic",
     "pages/CreateOutdoor/EditWxnotice",
-    "pages/EntryOutdoor/SubscribeLeader"
+    "pages/EntryOutdoor/SubscribeLeader",
+    "pages/MyInfo/MyCareer",
+    "pages/MyInfo/MyEvaluate",
+    "pages/MyInfo/EditTopN",
+    "pages/AboutOutdoor/ChatOutdoor",
+    "pages/CreateOutdoor/CheckMembers",
+    "pages/CreateOutdoor/LookCareer"
   ],
   "window": {
-    "backgroundTextStyle": "light",
+    "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "户外报名",
-    "navigationBarTextStyle": "black"
+    "navigationBarTextStyle": "black",
+    "enablePullDownRefresh": false
   },
   "tabBar": {
     "color": "#7A7E83",
@@ -53,6 +60,7 @@
     ]
   },
   "navigateToMiniProgramAppIdList": [
-    "wx1599b7c8d1e2b4d4"
+    "wx1599b7c8d1e2b4d4",
+    "wxd45c635d754dbf59"
   ]
 }

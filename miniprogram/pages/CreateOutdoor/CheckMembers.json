@@ -1,6 +1,5 @@
 {
-  "navigationBarTitleText": "发起活动",
-  "enablePullDownRefresh": true,
+  "navigationBarTitleText": "审核队员报名",
   "usingComponents": {
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",
@@ -14,7 +13,7 @@
     "van-col": "/vant-weapp/col/index",
     "van-switch-cell": "/vant-weapp/switch-cell/index",
     "van-stepper": "/vant-weapp/stepper/index",
-    "van-slider":"/vant-weapp/slider/index",
+    "van-slider": "/vant-weapp/slider/index",
     "van-panel": "/vant-weapp/panel/index",
     "van-popup": "/vant-weapp/popup/index",
     "van-tag": "/vant-weapp/tag/index"

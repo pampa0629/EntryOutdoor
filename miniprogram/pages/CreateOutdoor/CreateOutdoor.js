@@ -4,11 +4,13 @@ const lvyeorg = require('../../utils/lvyeorg.js')
 const qrcode = require('../../utils/qrcode.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
+const cloudfun = require('../../utils/cloudfun.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
+const _ = db.command  
 
 Page({
   data: {
@@ -45,7 +47,7 @@ Page({
     startDate: util.formatDate(new Date()), // 起始日期，格式化为字符串；只能从今天开始
     endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，格式化为字符串，不保存；不能发半年之后的活动
 
-    route: {}, // 活动路线，包括途经点和轨迹文件
+    route: { wayPoints:[]}, // 活动路线，包括途经点和轨迹文件
     meets: [], //集合点，可加多个
     traffic: null, // 交通方式
     members: [], // 已报名成员（含领队）
@@ -69,7 +71,7 @@ Page({
 
     // 同步到网站的信息
     websites: {
-      lvyeorg: {
+      lvyeorg: { 
         //fid: null, // 版块id
         tid: null, // 帖子id
         keepSame: false, // 是否保持同步
@@ -81,7 +83,8 @@ Page({
       show: false,
       reason: "",
       Reasons: ["人数不够", "空气污染太重", "天气状况不适合户外活动", "领队临时有事","其他原因"],
-    } 
+    },
+    newChat: false, // 是否有新留言
   },
 
   // 设置临时修改项目全部为false或true，包括整体是否修改标记
@@ -282,12 +285,16 @@ Page({
       self.setData({
         "route.wayPoints": res.data.route, // 途经点
         "route.trackFiles": [], // 轨迹文件
+        "route.trackSites": [], // 网站轨迹
       })
     } else { // 新格式直接设置
       self.setData({
         route: res.data.route,
       })
     }
+    // chat 
+    self.setNewchat(res.data.chat)
+    
     // next 
   },
 
@@ -499,26 +506,27 @@ Page({
     if (this.data.status != "已发布") {
       console.log("publishOutdoor")
       this.saveOutdoor("已发布")
-      this.post2Subscribe() // 给自己的订阅者发消息
+      // this.post2Subscribe() // 给自己的订阅者发消息
     }
+  },
+
+// 创建出outdoorid的时候调用
+  afterCreateOutdoor() {
+    // 当前也就这么一个事情
+    this.post2Subscribe()
   },
 
 // 给自己的订阅者发消息
   post2Subscribe() {
     const self = this
+    console.log("outdoorid: "+self.data.outdoorid)
     dbPersons.doc(app.globalData.personid).get().then(res => {
       for (var key in res.data.subscribers) {
         console.log("key: " + key);
         console.log(res.data.subscribers[key]);
         // 加到cared列表中
-        wx.cloud.callFunction({
-          name: 'unshiftPersonCare', // 云函数名称
-          data: {
-            personid: key,
-            outdoorid: self.data.outdoorid,
-            title: self.data.title.whole,
-          },
-        })
+        cloudfun.unshiftPersonCared(key, self.data.outdoorid, self.data.title.whole)
+        
         // 发微信消息
         if (res.data.subscribers[key].acceptNotice) {
           template.sendCreateMsg2Subscriber(key, self.data.title.whole, self.data.outdoorid, app.globalData.userInfo.phone)
@@ -557,25 +565,30 @@ Page({
   // 更新信息
   updateOutdoorInTable: function() {
     const self = this;
-    // 领队信息也要更新一下
-    var members = [self.data.leader];
     console.log(self.data.route)
-    dbOutdoors.doc(self.data.outdoorid).set({ // 用set，解决数据类型变化的问题
-      data: {
-        title: self.data.title,
-        route: self.data.route,
-        meets: self.data.meets,
-        traffic: self.data.traffic,
-        status: self.data.status,
-        members: members,
-        brief: self.data.brief,
-        limits: self.data.limits,
-      }
-    }).then(res => {
-      self.afterSaveOutdoor();
-      // 这里还应该把 Person表中对应的MyOutdoors中的title更新一下
-      self.updatePersonMyoutdoors();
-    }).catch(console.error)
+    // 必须先刷新一下成员，不然容易覆盖
+    dbOutdoors.doc(self.data.outdoorid).get().then(res=>{
+      self.setData({
+        members:res.data.members,
+        ["members["+ 0 +"]"]: self.data.leader // 领队信息也要更新一下
+      })
+      dbOutdoors.doc(self.data.outdoorid).update({
+        data: {
+          title: self.data.title,
+          route: _.set(self.data.route),
+          meets: self.data.meets,
+          traffic: self.data.traffic,
+          status: self.data.status,
+          members: self.data.members,
+          brief: self.data.brief,
+          limits: self.data.limits,
+        }
+      }).then(res => {
+        self.afterSaveOutdoor();
+        // 这里还应该把 Person表中对应的MyOutdoors中的title更新一下
+        self.updatePersonMyoutdoors();
+      }).catch(console.error)
+    })
   },
 
   // 创建活动信息记录
@@ -608,6 +621,7 @@ Page({
           self.setData({
             outdoorid: res._id, // 活动表id
           })
+          self.afterCreateOutdoor() // 创建出outdoorid的时候调用
           self.afterSaveOutdoor();
 
           // 发布成功，就需要往person表中追加活动id
@@ -732,10 +746,50 @@ Page({
   printOutdoor: function() {
     // 导航到 printOutdoor页面
     const self = this;
-    util.saveOutdoorID(self.data.outdoorid)
     wx.navigateTo({
-      url: "../PrintOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader=true"
+      url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader=true"
     })
+  },
+
+  chatOutdoor(){
+    const self = this;
+    wx.navigateTo({
+      url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.outdoorid,
+      complete (res) {
+        self.setData({
+          newChat: false,
+        })
+      }
+    })
+  },
+
+  // 页面相关事件处理函数--监听用户下拉动作  
+  onPullDownRefresh: function () {
+    console.log("onPullDownRefresh")
+    const self = this
+    wx.showNavigationBarLoading();
+    // 主要就刷新队员和留言信息
+    dbOutdoors.doc(self.data.outdoorid).get().then(res=>{
+      self.setData({
+        members:res.data.members,
+      })
+      self.setNewchat(res.data.chat)
+      wx.hideNavigationBarLoading();
+      wx.stopPullDownRefresh();
+    })
+  },
+
+  // 判断是否有新留言
+  setNewchat(chat){
+    if (chat && chat.messages) {
+      var count = 0
+      if(chat.seen && chat.seen[app.globalData.personid]){
+        count = chat.seen[app.globalData.personid]
+      }
+      this.setData({
+        newChat: chat.messages.length > count,
+      })
+    }
   },
 
   onPopup() {
@@ -747,6 +801,12 @@ Page({
 
   closePopup() {
     console.log("closePopup")
+    this.setData({
+      showPopup: false,
+    })
+  },
+
+  onCancelShare(){
     this.setData({
       showPopup: false,
     })

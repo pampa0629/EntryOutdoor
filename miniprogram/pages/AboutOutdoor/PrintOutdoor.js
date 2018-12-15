@@ -53,6 +53,12 @@ Page({
           self.dealChecked()
         } else { // 不是领队，隐藏电话号码中间三位
           self.hidePhone()
+          for(var i=0; i<self.data.members.length; i++){
+            let index = i
+            this["longTapMembers" + index] = (e) => {
+              self.longTapMembers(index, e)
+            }
+          }
         }
       })
   },
@@ -109,6 +115,16 @@ Page({
       // 遍历所有队员
       for (var j = 0; j < self.data.members.length; j++) {
         self.data.meetMembers[self.data.members[j].entryInfo.meetsIndex].push(self.data.members[j])
+      }
+
+      for(var i=0; i<self.data.meets.length; i++){
+        for (var j = 0; j < self.data.meetMembers[i].length; j++){
+          let index = i // 还必须用let才行
+          let cellIndex = j
+          this["longTapMeetMembers" + index+"_" + cellIndex] = (e) => {
+            self.longTapMeetMembers(index, cellIndex, e)
+          }
+        }
       }
       self.setData({
         meetMembers: self.data.meetMembers,
@@ -195,5 +211,16 @@ Page({
 
     wx.setStorageSync(this.data.outdoorid, checks)
   },
+
+  longTapMeetMembers(index, cellIndex, e){
+    const self = this
+    this.phoneCall(self.data.meetMembers[index][cellIndex].userInfo.phone)
+  },
+
+  longTapMembers(index, e){
+    const self = this
+    util.phoneCall(self.data.members[index].userInfo.phone)
+  },
+ 
 
 })

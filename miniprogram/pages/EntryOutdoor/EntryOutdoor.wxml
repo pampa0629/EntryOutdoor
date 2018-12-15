@@ -1,13 +1,24 @@
 <!--弹出分享按钮-->
-<van-popup show="{{ showPopup }}" position="top" custom-class="center" bind:close="closePopup">
-  <van-button type="primary" plain size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
-  <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
+<van-popup show="{{ showPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closePopup">
+  <van-row>
+    <van-col span="20" offset="2">
+      <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
+    </van-col>
+  </van-row>
+  <van-row>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
+    </van-col>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="onCancelShare">取消</van-button>
+    </van-col>
+  </van-row>
 </van-popup>
 
 <!--图标按钮-->
 <van-row>
   <!--分享-->
-  <van-col span="2" offset="9">
+  <van-col span="2" offset="6">
     <view wx:if="{{status!='已取消'}}" style="flex-direction:column">
       <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
       <view class="icon_tip">分享</view>
@@ -28,6 +39,14 @@
     <view style="flex-direction:column">
       <van-icon name="contact" size="24px" color="#1aad19" bind:click="clickLeader"></van-icon>
       <view class="icon_tip">领队</view>
+    </view>
+  </van-col>
+  <!--留言-->
+  <van-col span="2" offset="1">
+    <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
+      <van-icon wx:if="{{newChat}}" name="chat" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:else name="chat" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
+      <view class="icon_tip">留言</view>
     </view>
   </van-col>
   <!--打印详情与回到首页-->

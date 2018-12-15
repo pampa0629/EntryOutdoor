@@ -1,5 +1,27 @@
-<!--pages/EntryOutdoor/LookRoute.wxml-->
+<!--路线途经点-->
 <van-cell-group>
   <van-cell title="途经点" value="预计到达时间"/>
   <van-cell wx:for="{{route.wayPoints}}" wx:key="place+time" title="{{index+1}}）{{item.place}}" value="{{item.date}}，{{item.time}}"/> 
 </van-cell-group>
+
+<!--户外轨迹--> 
+<van-panel title="户外APP轨迹" wx:if="{{route.trackSites.length>0}}">
+  <block wx:if="{{item.useit}}" wx:for="{{route.trackSites}}" wx:key="name">
+    <van-panel title="{{item.name}}，编号：{{item.trackid}}" >
+      <van-cell title="网址: {{item.url}}" value="" border="{{false}}"> 
+        <van-button size="small" type="primary" bind:click='copyoutUrl{{index}}'>复制</van-button>
+      </van-cell>
+      <van-row>
+        <van-col span="4" offset="1">
+          <text style="font-size:12pt">二维码:</text>
+        </van-col>
+        <van-col span="10" offset="1">
+          <canvas class='canvas' canvas-id='canvas{{index}}'/>
+        </van-col>
+        <van-col span="4" offset="4">
+          <van-button size="small" type="primary" bind:click='saveQrcode{{index}}'>保存</van-button>
+        </van-col>
+      </van-row>
+    </van-panel>
+  </block>
+</van-panel>

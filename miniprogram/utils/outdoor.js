@@ -1,6 +1,11 @@
 const app = getApp()
 const util = require('./util.js')
-var bmap = require('../libs/bmap-wx.min.js');
+var bmap = require('../libs/bmap-wx.min.js')
+const cloudfun = require('../utils/cloudfun.js')
+
+wx.cloud.init()
+const db = wx.cloud.database({})
+const dbOutdoors = db.collection('Outdoors')
 
 // 根据各类信息，生成活动主题信息，修改whole
 const createTitle = (title, nickName) => {
@@ -350,6 +355,55 @@ const buildCarInfo=(traffic)=>{
   return carInfo
 }
 
+// 移除某个队员（自己退出，或者领队驳回报名），回调返回新成员名单
+const removeMember=(outdoorid, personid, callback)=>{
+  // 先重新获取members，再删除personid，再调用云函数
+  // 刷新一下队员列表
+  dbOutdoors.doc(outdoorid).get()
+    .then(res => {
+      // 先找到personid
+      var selfIndex = -1
+      for(var i=0; i<res.data.members.length; i++){
+        if (res.data.members[i].personid == personid){
+          selfIndex = i
+          break 
+        }
+      }
+      if(selfIndex == -1){ // 找不到就直接返回
+        if (callback){
+          callback(res.data.members)
+        }
+        return 
+      }
+
+      const self = res.data.members[selfIndex]
+      // 退出的时候应检查一下，如果自己不是替补，则把第一个替补改为“报名中”
+      var changeStatus = false;
+      if (self.entryInfo.status == "占坑中" || self.entryInfo.status == "报名中") {
+        changeStatus = true;
+      }
+      // 删除自己的
+      res.data.members.splice(selfIndex, 1)
+      
+      // 把第一个替补改为“报名中”
+      if (changeStatus) {
+        res.data.members.forEach((item, index) => {
+          if (changeStatus && res.data.members[index].entryInfo.status == "替补中") {
+            res.data.members[index].entryInfo.status = "报名中"
+            changeStatus = false // 自己退出，只能补上排在最前面的替补
+          }
+        })
+      }
+      console.log(res.data.members)
+      // 云函数
+      cloudfun.updateOutdoorMembers(outdoorid, res.data.members, nouse => {
+        if(callback){
+          callback(res.data.members)
+        }
+      })
+    })
+}
+
 module.exports = {
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
@@ -357,4 +411,6 @@ module.exports = {
   getWeather: getWeather, // 获取天气预报
   loadEquipments: loadEquipments, // 推荐的装备
   buildCarInfo: buildCarInfo, // 构建车辆信息
+
+  removeMember: removeMember, // 移除某个队员（自己退出，或者领队驳回报名）
 }

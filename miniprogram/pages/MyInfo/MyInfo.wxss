@@ -1,21 +1,31 @@
+
 .body-info {
   padding-bottom: 0;
   height: 500rpx;
 }
+
 .content-info {
   padding-bottom: 0;
   height: 300rpx;
 }
+
 .userinfo-avatar {
   border-radius: 128rpx;
   width: 128rpx;
   height: 128rpx;
 }
+
 .bigfont {
   font-size: 48rpx;
   height: 50rpx;
 }
+
 .multi_row{
    display: flex;
   flex-direction: row;
+}
+
+.icon_tip{
+  font-family:黑体;
+  font-size:10pt
 }

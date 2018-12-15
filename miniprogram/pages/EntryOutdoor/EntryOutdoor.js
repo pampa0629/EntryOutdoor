@@ -4,6 +4,7 @@ const qrcode = require('../../utils/qrcode.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
+const cloudfun = require('../../utils/cloudfun.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -56,6 +57,7 @@ Page({
     entriedOutdoors: null, // 报名的id列表
     caredOutdoors: null, // 关注的活动id列表
     hasCared: false, // 该活动是否已经加了关注
+    newChat:false, // 是否有新留言
 
     showPopup:false, // 分享弹出菜单
   }, 
@@ -196,13 +198,7 @@ Page({
         }
       })
       // 删完了还得存到数据库中，调用云函数写入
-      wx.cloud.callFunction({
-        name: 'updateMember', // 云函数名称
-        data: {
-          outdoorid: self.data.outdoorid,
-          members: self.data.members
-        }
-      })
+      cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, null)
     }
   },
 
@@ -283,6 +279,11 @@ Page({
       self.setData({
         route: res.data.route,
       })
+      if (!self.data.route.wayPoints) { // 防止为空
+        self.setData({
+          "route.wayPoints": []
+        })
+      }
     }
     // 微信服务通知
     if (!res.data.limits || !res.data.limits.wxnotice) {
@@ -290,6 +291,9 @@ Page({
         "limits.wxnotice": template.getDefaultNotice()
       })
     }
+    // chat
+    self.setNewchat(res.data.chat)
+    
     // next 
 
   },
@@ -395,6 +399,11 @@ Page({
     })
   },
 
+  onCancelShare() {
+    this.setData({
+      showPopup: false,
+    })
+  },
 
   onShareAppMessage: function () {
     const self = this;
@@ -463,15 +472,7 @@ Page({
             members: res.data.members,
           })
           // 再调用云函数写入
-          // 云函数
-          wx.cloud.callFunction({
-            name: 'updateMember', // 云函数名称
-            data: {
-              outdoorid: self.data.outdoorid,
-              members: self.data.members
-            }
-          })
-
+          cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, null)
           self.updateEntriedOutdoors(false)
         })
     } else { // 完全新报名，增加一条记录
@@ -484,24 +485,17 @@ Page({
       console.log(self.data.entryInfo)
 
       var member = util.createMember(app.globalData.personid, self.data.userInfo, self.data.entryInfo)
-      wx.cloud.callFunction({ // 把当前信息加入到 Outdoors的members中
-        name: 'addMember', // 云函数名称
-        data: {
-          outdoorid: self.data.outdoorid,
-          member: member
-        },
-        complete: res => {
-          // 刷新一下队员列表
-          dbOutdoors.doc(self.data.outdoorid).get()
-            .then(res => {
-              self.setData({
-                members: res.data.members
-              })
+      cloudfun.pushOutdoorMember(self.data.outdoorid, member, nouse=>{
+        // 刷新一下队员列表
+        dbOutdoors.doc(self.data.outdoorid).get()
+          .then(res => {
+            self.setData({
+              members: res.data.members
             })
+          })
 
-          // Person表中，还要把当前outdoorid记录下来
-          self.updateEntriedOutdoors(false)
-        }
+        // Person表中，还要把当前outdoorid记录下来
+        self.updateEntriedOutdoors(false)
       })
     }
 
@@ -533,13 +527,7 @@ Page({
           template.sendEntryMsg2Leader(this.data.members[0].personid, this.data.userInfo, this.data.entryInfo, this.data.title.whole, this.data.outdoorid)
           wx.setStorageSync(key, parseInt(count) + 1)
           // 发送结束，得往数据库里面加一条；还必须调用云函数
-          wx.cloud.callFunction({
-            name: 'addAlreadyNotice', // 云函数名称
-            data: {
-              outdoorid: self.data.outdoorid,
-              count: 1,
-            }
-          })
+          cloudfun.addOutdoorNoticeCount(self.data.outdoorid, 1)
         }
       }
     }
@@ -572,7 +560,7 @@ Page({
         }
         app.loginLvyeOrg() // 登录
       } else { // 没注册就记录到waitings中
-        lvyeorg.add2Waitings(self.data.outdoorid, message)
+        lvyeorg.add2Waitings(self.data.outdoorid, entryMessage.message)
       }
     }
   },
@@ -594,8 +582,8 @@ Page({
 
   // 替补、占坑、报名，用同一个函数，减少重复代码
   doEntry(status, formid){
-    console.log(status) 
-    console.log(formid) 
+    // console.log(status) 
+    // console.log(formid) 
     if (this.data.entryInfo.status != status) {
       this.entryOutdoor(status, formid)
     } else {
@@ -604,8 +592,23 @@ Page({
   },
 
   // 退出
-  tapQuit: function() {
-    const self = this;
+  tapQuit: function () {
+    const self = this; 
+    outdoor.removeMember(self.data.outdoorid, app.globalData.personid, members=>{
+      // 删除Persons表中的entriedOutdoors中的对应id的item
+      self.updateEntriedOutdoors(true)
+      // 退出后还可以继续再报名
+      self.setData({
+        "entryInfo.status": "浏览中",
+        members: self.data.members,
+      })
+    })
+    // 退出信息也要同步到网站
+    self.postEntry2Websites(true)
+  },
+  
+  tapQuit_old: function() {
+    const self = this; 
     // 先重新获取members，再删除personid，再调用云函数
     // 刷新一下队员列表
     dbOutdoors.doc(self.data.outdoorid).get()
@@ -638,18 +641,10 @@ Page({
             }
           })
         }
-        
         // 云函数
-        wx.cloud.callFunction({
-          name: 'updateMember', // 云函数名称
-          data: {
-            outdoorid: self.data.outdoorid,
-            members: self.data.members
-          }
-        }).then(res => {
+        cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, res=>{
           // 删除Persons表中的entriedOutdoors中的对应id的item
           self.updateEntriedOutdoors(true)
-
           // 退出后还可以继续再报名
           self.setData({
             "entryInfo.status": "浏览中",
@@ -663,16 +658,58 @@ Page({
   },
 
   // 查看报名情况，同时可以截屏保存起来
-  printOutdoor: function() {
+  printOutdoor() {
     // 导航到 printOutdoor页面
     const self = this;
-    var temp = "&isLeader=false";
+    var isLeader = "&isLeader=false";
     if (self.data.entryInfo.status == "领队") {
-      temp = "&isLeader=true";
+      isLeader = "&isLeader=true";
     }
     wx.navigateTo({
-      url: "../PrintOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + temp
+      url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + isLeader
     })
+  },
+
+  chatOutdoor() {
+    const self = this;
+    wx.navigateTo({
+      url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.outdoorid,
+      complete(res) {
+        self.setData({
+          newChat: false,
+        })
+      }
+    })
+  },
+
+
+  // 页面相关事件处理函数--监听用户下拉动作  
+  onPullDownRefresh: function () {
+    console.log("onPullDownRefresh")
+    const self = this
+    wx.showNavigationBarLoading();
+    // 主要就刷新队员和留言信息
+    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+      self.setData({
+        members: res.data.members,
+      })
+      self.setNewchat(res.data.chat)
+      wx.hideNavigationBarLoading();
+      wx.stopPullDownRefresh();
+    })
+  },
+
+  // 判断是否有新留言
+  setNewchat(chat) {
+    if (chat && chat.messages) {
+      var count = 0
+      if (chat.seen && chat.seen[app.globalData.personid]) {
+        count = chat.seen[app.globalData.personid]
+      }
+      this.setData({
+        newChat: chat.messages.length > count,
+      })
+    }
   },
 
   clickMeets: function(e) {

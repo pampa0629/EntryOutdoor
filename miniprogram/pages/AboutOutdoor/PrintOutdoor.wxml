@@ -22,12 +22,12 @@
 <view wx:for="{{meets}}" wx:key="place" data-pos='{{index}}'>集合点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
 
 <!--队员列表-->
-<view>
+<view> 
   <van-tag type="primary" plain>\n活动状态：{{status}}</van-tag>
   <text class="tip">\n队员列表（共{{members.length}}人）\n</text>
 </view>
 
-<!--对领队，要按照集合地点排列名单-->
+<!--对领队，要按照集合地点排列名单--> 
 <block wx:if="{{isLeader}}">
   <checkbox-group bindchange="cbCallName">
     <view wx:for="{{meetMembers}}" wx:key="*this">
@@ -37,7 +37,7 @@
         </checkbox-group>
       </view>
       <view class="multi_row" wx:for="{{meetMembers[index]}}" wx:key="personid" wx:for-item="cell" wx:for-index="cellindex">
-        <checkbox value="{{cell.personid}}" checked="{{cell.checked}}">{{cell.userInfo.nickName}}/{{cell.userInfo.gender}}/{{cell.userInfo.phone}}/{{cell.entryInfo.knowWay}}/{{cell.entryInfo.agreedDisclaimer}}({{cell.entryInfo.status}})</checkbox>
+        <checkbox value="{{cell.personid}}" checked="{{cell.checked}}" bindlongpress="longTapMeetMembers{{index}}_{{cellindex}}">{{cell.userInfo.nickName}}/{{cell.userInfo.gender}}/{{cell.userInfo.phone}}/{{cell.entryInfo.knowWay}}/{{cell.entryInfo.agreedDisclaimer}}({{cell.entryInfo.status}})</checkbox>
       </view>
     </view>
   </checkbox-group>
@@ -45,7 +45,7 @@
 
 <!--非领队，看到的就是直接的队员列表-->
 <block wx:if="{{!isLeader}}">
-  <view wx:for="{{members}}" wx:key="personid">{{item.userInfo.nickName}}/{{item.userInfo.gender}}/{{item.userInfo.phone}}/{{item.entryInfo.knowWay}}/{{item.entryInfo.agreedDisclaimer}}/第{{item.entryInfo.meetsIndex+1}}集合点({{item.entryInfo.status}})
+  <view wx:for="{{members}}" wx:key="personid" bindlongpress="longTapMembers{{index}}">{{item.userInfo.nickName}}/{{item.userInfo.gender}}/{{item.userInfo.phone}}/{{item.entryInfo.knowWay}}/{{item.entryInfo.agreedDisclaimer}}/第{{item.entryInfo.meetsIndex+1}}集合点({{item.entryInfo.status}})
   </view>
 </block>
 

@@ -5,8 +5,9 @@ Page({
     route: {
       wayPoints: [], // 途经点
       trackFiles: [], // 轨迹文件
+      trackSites: [], // 轨迹网站
     },
-    
+
     index: 0, // 当前要处理的index
     hasModified: false,
 
@@ -81,7 +82,59 @@ Page({
       route: prevPage.data.route,
       hasModified: prevPage.data.hasModified,
     })
+    if(!self.data.route.wayPoints) {
+      self.setData({
+        "route.wayPoints": [],
+        hasModified: true,
+      })
+    }
     self.rebuildClickStopFun()
+
+    if (!self.data.route.trackSites) {
+      // 轨迹网站 { name: "", useit: false, trackid: null, url: null }
+      self.setData({
+        "route.trackSites": [{
+          name: "六只脚",
+          useit: false,
+          url: "",
+          urlpre: "http://www.foooooot.com/trip/",
+          urlpost: "/",
+          qrcode:"",
+          qrcodepre:"http://foooooot.com/trip/",
+          qrcodepost:"/nav_to/"
+        }, {
+          name: "两步路",
+          useit: false,
+          url: "",
+          urlpre: "http://www.2bulu.com/track/t-",
+          urlpost: ".htm",
+          qrcode: "",
+            qrcodepre: "http://www.2bulu.com/track/t-",
+            qrcodepost: ".htm"
+        }],
+      })
+    }
+    console.log(self.data.route.trackSites)
+    self.rebuildSitesFun()
+  },
+
+  rebuildSitesFun() {
+    const self = this
+    for (var i = 0; i < self.data.route.trackSites.length; i++) {
+      let index = i
+      this["checkTrackSites" + index] = () => {
+        this.checkTrackSites(index)
+      }
+      this["changeTrackid" + index] = (e) => {
+        this.changeTrackid(index, e)
+      }
+      this["copyinUrl" + index] = () => {
+        this.copyinUrl(index)
+      }
+      this["copyoutUrl" + index] = () => {
+        this.copyoutUrl(index)
+      }
+    }
   },
 
   rebuildClickStopFun: function() {
@@ -114,12 +167,77 @@ Page({
     })
   },
 
-  // todo
-  addTrack(){
-  }, 
+  checkTrackSites(index) {
+    console.log("checkTrackSites")
+    console.log(index)
+    const self = this
+    self.setData({
+      ["route.trackSites[" + index + "].useit"]: !self.data.route.trackSites[index].useit,
+      hasModified:true,
+    })
+  },
+
+  changeTrackid(index, e) {
+    console.log("changeTrackid")
+    console.log(index)
+    console.log(e)
+    const self = this
+    const item = self.data.route.trackSites[index]
+    self.setData({
+      ["route.trackSites[" + index + "].trackid"]: e.detail,
+      ["route.trackSites[" + index + "].url"]: item.urlpre + e.detail + item.urlpost,
+      ["route.trackSites[" + index + "].qrcode"]: item.qrcodepre + e.detail + item.qrcodepost,
+      hasModified: true,
+    })
+  },
+
+  copyinUrl(index) {
+    console.log("copyinUrl")
+    console.log(index)
+    const self = this
+    const sites = self.data.route.trackSites
+    wx.getClipboardData({
+      success: function(res) {
+        console.log(res.data)
+        self.setData({
+          ["route.trackSites[" + index + "].url"]: res.data,
+          ["route.trackSites[" + index + "].trackid"]: self.removePrePost(res.data, index),
+          ["route.trackSites[" + index + "].qrcode"]: sites[index].qrcodepre + sites[index].trackid + sites[index].qrcodepost,
+          hasModified: true,
+        })
+      }
+    })
+  },
+
+  // 删除网址的前缀和后缀
+  removePrePost(url, index) {
+    const self = this
+    var pre = self.data.route.trackSites[index].pre
+    var post = self.data.route.trackSites[index].post
+    console.log(url)
+    console.log(pre)
+    console.log(post)
+    return url.substr(pre.length, url.length - pre.length - post.length)
+  },
+
+  copyoutUrl(index) {
+    console.log("copyoutUrl")
+    console.log(index)
+    const self = this
+    wx.setClipboardData({
+      data: self.data.route.trackSites[index].url,
+      success: function(res) {
+        wx.showToast({
+          title: '已拷贝',
+        })
+      }
+    })
+  },
 
   // todo
-  deleteTrack(index){
-  },
+  addTrackFile() {},
+
+  // todo
+  deleteTrackFile(index) {},
 
 })

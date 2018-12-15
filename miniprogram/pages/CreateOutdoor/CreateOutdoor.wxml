@@ -6,17 +6,28 @@
     </van-radio-group>
   </van-panel>
 </van-dialog>
-
+  
 <!--弹出分享按钮-->
-<van-popup show="{{ showPopup }}" position="bottom" custom-class="center" bind:close="closePopup">
-  <van-button type="primary" plain size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
-  <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
+<van-popup show="{{ showPopup }}" overlay="{{false}}" position="bottom" custom-class="center" bind:close="closePopup">
+  <van-row>
+    <van-col span="20" offset="2">
+      <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
+    </van-col>
+  </van-row>
+  <van-row>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
+    </van-col>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="onCancelShare">取消</van-button>
+    </van-col>
+  </van-row>
 </van-popup>
 
 <!--图标按钮-->
 <van-row>
   <!--报名截止/继续报名-->
-  <van-col span="2" offset="12">
+  <van-col span="2" offset="9">
     <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
       <van-icon name="stop" size="24px" color="#1aad19" bind:click="stopEntry"></van-icon>
       <view class="icon_tip">截止</view>
@@ -39,9 +50,17 @@
   </van-col>
   <!--分享-->
   <van-col span="2" offset="1">
-    <view wx:if="{{status=='已发布' ||status=='报名截止'}}" style="flex-direction:column">
+    <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
       <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
       <view class="icon_tip">分享</view>
+    </view>
+  </van-col>
+  <!--留言-->
+  <van-col span="2" offset="1">
+    <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
+      <van-icon wx:if="{{newChat}}" name="chat" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:else name="chat" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
+      <view class="icon_tip">留言</view>
     </view>
   </van-col>
   <!--打印活动详情-->
@@ -115,6 +134,9 @@
 
 <!--免责条款-->
 <van-cell title="免责条款" label="户外有风险" value="点击编辑免责条款" is-link url="EditDisclaimer" border="{{false}}" />
+
+<!--审核队员-->
+<van-cell title="审核队员" label="已报名{{members.length-1}}人" value="点击审核队员" is-link url="CheckMembers" border="{{false}}" />
 
 <!--活动报名状态-->
 <van-tag type="primary" plain>活动状态：{{status}}</van-tag>

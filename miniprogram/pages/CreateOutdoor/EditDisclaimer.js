@@ -33,7 +33,7 @@ Page({
 
   pasteDisclaimer: function () {
     const self = this
-    wx.getClipboardData({
+    wx.getClipboardData({ 
       success: function (res) {
         console.log(res.data)
         self.setData({

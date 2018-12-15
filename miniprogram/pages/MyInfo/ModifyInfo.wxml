@@ -1,21 +1,13 @@
-<!--pages/MyInfo/ModifyInfo.wxml-->
+<van-panel title="我的信息">
+  <van-field value="{{userInfo.nickName}}" label="户外昵称：" placeholder="请输入户外昵称（好听易记非真名）"  bind:change="changeNickname" bind:blur="blurNickname" error-message="{{nickErrMsg}}"/>
 
-<van-cell-group>
-  <van-field value="{{userInfo.nickName}}" label="户外昵称：" placeholder="请输入户外昵称（好听易记非真名）"  bind:change="changeNickName"/>
-
-<view class="multi_row">
-  <van-cell  title="性别选择："/>
-  <van-cell  title="{{userInfo.gender}}"/>
-</view>
-
-<van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">
-    <van-cell title="{{item}}">
-      <van-radio name="{{item}}"/>
-    </van-cell>
-</van-radio-group>
+  <van-field label="性别：" value="{{userInfo.gender}}" disabled/>
+  <van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">
+      <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender">
+        <van-radio name="{{item}}"/>
+      </van-cell>
+  </van-radio-group>
 
   <van-field value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="请输入手机号码（真实有效方便领队联系）" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" />
 
-</van-cell-group>
-
-<van-button size="large" type="primary"  disabled="{{hasModified==false}}" bindtap='updatePerson'>保存修改</van-button>
+</van-panel>

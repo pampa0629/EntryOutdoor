@@ -8,7 +8,7 @@
 <!--活动列表-->
 <swiper current="{{currentTab}}" duration="200" style="height:{{screenHeight}}px"  bindchange="swiperTab">
   <!--我发起的-->
-  <swiper-item> 
+  <swiper-item>  
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
     <van-cell  wx:for="{{myOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable data-pos='{{index}}' title="{{item.title}}" bind:click="tapMyOutdoors" bindlongpress="longTap"/>
     </scroll-view>

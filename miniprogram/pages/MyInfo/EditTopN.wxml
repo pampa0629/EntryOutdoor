@@ -1,0 +1,10 @@
+
+<van-panel title="我的Top {{index+1}}战绩">
+
+  <van-field value="{{top.title}}" label="活动路线：" placeholder="请输入活动路线描述"  bind:change="changeTitle"/>
+
+  <van-field value="{{top.result}}" label="战绩：" placeholder="请输入战绩结果"  bind:change="changeResult"/>
+
+  <van-field value="{{top.disc}}" label="说明：" placeholder="请输入相关说明"  bind:change="changeDisc"/>
+
+</van-panel>

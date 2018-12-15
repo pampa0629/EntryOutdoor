@@ -146,20 +146,22 @@ Page({
         }).get()
         .then(res => {
           if (res.data.length == 0) { // 确认没有才加新的记录
-            // 从微信登录信息中获取昵称和性别
-            self.data.userInfo.nickName = e.detail.userInfo.nickName;
-            self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
-            // 在Persons表中创建一条新用户的记录
-            dbPersons.add({
-              data: {
-                userInfo: self.data.userInfo,
-                myOutdoors: self.data.myOutdoors,
-                entriedOutdoors: self.data.entriedOutdoors,
-                caredOutdoors: self.data.caredOutdoors,
-                // websites: self.data.websites,
-              }
-            }).then(res => {
-              self.setPersonInfo(res._id, self.data.userInfo)
+            // 从微信登录信息中获取昵称和性别，不过不能与原有昵称重名
+            util.getUniqueNickname(e.detail.userInfo.nickName, nickName=>{
+              self.data.userInfo.nickName = nickName
+              self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
+              // 在Persons表中创建一条新用户的记录
+              dbPersons.add({
+                data: {
+                  userInfo: self.data.userInfo,
+                  myOutdoors: self.data.myOutdoors,
+                  entriedOutdoors: self.data.entriedOutdoors,
+                  caredOutdoors: self.data.caredOutdoors,
+                  // websites: self.data.websites,
+                }
+              }).then(res => {
+                self.setPersonInfo(res._id, self.data.userInfo)
+              })
             })
           } else if (res.data.length == 1) { // 有的话，用读取的就好
             self.setPersonInfo(res.data[0]._id, self.data.userInfo)
@@ -224,17 +226,20 @@ Page({
   },
 
   bindHelp: function() {
-    wx.setClipboardData({
-      data: 'https://docs.qq.com/doc/DVm1ITWx0V1dLVml3',
-      success: function(res) {
-        wx.showModal({
-          title: '帮助文档',
-          showCancel: false,
-          confirmText: "知道了",
-          content: "已经复制本小程序的帮助文档网页地址，请粘贴到浏览器中查看详细内容。"+
-                  "\n当前版本号：0.6.3  \n作者：攀爬",
-        })
+    var url = "https://docs.qq.com/doc/DVm1ITWx0V1dLVml3"
+    var path = "/pages/detail/detail?url=" + url
+    console.log(path)
+    wx.navigateToMiniProgram({
+      appId: 'wxd45c635d754dbf59', // 腾讯文档的appID
+      path: path,
+      success(res) {
       }
+    })
+  },
+
+  bindCareer(){
+    wx.navigateTo({
+      url: './MyCareer',
     })
   },
 

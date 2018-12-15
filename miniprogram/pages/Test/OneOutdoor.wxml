@@ -10,3 +10,9 @@
 
 <van-button size="large" bind:click="dbKey">数据库关键字</van-button>
 <van-button size="large" bind:click="dbRead">数据库读取</van-button>
+
+<van-button size="large" bind:click="tapDoc">腾讯文档</van-button>
+<van-button size="large" bind:click="tapScan">扫描二维码</van-button>
+<van-button size="large" bind:click="tapDecode">解密</van-button>
+<van-button size="large" bind:click="tapCreateQrcode">生成二维码</van-button>
+<canvas class='canvas' canvas-id='canvas' bindlongtap='save'></canvas>

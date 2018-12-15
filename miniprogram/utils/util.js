@@ -4,9 +4,10 @@
 const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database()
+const dbPersons = db.collection('Persons')
 
 const formatTime = date => {
-  const year = date.getFullYear() 
+  const year = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
   const hour = date.getHours()
@@ -17,7 +18,7 @@ const formatTime = date => {
 }
 
 // 把2018-11-01的日期格式，转化为11/02/2018的格式
-const Ymd2Mdy= (date)=>{
+const Ymd2Mdy = (date) => {
   var dates = date.split("-")
   return dates[1] + "/" + dates[2] + "/" + dates[0]
 }
@@ -155,7 +156,7 @@ const createPerson = (userInfo) => {
 }
 
 // 通过date得到星期几，如周一/.../六/日
-const getDay=(date) =>{
+const getDay = (date) => {
   var day = new Date(date).getDay();
   var text = "周";
   switch (day) {
@@ -185,10 +186,10 @@ const getDay=(date) =>{
 }
 
 // 汉字转数字
-const CChars = ['零','一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '多']
-const parseChar = (cchar) => { 
-  CChars.forEach((item, index)=>{
-    if(item == cchar){
+const CChars = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '多']
+const parseChar = (cchar) => {
+  CChars.forEach((item, index) => {
+    if (item == cchar) {
       return index
     }
   })
@@ -197,7 +198,7 @@ const parseChar = (cchar) => {
 
 // 得到截止日期数组
 const getLimitDates = () => {
-  var LimitDates= ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"] // 截止日期
+  var LimitDates = ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"] // 截止日期
   return LimitDates;
 }
 
@@ -205,8 +206,8 @@ const getLimitDates = () => {
 const getLimitDateIndex = (date) => {
   var LimitDates = ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"] // 截止日期
   var result = 0
-  LimitDates.forEach((item, index)=>{
-    if(item == date){
+  LimitDates.forEach((item, index) => {
+    if (item == date) {
       result = index
     }
   })
@@ -218,15 +219,15 @@ const buildPicSrc = (outdoorid, index) => { // index:0,1,2 图片顺序
   // 没有办法，只能先用时间（毫秒）作为随时文件名，等待微信解决bug
   return "Outdoors/" + outdoorid + "/" + new Date().getTime() + ".jpg"
 }
- 
+
 // 按照绿野习惯，发布出去的电话号码做谐音处理，防止网络爬虫获取隐私
 // 第一步实现：0->O，1->I；其他如2->Z，5->S，8->B，9->q 再议
-const changePhone =(phone)=>{
+const changePhone = (phone) => {
   return phone.replace("0", "O").replace("1", "I")
 }
 
 // 隐藏手机号码的中间三位
-const hidePhone= (phone)=> {
+const hidePhone = (phone) => {
   return phone.substring(0, 3) + "***" + phone.substring(7)
 }
 
@@ -234,10 +235,10 @@ const hidePhone= (phone)=> {
 const myParseInt = (str) => {
   var res = ""
   var temp = ""
-  for(var i=0; i<str.length; i++){
-    if (str.charAt(i) >= "0" && str.charAt(i) <= "9"){
+  for (var i = 0; i < str.length; i++) {
+    if (str.charAt(i) >= "0" && str.charAt(i) <= "9") {
       res += str.charAt(i)
-    } else if (res.length>0){ // 遇到中间不是数字，则需要清空
+    } else if (res.length > 0) { // 遇到中间不是数字，则需要清空
       temp = res
       res = ""
     }
@@ -255,8 +256,8 @@ const authorize = (which, message, callback) => {
         wx.authorize({
           scope: scope,
           success() {
-            console.log(scope+" OK")
-            if(callback){
+            console.log(scope + " OK")
+            if (callback) {
               callback()
             }
           },
@@ -264,8 +265,8 @@ const authorize = (which, message, callback) => {
             wx.showModal({
               title: '必须授权',
               content: message,
-              cancelText:"暂不授权",
-              confirmText:"这就授权",
+              cancelText: "暂不授权",
+              confirmText: "这就授权",
               success(res) {
                 if (res.confirm) {
                   console.log('用户点击确定')
@@ -284,6 +285,47 @@ const authorize = (which, message, callback) => {
       }
     }
   })
+}
+
+// 得到唯一的户外昵称
+const getUniqueNickname = (nickName, callback) => {
+  dbPersons.where({
+    "userInfo.nickName": nickName
+  }).get().then(res => {
+    console.log(res.data)
+    if(res.data.length == 0){
+      if(callback){
+        callback(nickName)
+      }
+    } else if (res.data.length > 0) { // 有了就得换一个名字
+      var time = (new Date()).getTime().toString() // 用时间毫秒数的最后四位做后缀
+      nickName += time.substring(time.length-4)
+      getUniqueNickname(nickName, callback)
+    }
+  })
+}
+
+// 拨打电话
+const phoneCall=(phone)=>{
+  if (phone.indexOf("*") != -1) {
+    wx.showModal({
+      title: '无法拨号',
+      content: '队员无法给非领队成员拨号，请联系领队拨号',
+      confirmText: "知道了",
+      showCancel: false,
+    })
+  } else if (!phone || phone.length != 11) {
+    wx.showModal({
+      title: '无法拨号',
+      content: '号码不全，无法拨号',
+      confirmText: "知道了",
+      showCancel: false,
+    })
+  } else {
+    wx.makePhoneCall({
+      phoneNumber: phone
+    })
+  }
 }
 
 module.exports = {
@@ -308,14 +350,14 @@ module.exports = {
   loadNicknameID: loadNicknameID,
   clearNicknameID: clearNicknameID,
   // 性别转化
-  toWxGender: toWxGender, 
+  toWxGender: toWxGender,
   fromWxGender: fromWxGender,
   // 创造队员
   createMember: createMember,
   // 根据userInfo（非微信）创建Person
   createPerson: createPerson,
   getDay: getDay,
-  parseChar: parseChar, 
+  parseChar: parseChar,
   // 图片在云存储上的位置
   buildPicSrc: buildPicSrc,
   // 截止日期数组和字符串的相互转化
@@ -324,8 +366,11 @@ module.exports = {
   // 手机号码处理
   changePhone: changePhone,
   hidePhone: hidePhone,
+  phoneCall: phoneCall,
   // 字符串转数字
-  myParseInt:myParseInt,
+  myParseInt: myParseInt,
   // 统一授权入口
-  authorize: authorize, 
+  authorize: authorize,
+  // 得到唯一的户外昵称
+  getUniqueNickname: getUniqueNickname,
 }

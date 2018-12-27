@@ -9,7 +9,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 
 Page({
-
+ 
   data: {
     outdoorid:null,
     title:"",
@@ -29,7 +29,7 @@ Page({
       select: null,
       Options: ["体力不能胜任", "户外装备不全",  "户外经验不足", "必须认路", "只限熟人", "其它"],
     },
-  },
+  }, 
 
   onLoad: function (options) {
     const self = this;
@@ -75,11 +75,11 @@ Page({
   },
 
   longPressMember(index){
-    util.phoneCall(this.data.members[index].phone)
+    util.phoneCall(this.data.members[index].phone, false)
   },
 
   onMakecall(){
-    util.phoneCall(this.data.members[this.data.index].phone)
+    util.phoneCall(this.data.members[this.data.index].phone, false)
   },
 
   onPopup(index){
@@ -125,10 +125,19 @@ Page({
   confirmChatDlg(e) {
     console.log(e)
     const self = this
-    var content = self.data.chatDlg.Options[self.data.chatDlg.select]
-    if (content == "其它") {
-      content = self.data.chatDlg.content
-    }
+    
+    var content=""
+    self.data.chatDlg.selects.forEach((item, index)=>{
+      var temp = self.data.chatDlg.Options[item]
+      if (temp == "其它") {
+        temp = self.data.chatDlg.content
+      }
+      content += temp
+      if (index != self.data.chatDlg.selects.length-1) {
+        content += "，"
+      } 
+    })
+    
     console.log(content)
     if (content) {
       const item = self.data.members[self.data.index]
@@ -156,10 +165,10 @@ Page({
     }
   },
 
-  changeChatSelect(e){
+  changeChatSelects(e){
     console.log(e)
     this.setData({
-      "chatDlg.select": e.detail
+      "chatDlg.selects": e.detail
     })
   },
 
@@ -190,10 +199,18 @@ Page({
   confirmRejectDlg(e) {
     console.log(e)
     const self = this
-    var content = self.data.rejectDlg.Options[self.data.rejectDlg.select]
-    if (content == "其它") {
-      content = self.data.rejectDlg.content
-    }
+
+    var content = ""
+    self.data.rejectDlg.selects.forEach((item, index) => {
+      var temp = self.data.rejectDlg.Options[item]
+      if (temp == "其它") {
+        temp = self.data.rejectDlg.content
+      }
+      content += temp
+      if (index != self.data.rejectDlg.selects.length - 1) {
+        content += "，"
+      }
+    })
     console.log(content)
 
     if (content) {
@@ -230,10 +247,10 @@ Page({
     }
   },
 
-  changeRejectSelect(e) {
+  changeRejectSelects(e) {
     console.log(e)
     this.setData({
-      "rejectDlg.select": e.detail
+      "rejectDlg.selects": e.detail
     })
   },
 

@@ -15,7 +15,6 @@ const getDefaultNotice = () => {
     entryCount: 3, // 接收前几个队员的报名消息
     alreadyCount: 0, // 已经接收了几个
     fullNotice: true, // 报名满了，是否接收消息（以便好截止报名）
-    formids: [],
   }
   return wxnotice
 }
@@ -44,14 +43,14 @@ const savePersonFormid = (personid, formid, callback) => {
     }).then(res => {
       console.log("savePersonFormid OK: " + formid)
       if (callback) {
-        callback()
+        callback(result)
       }
     })
   }
 }
 
-// 把获得的formid给指定人员存起来，还有过期时间
-const saveOutdoorFormid = (outdoorid, formid) => {
+// 把获得的formid给指定活动存起来，还有过期时间
+/*const saveOutdoorFormid = (outdoorid, formid) => {
   console.log(formid)
   var result = buildOneFormid(formid)
   if (result) { // 模拟的不要记录
@@ -61,8 +60,9 @@ const saveOutdoorFormid = (outdoorid, formid) => {
       }
     })
   }
-}
+}*/
 
+/*
 const loadOutdoorFormids = (outdoorid, callback) => {
   dbOutdoors.doc(outdoorid).get().then(res => {
     if (callback && res.data.limits && res.data.limits.wxnotice) {
@@ -71,7 +71,7 @@ const loadOutdoorFormids = (outdoorid, callback) => {
       callback(res.data.limits.wxnotice.formids)
     }
   })
-}
+}*/
 
 // 根据personid找到openid
 const personid2openid = (personid, callback) => {
@@ -172,8 +172,10 @@ const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid, 
 // 发送报名消息
 const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) => {
   console.log("sendEntryMsg2Leader")
+  console.log(leaderid)
   dbPersons.doc(leaderid).get().then(res => {
     var openid = res.data._openid
+    console.log(openid)
     var tempid = "4f4JAb6IwzCW3iElLANR0OxSoJhDKZNo8rvbubsfgyE"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
       "keyword1": { // 昵称
@@ -196,7 +198,7 @@ const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) =>
       }
     }
     var page = buildPage("CreateOutdoor", outdoorid)
-    fetchOutdoorFormid(outdoorid, formid => {
+    fetchPersonFormid(leaderid, res.data.formids, formid=>{
       sendMessage(openid, tempid, formid, page, data)
     })
   })
@@ -260,20 +262,20 @@ const sendRejectMsg2Member = (personid, title, outdoorid, nickName, phone, conte
   })
 }
 
-// 得到活动的form id
+/* 得到活动的form id
 const fetchOutdoorFormid = (outdoorid, callback) => {
   // 得到formids
   loadOutdoorFormids(outdoorid, formids => {
     // 找到第一个能用的formid，把前面没用的删掉
     findFirstFormid(formids, true, result => {
-      // 最后调用云函数写回去
+      // 最后调用云函数写回去 
       cloudfun.updateOutdoorFormids(outdoorid, result.formids)
       if (callback) {
         callback(result.formid)
       }
     })
   })
-}
+}*/
 
 // 清理过期的formids，回调返回可用的formids
 const clearPersonFormids=(personid, callback)=>{ 
@@ -379,9 +381,10 @@ module.exports = {
 
   buildOneFormid: buildOneFormid,
   savePersonFormid: savePersonFormid,
-  saveOutdoorFormid: saveOutdoorFormid,
-
+  // saveOutdoorFormid: saveOutdoorFormid, 废弃，存到Persons表中
   clearPersonFormids: clearPersonFormids, // 清理并得到有效的个人formids
+
+  sendMessage: sendMessage, // 发送模板消息
 
   sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息
   sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息

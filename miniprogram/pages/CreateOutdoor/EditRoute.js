@@ -6,7 +6,7 @@ Page({
       wayPoints: [], // 途经点
       trackFiles: [], // 轨迹文件
       trackSites: [], // 轨迹网站
-    },
+    }, 
 
     index: 0, // 当前要处理的index
     hasModified: false,
@@ -97,25 +97,35 @@ Page({
           name: "六只脚",
           useit: false,
           url: "",
-          urlpre: "http://www.foooooot.com/trip/",
-          urlpost: "/",
           qrcode:"",
-          qrcodepre:"http://foooooot.com/trip/",
-          qrcodepost:"/nav_to/"
         }, {
           name: "两步路",
           useit: false,
           url: "",
-          urlpre: "http://www.2bulu.com/track/t-",
-          urlpost: ".htm",
           qrcode: "",
-            qrcodepre: "http://www.2bulu.com/track/t-",
-            qrcodepost: ".htm"
         }],
       })
     }
+    self.dealCompatibility()
     console.log(self.data.route.trackSites)
     self.rebuildSitesFun()
+  },
+
+  dealCompatibility(){
+    const self = this
+    self.data.route.trackSites.forEach((item, index)=>{
+      if (item.name == "六只脚") {
+        item.urlpre="http://www.foooooot.com/trip/"
+        item.urlpost= "/"
+        item.qrcodepre= "http://foooooot.com/trip/"
+        item.qrcodepost= "/nav_to/"
+      } else if (item.name == "两步路"){
+        item.urlpre= "http://www.2bulu.com/track/t-"
+        item.urlpost= ".htm"
+        item.qrcodepre="http://www.2bulu.com/track/t-"
+        item.qrcodepost= ".htm"
+      }
+    })
   },
 
   rebuildSitesFun() {
@@ -189,6 +199,7 @@ Page({
       ["route.trackSites[" + index + "].qrcode"]: item.qrcodepre + e.detail + item.qrcodepost,
       hasModified: true,
     })
+    console.log(item)
   },
 
   copyinUrl(index) {

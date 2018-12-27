@@ -4,6 +4,14 @@
   <van-cell wx:else title="户外评测" label="户外达人指数为：{{career.evaluation.level}}" value="点击再次评测" is-link url="MyEvaluate" border="{{false}}" />
 </van-panel>
 
+<!--最近运动步数-->
+<van-panel title="最高运动步数" desc="最后更新时间：{{career.step.update}}">
+  <van-cell title="最近七天为：{{career.step.topLast7}}步，最近三十天为：{{career.step.topLast30}}步">
+    <van-button plain type="primary" size="normal" bind:click="clickFetchWalk">获取</van-button>
+  </van-cell>
+  <van-switch-cell title="是否自动更新步数" checked="{{career.step.autoUpdate}}" bind:change="changeAutoUpdate"/>
+</van-panel>
+
 <!--Top N 活动-->
 <van-panel title="我的最佳战绩（Top 3）">
   <van-cell wx:for="{{career.topn}}" wx:key="item.title" title="Top{{index+1}}路线：{{item.title}}" label="说明：{{item.disc}}"  value="成绩：{{item.result}}" is-link url="EditTopN?n={{index}}" border="{{index<career.topn.length-1}}" />

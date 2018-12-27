@@ -214,12 +214,12 @@ Page({
 
   longTapMeetMembers(index, cellIndex, e){
     const self = this
-    this.phoneCall(self.data.meetMembers[index][cellIndex].userInfo.phone)
+    util.phoneCall(self.data.meetMembers[index][cellIndex].userInfo.phone, false)
   },
 
   longTapMembers(index, e){
     const self = this
-    util.phoneCall(self.data.members[index].userInfo.phone)
+    util.phoneCall(self.data.members[index].userInfo.phone, false)
   },
  
 

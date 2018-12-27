@@ -6,9 +6,9 @@
     <van-button size="large" open-type="getPhoneNumber" bindgetphonenumber="onTest">测试</van-button>
   </van-col>
 </van-row>
-
-
-<van-button size="large" bind:click="dbKey">数据库关键字</van-button>
+ 
+<van-button size="large" bind:click="sendTemplate">发模板消息</van-button>
+<van-button size="large" bind:click="tapWalk">读取步数</van-button>
 <van-button size="large" bind:click="dbRead">数据库读取</van-button>
 
 <van-button size="large" bind:click="tapDoc">腾讯文档</van-button>

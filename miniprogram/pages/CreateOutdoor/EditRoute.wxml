@@ -7,7 +7,7 @@
     <van-button size="large" type="primary" bindtap='addStop'>增加途经点</van-button>
   </view>
 </van-panel>
-
+ 
 <!--弹出功能选项-->
 <van-action-sheet
   show="{{ showAction }}"

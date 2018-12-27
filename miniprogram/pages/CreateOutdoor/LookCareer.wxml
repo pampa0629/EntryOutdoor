@@ -7,6 +7,12 @@
   <van-notice-bar wx:else text="无户外扎营装备"/>
 </van-panel>
 
+<!--最近步数-->
+<van-panel title="最高运动步数" desc="最后更新时间：{{career.step.update}}" wx:if="{{career && career.step}}">
+  <van-notice-bar text="最近七天为：{{career.step.topLast7}}步"/>
+  <van-notice-bar text="最近三十天为：{{career.step.topLast30}}步"/>
+</van-panel>
+
 <!--发起的活动-->
 <van-panel title="发起过的活动" wx:if="{{myOutdoors && myOutdoors.length>0}}">
   <van-cell wx:for="{{myOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<myOutdoors.length-1}}"/>

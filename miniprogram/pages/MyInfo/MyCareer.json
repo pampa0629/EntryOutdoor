@@ -6,6 +6,7 @@
     "van-dialog": "/vant-weapp/dialog/index",
     "van-cell": "/vant-weapp/cell/index",
     "van-cell-group": "/vant-weapp/cell-group/index",
+    "van-switch-cell": "/vant-weapp/switch-cell/index",
     "van-row": "/vant-weapp/row/index",
     "van-col": "/vant-weapp/col/index",
     "van-panel": "/vant-weapp/panel/index",

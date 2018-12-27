@@ -6,27 +6,71 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 
-Page({   
-  
+Page({
+
   data: {
+    isTesting: false, // for test， false true
+
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
     userInfo: {
       nickName: "待定",
       gender: "GG",
-      phone: "136", 
+      phone: "136",
     },
-    
+
     myOutdoors: [], // 活动id
     entriedOutdoors: [],
     caredOutdoors: [],
     lastOutdoorid: null, // 最近访问过的活动ID
 
     // 与户外网站对接
-    hasLoginLvyeorg:false, // 是否已经登录了org网站
-    lvyeOrgUsername:"", // 绿野org 登录用户名
-    lvyeOrgButton:"绿野ORG登录", // 按钮上显示的文字
+    hasLoginLvyeorg: false, // 是否已经登录了org网站
+    lvyeOrgUsername: "", // 绿野org 登录用户名
+    lvyeOrgButton: "绿野ORG登录", // 按钮上显示的文字
 
-    isTesting: false, // for test， false true
+    showCalls: false,
+    Calls: [{
+        name: '119',
+      subname: '消防救援',
+      },
+      {
+        name: '4006009958',
+        subname: '蓝天救援',
+      },
+      {
+        name: '4006007385',
+        subname: '绿野救援',
+      },
+      {
+        name: '120',
+        subname: '医疗急救',
+      },
+      {
+        name: '110',
+        subname: '匪警电话',
+      },
+      {
+        name: '95119',
+        subname: '森林火警',
+      },
+      {
+        name: '122',
+        subname: '交通事故',
+      },
+      {
+        name: '12369',
+        subname: '环保监督',
+      },
+      {
+        name: '121',
+        subname: '天气预报',
+      },
+      {
+        name: '114',
+        subname: '号码查询',
+      },
+    ],
+
   },
 
   onLoad: function() {
@@ -41,14 +85,14 @@ Page({
     }
   },
 
-// 点击 > 图标想修改信息，主要看是否登录了
-  clickModify: function (e) {
+  // 点击 > 图标想修改信息，主要看是否登录了
+  clickModify: function(e) {
     console.log(e)
-    if(!this.data.hasLogin){
+    if (!this.data.hasLogin) {
       wx.showModal({
         title: '请先登录',
-        showCancel:false,
-        confirmText:"知道了",
+        showCancel: false,
+        confirmText: "知道了",
         content: '首次使用请点击“微信登录”按钮，并请允许微信授权',
       })
     } else {
@@ -79,14 +123,14 @@ Page({
           self.createOnePerson(e);
         }
       }
-      if(e) { // 如果e不为null，则说明是通过按钮调用的，那就需要启动app的函数
+      if (e) { // 如果e不为null，则说明是通过按钮调用的，那就需要启动app的函数
         app.getPersonInfo(); // 调用app 获得个人信息的函数
       }
     }
   },
 
   // 绿野org登录，直接跳转到登录页面
-  lvyeorgLogin:function(){
+  lvyeorgLogin: function() {
     wx.navigateTo({
       url: './LvyeorgLogin',
     })
@@ -102,24 +146,26 @@ Page({
     // 同时看看org是否登录了
     console.log("ready login org")
     // 登录org
-    if (app.globalData.lvyeorgInfo){ // 数据库读取有了
-      if(!app.globalData.lvyeorgLogin) { // 尚未登录，则主动登录
+    if (app.globalData.lvyeorgInfo) { // 数据库读取有了
+      if (!app.globalData.lvyeorgLogin) { // 尚未登录，则主动登录
         app.callbackLoginLvyeorg = (res) => {
           self.setLoginLvyeorg(res)
         }
         app.loginLvyeOrg()
       } else { // 登录了直接设置就好
-        self.setLoginLvyeorg({ username: app.globalData.lvyeorgInfo.username })
+        self.setLoginLvyeorg({
+          username: app.globalData.lvyeorgInfo.username
+        })
       }
     } else { //数据度还没有读好，或者没有，则只能等着
       app.callbackLoginLvyeorg = (res) => {
         self.setLoginLvyeorg(res)
       }
-    } 
+    }
   },
 
   // 设置org登录信息
-  setLoginLvyeorg: function (res) {
+  setLoginLvyeorg: function(res) {
     console.log("MyInfo setLoginLvyeorg, res is: ")
     console.log(res)
     if (res.error) {
@@ -134,7 +180,7 @@ Page({
       })
     }
   },
-  
+
   createOnePerson: function(e) {
     const self = this;
     if (e != null) {
@@ -147,7 +193,7 @@ Page({
         .then(res => {
           if (res.data.length == 0) { // 确认没有才加新的记录
             // 从微信登录信息中获取昵称和性别，不过不能与原有昵称重名
-            util.getUniqueNickname(e.detail.userInfo.nickName, nickName=>{
+            util.getUniqueNickname(e.detail.userInfo.nickName, nickName => {
               self.data.userInfo.nickName = nickName
               self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
               // 在Persons表中创建一条新用户的记录
@@ -232,19 +278,35 @@ Page({
     wx.navigateToMiniProgram({
       appId: 'wxd45c635d754dbf59', // 腾讯文档的appID
       path: path,
-      success(res) {
-      }
+      success(res) {}
     })
   },
 
-  bindCareer(){
+  bindEmergencyCall() {
+    this.setData({
+      showCalls:true,
+    })
+  },
+
+  closeCalls(){
+    this.setData({
+      showCalls: false,
+    })
+  },
+
+  selectCalls(e) { 
+    console.log(e)
+    util.phoneCall(e.detail.name, true)
+  },
+
+  bindCareer() {
     wx.navigateTo({
       url: './MyCareer',
     })
   },
 
-//////////////////////////////// for testing ////////////////////////
-  bindTest: function () {
+  //////////////////////////////// for testing ////////////////////////
+  bindTest: function() {
     wx.navigateTo({
       url: '../Test/OneOutdoor',
     })

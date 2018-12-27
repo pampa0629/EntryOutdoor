@@ -349,6 +349,11 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     message += "活动性质：" + data.title.loaded + NL2
   }
 
+  // 活动介绍
+  if (modifys.brief) { // 第一次在前面加信息了，这里只管后面修改的事情
+    message += "活动介绍：" + NL + data.brief.disc + NL2
+  }
+
   // 集合时间及地点
   if (first || modifys.meets) {
     message += "集合时间及地点：" + NL

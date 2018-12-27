@@ -1,8 +1,9 @@
 import { VantComponent } from '../common/component';
+import { isDef } from '../common/utils';
 var currentYear = new Date().getFullYear();
 
 var isValidDate = function isValidDate(date) {
-  return !isNaN(new Date(date).getTime());
+  return isDef(date) && !isNaN(new Date(date).getTime());
 };
 
 function range(num, min, max) {
@@ -95,7 +96,7 @@ VantComponent({
       var isEqual = val === data.innerValue;
 
       if (!isEqual) {
-        this.setData({
+        this.set({
           innerValue: val
         }, function () {
           _this2.updateColumnValue(val);
@@ -165,8 +166,8 @@ VantComponent({
       if (isDateType && !isValidDate(value)) {
         value = data.minDate;
       } else if (!isDateType && !value) {
-        var _minHour = data.minHour;
-        value = pad(_minHour) + ":00";
+        var minHour = data.minHour;
+        value = pad(minHour) + ":00";
       } // time type
 
 
@@ -181,24 +182,8 @@ VantComponent({
       } // date type
 
 
-      var _this$getBoundary3 = this.getBoundary('max', value),
-          maxYear = _this$getBoundary3.maxYear,
-          maxDate = _this$getBoundary3.maxDate,
-          maxMonth = _this$getBoundary3.maxMonth,
-          maxHour = _this$getBoundary3.maxHour,
-          maxMinute = _this$getBoundary3.maxMinute;
-
-      var _this$getBoundary4 = this.getBoundary('min', value),
-          minYear = _this$getBoundary4.minYear,
-          minDate = _this$getBoundary4.minDate,
-          minMonth = _this$getBoundary4.minMonth,
-          minHour = _this$getBoundary4.minHour,
-          minMinute = _this$getBoundary4.minMinute;
-
-      var minDay = new Date(minYear, minMonth - 1, minDate, minHour, minMinute);
-      var maxDay = new Date(maxYear, maxMonth - 1, maxDate, maxHour, maxMinute);
-      value = Math.max(value, minDay.getTime());
-      value = Math.min(value, maxDay.getTime());
+      value = Math.max(value, data.minDate);
+      value = Math.min(value, data.maxDate);
       return value;
     },
     times: function times(n, iteratee) {
@@ -274,7 +259,7 @@ VantComponent({
 
       var data = this.data;
       var pickerValue = event.detail.value;
-      var values = pickerValue.map(function (value, index) {
+      var values = pickerValue.slice(0, data.columns.length).map(function (value, index) {
         return data.columns[index][value];
       });
       var value;
@@ -304,7 +289,7 @@ VantComponent({
       }
 
       value = this.correctValue(value);
-      this.setData({
+      this.set({
         innerValue: value
       }, function () {
         _this3.updateColumnValue(value);
@@ -322,7 +307,7 @@ VantComponent({
           pickerValue = _this$data.pickerValue,
           columns = _this$data.columns;
       pickerValue[index] = columns[index].indexOf(value);
-      this.setData({
+      this.set({
         pickerValue: pickerValue
       });
     },
@@ -332,7 +317,7 @@ VantComponent({
     setColumnValues: function setColumnValues(index, values) {
       var columns = this.data.columns;
       columns[index] = values;
-      this.setData({
+      this.set({
         columns: columns
       });
     },
@@ -346,7 +331,7 @@ VantComponent({
     },
     setValues: function setValues(values) {
       var columns = this.data.columns;
-      this.setData({
+      this.set({
         pickerValue: values.map(function (value, index) {
           return columns[index].indexOf(value);
         })
@@ -374,7 +359,7 @@ VantComponent({
         }
       }
 
-      this.setData({
+      this.set({
         pickerValue: values
       });
     }
@@ -383,7 +368,7 @@ VantComponent({
     var _this4 = this;
 
     var innerValue = this.correctValue(this.data.value);
-    this.setData({
+    this.set({
       innerValue: innerValue
     }, function () {
       _this4.updateColumnValue(innerValue);

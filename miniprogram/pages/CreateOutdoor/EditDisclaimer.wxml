@@ -2,13 +2,22 @@
 
 <van-panel title="免责条款" desc="请拷贝后这里粘贴生成"  use-footer-slot>
   <view><text style="font-size:12pt">{{disclaimer}}</text></view>
-  <view class="multi_row">
-    <button class="btn" hover-class='btn_hover'  bindtap="pasteDisclaimer">粘贴生成条款</button>
-    <button class="btn" hover-class='btn_hover'  bindtap="copyDisclaimer">拷贝到剪切板</button>
-  </view>
-  <view class="multi_row">
-    <button class="btn" hover-class='btn_hover'  bindtap="loadMyDisclaimer">加载我的条款</button>
-    <button class="btn" hover-class='btn_hover'  bindtap="saveMyDisclaimer">存为我的条款</button>
-  </view>
+  <van-row>
+    <van-col span="9" offset="2">
+      <van-button plain type="primary" size="large" bind:click="pasteDisclaimer">粘贴生成条款</van-button>
+    </van-col>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="copyDisclaimer">拷贝到剪切板</van-button>
+    </van-col>
+  </van-row>
+
+  <van-row>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="loadMyDisclaimer">加载我的条款</van-button>
+    </van-col>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="saveMyDisclaimer">存为我的条款</van-button>
+    </van-col>
+  </van-row>
 </van-panel>
 

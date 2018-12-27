@@ -189,6 +189,22 @@ const updatePersonSubscriber=(leaderid, personid, mine)=>{
   })
 }
 
+const decryptWeRun=(encrypedData, iv, code, callback)=>{
+  console.log("decryptWeRun")
+  wx.cloud.callFunction({
+    name: 'decryptWeRun', // 云函数名称
+    data: { // 
+      encrypedData: encrypedData,
+      iv: iv,
+      code:code,
+    }
+  }).then(res=>{
+    console.log(res)
+    if(callback){
+      callback(res.result)
+    }
+  })
+}
 
 module.exports = {
   // Outdoors
@@ -203,8 +219,13 @@ module.exports = {
   pushOutdoorLvyeWaiting: pushOutdoorLvyeWaiting,
   shiftOutdoorLvyeWaitings: shiftOutdoorLvyeWaitings,
 
+  updateOutdoorFormids: updateOutdoorFormids,
+
   // Persons
   unshiftPersonCared:unshiftPersonCared,
   updatePersonFormids: updatePersonFormids,
   updatePersonSubscriber: updatePersonSubscriber,
+
+  // other 
+  decryptWeRun: decryptWeRun, 
 }

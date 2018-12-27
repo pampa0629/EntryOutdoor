@@ -1,6 +1,9 @@
 import Page from 'page';
 const app = getApp()
 const QRCode  = require('../../libs/weapp-qrcode.js')
+const util = require('../../utils/util.js')
+const cloudfun = require('../../utils/cloudfun.js')
+const template = require('../../utils/template.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -8,7 +11,7 @@ const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const dbTemp = db.collection('Temp')
 
-
+ 
 Page({
   data: {
     home: false,
@@ -17,6 +20,12 @@ Page({
 
   onLoad() {
 
+  },
+  
+  sendTemplate(){
+    template.sendMessage("ogNmG5P3ZlT29kXGhWfGX5nC_sqA", "4f4JAb6IwzCW3iElLANR0OxSoJhDKZNo8rvbubsfgyE", "1545879624341", "", "")
+    // template.sendMessage("ogNmG5KFPConlOTeQNYciQrW5SE4", "IXScAdQZb_QmXCHXWCpjXwjwqii9_yOILJtCiGg1al0", "1543935782814", "", "")
+    
   },
 
   onContact: function(e) {
@@ -47,13 +56,39 @@ Page({
     })
   },
 
-  dbKey(){
-    var key = "1234"
-    dbPersons.doc(app.globalData.personid).update({
-      data:{
-        ["subscribe."+key]:{accept:true}
+  tapWalk(){
+    wx.login({
+      success(resLogin) {
+        console.log("login")
+        console.log(resLogin)
+        util.authorize("werun", "授权后才能获取步数", cb => {
+          wx.getWeRunData({
+            success(res) {
+              const encryptedData = res.encryptedData
+              cloudfun.decryptWeRun(res.encryptedData, res.iv, resLogin.code, run=>{
+                console.log(run)
+                var date = new Date()
+                date.setTime(run.watermark.timestamp*1000)
+                console.log("数据获取时间："+date.toLocaleString())
+                var steps = ""
+                run.stepInfoList.forEach((item, index)=>{
+                  var date = new Date()
+                  date.setTime(item.timestamp * 1000)
+                  var step = "日期：" + date.toLocaleString() + ", 步数：" + item.step
+                  steps += step +"\r\n"
+                  console.log(step)
+                })
+                wx.showModal({
+                  title: '读取步数',
+                  content: steps,
+                })
+              })
+            }
+          })
+        })
       }
     })
+    
   },
 
   dbRead(){

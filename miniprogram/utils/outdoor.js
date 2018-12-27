@@ -1,7 +1,7 @@
 const app = getApp()
 const util = require('./util.js')
 var bmap = require('../libs/bmap-wx.min.js')
-const cloudfun = require('../utils/cloudfun.js')
+const cloudfun = require('./cloudfun.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})

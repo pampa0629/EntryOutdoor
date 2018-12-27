@@ -1,6 +1,8 @@
+const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
+const dbPersons = db.collection('Persons')
 
 const util = require('../../utils/util.js')
 const template = require('../../utils/template.js')
@@ -10,6 +12,7 @@ Page({
   data: {
     outdoorid:null,
     wxnotice:{}, 
+    formids:[],
     hasModified: false, 
   },
 
@@ -26,16 +29,20 @@ Page({
       self.setData({
         wxnotice: prevPage.data.limits.wxnotice,
       })
-      dbOutdoors.doc(self.data.outdoorid).get().then(res => {
-        self.setData({
-          "wxnotice.formids": res.data.limits.wxnotice.formids
-        })
-      })
     } else {
       self.setData({
         wxnotice: template.getDefaultNotice(),
+        hasModified: true, 
       })
     }
+
+    dbPersons.doc(app.globalData.personid).get().then(res => {
+      if (res.data.formids) {
+        self.setData({
+          formids: res.data.formids
+        })
+      }
+    })
     console.log(self.data)
   },
 
@@ -76,17 +83,15 @@ Page({
     console.log(self.data.wxnotice.fullNotice)
   },
 
-  addCount(e){
+  addCount(e) { 
+    console.log(e.detail.formId)
     const self = this
-    template.saveOutdoorFormid(self.data.outdoorid, e.detail.formId)
-    var formid = template.buildOneFormid(e.detail.formId)
-    if (formid){
-      self.data.wxnotice.formids.push(formid)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, formid=>{
+      self.data.formids.push(formid)
       self.setData({
-        "wxnotice.formids": self.data.wxnotice.formids
+        formids: self.data.formids
       })
-    }
-    console.log(self.data.wxnotice.formids.length)
+    })
   },
 
 })

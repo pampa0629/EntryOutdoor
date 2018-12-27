@@ -306,7 +306,7 @@ const getUniqueNickname = (nickName, callback) => {
 }
 
 // 拨打电话
-const phoneCall=(phone)=>{
+const phoneCall = (phone, isEmergency)=>{
   if (phone.indexOf("*") != -1) {
     wx.showModal({
       title: '无法拨号',
@@ -314,7 +314,7 @@ const phoneCall=(phone)=>{
       confirmText: "知道了",
       showCancel: false,
     })
-  } else if (!phone || phone.length != 11) {
+  } else if (!phone || (!isEmergency && phone.length != 11))  {
     wx.showModal({
       title: '无法拨号',
       content: '号码不全，无法拨号',
@@ -326,6 +326,24 @@ const phoneCall=(phone)=>{
       phoneNumber: phone
     })
   }
+}
+
+const stepsTopNs=(steps, tops)=>{
+  var maxes=[]
+  for(var i=0; i<tops.length; i++){
+    maxes[i] = 0
+  }
+
+  var count = 0
+  for(var i=steps.length; i>=0; i--) {
+    for (var j = 0; j < maxes.length; j++) {
+      if (steps[i] > maxes[j] && count < tops[j]) {
+        maxes[j] = steps[i] 
+      }
+    }
+    count++
+  }
+  return maxes
 }
 
 module.exports = {
@@ -373,4 +391,6 @@ module.exports = {
   authorize: authorize,
   // 得到唯一的户外昵称
   getUniqueNickname: getUniqueNickname,
+  // 得到最近步数的top值
+  stepsTopNs: stepsTopNs,
 }

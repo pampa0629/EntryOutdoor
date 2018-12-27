@@ -1,15 +1,30 @@
+<!--紧急电话-->
+<van-action-sheet
+  show="{{ showCalls }}"
+  actions="{{ Calls }}"
+  bind:close="closeCalls"
+  bind:select="selectCalls"
+/>
+
 <!--头像&帮助-->
 <van-row>
   <van-col span="4" offset="1">
     <open-data type="userAvatarUrl"></open-data>
   </van-col>
-  <van-col span="2" offset="15">
+  <van-col span="2" offset="12">
     <view style="flex-direction:column">
-      <van-icon size='32px' name="info-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>v0.6.7</view>
+      <van-icon size='32px' name="phone-o" bind:click="bindEmergencyCall"/>
+      <view style='font-family:黑体;font-size:11pt'>紧急</view>
     </view>
   </van-col>
-</van-row>
+  <van-col span="2" offset="1">
+    <view style="flex-direction:column">
+      <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
+      <view style='font-family:黑体;font-size:11pt'>0.6.8</view>
+    </view>
+  </van-col>
+  
+</van-row> 
 
 <!--个人信息-->
 <van-cell-group>

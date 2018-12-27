@@ -2,6 +2,7 @@ const promisify = require('./utils/promisify.js')
 const util = require('./utils/util.js')
 const qrcode = require('./utils/qrcode.js')
 const lvyeorg = require('./utils/lvyeorg.js')
+const person = require('./utils/person.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -130,6 +131,13 @@ App({
       console.log(data.websites)
       self.globalData.lvyeorgInfo = data.websites.lvyeorgInfo
       self.loginLvyeOrg()
+    }
+    // walk step autoUpdate
+    if (data.career && data.career.step && data.career.step.autoUpdate) {
+      if ( (new Date()).toLocaleDateString() != data.career.step.update ) {
+        console.log("update walk step")
+        person.updateWalkStep(self.globalData.personid, null)
+      }
     }
     // next 
   },

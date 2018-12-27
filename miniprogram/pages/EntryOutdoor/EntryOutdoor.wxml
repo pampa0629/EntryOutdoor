@@ -44,15 +44,15 @@
   <!--留言-->
   <van-col span="2" offset="1">
     <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
-      <van-icon wx:if="{{newChat}}" name="chat" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
-      <van-icon wx:else name="chat" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:if="{{newChat}}" name="chat-o" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:else name="chat-o" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
       <view class="icon_tip">留言</view>
     </view>
   </van-col>
   <!--打印详情与回到首页-->
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
-      <van-icon name="pending-orders" size="24px" color="#1aad19" bind:click="printOutdoor"></van-icon>
+      <van-icon name="description" size="24px" color="#1aad19" bind:click="printOutdoor"></van-icon>
       <view class="icon_tip">详情</view>
     </view>
   </van-col>
@@ -107,7 +107,7 @@
 <!--集合地点-->
 <van-panel title="集合点选择">
   <van-cell required title="必须选择集合地点" clickable value="已选择第{{entryInfo.meetsIndex+1}}集合点" bind:click="lookMeetMap">
-    <van-icon wx:if="{{entryInfo.meetsIndex>=0 &&meets[entryInfo.meetsIndex].latitude }}" slot="right-icon" name="location" bind:click="lookMeetMap" />
+    <van-icon wx:if="{{entryInfo.meetsIndex>=0 &&meets[entryInfo.meetsIndex].latitude }}" slot="right-icon" name="location-o" bind:click="lookMeetMap" />
   </van-cell>
   <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{entryInfo.meetsIndex}}" bind:change="changeMeets">
     <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" border="{{index<meets.length-1}}">

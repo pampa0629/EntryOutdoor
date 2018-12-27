@@ -58,15 +58,15 @@
   <!--留言-->
   <van-col span="2" offset="1">
     <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
-      <van-icon wx:if="{{newChat}}" name="chat" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
-      <van-icon wx:else name="chat" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:if="{{newChat}}" name="chat-o" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:else name="chat-o" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
       <view class="icon_tip">留言</view>
     </view>
   </van-col>
   <!--打印活动详情-->
   <van-col span="2" offset="1">
     <view wx:if="{{status!='拟定中'}}" style="flex-direction:column">
-      <van-icon name="pending-orders" size="24px" color="#1aad19" bind:click="printOutdoor"></van-icon>
+      <van-icon name="description" size="24px" color="#1aad19" bind:click="printOutdoor"></van-icon>
       <view class="icon_tip">详情</view>
     </view>
   </van-col>
@@ -201,7 +201,7 @@
   <!--新建活动-->
   <block wx:if="{{status!='拟定中'}}">
     <form bindsubmit="newOutdoor" report-submit="true">
-      <button form-type="submit" class="no_btn">
+      <button form-type="submit" class="no_btn"> 
         <form bindsubmit="newOutdoor" report-submit="true">
           <button form-type="submit" class="no_btn">
             <form bindsubmit="newOutdoor" report-submit="true">

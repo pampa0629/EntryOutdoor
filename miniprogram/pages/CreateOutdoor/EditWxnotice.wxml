@@ -14,10 +14,10 @@
       <van-checkbox value="{{wxnotice.fullNotice}}" bind:change="checkFullNotice" />
     </van-cell>
   </block>
-</van-panel>
+</van-panel> 
 
 <!--提示和增加通知数量上限-->
-<van-tag type="primary" plain>当前可接收微信通知数量的上限是：{{wxnotice.formids.length}}，您可点击下面按钮增加上限。
+<van-tag type="primary" plain>当前可接收微信通知数量的上限是：{{formids.length}}，您可点击下面按钮增加上限。
 </van-tag>
 <van-tag type="danger" plain>注意：由于微信限制，通知有效期为七天，过期将无法收到，需重新点击下面按钮。</van-tag>
 

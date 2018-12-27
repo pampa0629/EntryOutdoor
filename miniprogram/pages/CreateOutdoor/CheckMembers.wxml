@@ -2,33 +2,34 @@
 <van-panel title="审核队员报名">
   <van-cell wx:if="{{false}}" title="昵称/性别/电话/认路/状态" value="审核结果"/>
   <van-cell wx:for="{{members}}" title-width="80%" wx:key="item.personid" title="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}">
-    <van-button wx:if="{{index>0}}" plain size="small" type="primary" bind:click="onPopup{{index}}">功能</van-button>
+    <van-button wx:if="{{index>0}}" plain size="small" type="primary" bind:click="onPopup{{index}}">审核</van-button>
   </van-cell>
 </van-panel>
-
+ 
 <!--留言询问对话框-->
 <van-dialog use-slot async-close show="{{chatDlg.show}}" show-cancel-button  bind:close="closeChatDlg" bind:confirm="confirmChatDlg" title="留言询问" confirmButtonText="发送留言" cancelButtonText="取消">
   <van-panel title="请选择留言询问内容">
-    <van-radio-group value="{{chatDlg.select}}" bind:change="changeChatSelect">
-      <van-radio  wx:for="{{chatDlg.Options}}" wx:key="item" name="{{index}}">{{chatDlg.Options[index]}}</van-radio>
-      <van-field wx:if="{{chatDlg.Options[chatDlg.select]=='其它'}}" placeholder="请输入具体留言内容" border="{{false}}" bind:change="changeChatContent" value="{{ chatDlg.content }}"/>
-    </van-radio-group>
+    <van-checkbox-group value="{{chatDlg.selects}}" bind:change="changeChatSelects">
+      <van-checkbox wx:for="{{chatDlg.Options}}" wx:key="item" name="{{index}}">{{chatDlg.Options[index]}}</van-checkbox>
+    </van-checkbox-group>
+    <van-field wx:if="{{chatDlg.Options[chatDlg.selects[chatDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体留言内容" border="{{false}}" bind:change="changeChatContent" value="{{ chatDlg.content }}"/>
   </van-panel>
 </van-dialog>
 
 <!--驳回报名对话框-->
 <van-dialog use-slot async-close show="{{rejectDlg.show}}" show-cancel-button  bind:close="closeRejectDlg" bind:confirm="confirmRejectDlg" title="驳回报名" confirmButtonText="确定驳回" cancelButtonText="取消">
   <van-panel title="请选择驳回理由">
-    <van-radio-group value="{{rejectDlg.select}}" bind:change="changeRejectSelect">
-      <van-radio  wx:for="{{rejectDlg.Options}}" wx:key="item" name="{{index}}">{{rejectDlg.Options[index]}}</van-radio>
-      <van-field wx:if="{{rejectDlg.Options[rejectDlg.select]=='其它'}}" placeholder="请输入具体驳回理由" border="{{false}}" bind:change="changeRejectContent" value="{{ rejectDlg.content }}"/>
-    </van-radio-group>
+    <van-checkbox-group value="{{rejectDlg.selects}}" bind:change="changeRejectSelects">
+      <van-checkbox wx:for="{{rejectDlg.Options}}" wx:key="item" name="{{index}}">{{rejectDlg.Options[index]}}</van-checkbox>
+    </van-checkbox-group>
+    <van-field wx:if="{{rejectDlg.Options[rejectDlg.selects[rejectDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体驳回理由" border="{{false}}" bind:change="changeRejectContent" value="{{ rejectDlg.content }}"/>
   </van-panel>
 </van-dialog>
  
-
 <!--弹出功能按钮-->
 <van-popup show="{{ showPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closePopup">
+  <van-notice-bar text="当前审核队员为：{{members[index].nickName}}"
+/>
   <van-row>
     <van-col span="6" offset="1">
       <van-button plain size="large" bind:click="onLookCareer">查看履历</van-button>

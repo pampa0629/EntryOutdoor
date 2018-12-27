@@ -10,10 +10,10 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
-const _ = db.command 
- 
+const _ = db.command
+
 Page({
-    
+
   data: {
     outdoorid: null, // 活动id
     entryInfo: { //报名信息
@@ -57,10 +57,10 @@ Page({
     entriedOutdoors: null, // 报名的id列表
     caredOutdoors: null, // 关注的活动id列表
     hasCared: false, // 该活动是否已经加了关注
-    newChat:false, // 是否有新留言
+    newChat: false, // 是否有新留言
 
-    showPopup:false, // 分享弹出菜单
-  }, 
+    showPopup: false, // 分享弹出菜单
+  },
 
   onLoad: function(options) {
     console.log(options)
@@ -173,11 +173,11 @@ Page({
   postWaitings: function() {
     const self = this
     // 先判断本活动是否需要同步到org上
-    if (self.data.websites && self.data.websites.lvyeorg.tid){
+    if (self.data.websites && self.data.websites.lvyeorg.tid) {
       // 登录后，先把已有的waitings信息同步一下
       if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
         app.callbackLoginLvyeorg = (res) => {
-          if(res.username){
+          if (res.username) {
             lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid)
           }
         }
@@ -262,7 +262,7 @@ Page({
       })
     }
     // 交通方式
-    if(res.data.traffic){
+    if (res.data.traffic) {
       self.setData({
         "traffic": res.data.traffic,
         "traffic.carInfo": outdoor.buildCarInfo(res.data.traffic),
@@ -293,7 +293,7 @@ Page({
     }
     // chat
     self.setNewchat(res.data.chat)
-    
+
     // next 
 
   },
@@ -405,7 +405,7 @@ Page({
     })
   },
 
-  onShareAppMessage: function () {
+  onShareAppMessage: function() {
     const self = this;
     this.closePopup()
     if (self.data.outdoorid) { // 数据库里面有，才能分享出去
@@ -425,20 +425,22 @@ Page({
   },
 
   // 刷新一下 entriedOutdoors 里面的内容：报名的话，把当前活动信息放到第一位；退出则要删除当前活动
-  updateEntriedOutdoors:function(isQuit){
+  updateEntriedOutdoors: function(isQuit) {
     const self = this
     // 先保证把当前活动清除掉
-    self.data.entriedOutdoors.forEach(function (item, index) {
+    self.data.entriedOutdoors.forEach(function(item, index) {
       if (item.id == self.data.outdoorid) {
         self.data.entriedOutdoors.splice(index, 1);
       }
     })
-    
+
     // 若非退出，则加到第一条
-    self.data.entriedOutdoors.unshift({
-      id: self.data.outdoorid,
-      title: self.data.title.whole
-    })
+    if (!isQuit) {
+      self.data.entriedOutdoors.unshift({
+        id: self.data.outdoorid,
+        title: self.data.title.whole
+      })
+    }
 
     // 最后更新数据库
     dbPersons.doc(app.globalData.personid).update({
@@ -485,7 +487,7 @@ Page({
       console.log(self.data.entryInfo)
 
       var member = util.createMember(app.globalData.personid, self.data.userInfo, self.data.entryInfo)
-      cloudfun.pushOutdoorMember(self.data.outdoorid, member, nouse=>{
+      cloudfun.pushOutdoorMember(self.data.outdoorid, member, nouse => {
         // 刷新一下队员列表
         dbOutdoors.doc(self.data.outdoorid).get()
           .then(res => {
@@ -506,22 +508,24 @@ Page({
   },
 
   // 把报名消息给领队发个微信模板消息
-  postEntry2Template(formid){
+  postEntry2Template(formid) {
     const self = this
     let notice = self.data.limits.wxnotice
     console.log("postEntry2Template")
     // 如果领队设定活动不需要审核，则给自己发微信消息
-    if(true){ // todo
+    if (true) { // todo
       // 活动主题，领队联系方式，自己的昵称，报名状态，
       template.sendEntryMsg2Self(app.globalData.personid, this.data.title.whole, this.data.members[0].userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.outdoorid, formid)
     }
 
     console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
-      if ( (notice.entryCount > notice.alreadyCount) || (notice.fullNotice && (self.data.limit.maxPerson && self.data.members.length >= self.data.limit.personCount)) ) { // 前几个报名，或者接收最后一个报名，才发送微信消息
+      if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && (self.data.limit.maxPerson && self.data.members.length >= self.data.limit.personCount))) { // 前几个报名，或者接收最后一个报名，才发送微信消息
         var key = this.data.outdoorid + "." + this.data.entryInfo.personid
         var count = parseInt(wx.getStorageSync(key))
-        if (!count) { count = 0 }
+        if (!count) {
+          count = 0
+        }
         console.log("count:" + count)
         if (count < 1) { // 每个人只发送一次
           template.sendEntryMsg2Leader(this.data.members[0].personid, this.data.userInfo, this.data.entryInfo, this.data.title.whole, this.data.outdoorid)
@@ -538,24 +542,24 @@ Page({
     const self = this
     console.log(self.data.websites)
     // 先判断活动可以同步
-    if (self.data.websites && self.data.websites.lvyeorg 
-      && self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) {
+    if (self.data.websites && self.data.websites.lvyeorg &&
+      self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) {
       var entryMessage = lvyeorg.buildEntryMessage(self.data.userInfo, self.data.entryInfo, isQuit, false) // 构建报名信息
       console.log(entryMessage)
       console.log(app.globalData.lvyeorgLogin)
       if (app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid) { // 登录了就直接发
-        lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback=>{
+        lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback => {
           lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, entryMessage.title, entryMessage.message)
         })
-      } else if (app.globalData.lvyeorgInfo && !app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid ) { // 注册了没登录，就登录一下
+      } else if (app.globalData.lvyeorgInfo && !app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid) { // 注册了没登录，就登录一下
         app.callbackLoginLvyeorg = (res) => { // 设置回调
-          if(res.username){
+          if (res.username) {
             console.log("app.callbackLoginLvyeorg")
             lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback => {
               lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, entryMessage.title, entryMessage.messageentryMessage.title, entryMessage.message)
             })
           } else if (res.error) { // 登录失败也记录到waitings中 // todo 标题先不加了
-            lvyeorg.add2Waitings(self.data.outdoorid, entryMessage.message)    
+            lvyeorg.add2Waitings(self.data.outdoorid, entryMessage.message)
           }
         }
         app.loginLvyeOrg() // 登录
@@ -581,7 +585,7 @@ Page({
   },
 
   // 替补、占坑、报名，用同一个函数，减少重复代码
-  doEntry(status, formid){
+  doEntry(status, formid) {
     // console.log(status) 
     // console.log(formid) 
     if (this.data.entryInfo.status != status) {
@@ -592,67 +596,18 @@ Page({
   },
 
   // 退出
-  tapQuit: function () {
-    const self = this; 
-    outdoor.removeMember(self.data.outdoorid, app.globalData.personid, members=>{
+  tapQuit: function() {
+    console.log("tapQuit")
+    const self = this;
+    outdoor.removeMember(self.data.outdoorid, app.globalData.personid, members => {
       // 删除Persons表中的entriedOutdoors中的对应id的item
       self.updateEntriedOutdoors(true)
       // 退出后还可以继续再报名
       self.setData({
         "entryInfo.status": "浏览中",
-        members: self.data.members,
+        members: members,
       })
     })
-    // 退出信息也要同步到网站
-    self.postEntry2Websites(true)
-  },
-  
-  tapQuit_old: function() {
-    const self = this; 
-    // 先重新获取members，再删除personid，再调用云函数
-    // 刷新一下队员列表
-    dbOutdoors.doc(self.data.outdoorid).get()
-      .then(res => {
-        self.setData({
-          members: res.data.members
-        })
-
-        // 退出的时候应检查一下，如果自己不是替补，则把第一个替补改为“报名中”
-        var changeStatus = false;
-        if (self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "报名中") {
-          changeStatus = true;
-        }
-        // 删除自己的
-        var selfIndex = -1;
-        self.data.members.forEach((item, index) => {
-          if (item.personid == app.globalData.personid) {
-            selfIndex = index
-          }
-        })
-        if (selfIndex>=0){
-          self.data.members.splice(selfIndex, 1)
-        }
-        // 把第一个替补改为“报名中”
-        if (changeStatus){
-          self.data.members.forEach((item, index)=>{
-            if (changeStatus && self.data.members[index].entryInfo.status == "替补中") {
-              self.data.members[index].entryInfo.status = "报名中"
-              changeStatus = false // 自己退出，只能补上排在最前面的替补
-            }
-          })
-        }
-        // 云函数
-        cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, res=>{
-          // 删除Persons表中的entriedOutdoors中的对应id的item
-          self.updateEntriedOutdoors(true)
-          // 退出后还可以继续再报名
-          self.setData({
-            "entryInfo.status": "浏览中",
-            members: self.data.members,
-          })
-        })
-      })
-
     // 退出信息也要同步到网站
     self.postEntry2Websites(true)
   },
@@ -684,7 +639,7 @@ Page({
 
 
   // 页面相关事件处理函数--监听用户下拉动作  
-  onPullDownRefresh: function () {
+  onPullDownRefresh: function() {
     console.log("onPullDownRefresh")
     const self = this
     wx.showNavigationBarLoading();
@@ -728,11 +683,11 @@ Page({
   },
 
   // 查看集合地点的地图设置，并可导航
-  lookMeetMap(){
+  lookMeetMap() {
     const self = this
     const index = self.data.entryInfo.meetsIndex
     // 选中了集合地点，并且有经纬度，才开启选择地图
-    if (index >= 0 && self.data.meets[index].latitude){ 
+    if (index >= 0 && self.data.meets[index].latitude) {
       var message = "同意授权“使用我的地理位置”才能调用微信地图；小程序不会记录您的位置，请放心"
       util.authorize("userLocation", message, res => {
         const latitude = self.data.meets[index].latitude
@@ -806,7 +761,7 @@ Page({
   },
 
   // 跳转到“订阅领队”页面
-  clickLeader(){
+  clickLeader() {
     wx.navigateTo({
       url: '../EntryOutdoor/SubscribeLeader?leaderid=' + this.data.members[0].personid,
     })
@@ -818,9 +773,5 @@ Page({
       url: "../MyOutdoors/MyOutdoors",
     })
   },
-
-  getFormid(e){
-    console.log(e.detail.formId);
-  }
 
 })

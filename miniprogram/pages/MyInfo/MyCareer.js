@@ -1,4 +1,7 @@
 const app = getApp()
+const util = require('../../utils/util.js')
+const cloudfun = require('../../utils/cloudfun.js')
+const person = require('../../utils/person.js')
 
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
@@ -9,6 +12,7 @@ Page({
   data: {
     career:{
       evaluation:null,
+      step:{autoUpdate:true}, // 步数，是否自动更新
       topn: [{}, {}, {}],
       other:"",
     },
@@ -38,6 +42,24 @@ Page({
         career: self.data.career
       }
     })
+  },
+
+  clickFetchWalk() {
+    const self = this
+    person.updateWalkStep(app.globalData.personid, step=>{
+      step.autoUpdate = self.data.career.step.autoUpdate
+      self.setData({
+        "career.step": step,
+      })
+    })
+  },
+
+  changeAutoUpdate(e){
+    console.log(e)
+    this.setData({
+      "career.step.autoUpdate":e.detail,
+    })
+    console.log(this.data.career.step.autoUpdate)
   },
 
   inOther() {

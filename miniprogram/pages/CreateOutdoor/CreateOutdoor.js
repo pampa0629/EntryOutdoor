@@ -11,7 +11,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command  
-
+ 
 Page({
   data: {
     outdoorid: null, // 页面活动已经存储到数据库中的活动id
@@ -181,9 +181,9 @@ Page({
 
   // 新建活动就是把 outdoor id清空，把关键信息删除
   newOutdoor: function(e) {
-    if (e) {
+    if (e) { 
       console.log(e.detail)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     }
     if (this.data.outdoorid) {
       this.setData({
@@ -491,29 +491,23 @@ Page({
 
   // 在活动还没有发布的时候，保存活动草稿
   saveDraft: function(e) {
+    console.log(this.data.outdoorid)
     console.log(e.detail.formId)
-    template.saveOutdoorFormid(this.data.outdoorid, e.detail.formId)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
       console.log("saveDraft")
-      this.saveOutdoor("拟定中")
+      this.saveOutdoor("拟定中", false)
     }
   },
 
   // 发布活动
   publishOutdoor: function(e) {
     console.log(e.detail.formId)
-    template.saveOutdoorFormid(this.data.outdoorid, e.detail.formId)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.status != "已发布") {
       console.log("publishOutdoor")
-      this.saveOutdoor("已发布")
-      // this.post2Subscribe() // 给自己的订阅者发消息
+      this.saveOutdoor("已发布", true)
     }
-  },
-
-// 创建出outdoorid的时候调用
-  afterCreateOutdoor() {
-    // 当前也就这么一个事情
-    this.post2Subscribe()
   },
 
 // 给自己的订阅者发消息
@@ -538,10 +532,10 @@ Page({
   // 保存 活动的更新信息
   saveModified: function(e) {
     console.log(e.detail.formId)
-    template.saveOutdoorFormid(this.data.outdoorid, e.detail.formId)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
       console.log("saveModified")
-      this.saveOutdoor("已发布")
+      this.saveOutdoor("已发布", false)
     }
   },
 
@@ -563,7 +557,7 @@ Page({
   },
 
   // 更新信息
-  updateOutdoorInTable: function() {
+  updateOutdoorInTable: function (isPublishing) {
     const self = this;
     console.log(self.data.route)
     // 必须先刷新一下成员，不然容易覆盖
@@ -584,7 +578,7 @@ Page({
           limits: self.data.limits,
         }
       }).then(res => {
-        self.afterSaveOutdoor();
+        self.afterSaveOutdoor(isPublishing);
         // 这里还应该把 Person表中对应的MyOutdoors中的title更新一下
         self.updatePersonMyoutdoors();
       }).catch(console.error)
@@ -592,7 +586,7 @@ Page({
   },
 
   // 创建活动信息记录
-  createOutdoorInTable: function() {
+  createOutdoorInTable: function (isPublishing) {
     const self = this;
     // 先把领队的信息从数据库中调出来
     var personid = app.globalData.personid; // util.loadPersonID();
@@ -621,8 +615,7 @@ Page({
           self.setData({
             outdoorid: res._id, // 活动表id
           })
-          self.afterCreateOutdoor() // 创建出outdoorid的时候调用
-          self.afterSaveOutdoor();
+          self.afterSaveOutdoor(isPublishing);
 
           // 发布成功，就需要往person表中追加活动id
           dbPersons.doc(app.globalData.personid).get()
@@ -642,16 +635,16 @@ Page({
       })
   },
 
-  saveOutdoor: function(status) {
+  saveOutdoor: function(status, isPublishing) {
     const self = this;
     self.setData({
       status: status,
     })
 
     if (self.data.outdoorid) { // 有outdoorid,说明Outdoors数据库中已经有记录,更新信息就好
-      self.updateOutdoorInTable()
+      self.updateOutdoorInTable(isPublishing)
     } else {
-      self.createOutdoorInTable()
+      self.createOutdoorInTable(isPublishing)
     }
     self.setData({
       hasModified: false
@@ -659,13 +652,16 @@ Page({
   },
 
   // 在成功保存outdoor之后，相应的一些处理，包括id和brief中的照片
-  afterSaveOutdoor: function() {
+  afterSaveOutdoor: function(isPublishing) {
     const self = this;
     util.saveOutdoorID(self.data.outdoorid)
     self.data.memOutdoorid = self.data.outdoorid;
     self.copyPics(); // 把照片中不是自己的，拷贝一份给自己用
     // 这里处理和ORG网站同步的事情
     self.keepSameWithWebsites()
+    if (isPublishing) { // 第一次发布，需要给订阅者发消息
+      self.post2Subscribe()
+    }
   },
 
   // 保存修改时，在org网站跟帖发布信息

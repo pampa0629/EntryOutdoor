@@ -8,11 +8,16 @@
 
 <!--免责条款详细内容-->  
 <van-panel title="免责条款详细内容" desc="">
-  <view>
+  <view> 
     <text style="font-size:12pt">{{disclaimer}}</text>
   </view>
-  <view class="multi_row">
-    <button class="btn" hover-class='btn_hover'  bindtap="copyDisclaimer">拷贝到剪切板</button>
-    <button class="btn" hover-class='btn_hover'  bindtap="saveMyDisclaimer">存为我的条款</button>
-  </view>
+
+  <van-row>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="copyDisclaimer">拷贝到剪切板</van-button>
+    </van-col>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="saveMyDisclaimer">存为我的条款</van-button>
+    </van-col>
+  </van-row>
 </van-panel>

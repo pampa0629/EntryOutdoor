@@ -19,6 +19,7 @@ Page({
       isTesting: false, // 是否为测试帖，测试帖发布到技术小组版面
     },
     password: "",  // 密码存到本地缓存，不放到数据库中了
+    showPwd:false, // 是否显示密码
 
     hasModified: false, // 是否有修改
     hasLogin:false, // 是否已经登录
@@ -92,6 +93,14 @@ Page({
     this.setData({
       password: e.detail,
       hasModified: true
+    })
+  },
+
+  clickPwdIcon() {
+    console.log("clickPwdIcon")
+    const self = this
+    self.setData({
+      showPwd: !self.data.showPwd
     })
   },
 

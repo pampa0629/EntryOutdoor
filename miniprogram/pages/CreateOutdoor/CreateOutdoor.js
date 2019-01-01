@@ -810,7 +810,7 @@ Page({
 
   onShareAppMessage: function(options) {
     const self = this;
-    this.closePopup()
+    this.closePopup() 
     // options.from == "menu" &&     // options.type = "tap" from="button"
     if (self.data.outdoorid) { // 数据库里面有，才能分享出去
       return {

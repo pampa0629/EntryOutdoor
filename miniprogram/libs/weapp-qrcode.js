@@ -408,7 +408,7 @@ var QRCode;
             y: 0,
             width: this._htOption.width,
             height: this._htOption.height,
-            destWidth: this._htOption.width,
+            destWidth: this._htOption.width, 
             destHeight: this._htOption.height,
             canvasId: this.canvasId,
             success: function (res) {

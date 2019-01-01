@@ -7,12 +7,58 @@
       <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender">
         <van-radio name="{{item}}"/>
       </van-cell>
-  </van-radio-group>
+  </van-radio-group> 
 
   <van-field value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="请输入手机号码（真实有效方便领队联系）" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" />
 </van-panel>
 
-<!--紧急联系人-->
-<van-panel title="紧急联系">
+  <!--紧急联系信息-->
+<van-switch-cell title="紧急联系信息已{{showEmergency?'显示':'隐藏'}}" checked="{{showEmergency}}" bind:change="changeEmergency"/>
+<block wx:if="{{showEmergency}}">
+  <van-panel title="紧急联系人">
+    <van-field label="姓名" placeholder="请输入真实姓名"  value="{{emergency.contact.name}}" bind:change="changeContactName"/>
+    <van-field label="电话1" placeholder="请输入有效电话" type="number" value="{{emergency.contact.phone1}}" bind:change="changeContactPhone1"/>
+    <van-field label="电话2" placeholder="请输入有效电话" type="number" value="{{emergency.contact.phone2}}" bind:change="changeContactPhone2"/>
+  </van-panel>
 
-</van-panel>
+  <!--个人真实信息-->
+  <van-panel title="个人真实信息">
+    <van-field label="姓名" placeholder="请输入真实姓名"  value="{{emergency.self.trueName}}" bind:change="changeSelfName"/>
+    <van-field label="身份证号码" placeholder="请输入身份证号码" type="idcard" value="{{emergency.self.id}}" bind:change="changeSelfID"/>
+    <van-field label="个人高清照片（最多两张）" title-width="80%" disabled/>
+    <view wx:for="{{emergency.self.photos}}" wx:key="src">
+      <van-row>
+        <van-col span="20" offset="2">
+          <image mode="widthFix" src="{{item.src}}"></image>
+        </van-col>
+      </van-row>
+    </view>
+    <van-row>
+      <van-col span="9" offset="2">
+        <van-button  size="large" disabled="{{emergency.self.photos.length>=3}}" plain type="primary" bind:click='addPhoto'>上传照片</van-button>
+      </van-col>
+      <van-col span="9" offset="2">
+        <van-button disabled="{{emergency.self.photos.length==0}}" size="large" plain type="warning" bind:click='deletePhoto'>删除照片</van-button>
+      </van-col>
+    </van-row>
+  </van-panel>
+
+  <!--委托给谁-->
+  <van-switch-cell title="委托已{{emergency.entrust.open?'开启':'关闭'}}" checked="{{emergency.entrust.open}}" bind:change="changeEntrust"/>
+  <block wx:if="{{emergency.entrust.open}}">
+    <picker mode="date" value="{{emergency.entrust.start}}" bindchange="changeStartDate">
+        <van-field label="生效日期" disabled required value="{{emergency.entrust.start}}" placeholder="请选择委托生效日期" />
+    </picker>
+    <picker mode="date" value="{{emergency.entrust.end}}" start="{{emergency.entrust.start}}" bindchange="changeEndDate">
+      <van-field label="截止日期" disabled required value="{{emergency.entrust.end}}" placeholder="请选择委托截止日期" />
+    </picker>
+    <van-tag plain type="primary">紧急联系信息加密保存，个人信息更安全</van-tag>
+    <van-field label="委托密码"  type="{{showPwd?'text':'password'}}" placeholder="请输入委托密码"  value="{{password}}" bind:change="changePassword" icon="{{showPwd?'closed-eye':'eye-o'}}" bind:click-icon="clickPwdIcon"/>
+    
+    <van-row>
+      <van-col span="20" offset="2">
+        <van-button size="large" type="primary" open-type="share" bind:click="onShareAppMessage">委托给…</van-button>
+      </van-col>
+    </van-row>
+  </block>
+</block>

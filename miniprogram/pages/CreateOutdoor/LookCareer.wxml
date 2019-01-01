@@ -5,7 +5,7 @@
   <van-notice-bar wx:else text="无户外扎营经历"/>
   <van-notice-bar wx:if="{{career.evaluation.campEquipment}}" text="有户外扎营装备"/>
   <van-notice-bar wx:else text="无户外扎营装备"/>
-</van-panel>
+</van-panel> 
 
 <!--最近步数-->
 <van-panel title="最高运动步数" desc="最后更新时间：{{career.step.update}}" wx:if="{{career && career.step}}">

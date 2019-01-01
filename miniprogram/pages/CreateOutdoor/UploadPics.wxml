@@ -1,5 +1,5 @@
 <!--pages/CreateOutdoor/UploadPics.wxml-->
-
+ 
 <van-tag type="danger" wx:if="{{pics.length>=3}}">照片数量不能超过三张</van-tag>
 <van-button  size="large" disabled="{{pics.length>=3||!outdoorid}}" type="primary" bind:click='addPic'>上传照片</van-button>
 <van-button disabled="{{pics.length==0}}" size="large" type="warning" bind:click='deletePic'>删除照片</van-button>
@@ -10,4 +10,4 @@
       <image mode="widthFix" src="{{item.src}}"></image>
     </van-col>
   </van-row>
-</view>
+</view> 

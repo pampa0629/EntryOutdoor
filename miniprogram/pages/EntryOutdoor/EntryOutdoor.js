@@ -13,7 +13,7 @@ const dbPersons = db.collection('Persons')
 const _ = db.command
 
 Page({
-
+ 
   data: {
     outdoorid: null, // 活动id
     entryInfo: { //报名信息
@@ -64,7 +64,7 @@ Page({
 
   onLoad: function(options) {
     console.log(options)
-    var outdoorid = null;
+    var outdoorid = null; 
     if (options.outdoorid) {
       outdoorid = options.outdoorid
     } else if (options.scene) {
@@ -403,7 +403,7 @@ Page({
     this.setData({
       showPopup: false,
     })
-  },
+  }, 
 
   onShareAppMessage: function() {
     const self = this;
@@ -428,12 +428,12 @@ Page({
   updateEntriedOutdoors: function(isQuit) {
     const self = this
     // 先保证把当前活动清除掉
-    self.data.entriedOutdoors.forEach(function(item, index) {
-      if (item.id == self.data.outdoorid) {
-        self.data.entriedOutdoors.splice(index, 1);
+    for (var i = self.data.entriedOutdoors.length-1; i>=0; i--) {
+      if (self.data.entriedOutdoors[i].id == self.data.outdoorid) {
+        self.data.entriedOutdoors.splice(i, 1)
       }
-    })
-
+    }
+    
     // 若非退出，则加到第一条
     if (!isQuit) {
       self.data.entriedOutdoors.unshift({
@@ -513,7 +513,7 @@ Page({
     let notice = self.data.limits.wxnotice
     console.log("postEntry2Template")
     // 如果领队设定活动不需要审核，则给自己发微信消息
-    if (true) { // todo
+    if (formid) { 
       // 活动主题，领队联系方式，自己的昵称，报名状态，
       template.sendEntryMsg2Self(app.globalData.personid, this.data.title.whole, this.data.members[0].userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.outdoorid, formid)
     }
@@ -667,19 +667,15 @@ Page({
     }
   },
 
+// 选择或改变集合地点选择
   clickMeets: function(e) {
     console.log(e)
+    const self = this
     this.setData({
       "entryInfo.meetsIndex": parseInt(e.target.dataset.name),
     })
-  },
-
-  // 选择或改变集合地点选择
-  changeMeets: function(e) {
-    const self = this;
-    self.setData({
-      "entryInfo.meetsIndex": parseInt(e.detail),
-    })
+    // 如果已经报名，则需要修改集合地点
+    self.entryOutdoor(self.data.entryInfo.status, null)
   },
 
   // 查看集合地点的地图设置，并可导航
@@ -716,6 +712,7 @@ Page({
     self.setData({
       "entryInfo.knowWay": !self.data.entryInfo.knowWay,
     })
+    self.entryOutdoor(self.data.entryInfo.status, null)
   },
 
   // 关注活动

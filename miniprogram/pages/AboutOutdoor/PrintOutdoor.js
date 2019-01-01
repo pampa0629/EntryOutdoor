@@ -7,7 +7,7 @@ const dbPersons = db.collection('Persons')
 const _ = db.command
 
 Page({
-
+ 
   data: {   
     outdoorid: null, // 活动id
     title: {}, // 活动主题信息，内容从数据库中读取
@@ -18,22 +18,23 @@ Page({
     isLeader: false, // 是否是领队：领队能看到队员的电话，非领队看不到；领队按照集合地点排列名单，队员不需要
     status: null, // 活动状态
   },
-
+ 
   onLoad: function(options) {
     console.log("PrintOutdoor.js in onLoad fun, options is:" + JSON.stringify(options, null, 2))
     const self = this;
-    if (options != null && options.outdoorid != null && options.isLeader != null) {
-      if (options.isLeader == "true") {
-        self.data.isLeader = true;
+    if (options && options.outdoorid) {
+      var isLeader = false
+      if (options.isLeader && options.isLeader=="tue") {
+        isLeader = true
       }
       self.setData({
         outdoorid: options.outdoorid,
-        isLeader: self.data.isLeader,
+        isLeader: isLeader,
       })
-    } else { // 参数不对，就直接返回吧
+    } else { // id要是都没有，就直接返回吧
       return
     }
- 
+    
     console.log("PrintOutdoor.js in onLoad fun, isLeader is:" + self.data.isLeader)
     dbOutdoors.doc(self.data.outdoorid).get()
       .then(res => {
@@ -47,18 +48,13 @@ Page({
         self.dealCompatibility(res)
         console.log(self.data)
 
-        if (self.data.isLeader) { // 是领队：分组，缓存checked
-          // 把队员按照集合地点进行排列
-          self.groupMembersByMeets()
-          self.dealChecked()
-        } else { // 不是领队，隐藏电话号码中间三位
+        // 把队员按照集合地点进行排列
+        self.groupMembersByMeets()
+        self.dealChecked()
+
+        // 不是领队，隐藏电话号码中间三位
+        if (!self.data.isLeader) { 
           self.hidePhone()
-          for(var i=0; i<self.data.members.length; i++){
-            let index = i
-            this["longTapMembers" + index] = (e) => {
-              self.longTapMembers(index, e)
-            }
-          }
         }
       })
   },
@@ -100,6 +96,7 @@ Page({
 
   // 把队员按照集合地点进行排列
   groupMembersByMeets: function() {
+    console.log("groupMembersByMeets")
     const self = this;
     if (self.data.meets.length >= 1) {
       self.data.meetMembers = new Array(self.data.meets.length);
@@ -134,16 +131,20 @@ Page({
 
   // 不是领队，隐藏电话号码中间三位
   hidePhone: function() {
+    console.log("hidePhone")
     const self = this;
     // 遍历所有队员
-    for (var j = 1; j < self.data.members.length; j++) {
-      // 当前用户不是领队，则需要隐藏电话号码的中间四位；领队的电话号码不隐藏
-      var phone = self.data.members[j].userInfo.phone.toString();
-      phone = phone.substring(0, 3) + "***" + phone.substring(7)
-      self.data.members[j].userInfo.phone = phone
+    for (var i = 0; i < self.data.meetMembers.length; i++) {
+      for(var j=0; j<self.data.meetMembers[i].length; j++) {
+        // 当前用户不是领队，则需要隐藏电话号码的中间四位；领队的电话号码不隐藏
+        if (self.data.meetMembers[i][j].entryInfo.status != "领队") {
+          var phone = self.data.meetMembers[i][j].userInfo.phone.toString();
+          self.data.meetMembers[i][j].userInfo.phone = util.hidePhone(phone)
+        }
+      }
     }
     self.setData({
-      members: self.data.members,
+      meetMembers: self.data.meetMembers,
     })
   },
 

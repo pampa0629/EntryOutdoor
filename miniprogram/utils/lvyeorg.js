@@ -309,7 +309,7 @@ const buildMembersMessage = (meets, members) => {
     message += "第" +(index + 1) + "）集合地点：" + meets[index].place + "，活动" + meets[index].date + " " + meets[index].time + NL
     meetMembers[index].forEach((citem, cindex) => {
       var result = buildEntryMessage(meetMembers[index][cindex].userInfo, meetMembers[index][cindex].entryInfo, false, true)
-      message += result.message
+      message += result.message + NL
     })
     message += NL
   })

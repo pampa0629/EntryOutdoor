@@ -63,7 +63,6 @@ Page({
               cloudPath: util.buildPicSrc(self.data.outdoorid, index + length),
               filePath: item.path, // 小程序临时文件路径
             }).then(resUpload => {
-              //console.log("CreateOutdoor.js in addPic fun, res of uploadFile is:" + JSON.stringify(resUpload, null, 2))
               self.data.pics.push({
                 src: resUpload.fileID
               })
@@ -71,9 +70,6 @@ Page({
                 "pics": self.data.pics,
                 hasModified: true,
               })
-              console.log("CreateOutdoor.js in addPic fun, pics is:" + JSON.stringify(self.data.pics, null, 2))
-            }).catch(err => {
-              console.log("CreateOutdoor.js in addPic fun, uploadFile err is:" + JSON.stringify(err, null, 2))
             })
             wx.hideLoading()
           }

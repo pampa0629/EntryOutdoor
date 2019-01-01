@@ -1,0 +1,18 @@
+{
+  "navigationBarTitleText": "查看紧急联系信息",
+  "usingComponents": {
+    "van-icon": "/vant-weapp/icon/index",
+    "van-button": "/vant-weapp/button/index",
+    "van-dialog": "/vant-weapp/dialog/index",
+    "van-field": "/vant-weapp/field/index",
+    "van-cell": "/vant-weapp/cell/index",
+    "van-cell-group": "/vant-weapp/cell-group/index",
+    "van-checkbox": "/vant-weapp/checkbox/index",
+    "van-checkbox-group": "/vant-weapp/checkbox-group/index",
+    "van-notice-bar": "/vant-weapp/notice-bar/index",
+    "van-panel": "/vant-weapp/panel/index",
+    "van-row": "/vant-weapp/row/index",
+    "van-col": "/vant-weapp/col/index",
+    "van-tag": "/vant-weapp/tag/index"
+  }
+}

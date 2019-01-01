@@ -10,8 +10,8 @@
 		"minified": true,
 		"newFeature": true
 	},
-  "miniprogramRoot":"./miniprogram",
-  "cloudfunctionRoot":"./cloud-functions",
+	"miniprogramRoot": "miniprogram/",
+	"cloudfunctionRoot": "cloud-functions/",
 	"compileType": "miniprogram",
 	"libVersion": "2.4.1",
 	"appid": "wx20edd5723fb67799",

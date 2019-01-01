@@ -1,0 +1,44 @@
+ <van-notice-bar scrollable="false" text="委托您保留紧急联系方式的驴友户外昵称为：{{nickName}}"/>
+
+ <!--紧急联系信息-->
+<block wx:if="{{!show}}">
+  <view>
+    <text>{{showMessage}}</text>
+  </view>
+  <van-row>
+    <van-col span="20" offset="2">
+      <van-button size="large" type="primary"  bind:click="clickCopy">拷贝到内存</van-button>
+    </van-col>
+  </van-row>
+</block>
+<block wx:else>
+  <van-panel title="{{nickName}}的紧急联系人">
+    <van-cell title="姓名：{{emergency.contact.name}}"/>
+    <van-cell title="电话1：{{emergency.contact.phone1}}"/>
+    <van-cell title="电话2：{{emergency.contact.phone2}}"/>
+  </van-panel>
+
+  <!--个人真实信息-->
+  <van-panel title="{{nickName}}的真实信息">
+    <van-cell title="姓名：{{emergency.self.trueName}}"/>
+    <van-cell title="身份证号码：{{emergency.self.id}}"/>
+    <view wx:for="{{emergency.self.photos}}" wx:key="item">
+      <van-row>
+        <van-col span="20" offset="2">
+          <image mode="widthFix" src="{{item.src}}"></image>
+        </van-col>
+      </van-row>
+    </view>
+  </van-panel>
+
+  <!--参加的活动列表-->
+  <van-panel title="{{nickName}}最近参加的活动列表">
+    <van-cell wx:for="{{entriedOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<entriedOutdoors.length-1}}" data-pos='{{index}}' bind:click="tapEntriedOutdoors"/>
+  </van-panel>
+
+  <!--发起的活动列表-->
+  <van-panel title="{{nickName}}最近发起的活动列表">
+    <van-cell wx:for="{{myOutdoors}}" wx:key="item.title" title="{{item.title}}" data-pos='{{index}}' bind:click="tapMyOutdoors" border="{{index<myOutdoors.length-1}}"/>
+  </van-panel>
+
+</block>

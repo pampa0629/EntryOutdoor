@@ -1,4 +1,3 @@
-// pages/All/MyInfo.js
 const app = getApp()
 const util = require('../../utils/util.js')
 wx.cloud.init()
@@ -30,8 +29,13 @@ Page({
 
     showCalls: false,
     Calls: [{
+        name: '坐标',
+        subname: '',
+        disabled:true,
+      },
+      {
         name: '119',
-      subname: '消防救援',
+        subname: '消防救援',
       },
       {
         name: '4006009958',
@@ -278,23 +282,39 @@ Page({
     wx.navigateToMiniProgram({
       appId: 'wxd45c635d754dbf59', // 腾讯文档的appID
       path: path,
-      success(res) {}
     })
   },
 
   bindEmergencyCall() {
-    this.setData({
-      showCalls:true,
+    const self = this
+    self.setData({
+      showCalls: true,
+    })
+
+    var message = "获取坐标会有助于您报警救援时给出准确位置；小程序不会记录您的位置，请放心！"
+    util.authorize("userLocation", message, res => {
+      console.log("util.authorize,userLocation")
+      wx.getLocation({
+        altitude: true,
+        success(res) {
+          console.log(res)
+          console.log(self.data.Calls)
+          self.data.Calls[0].subname = "经度:" + res.longitude + ",维度:" + res.latitude + ",海拔:" + res.altitude + ",误差:" + res.accuracy + "米"
+          self.setData({
+            Calls: self.data.Calls
+          })
+        }
+      })
     })
   },
 
-  closeCalls(){
+  closeCalls() {
     this.setData({
       showCalls: false,
     })
   },
 
-  selectCalls(e) { 
+  selectCalls(e) {
     console.log(e)
     util.phoneCall(e.detail.name, true)
   },

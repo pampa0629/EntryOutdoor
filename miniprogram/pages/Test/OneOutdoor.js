@@ -1,9 +1,13 @@
 import Page from 'page';
 const app = getApp()
-const QRCode  = require('../../libs/weapp-qrcode.js')
+const QRCode = require('../../libs/weapp-qrcode.js')
 const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const template = require('../../utils/template.js')
+const crypto = require('../../utils/crypto.js')
+
+const plugin = requirePlugin("WechatSI")
+const manager = plugin.getRecordRecognitionManager()
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -11,7 +15,7 @@ const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const dbTemp = db.collection('Temp')
 
- 
+
 Page({
   data: {
     home: false,
@@ -19,13 +23,39 @@ Page({
   },
 
   onLoad() {
+    this.initRecord()
 
+    var time = new Date()
+    console.log("load time:" + time.toTimeString())
+    dbTemp.doc(app.globalData.personid).update({
+      data: {
+        loadtime: time.toTimeString(),
+      }
+    })
+    return
+    setInterval(() => {
+      dbTemp.doc(app.globalData.personid).update({
+        data: {
+          timing: (new Date()).toTimeString(),
+        }
+      })
+    }, 10000)
   },
-  
-  sendTemplate(){
+
+  onUnload() {
+    var time = new Date()
+    console.log("unload time:" + time.toTimeString())
+    dbTemp.doc(app.globalData.personid).update({
+      data: {
+        unloadtime: time.toTimeString(),
+      }
+    })
+  },
+
+  sendTemplate() {
     template.sendMessage("ogNmG5P3ZlT29kXGhWfGX5nC_sqA", "4f4JAb6IwzCW3iElLANR0OxSoJhDKZNo8rvbubsfgyE", "1545879624341", "", "")
     // template.sendMessage("ogNmG5KFPConlOTeQNYciQrW5SE4", "IXScAdQZb_QmXCHXWCpjXwjwqii9_yOILJtCiGg1al0", "1543935782814", "", "")
-    
+
   },
 
   onContact: function(e) {
@@ -56,7 +86,7 @@ Page({
     })
   },
 
-  tapWalk(){
+  tapWalk() {
     wx.login({
       success(resLogin) {
         console.log("login")
@@ -65,17 +95,17 @@ Page({
           wx.getWeRunData({
             success(res) {
               const encryptedData = res.encryptedData
-              cloudfun.decryptWeRun(res.encryptedData, res.iv, resLogin.code, run=>{
+              cloudfun.decryptWeRun(res.encryptedData, res.iv, resLogin.code, run => {
                 console.log(run)
                 var date = new Date()
-                date.setTime(run.watermark.timestamp*1000)
-                console.log("数据获取时间："+date.toLocaleString())
+                date.setTime(run.watermark.timestamp * 1000)
+                console.log("数据获取时间：" + date.toLocaleString())
                 var steps = ""
-                run.stepInfoList.forEach((item, index)=>{
+                run.stepInfoList.forEach((item, index) => {
                   var date = new Date()
                   date.setTime(item.timestamp * 1000)
                   var step = "日期：" + date.toLocaleString() + ", 步数：" + item.step
-                  steps += step +"\r\n"
+                  steps += step + "\r\n"
                   console.log(step)
                 })
                 wx.showModal({
@@ -88,218 +118,44 @@ Page({
         })
       }
     })
-    
+
   },
 
-  dbRead(){
+  dbRead() {
     var key = "1234"
-    dbPersons.doc(app.globalData.personid).get().then(res=>{
+    dbPersons.doc(app.globalData.personid).get().then(res => {
       var accept = res.data.subscribe[key]
       console.log(accept)
     })
   },
 
-  tapDoc: function () {
-    var url= "https://docs.qq.com/doc/DVm1ITWx0V1dLVml3"
-    var path = "/pages/detail/detail?url=" + url 
-    console.log(path)
-    wx.navigateToMiniProgram({
-      appId: 'wxd45c635d754dbf59', // 腾讯文档的appID
-      path: path,
-      success(res) {
-      }
-    })
-  },
-
-  tapScan(){
+  tapScan() {
     const self = this
     wx.scanCode({
       complete: (res) => {
         console.log(res)
         dbTemp.doc(app.globalData.personid).set({
-          data:{
+          data: {
             raw: res.rawData,
             decode: self.decode(res.rawData),
-            result:res.result,
+            result: res.result,
           }
         })
       }
     })
   },
 
-  tapDecode(){
-    var input = "EM6goKRzABtHvCgQrBqAfzQ"
-    // var input = "bG0xKUwzX2xYeWJkTWdtWmYyJnFoKThGZmc0eGpzT2c0M0NGZmc0UllSZGkx"
-    // var input = "V0lGSTpUOldQQTtQOjAwNTk4OTY2NTU7UzpTdXBlck1hcF9HdWVzdDs="
-    var output = this.decode(input)
-    console.log(output)
+  tapDecode() {
+    var str = "hello"
+    var pwd = "pwd"
+    var enc = crypto.encrypt(str, pwd)
+    var res = crypto.decrypt(enc, pwd)
+    console.log(str)
+    console.log(enc)
+    console.log(res)
   },
 
-  encode: function (input) {
-    var _keyStr= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-    var output = "";
-    var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-    var i = 0;
-    input = this._utf8_encode(input);
-
-    while (i < input.length) {
-      chr1 = input.charCodeAt(i++);
-      chr2 = input.charCodeAt(i++);
-      chr3 = input.charCodeAt(i++);
-
-      enc1 = chr1 >> 2;
-      enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-      enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-      enc4 = chr3 & 63;
-
-      if (isNaN(chr2)) {
-        enc3 = enc4 = 64;
-      } else if (isNaN(chr3)) {
-        enc4 = 64;
-      }
-
-      output = output + _keyStr.charAt(enc1) + _keyStr.charAt(enc2) + _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
-    }
-    return output;
-  },
-
-  decode: function (input) {
-    var _keyStr= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-    var output = "";
-    var chr1, chr2, chr3;
-    var enc1, enc2, enc3, enc4;
-    var i = 0;
-
-    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-    while (i < input.length) {
-      enc1 = _keyStr.indexOf(input.charAt(i++));
-      enc2 = _keyStr.indexOf(input.charAt(i++));
-      enc3 = _keyStr.indexOf(input.charAt(i++));
-      enc4 = _keyStr.indexOf(input.charAt(i++));
-
-      chr1 = (enc1 << 2) | (enc2 >> 4);
-      chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-      chr3 = ((enc3 & 3) << 6) | enc4;
-
-      output = output + String.fromCharCode(chr1);
-
-      if (enc3 != 64) {
-        output = output + String.fromCharCode(chr2);
-      }
-      if (enc4 != 64) {
-        output = output + String.fromCharCode(chr3);
-      }
-    }
-
-    output = this._utf8_decode(output);
-    return output;
-  },
-
-  _utf8_encode: function (string) {
-
-    string = string.replace(/\r\n/g, "\n");
-
-    var utftext = "";
-
-
-
-    for (var n = 0; n < string.length; n++) {
-
-
-
-      var c = string.charCodeAt(n);
-
-
-
-      if (c < 128) {
-
-        utftext += String.fromCharCode(c);
-
-      } else if ((c > 127) && (c < 2048)) {
-
-        utftext += String.fromCharCode((c >> 6) | 192);
-
-        utftext += String.fromCharCode((c & 63) | 128);
-
-      } else {
-
-        utftext += String.fromCharCode((c >> 12) | 224);
-
-        utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-
-        utftext += String.fromCharCode((c & 63) | 128);
-
-      }
-
-
-
-    }
-
-
-
-    return utftext;
-
-  },
-
-
-
-  // private method for UTF-8 decoding
-
-  _utf8_decode: function (utftext) {
-
-    var string = "";
-
-    var i = 0;
-
-    var c = 0;
-
-    var c1 = 0;
-
-    var c2 = 0;
-
-
-
-    while (i < utftext.length) {
-
-
-
-      c = utftext.charCodeAt(i);
-
-
-
-      if (c < 128) {
-
-        string += String.fromCharCode(c);
-
-        i++;
-
-      } else if ((c > 191) && (c < 224)) {
-
-        c = utftext.charCodeAt(i + 1);
-
-        string += String.fromCharCode(((c & 31) << 6) | (c1 & 63));
-
-        i += 2;
-
-      } else {
-
-        c1 = utftext.charCodeAt(i + 1);
-
-        c2 = utftext.charCodeAt(i + 2);
-
-        string += String.fromCharCode(((c & 15) << 12) | ((c1 & 63) << 6) | (c2 & 63));
-
-        i += 3;
-
-      }
-
-
-
-    }
-  return string;
-  },
-
-  tapCreateQrcode(){
+  tapCreateQrcode() {
     var qrcode = new QRCode('canvas', {
       // usingIn: this,
       text: "https://github.com/tomfriwel/weapp-qrcode",
@@ -312,15 +168,263 @@ Page({
     qrcode.makeCode("test")
     wx.showActionSheet({
       itemList: ['保存图片'],
-      success: function (res) {
+      success: function(res) {
         console.log(res.tapIndex)
         if (res.tapIndex == 0) {
-          qrcode.exportImage(function (path) {
+          qrcode.exportImage(function(path) {
             wx.saveImageToPhotosAlbum({
               filePath: path,
             })
           })
         }
+      }
+    })
+  },
+
+  startRecord2() {
+    console.log('startRecord2')
+    // 开启语音输入
+    var record = wx.getRecorderManager()
+    record.onStop((res) => {
+      console.log('recorder stop', res)
+
+      var fs = wx.getFileSystemManager()
+      var buffer = fs.readFile({
+        filePath: res.tempFilePath,
+        success: file => {
+          console.log(file)
+          var dataLen = res.fileSize
+          console.log("dataLen: " + dataLen)
+
+          /*var data = qs.stringify({
+            audio: encodeURI(Buffer.from(file.data).toString("base64"))
+          })
+          var options = {
+            url: url,
+            method: 'POST',
+            body: data, // body 得这么写
+          }*/
+          // id: AKIDOZVDdzIj5Dj5hVfPTJ5i6LSODuMPooxC
+          // key: 9CF6QeeOA7sO0qQN1VkskMCn9G8sWAGI
+          // id: AKIDiCUv7dM2rRlphJptqYFoAGD6rOuCr9TY
+          // key: 82hCSWnrfEZmlYDm9HAnEPO8h06zfCVm
+
+          var data = {
+            Action: "SentenceRecognition",
+            Data: file.data.toString("base64"),
+            DataLen: dataLen,
+            EngSerViceType: "16k",
+            Nonce: (new Date()).getTime(),
+            ProjectId: "0",
+            Region: "ap-beijing",
+            SecretId: "AKIDiCUv7dM2rRlphJptqYFoAGD6rOuCr9TY",
+            Signature: "82hCSWnrfEZmlYDm9HAnEPO8h06zfCVm",
+            SourceType: "1",
+            SubServiceType: "2",
+            Timestamp: Math.floor((new Date()).getTime() / 1000),
+            UsrAudioKey: "",
+            Version: "2018-05-22",
+            VoiceFormat: "mp3",
+          }
+          var temp = hash_hmac(data)
+          var param = qs.stringify(data)
+          console.log(param)
+
+          wx.request({
+            url: "https://aai.tencentcloudapi.com",
+            method: "post",
+            header: {
+              "content-type": "application/x-www-form-urlencoded"
+            },
+            data: data,
+            success: function(resp) {
+              console.log(resp)
+            }
+          })
+        }
+      })
+
+    })
+
+    const options = {
+      duration: 10000,
+      sampleRate: 16000,
+      numberOfChannels: 1,
+      encodeBitRate: 64000,
+      format: 'mp3',
+      frameSize: 50
+    }
+    record.start(options)
+
+
+  },
+
+  startRecord_tencent() {
+    console.log('startRecord_tencent')
+    // 开启语音输入
+    var record = wx.getRecorderManager()
+    record.onStop((res) => {
+      console.log('recorder stop', res)
+      // wx.translateVoice({})
+      const {
+        tempFilePath
+      } = res
+      wx.cloud.uploadFile({
+        cloudPath: "Persons/" + app.globalData.personid + "/" + new Date().getTime() + ".mp3",
+        filePath: res.tempFilePath, // 文件路径
+      }).then(res => {
+        // get resource ID
+        console.log(res.fileID)
+
+        // 发给云函数
+        wx.cloud.callFunction({
+          name: 'tecentVoice', // 云函数名称
+          data: {
+            voice: res.fileID,
+          }
+        }).then(res => {
+          console.log(res)
+          // 展示结果
+          wx.showModal({
+            title: '识别结果',
+            content: res.result,
+          })
+        })
+      })
+    })
+
+    const options = {
+      duration: 10000,
+      sampleRate: 16000,
+      numberOfChannels: 1,
+      encodeBitRate: 64000,
+      format: 'mp3',
+      frameSize: 50
+    }
+    record.start(options)
+
+
+  },
+
+  endRecord_old() {
+    console.log('endRecord_old')
+
+    // 发给云函数
+    var record = wx.getRecorderManager()
+    record.stop()
+
+    // 云函数解析，返回结果
+
+    // 展示结果
+  },
+
+  startRecord() {
+    console.log('startRecord')
+    manager.start({
+      lang: 'zh_CN',
+    })
+    manager.onRecognize = (res) => {
+      console.log('manager.onStop')
+      let text = res.result
+      this.setData({
+        currentText: text,
+      })
+    }
+    manager.onStop = (res) => {
+      console.log('manager.onStop')
+      let text = res.result
+      wx.showModal({
+        title: '识别结果',
+        content: text,
+      })
+      
+      // 得到完整识别内容就可以去翻译了
+      // this.translateTextAction()
+    }
+  },
+
+  endRecord() {
+    console.log('endRecord')
+    manager.stop()
+  },
+
+  initRecord: function () {
+    console.log('initRecord')
+    //有新的识别内容返回，则会调用此事件
+    manager.onRecognize = (res) => {
+      console.log('manager.onRecognize')
+      let currentData = Object.assign({}, this.data.currentTranslate, {
+        text: res.result,
+      })
+      this.setData({
+        currentTranslate: currentData,
+      })
+      this.scrollToNew();
+    }
+
+    // 识别结束事件
+    manager.onStop = (res) => {
+      console.log('manager.onStop')
+      let text = res.result
+      wx.showModal({
+        title: '识别结果',
+        content: text,
+      })
+
+    }
+
+    // 识别错误事件
+    manager.onError = (res) => {
+
+      this.setData({
+        recording: false,
+        bottomButtonDisabled: false,
+      })
+
+    }
+
+    // 语音播放开始事件
+    wx.onBackgroundAudioPlay(res => {
+
+      const backgroundAudioManager = wx.getBackgroundAudioManager()
+      let src = backgroundAudioManager.src
+
+      this.setData({
+        currentTranslateVoice: src
+      })
+
+    })
+  },
+
+  uploadVoice() {
+    wx.chooseVideo({
+      sourceType: ['album', 'camera'],
+      maxDuration: 60,
+      camera: 'back',
+      success(res) {
+        console.log(res.tempFilePath)
+        wx.cloud.uploadFile({
+          cloudPath: "Persons/" + app.globalData.personid + "/" + new Date().getTime() + ".wav",
+          filePath: res.tempFilePath, // 文件路径
+        }).then(res => {
+          // get resource ID
+          console.log(res.fileID)
+
+          // 发给云函数
+          wx.cloud.callFunction({
+            name: 'baiduVoice', // 云函数名称
+            data: {
+              voice: res.fileID,
+            }
+          }).then(res => {
+            console.log(res)
+            // 展示结果
+            wx.showModal({
+              title: '识别结果',
+              content: res.result,
+            })
+          })
+        })
       }
     })
   },

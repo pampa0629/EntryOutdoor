@@ -220,6 +220,12 @@ const buildPicSrc = (outdoorid, index) => { // index:0,1,2 图片顺序
   return "Outdoors/" + outdoorid + "/" + new Date().getTime() + ".jpg"
 }
 
+// 构建图片存储的路径
+const buildPersonPhotoSrc = (personid, index) => { // index:0,1,2 图片顺序
+  // 没有办法，只能先用时间（毫秒）作为随时文件名，等待微信解决bug
+  return "Persons/" + personid + "/" + new Date().getTime() + ".jpg"
+}
+
 // 按照绿野习惯，发布出去的电话号码做谐音处理，防止网络爬虫获取隐私
 // 第一步实现：0->O，1->I；其他如2->Z，5->S，8->B，9->q 再议
 const changePhone = (phone) => {
@@ -252,7 +258,8 @@ const authorize = (which, message, callback) => {
   console.log("scope is: " + scope)
   wx.getSetting({
     success(res) {
-      if (!res.authSetting[scope]) {
+      console.log("wx.getSetting")
+      if (!res.authSetting[scope]) { 
         wx.authorize({
           scope: scope,
           success() {
@@ -270,7 +277,13 @@ const authorize = (which, message, callback) => {
               success(res) {
                 if (res.confirm) {
                   console.log('用户点击确定')
-                  wx.openSetting({})
+                  wx.openSetting({
+                    success(res){
+                      if (callback) {
+                        callback()
+                      }
+                    }
+                  })
                 } else if (res.cancel) {
                   console.log('用户点击取消')
                 }
@@ -378,6 +391,7 @@ module.exports = {
   parseChar: parseChar,
   // 图片在云存储上的位置
   buildPicSrc: buildPicSrc,
+  buildPersonPhotoSrc: buildPersonPhotoSrc,
   // 截止日期数组和字符串的相互转化
   getLimitDates: getLimitDates,
   getLimitDateIndex: getLimitDateIndex,

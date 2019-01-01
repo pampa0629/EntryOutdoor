@@ -189,6 +189,7 @@ const updatePersonSubscriber=(leaderid, personid, mine)=>{
   })
 }
 
+// 解密微信步数
 const decryptWeRun=(encrypedData, iv, code, callback)=>{
   console.log("decryptWeRun")
   wx.cloud.callFunction({
@@ -201,6 +202,18 @@ const decryptWeRun=(encrypedData, iv, code, callback)=>{
   }).then(res=>{
     console.log(res)
     if(callback){
+      callback(res.result)
+    }
+  })
+}
+
+// 得到服务器时间
+const getServerDate=(callback)=>{
+  wx.cloud.callFunction({
+    name: 'getDate', // 云函数名称
+  }).then(res => {
+    console.log(res)
+    if (callback) {
       callback(res.result)
     }
   })
@@ -228,4 +241,5 @@ module.exports = {
 
   // other 
   decryptWeRun: decryptWeRun, 
+  getServerDate: getServerDate, 
 }

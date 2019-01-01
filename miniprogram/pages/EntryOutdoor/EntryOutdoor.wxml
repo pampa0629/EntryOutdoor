@@ -5,7 +5,7 @@
       <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
     </van-col>
   </van-row>
-  <van-row>
+  <van-row> 
     <van-col span="9" offset="2">
       <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
     </van-col>
@@ -109,8 +109,8 @@
   <van-cell required title="必须选择集合地点" clickable value="已选择第{{entryInfo.meetsIndex+1}}集合点" bind:click="lookMeetMap">
     <van-icon wx:if="{{entryInfo.meetsIndex>=0 &&meets[entryInfo.meetsIndex].latitude }}" slot="right-icon" name="location-o" bind:click="lookMeetMap" />
   </van-cell>
-  <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{entryInfo.meetsIndex}}" bind:change="changeMeets">
-    <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" border="{{index<meets.length-1}}">
+  <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{entryInfo.meetsIndex}}">
+    <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="80%" border="{{index<meets.length-1}}">
       <van-radio name="{{index}}" />
     </van-cell>
   </van-radio-group>

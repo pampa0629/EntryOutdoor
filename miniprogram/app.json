@@ -30,7 +30,8 @@
     "pages/MyInfo/EditTopN",
     "pages/AboutOutdoor/ChatOutdoor",
     "pages/CreateOutdoor/CheckMembers",
-    "pages/CreateOutdoor/LookCareer"
+    "pages/CreateOutdoor/LookCareer",
+    "pages/MyInfo/LookEmergency"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -62,6 +63,12 @@
   "permission": {
     "scope.userLocation": {
       "desc": "设定集合地点位置，方便队员找到"
+    }
+  },
+  "plugins": {
+    "WechatSI": {
+      "version": "0.2.2",
+      "provider": "wx069ba97219f66d99"
     }
   },
   "navigateToMiniProgramAppIdList": [

@@ -99,7 +99,7 @@ Page({
   },
 
   // 切换到“活动报名”的页面
-  tapEntriedOutdoors: function(e) {
+  tapEntriedOutdoors: function(e) { 
     const self = this;
     self.tapOneOutdoor(e.currentTarget.dataset.pos, "entriedOutdoors", self.data.entriedOutdoors);
   },

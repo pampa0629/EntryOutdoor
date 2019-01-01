@@ -10,7 +10,7 @@ exports.main = async(event, context) => {
   // event.outdoorid, access_token
   console.log(event)
   var url = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=" + event.access_token
-  console.log(url)
+  console.log(url) 
   var data = { 
       scene: event.outdoorid,
       width: "280px",

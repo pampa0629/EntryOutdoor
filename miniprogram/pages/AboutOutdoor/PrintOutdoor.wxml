@@ -28,9 +28,9 @@
 </view>
 
 <!--对领队，要按照集合地点排列名单--> 
-<block wx:if="{{isLeader}}">
+<block wx:if="{{true}}">
   <checkbox-group bindchange="cbCallName">
-    <view wx:for="{{meetMembers}}" wx:key="*this">
+    <view wx:for="{{meetMembers}}" wx:key="**this">
       <view  class="multi_row">
         <checkbox-group bindchange="cbCallNamebyMeet{{index}}">
           <checkbox class="tip" value="{{index}}" checked="{{meetMembers[index].checked}}">第{{index+1}}集合地点（共{{meetMembers[index].length}}人）\n</checkbox>
@@ -44,7 +44,7 @@
 </block>
 
 <!--非领队，看到的就是直接的队员列表-->
-<block wx:if="{{!isLeader}}">
+<block wx:if="{{false}}">
   <view wx:for="{{members}}" wx:key="personid" bindlongpress="longTapMembers{{index}}">{{item.userInfo.nickName}}/{{item.userInfo.gender}}/{{item.userInfo.phone}}/{{item.entryInfo.knowWay}}/{{item.entryInfo.agreedDisclaimer}}/第{{item.entryInfo.meetsIndex+1}}集合点({{item.entryInfo.status}})
   </view>
 </block>

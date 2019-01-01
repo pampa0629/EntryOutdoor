@@ -26,7 +26,7 @@
 
 <!--图标按钮-->
 <van-row>
-  <!--报名截止/继续报名-->
+  <!--报名截止/继续报名--> 
   <van-col span="2" offset="9">
     <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
       <van-icon name="stop" size="24px" color="#1aad19" bind:click="stopEntry"></van-icon>
@@ -103,7 +103,7 @@
 <van-panel title="集合地点">
   <van-cell title="必须选择集合地点" value="点击编辑集合地点" required is-link url="EditMeets" />
   <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{leader.entryInfo.meetsIndex}}" bind:change="changeMeets">
-    <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" border="{{index<meets.length-1}}">
+    <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="80%" border="{{index<meets.length-1}}">
       <van-radio name="{{index}}" />
     </van-cell>
   </van-radio-group>

@@ -21,7 +21,7 @@ Page({
       for (var i = 0; i < self.data.route.trackSites.length; i++) {
         let index = i
         this["copyoutUrl" + index] = () => {
-          this.copyoutUrl(index)
+          this.copyoutUrl(index) 
         }
         this["saveQrcode" + index] = () => {
           this.saveQrcode(index)

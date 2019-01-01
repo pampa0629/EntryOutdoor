@@ -7,7 +7,7 @@ Page({
 
   data: {
     career:null,
-    myOutdoors:null,
+    myOutdoors:null, 
     entriedOutdoors:null,
   },
 

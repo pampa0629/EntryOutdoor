@@ -1,10 +1,5 @@
 <!--紧急电话-->
-<van-action-sheet
-  show="{{ showCalls }}"
-  actions="{{ Calls }}"
-  bind:close="closeCalls"
-  bind:select="selectCalls"
-/>
+<van-action-sheet show="{{showCalls}}" actions="{{Calls}}" bind:close="closeCalls" bind:select="selectCalls" />
 
 <!--头像&帮助-->
 <van-row>
@@ -20,7 +15,7 @@
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>0.6.8</view>
+      <view style='font-family:黑体;font-size:11pt'>0.6.9</view>
     </view>
   </van-col>
   
@@ -50,7 +45,7 @@
   </van-col>
 </van-row>
 
-<!--户外履历 & 绿野ORG登录-->
+<!--户外履历 & 绿野ORG登录--> 
 <van-row>
   <van-col span="9" offset="2">
     <van-button size="large" bind:click="bindCareer">户外履历</van-button>

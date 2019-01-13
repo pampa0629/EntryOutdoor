@@ -2,11 +2,12 @@
 Page({
 
   data: {
+    status:"", // 当前活动状态
     meets: [], //集合点，可加多个
     index: 0, // 当前要处理的index
     hasModified: false,
 
-    showAction: false,
+    showAction: false, 
     Actions: [{
         name: '编辑',
         subname: "编辑当前集合点"
@@ -74,6 +75,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({
+      status: prevPage.data.status,
       meets: prevPage.data.meets,
       hasModified: prevPage.data.hasModified,
     })

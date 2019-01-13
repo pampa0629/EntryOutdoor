@@ -2,6 +2,7 @@ const app = getApp()
 const util = require('./util.js')
 var bmap = require('../libs/bmap-wx.min.js')
 const cloudfun = require('./cloudfun.js')
+const template = require('./template.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -353,7 +354,7 @@ const buildCarInfo=(traffic)=>{
   }
   console.log(carInfo)
   return carInfo
-}
+} 
 
 // 移除某个队员（自己退出，或者领队驳回报名），回调返回新成员名单
 const removeMember=(outdoorid, personid, callback)=>{
@@ -382,15 +383,19 @@ const removeMember=(outdoorid, personid, callback)=>{
       if (self.entryInfo.status == "占坑中" || self.entryInfo.status == "报名中") {
         changeStatus = true;
       }
+      // 给自己发模板消息
+      template.sendQuitMsg2Self(personid, outdoorid, res.data.title.whole, self.userInfo.nickName)
       // 删除自己的
       res.data.members.splice(selfIndex, 1)
       
       // 把第一个替补改为“报名中”
       if (changeStatus) {
         res.data.members.forEach((item, index) => {
-          if (changeStatus && res.data.members[index].entryInfo.status == "替补中") {
-            res.data.members[index].entryInfo.status = "报名中"
+          if (changeStatus && item.entryInfo.status == "替补中") {
+            item.entryInfo.status = "报名中"
             changeStatus = false // 自己退出，只能补上排在最前面的替补
+            // 给替补上的队员发模板消息
+            template.sendEntryMsg2Bench(item.personid, outdoorid, res.data.title.whole, item.userInfo.nickName)
           }
         })
       }
@@ -404,6 +409,95 @@ const removeMember=(outdoorid, personid, callback)=>{
     })
 }
 
+// 超过占坑截止时间（外部判断），则清退所有占坑队员，后续替补
+const removeOcuppy=(outdoorid, callback)=>{
+  dbOutdoors.doc(outdoorid).get().then(res=>{
+    const members = res.data.members 
+    var count = 0
+    // 第一遍循环，找到所有占坑者
+    for (var i = 0; i < members.length; i++){
+      if (members[i].entryInfo.status=="占坑中") {
+        count ++
+        // 给被强制退坑者发模板消息
+        template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
+        members.splice(i,1)
+        i-- // i 要回退一格
+      }
+    }
+
+    // 第二遍循环，对应的替补队员改为报名
+    for (var i = 0; i < members.length && count>0; i++) {
+      if (members[i].entryInfo.status == "替补中") {
+        count--
+        members[i].entryInfo.status == "报名中"
+        // 给替补上的队员发模板消息
+        template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
+      }
+    }
+
+    // 删完了还得存到数据库中，调用云函数写入
+    cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, null)
+
+    if (callback){
+      callback(members)
+    }
+  })
+}
+
+// 构建剩余时间的文本提示信息
+const buildRemainText=(remainMinute) =>{
+  var remainText = "";
+  if (remainMinute > 0) {
+    var remainDay = Math.trunc(remainMinute / 24.0 / 60.0)
+    remainMinute -= remainDay * 24 * 60
+    var remainHour = Math.trunc(remainMinute / 60)
+    remainMinute = Math.trunc(remainMinute - remainHour * 60)
+    remainText = remainDay + "天" + remainHour + "小时" + remainMinute + "分钟"
+  }
+  return remainText
+}
+
+// 计算当前距离截止时间还剩余的时间（单位：分钟）
+// 若 limitItem 为空，则占坑为前两天22:00；报名为前一天22:00
+const calcRemainTime=(outdoorDate, limitItem, isOccupy)=> {
+  // console.log(limitItem)
+  if (!limitItem) {
+    if(isOccupy){
+      limitItem = {
+        date: "前两天",
+        time: "22:00"
+      }
+    } else {
+      limitItem = {
+        date: "前一天",
+        time: "22:00"
+      }
+    }
+  }
+  //console.log(outdoorDate)
+  //console.log(limitItem)
+  var outdoorMinute = Date.parse(util.Ymd2Mdy(outdoorDate)) / 1000.0 / 60 // 得到活动日期的分钟时间数
+  var dayCount = util.getLimitDateIndex(limitItem.date)
+  console.log("dayCount:" + dayCount)
+  var minute = 24 * 60; // 一天多少分钟
+  //console.log(limitItem.time)
+  if (limitItem.time) {
+    var hour_minute = limitItem.time.split(":")
+    minute = minute - (parseInt(hour_minute[0]) * 60 + parseInt(hour_minute[1]))
+    //console.log("hour_minute:" + hour_minute)
+    //console.log("minute:" + minute)
+  }
+  minute += (dayCount - 1) * 24 * 60 // 截止时间和活动日期两者之间间隔的分钟数
+  //console.log("minute" + minute)
+  var limitMinute = outdoorMinute - minute // 截止时间的分钟数
+
+  var nowMinute = Date.parse(new Date()) / 1000.0 / 60
+  var remainMinute = limitMinute - nowMinute
+
+  //console.log(remainMinute)
+  return remainMinute
+}
+
 module.exports = {
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
@@ -412,5 +506,9 @@ module.exports = {
   loadEquipments: loadEquipments, // 推荐的装备
   buildCarInfo: buildCarInfo, // 构建车辆信息
 
+  buildRemainText: buildRemainText, // 构造剩余时间提示文字
+  calcRemainTime:calcRemainTime, // 计算占坑或报名的剩余时间
+
   removeMember: removeMember, // 移除某个队员（自己退出，或者领队驳回报名）
+  removeOcuppy: removeOcuppy, // 清退占坑队员
 }

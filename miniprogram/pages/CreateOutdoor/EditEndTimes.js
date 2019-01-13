@@ -3,11 +3,11 @@ const util = require('../../utils/util.js')
 Page({
 
   data: {
-    OcuppyDates: null, //["不限", "前一天", "前两天", "前三天", "前四天", "前五天","前六天"], // 占坑截止日期
-    EntryDates: null, // ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"], // 报名截止日期
+    OcuppyDates: null, // 占坑截止日期
+    EntryDates: null, // 报名截止日期 
 
-    ocuppy: { date: "不限", time: null }, // 占坑截止时间
-    entry: { date: "不限", time: null }, // 报名截止时间
+    ocuppy: null, // 占坑截止时间
+    entry: null, // 报名截止时间
     hasModified: false, 
   }, 
 
@@ -25,6 +25,23 @@ Page({
       entry: prevPage.data.limits.entry,
       hasModified: prevPage.data.hasModified,
     })
+
+    if(!self.data.ocuppy) {
+      self.setData({
+        // 默认占坑截止时间
+        ocuppy: { date: "前两天", time: "22:00" },
+        hasModified: true, 
+      })
+    }
+
+    if (!self.data.entry) {
+      self.setData({
+        // 默认报名截止时间
+        entry: { date: "前一天", time: "22:00" },
+        hasModified: true, 
+      })
+    }
+
     console.log(self.data)
   },
 

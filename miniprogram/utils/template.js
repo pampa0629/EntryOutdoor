@@ -131,6 +131,70 @@ const sendCancelMsg2Member = (personid, title, outdoorid, leader, reason) => {
   })
 }
 
+// 给全体队员发送活动重要内容修改通知
+const sendModifyMsg2Member=(personid, outdoorid, title, leader, modifys)=>{
+  console.log("sendModifyMsg2Member")
+  var info = "您报名的户外活动"
+  var tip=""
+  console.log(modifys)
+  if(modifys.title) {
+    info += "基本信息被修改为：“" + title +"”，"
+    tip += "本次修改涉及活动重大内容修改，请点击进入小程序查看修改后的内容，若不能确保自己仍然能参加活动，请及时退出活动！"
+  } 
+  if (modifys.meets) {
+    info += "集合地点信息被修改，"
+    tip += "请点击进入小程序查看被修改后的集合地点，并选择自己适合的地点集合。"
+  }
+  info += "敬请留意！"
+  
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "HrOjxx70qtkyerdup5zISeydonsvpH_f_vjLe2LwkIc"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 活动名称
+        "value": title
+      },
+      "keyword2": { // 修改详情
+        "value": info
+      },
+      "keyword3": { // 修改者
+        "value": leader
+      },
+      "keyword4": { // 温馨提示
+        "value": tip
+      },
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
+// 给所有队员发活动成行通知
+const sendConfirmMsg2Member=(personid, outdoorid, title, count, leader)=>{
+  console.log("sendConfirmMsg2Member")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "Eh_ODLoKykVkGGjJPLEmKjLs9xJXv5NyGKF-cyVwyBc"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 活动名称
+        "value": title
+      },
+      "keyword2": { // 报名人数
+        "value": count
+      },
+      "keyword3": { // 发起人
+        "value": leader
+      },
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
 const buildPage = (page, outdoorid) => {
   var result = "pages/" + page + "/" + page + "?outdoorid=" + outdoorid
   return result
@@ -346,6 +410,61 @@ const fetchPersonFormid = (personid, formids, callback) => {
   })
 }
 
+// 给自己发报名退出消息
+const sendQuitMsg2Self=(personid, outdoorid, title, nickName)=>{
+  console.log("sendQuitMsg2Self")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "mHbrqjd8FBpkM_hZgkcuEonpCXYgF6QeW1DyKhHsxIc"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 登录账号
+        "value": nickName
+      },
+      "keyword2": { // 备注
+        "value": title
+      },
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
+// 给被强制退坑者发模板消息
+const sendQuitMsg2Occupy = (personid, outdoorid, title, nickName) => {
+  var newTitle = "您所占坑的活动："+title+"，由于占坑截止时间已过，您已被强制退出；若想参加此次活动，请尽快重新报名"
+  sendQuitMsg2Self(personid, outdoorid, newTitle, nickName) // 复用
+}
+
+// 替补队员转为正式队员时，发消息提醒
+const sendEntryMsg2Bench = (personid, outdoorid, title, nickName) => {
+  console.log("sendEntryMsg2Bench")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "Cbw4Bpfa97gmQWOxTKHWrhOqtFYDj30gM5lE1SvawWY"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 活动主题
+        "value": title
+      },
+      "keyword2": { // 报名人
+        "value": nickName
+      },
+      "keyword2": { // 报名状态
+        "value": "从替补中转为报名中"
+      },
+      "keyword2": { // 备注
+        "value": "前面队员退出，您已经转为正式队员；若不能参加，请及时退出活动"
+      },
+
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
 // 给特定openid发特定id的模板消息
 const sendMessage = (openid, tempid, formid, page, data) => {
   console.log("sendMessage")
@@ -386,10 +505,19 @@ module.exports = {
 
   sendMessage: sendMessage, // 发送模板消息
 
-  sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息
-  sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
+  // 给队员发消息
   sendCreateMsg2Subscriber: sendCreateMsg2Subscriber, // 给订阅者发“新活动”消息
-  sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
+  sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
+  sendQuitMsg2Self: sendQuitMsg2Self, // 给自己发报名退出消息
+  sendEntryMsg2Bench: sendEntryMsg2Bench, // 给替补队员发转为正式队员的消息
+  sendQuitMsg2Occupy: sendQuitMsg2Occupy, // 给被强制退坑者发消息提醒
   sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况
   sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息
+  sendModifyMsg2Member: sendModifyMsg2Member, // // 给队员发送活动重要内容修改通知
+  sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
+  sendConfirmMsg2Member: sendConfirmMsg2Member, // 给队员发活动成行消息
+
+  // 给领队发消息
+  sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息
+
 }

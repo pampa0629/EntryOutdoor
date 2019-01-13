@@ -122,7 +122,7 @@ Page({
             hasLogin: true,
             userInfo: util.createPerson(userInfo),
           });
-        } else {
+        } else { 
           // openid不为null，说明真的需要创建新记录了
           self.createOnePerson(e);
         }

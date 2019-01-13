@@ -18,6 +18,15 @@ Page({
     },
   }, 
 
+  onShareAppMessage: function () {
+    const self = this;
+    return {
+      title: app.globalData.userInfo.nickName+"的户外履历",
+      desc: '嘚瑟一下',
+      path: 'pages/CreateOutdoor/LookCareer?personid=' + app.globalData.personid
+    }
+  },
+
   onLoad: function (options) {
     const self = this
     // 读取数据库

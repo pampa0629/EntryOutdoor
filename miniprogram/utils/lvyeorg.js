@@ -327,16 +327,19 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   // 活动当前状态
   if (first || modifys.status) {
     message += "活动当前状态：" + NL + data.status + NL2
-    if (data.status == "报名截止") {
+    if (data.status == "已成行") {
       message += buildMembersMessage(data.meets, data.members)
       message += NL
     }
   }
 
-  // 活动基本信息
-  if (first) {
-    // 文字介绍
+  // 活动介绍
+  if (first || modifys.brief) { 
     message += "活动介绍：" + NL + data.brief.disc + NL2
+  }
+
+  // 活动基本信息
+  if (first || modifys.title) {
     // 领队，联系方式
     message += "领队：" + data.leader.userInfo.nickName + " " + util.changePhone(data.leader.userInfo.phone) + NL2 
     // 活动时间：
@@ -347,11 +350,6 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     message += "活动强度：累计上升" + data.title.addedUp + "00米，累计距离" + data.title.addedLength + "公里（强度值：" + data.title.level + "）" + NL2
     // 活动负重
     message += "活动性质：" + data.title.loaded + NL2
-  }
-
-  // 活动介绍
-  if (modifys.brief) { // 第一次在前面加信息了，这里只管后面修改的事情
-    message += "活动介绍：" + NL + data.brief.disc + NL2
   }
 
   // 集合时间及地点
@@ -431,8 +429,6 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
       message += NL
     }
   }
-
-  // 活动装备 todo
 
   // 注意事项和免责条款
   if (first || modifys.disclaimer) {

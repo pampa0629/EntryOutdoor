@@ -5,7 +5,7 @@
       <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
     </van-col>
   </van-row>
-  <van-row> 
+  <van-row>
     <van-col span="9" offset="2">
       <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
     </van-col>
@@ -43,7 +43,7 @@
   </van-col>
   <!--留言-->
   <van-col span="2" offset="1">
-    <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
+    <view style="flex-direction:column">
       <van-icon wx:if="{{newChat}}" name="chat-o" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
       <van-icon wx:else name="chat-o" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
       <view class="icon_tip">留言</view>
@@ -118,7 +118,7 @@
 
 <!--交通方式-->
 <van-cell wx:if="{{traffic}}" title="交通方式：{{traffic.mode}}" label="车辆信息： {{traffic.carInfo}}" value="{{traffic.cost=='免费'?'免费':'大致费用：'+traffic.money+'元'}}" border="{{false}}" />
- 
+
 <!--免责条款与是否认路-->
 <van-cell title="免责条款与活动规则" value="点击查看详细内容" clickable is-link url="LookDisclaimer" />
 <van-checkbox-group>
@@ -150,7 +150,7 @@
 <van-cell title="  " border="{{false}}" />
 
 <!--报名按钮-->
-<block wx:if="{{status=='已发布'}}">
+<block wx:if="{{status=='已发布'||status=='已成行'}}">
   <!--替补-->
   <block wx:if="{{(limits.maxPerson && members.length>=limits.personCount) && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
     <form bindsubmit="tapBench" report-submit="true">
@@ -161,11 +161,19 @@
               <button form-type="submit" class="no_btn">
                 <form bindsubmit="tapBench" report-submit="true">
                   <button form-type="submit" class="no_btn">
-                    <view class="fix" style="left:30rpx">
-                      <form bindsubmit="tapBench" report-submit="true">
-                        <button style="color:#1aad19;background-color:#ffffff" disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" size="large" plain>替补</button>
-                      </form>
-                    </view>
+                    <form bindsubmit="tapBench" report-submit="true">
+                      <button form-type="submit" class="no_btn">
+                        <form bindsubmit="tapBench" report-submit="true">
+                          <button form-type="submit" class="no_btn">
+                            <view class="fix" style="left:30rpx">
+                              <form bindsubmit="tapBench" report-submit="true">
+                                <button style="color:#1aad19;background-color:#ffffff" disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" size="large" plain>替补</button>
+                              </form>
+                            </view>
+                          </button>
+                        </form>
+                      </button>
+                    </form>
                   </button>
                 </form>
               </button>
@@ -185,11 +193,19 @@
               <button form-type="submit" class="no_btn">
                 <form bindsubmit="tapOcuppy" report-submit="true">
                   <button form-type="submit" class="no_btn">
-                    <view class="fix" style="left:200rpx">
-                      <form bindsubmit="tapOcuppy" report-submit="true">
-                        <button style="color:#1aad19;background-color:#ffffff" form-type="submit" disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" size="large" plain>占坑</button>
-                      </form>
-                    </view>
+                    <form bindsubmit="tapOcuppy" report-submit="true">
+                      <button form-type="submit" class="no_btn">
+                        <form bindsubmit="tapOcuppy" report-submit="true">
+                          <button form-type="submit" class="no_btn">
+                            <view class="fix" style="left:200rpx">
+                              <form bindsubmit="tapOcuppy" report-submit="true">
+                                <button style="color:#1aad19;background-color:#ffffff" form-type="submit" disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" size="large" plain>占坑</button>
+                              </form>
+                            </view>
+                          </button>
+                        </form>
+                      </button>
+                    </form>
                   </button>
                 </form>
               </button>
@@ -209,11 +225,19 @@
               <button form-type="submit" class="no_btn">
                 <form bindsubmit="tapEntry" report-submit="true">
                   <button form-type="submit" class="no_btn">
-                    <view class="fix" style="left:370rpx">
-                      <form bindsubmit="tapEntry" report-submit="true">
-                        <button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" style="color:#1aad19;background-color:#ffffff" size="large" plain>报名</button>
-                      </form>
-                    </view>
+                    <form bindsubmit="tapEntry" report-submit="true">
+                      <button form-type="submit" class="no_btn">
+                        <form bindsubmit="tapEntry" report-submit="true">
+                          <button form-type="submit" class="no_btn">
+                            <view class="fix" style="left:370rpx">
+                              <form bindsubmit="tapEntry" report-submit="true">
+                                <button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" style="color:#1aad19;background-color:#ffffff" size="large" plain>报名</button>
+                              </form>
+                            </view>
+                          </button>
+                        </form>
+                      </button>
+                    </form>
                   </button>
                 </form>
               </button>

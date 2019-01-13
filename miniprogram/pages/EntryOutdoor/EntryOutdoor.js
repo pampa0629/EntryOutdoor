@@ -12,7 +12,7 @@ const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
 
-Page({
+Page({ 
  
   data: {
     outdoorid: null, // 活动id
@@ -29,13 +29,11 @@ Page({
     limits: {}, // 领队设定的各类限制条款
 
     remains: {
-      //remainOccupyTime: 10 * 24 * 60, // 距离占坑截止还剩余的时间（单位：分钟）
-      //remainEntryTime: 10 * 24 * 60, // 距离报名截止还剩余的时间（单位：分钟）
-      occupy: {
-        time: null,
+      occupy: { // 距离占坑截止还剩余的时间（单位：分钟）
+        time: null, 
         text: ""
       },
-      entry: {
+      entry: { // 距离报名截止还剩余的时间（单位：分钟）
         time: null,
         text: ""
       },
@@ -127,11 +125,9 @@ Page({
         self.setData({
           outdoorid: self.data.outdoorid,
           title: res.data.title,
-          // route: res.data.route, 做兼容性处理了
           meets: res.data.meets,
           members: res.data.members,
           status: res.data.status,
-          // brief,limits： 需要做兼容性处理，放到下面专门的函数中
         })
         self.dealOutdoorCompatibility(res) // 处理Outdoors表中数据的兼容性
         self.checkOcuppyLimitDate() // 处理占坑截止时间过了得退坑的问题
@@ -191,14 +187,13 @@ Page({
   // 处理占坑截止时间过了得退坑的问题
   checkOcuppyLimitDate: function() {
     const self = this
-    if (self.data.limits.remainOccupyTime < 0) {
-      self.data.members.forEach((item, index) => {
-        if (item.entryInfo.status == "占坑中") {
-          self.data.members.splice(index, 1)
-        }
-      })
-      // 删完了还得存到数据库中，调用云函数写入
-      cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, null)
+    console.log("remainOccupyTime:" + self.data.remains.occupy.time)
+    if (self.data.remains.occupy.time < 0) { // 占坑时间已过
+      outdoor.removeOcuppy(self.data.outdoorid, members=>{
+        self.setData({
+          members:members
+        })
+      }) 
     }
   },
 
@@ -247,13 +242,15 @@ Page({
       }
     }
     self.setData({
-      "remains.occupy.time": self.calcRemainTime(self.data.title.date, res.data.limits.ocuppy),
-      "remains.entry.time": self.calcRemainTime(self.data.title.date, res.data.limits.entry)
+      "remains.occupy.time": outdoor.calcRemainTime(self.data.title.date, res.data.limits.ocuppy, true),
+      "remains.entry.time": outdoor.calcRemainTime(self.data.title.date, res.data.limits.entry, false)
     })
     self.setData({
-      "remains.occupy.text": self.buildRemainText(self.data.remains.occupy.time),
-      "remains.entry.text": self.buildRemainText(self.data.remains.entry.time)
+      "remains.occupy.text": outdoor.buildRemainText(self.data.remains.occupy.time),
+      "remains.entry.text": outdoor.buildRemainText(self.data.remains.entry.time)
     })
+    console.log("remains:")
+    console.log(self.data.remains)
 
     // 网站同步信息
     if (res.data.websites) {
@@ -297,53 +294,6 @@ Page({
     // next 
 
   },
-
-  buildRemainText: function(remainMinute) {
-    var remainText = "";
-    if (remainMinute > 0) {
-      var remainDay = Math.trunc(remainMinute / 24.0 / 60.0)
-      remainMinute -= remainDay * 24 * 60
-      var remainHour = Math.trunc(remainMinute / 60)
-      remainMinute = Math.trunc(remainMinute - remainHour * 60)
-      remainText = remainDay + "天" + remainHour + "小时" + remainMinute + "分钟"
-    }
-    return remainText
-  },
-
-  // 计算当前距离截止时间还剩余的时间（单位：分钟）
-  // 若 limitItem 为空，则说明为不限
-  calcRemainTime: function(outdoorDate, limitItem) {
-    console.log(limitItem)
-    if (!limitItem) {
-      limitItem = {
-        date: "不限",
-        time: null
-      }
-    }
-    console.log(outdoorDate)
-    console.log(limitItem)
-    var outdoorMinute = Date.parse(util.Ymd2Mdy(outdoorDate)) / 1000.0 / 60 // 得到活动日期的分钟时间数
-    var dayCount = util.getLimitDateIndex(limitItem.date)
-    console.log("dayCount:" + dayCount)
-    var minute = 24 * 60; // 一天多少分钟
-    console.log(limitItem.time)
-    if (limitItem.time) {
-      var hour_minute = limitItem.time.split(":")
-      minute = minute - (parseInt(hour_minute[0]) * 60 + parseInt(hour_minute[1]))
-      console.log("hour_minute:" + hour_minute)
-      console.log("minute:" + minute)
-    }
-    minute += (dayCount - 1) * 24 * 60 // 截止时间和活动日期两者之间间隔的分钟数
-    console.log("minute" + minute)
-    var limitMinute = outdoorMinute - minute // 截止时间的分钟数
-
-    var nowMinute = Date.parse(new Date()) / 1000.0 / 60
-    var remainMinute = limitMinute - nowMinute
-
-    console.log(remainMinute)
-    return remainMinute
-  },
-
 
   // 处理报名信息的兼容性
   dealEntryInfoCompatibility: function() {
@@ -477,7 +427,7 @@ Page({
           cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, null)
           self.updateEntriedOutdoors(false)
         })
-    } else { // 完全新报名，增加一条记录
+    } else { // 新报名，增加一条记录
       // 先从Person表中找到自己的信息
       console.log(self.data.entryInfo)
       self.setData({
@@ -586,8 +536,6 @@ Page({
 
   // 替补、占坑、报名，用同一个函数，减少重复代码
   doEntry(status, formid) {
-    // console.log(status) 
-    // console.log(formid) 
     if (this.data.entryInfo.status != status) {
       this.entryOutdoor(status, formid)
     } else {
@@ -637,7 +585,6 @@ Page({
     })
   },
 
-
   // 页面相关事件处理函数--监听用户下拉动作  
   onPullDownRefresh: function() {
     console.log("onPullDownRefresh")
@@ -675,7 +622,9 @@ Page({
       "entryInfo.meetsIndex": parseInt(e.target.dataset.name),
     })
     // 如果已经报名，则需要修改集合地点
-    self.entryOutdoor(self.data.entryInfo.status, null)
+    if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status=="占坑中") {
+      self.entryOutdoor(self.data.entryInfo.status, null)
+    }
   },
 
   // 查看集合地点的地图设置，并可导航
@@ -712,7 +661,9 @@ Page({
     self.setData({
       "entryInfo.knowWay": !self.data.entryInfo.knowWay,
     })
-    self.entryOutdoor(self.data.entryInfo.status, null)
+    if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status == "占坑中") {
+      self.entryOutdoor(self.data.entryInfo.status, null)
+    }
   },
 
   // 关注活动

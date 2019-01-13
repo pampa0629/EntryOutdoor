@@ -27,19 +27,26 @@
 <!--图标按钮-->
 <van-row>
   <!--报名截止/继续报名--> 
-  <van-col span="2" offset="9">
-    <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
+  <van-col span="2" offset="6">
+    <view wx:if="{{status=='已发布'||status=='已成行'}}" style="flex-direction:column">
       <van-icon name="stop" size="24px" color="#1aad19" bind:click="stopEntry"></van-icon>
-      <view class="icon_tip">截止</view>
+      <view class="icon_tip">截止</view> 
     </view>
     <view wx:if="{{status=='报名截止'}}" style="flex-direction:column">
       <van-icon name="play" size="24px" color="#1aad19" bind:click="continueEntry"></van-icon>
       <view class="icon_tip">继续</view>
     </view>
   </van-col>
-  <!--活动取消/活动恢复-->
+  <!--成行-->
   <van-col span="2" offset="1">
     <view wx:if="{{status=='已发布'||status=='报名截止'}}" style="flex-direction:column">
+      <van-icon name="passed" size="24px" color="#1aad19" bind:click="confirmOutdoor"></van-icon>
+      <view class="icon_tip">成行</view>
+    </view>
+  </van-col>
+  <!--活动取消/活动恢复-->
+  <van-col span="2" offset="1">
+    <view wx:if="{{status=='已发布'||status=='报名截止'||status=='已成行'}}" style="flex-direction:column">
       <van-icon name="close" size="24px" color="#1aad19" bind:click="cancelOutdoor"></van-icon>
       <view class="icon_tip">取消</view>
     </view>
@@ -50,14 +57,14 @@
   </van-col>
   <!--分享-->
   <van-col span="2" offset="1">
-    <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
+    <view wx:if="{{status=='已发布'||status=='已成行'}}" style="flex-direction:column">
       <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
       <view class="icon_tip">分享</view>
     </view>
   </van-col>
   <!--留言-->
   <van-col span="2" offset="1">
-    <view wx:if="{{status=='已发布'}}" style="flex-direction:column">
+    <view  style="flex-direction:column">
       <van-icon wx:if="{{newChat}}" name="chat-o" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
       <van-icon wx:else name="chat-o" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
       <view class="icon_tip">留言</view>
@@ -74,8 +81,8 @@
 
 <!--活动标题信息-->
 <van-panel title="{{title.whole}}" desc="自动生成">
-  <!--只有在“拟定中”的活动，才能修改活动基本信息-->
-  <block wx:if="{{status=='拟定中'}}">
+  <block wx:if="{{status=='拟定中'||status=='已发布'}}">
+    <van-tag plain type="danger" wx:if="{{status=='已发布'}}">活动基本信息请勿轻易修改，修改后将通知全体队员重新考虑是否能继续参加！</van-tag>
     <van-field label="活动地点" required value="{{title.place}}" placeholder="请输入活动地点" bind:change="bindPlace" />
     <picker mode="date" value="{{title.date}}" start="{{startDate}}" end="{{endDate}}" bindchange="bindDateChange">
       <van-field label="活动日期" disabled required value="{{title.date}}" placeholder="请选择活动日期" />

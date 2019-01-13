@@ -19,6 +19,7 @@ Page({
     canPublish: false, // 判断是否可发布，必须定义关键的几项：地点、日期、集合时间地点等,不保存
     hasModified: false, // 是否被修改了，可以保存起来
     modifys: { // 到底更新了哪些条目，这里做一个临时记录
+      title:false, // 主题类消息
       brief: false, // 文字介绍，图片暂时不管
       meets: false, // 集合地点
       traffic: false, // 交通方式
@@ -67,7 +68,7 @@ Page({
     limits: { // 领队设置的活动限定条件
       disclaimer: "" //免责条款
     },
-    status: "拟定中", // 活动本身的状态，分为：拟定中，已发布，报名截止，已取消
+    status: "拟定中", // 活动本身的状态，分为：拟定中，已发布，已成行，报名截止，已取消
 
     // 同步到网站的信息
     websites: {
@@ -91,6 +92,7 @@ Page({
   setModifys(result) {
     this.data.hasModified = result
     this.data.modifys = { // 到底更新了哪些条目，这里做一个临时记录
+      title: result,
       brief: result,
       meets: result,
       traffic: result,
@@ -103,7 +105,7 @@ Page({
 
   // 判断是否有任一被修改了
   anyModify(modifys) {
-    return modifys.brief || modifys.meets || modifys.traffic || modifys.route || modifys.limits || modifys.disclaimer || modifys.status
+    return modifys.title || modifys.brief || modifys.meets || modifys.traffic || modifys.route || modifys.limits || modifys.disclaimer || modifys.status
   },
 
   onLoad: function() {
@@ -159,23 +161,6 @@ Page({
     } else { // 本地缓存没有id，则说明是要新创建活动
       self.newOutdoor(null);
       self.createAutoInfo();
-    }
-  },
-
-  // 判断是否需要与网站同步
-  keepSameWithWebsites: function() {
-    const self = this
-    console.log("keepSameWithWebsites")
-    console.log(self.data.websites)
-    if (self.data.websites &&
-      self.data.websites.lvyeorg &&
-      (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
-      &&
-      self.data.leader.personid == app.globalData.personid // 并且还是自己的活动
-      &&
-      self.data.outdoorid // 活动id必须有了
-    ) {
-      this.keepSameWithLvyeorg() // 同步到org上
     }
   },
 
@@ -294,6 +279,15 @@ Page({
     }
     // chat 
     self.setNewchat(res.data.chat)
+
+    // 判断处理占坑过期的问题
+    if(outdoor.calcRemainTime(self.data.title.date, res.data.limits.ocuppy,true) < 0) {
+      outdoor.removeOcuppy(self.data.outdoorid, members => {
+        self.setData({
+          members: members
+        })
+      }) 
+    }
     
     // next 
   },
@@ -323,7 +317,8 @@ Page({
   createTitle: function() {
     const self = this
     self.setData({
-      "title.whole": outdoor.createTitle(self.data.title, self.data.leader.userInfo.nickName)
+      "title.whole": outdoor.createTitle(self.data.title, self.data.leader.userInfo.nickName),
+      "modifys.title":true,
     })
   },
 
@@ -479,8 +474,28 @@ Page({
     this.updateStatus("已发布")
   },
 
-  // 截止报名
-  stopEntry: function() {
+  // 活动成行
+  confirmOutdoor: function() {
+    const self = this
+    wx.showModal({
+      title: '活动成行确认',
+      content: '请确认活动成行。您可以再点击“截止”来截止报名',
+      success(res) {
+        if (res.confirm) {
+          self.updateStatus("已成行")
+          // 给所有队员发活动成行通知
+          for(var i=1; i<self.data.members.length; i++){
+            const member = self.data.members[i]
+            template.sendConfirmMsg2Member(member.personid, self.data.outdoorid, self.data.title.whole, self.data.members.length, self.data.leader.userInfo.nickName)
+          }
+        } else if (res.cancel) {
+          console.log('用户点击取消')
+        }
+      }
+    })
+  },
+
+  stopEntry(){
     this.updateStatus("报名截止")
   },
 
@@ -657,22 +672,32 @@ Page({
     util.saveOutdoorID(self.data.outdoorid)
     self.data.memOutdoorid = self.data.outdoorid;
     self.copyPics(); // 把照片中不是自己的，拷贝一份给自己用
-    // 这里处理和ORG网站同步的事情
-    self.keepSameWithWebsites()
     if (isPublishing) { // 第一次发布，需要给订阅者发消息
       self.post2Subscribe()
+    } else if (self.data.modifys.title || self.data.modifys.meets){ 
+      // 非第一次发布，如果包括活动重要信息修改，则要给全体队员发送消息提示
+      self.data.members.forEach((item, index) => {
+        if (index > 0) { // 跳过领队
+          template.sendModifyMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole,  self.data.leader.userInfo.nickName, self.data.modifys)
+        }
+      })
     }
+    // 这里处理和ORG网站同步的事情
+    self.keepSameWithWebsites()
   },
 
-  // 保存修改时，在org网站跟帖发布信息
-  postModifys: function() {
-    console.log("postModifys:function")
-    console.log(this.data.modifys)
-    if (this.anyModify(this.data.modifys)) { // 有一点修改，才有必要 跟帖发布
-      var addedMessage = "领队对以下内容作了更新，请报名者留意！"
-      var message = lvyeorg.buildOutdoorMesage(this.data, false, this.data.modifys, addedMessage, this.data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
-      lvyeorg.postMessage(this.data.outdoorid, this.data.websites.lvyeorg.tid, addedMessage, message)
-      // 用完了得把modifys都设置为false
+  // 判断是否需要与网站同步
+  keepSameWithWebsites: function () {
+    const self = this
+    console.log("keepSameWithWebsites")
+    console.log(self.data.websites)
+    if (self.data.websites && self.data.websites.lvyeorg 
+      && (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
+      && (self.data.leader.personid == app.globalData.personid) // 并且还是自己的活动
+      && self.data.outdoorid // 活动id必须有了
+    ) {
+      this.keepSameWithLvyeorg() // 同步到org上
+    } else { // 不同步也要把修改信息给抹掉
       this.setModifys(false)
     }
   },
@@ -682,19 +707,15 @@ Page({
     const self = this
     console.log(self.data.websites)
     console.log(app.globalData.lvyeorgInfo)
-    // 逻辑关系：
-    // 看 outdoors中是否设置了 同步
-    if (self.data.websites && self.data.websites.lvyeorg) {
-      if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
-        app.callbackLoginLvyeorg = (res) => {
-          if (res.username) {
-            self.post2Lvyeorg()
-          }
+    if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
+      app.callbackLoginLvyeorg = (res) => {
+        if (res.username) {
+          self.post2Lvyeorg()
         }
-        app.loginLvyeOrg()
-      } else { // 登录了直接发布信息就好
-        self.post2Lvyeorg()
       }
+      app.loginLvyeOrg()
+    } else { // 登录了直接发布信息就好
+      self.post2Lvyeorg()
     }
   },
 
@@ -703,7 +724,7 @@ Page({
     console.log("post2Lvyeorg:function")
     const self = this
     // 没有 tid，则先生成tid；再处理waitings
-    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && self.data.status == "已发布") { // 没有tid，则必须有keepSame，同时还必须是“已发布”状态的活动
+    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && (self.data.status == "已发布" || self.data.status == "已成行") ) { // 没有tid，则必须有keepSame，同时还必须是“已发布”或“已成行”状态的活动
       lvyeorg.addThread(self.data.outdoorid, self.data, app.globalData.lvyeorgInfo.isTesting, tid => {
         if (tid) {
           self.data.websites.lvyeorg.tid = tid
@@ -717,6 +738,19 @@ Page({
         // 最后 发布更新信息
         self.postModifys()
       })
+    }
+  },
+
+  // 保存修改时，在org网站跟帖发布信息
+  postModifys: function () {
+    console.log("postModifys:function")
+    console.log(this.data.modifys)
+    if (this.anyModify(this.data.modifys)) { // 有修改，才有必要跟帖发布
+      var addedMessage = "领队对以下内容作了更新，请报名者留意！"
+      var message = lvyeorg.buildOutdoorMesage(this.data, false, this.data.modifys, addedMessage, this.data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
+      lvyeorg.postMessage(this.data.outdoorid, this.data.websites.lvyeorg.tid, addedMessage, message)
+      // 用完了得把modifys都设置为false
+      this.setModifys(false)
     }
   },
 
@@ -904,6 +938,6 @@ Page({
         }
       })
     }
-  },
+  }, 
 
 })

@@ -192,7 +192,7 @@ const parseChar = (cchar) => {
     if (item == cchar) {
       return index
     }
-  })
+  }) 
   return -1
 }
 
@@ -202,7 +202,7 @@ const getLimitDates = () => {
   return LimitDates;
 }
 
-// 根据字符信息，得到截止日期的索引
+// 根据字符信息，得到截止日期的索引 
 const getLimitDateIndex = (date) => {
   var LimitDates = ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"] // 截止日期
   var result = 0

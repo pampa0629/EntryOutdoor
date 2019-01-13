@@ -5,7 +5,7 @@ const _ = db.command
 
 Page({
 
-  data: {
+  data: { 
     career:null,
     myOutdoors:null, 
     entriedOutdoors:null,

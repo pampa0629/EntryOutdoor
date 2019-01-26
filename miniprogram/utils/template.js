@@ -450,10 +450,10 @@ const sendEntryMsg2Bench = (personid, outdoorid, title, nickName) => {
       "keyword2": { // 报名人
         "value": nickName
       },
-      "keyword2": { // 报名状态
+      "keyword3": { // 报名状态
         "value": "从替补中转为报名中"
       },
-      "keyword2": { // 备注
+      "keyword4": { // 备注
         "value": "前面队员退出，您已经转为正式队员；若不能参加，请及时退出活动"
       },
 

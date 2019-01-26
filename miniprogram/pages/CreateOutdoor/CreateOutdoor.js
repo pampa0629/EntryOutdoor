@@ -5,7 +5,7 @@ const qrcode = require('../../utils/qrcode.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
-
+ 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -309,16 +309,17 @@ Page({
 
   // 生成应 自动变化的内容，如强度值、标题等
   createAutoInfo: function() {
+    console.log("createAutoInfo")
     this.calcLevel(); // 计算强度
     this.createTitle(); // 生成标题
   },
 
   // 根据各类信息，生成活动主题信息，修改whole
   createTitle: function() {
+    console.log("createTitle")
     const self = this
     self.setData({
       "title.whole": outdoor.createTitle(self.data.title, self.data.leader.userInfo.nickName),
-      "modifys.title":true,
     })
   },
 
@@ -341,7 +342,8 @@ Page({
     console.log(e)
     this.setData({
       "title.place": e.detail,
-      hasModified: true
+      hasModified: true,
+      "modifys.title": true,
     })
     this.createTitle()
     this.checkPublish()
@@ -350,7 +352,8 @@ Page({
   bindDateChange: function(e) {
     this.setData({
       "title.date": e.detail.value,
-      hasModified: true
+      hasModified: true,
+      "modifys.title": true,
     })
     this.createTitle()
     this.checkPublish()
@@ -361,7 +364,8 @@ Page({
     const self = this
     this.setData({
       "title.during": self.data.Durings[e.detail.value],
-      hasModified: true
+      hasModified: true,
+      "modifys.title": true,
     })
     this.calcLevel()
     this.createTitle()
@@ -372,7 +376,8 @@ Page({
     const self = this
     this.setData({
       "title.loaded": self.data.Loadeds[e.detail.value],
-      hasModified: true
+      hasModified: true,
+      "modifys.title": true,
     })
     this.calcLevel()
     this.createTitle()
@@ -389,7 +394,8 @@ Page({
   bindAddedLength: function(e) {
     this.setData({
       "title.addedLength": e.detail,
-      hasModified: true
+      hasModified: true,
+      "modifys.title": true,
     })
     this.calcLevel()
     this.createTitle()
@@ -398,7 +404,8 @@ Page({
   bindAddedUp: function(e) {
     this.setData({
       "title.addedUp": e.detail,
-      hasModified: true
+      hasModified: true,
+      "modifys.title": true,
     })
     this.calcLevel()
     this.createTitle()
@@ -408,7 +415,8 @@ Page({
   bindAdjustLevel: function(e) {
     this.setData({
       "title.adjustLevel": e.detail,
-      hasModified: true
+      hasModified: true,
+      "modifys.title": true,
     })
     this.calcLevel()
     this.createTitle()
@@ -483,10 +491,16 @@ Page({
       success(res) {
         if (res.confirm) {
           self.updateStatus("已成行")
-          // 给所有队员发活动成行通知
-          for(var i=1; i<self.data.members.length; i++){
-            const member = self.data.members[i]
-            template.sendConfirmMsg2Member(member.personid, self.data.outdoorid, self.data.title.whole, self.data.members.length, self.data.leader.userInfo.nickName)
+          // 成行的活动通知，只发一次
+          var key = self.data.outdoorid + ".confirmOutdoor"
+          if (!wx.getStorageSync(key) ) {
+            console.log(key)
+            wx.setStorageSync(key, true)
+            // 给所有队员发活动成行通知
+            for(var i=1; i<self.data.members.length; i++){
+              const member = self.data.members[i]
+              template.sendConfirmMsg2Member(member.personid, self.data.outdoorid, self.data.title.whole, self.data.members.length, self.data.leader.userInfo.nickName)
+            }
           }
         } else if (res.cancel) {
           console.log('用户点击取消')
@@ -751,6 +765,7 @@ Page({
       lvyeorg.postMessage(this.data.outdoorid, this.data.websites.lvyeorg.tid, addedMessage, message)
       // 用完了得把modifys都设置为false
       this.setModifys(false)
+      console.log(this.data.modifys)
     }
   },
 

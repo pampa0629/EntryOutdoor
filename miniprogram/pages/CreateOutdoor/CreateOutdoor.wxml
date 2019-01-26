@@ -5,7 +5,7 @@
       <van-radio  wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio>
     </van-radio-group>
   </van-panel>
-</van-dialog>
+</van-dialog> 
   
 <!--弹出分享按钮-->
 <van-popup show="{{ showPopup }}" overlay="{{false}}" position="bottom" custom-class="center" bind:close="closePopup">
@@ -39,7 +39,7 @@
   </van-col>
   <!--成行-->
   <van-col span="2" offset="1">
-    <view wx:if="{{status=='已发布'||status=='报名截止'}}" style="flex-direction:column">
+    <view wx:if="{{status=='已发布'||status=='报名截止'||status=='已成行'}}" style="flex-direction:column">
       <van-icon name="passed" size="24px" color="#1aad19" bind:click="confirmOutdoor"></van-icon>
       <view class="icon_tip">成行</view>
     </view>

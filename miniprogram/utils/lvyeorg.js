@@ -328,7 +328,14 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   if (first || modifys.status) {
     message += "活动当前状态：" + NL + data.status + NL2
     if (data.status == "已成行") {
-      message += buildMembersMessage(data.meets, data.members)
+      // 活动人数限制xx人，现有多少人
+      if (data.limits && data.limits.maxPerson) {
+        message += "活动人数：限" + data.limits.personCount + "人" + NL
+        message += "已报名：" + data.members.length + "人"
+      } else {
+        message += "活动人数不限人数"+ NL
+      }
+      message += NL + buildMembersMessage(data.meets, data.members)
       message += NL
     }
   }

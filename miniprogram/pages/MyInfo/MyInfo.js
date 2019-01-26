@@ -4,7 +4,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
-
+ 
 Page({
 
   data: {
@@ -15,7 +15,7 @@ Page({
       nickName: "待定",
       gender: "GG",
       phone: "136",
-    },
+    }, 
 
     myOutdoors: [], // 活动id
     entriedOutdoors: [],

@@ -462,7 +462,7 @@ Page({
     const self = this
     let notice = self.data.limits.wxnotice
     console.log("postEntry2Template")
-    // 如果领队设定活动不需要审核，则给自己发微信消息
+    // 给自己发微信消息
     if (formid) { 
       // 活动主题，领队联系方式，自己的昵称，报名状态，
       template.sendEntryMsg2Self(app.globalData.personid, this.data.title.whole, this.data.members[0].userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.outdoorid, formid)
@@ -470,7 +470,7 @@ Page({
 
     console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
-      if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && (self.data.limit.maxPerson && self.data.members.length >= self.data.limit.personCount))) { // 前几个报名，或者接收最后一个报名，才发送微信消息
+      if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && (self.data.limit.maxPerson && self.data.members.length == self.data.limit.personCount))) { // 前几个报名，或者接收最后一个报名，才发送微信消息
         var key = this.data.outdoorid + "." + this.data.entryInfo.personid
         var count = parseInt(wx.getStorageSync(key))
         if (!count) {
@@ -622,7 +622,7 @@ Page({
       "entryInfo.meetsIndex": parseInt(e.target.dataset.name),
     })
     // 如果已经报名，则需要修改集合地点
-    if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status=="占坑中") {
+    if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "替补中") {
       self.entryOutdoor(self.data.entryInfo.status, null)
     }
   },
@@ -661,7 +661,7 @@ Page({
     self.setData({
       "entryInfo.knowWay": !self.data.entryInfo.knowWay,
     })
-    if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status == "占坑中") {
+    if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "替补中") {
       self.entryOutdoor(self.data.entryInfo.status, null)
     }
   },

@@ -436,7 +436,7 @@ const removeOcuppy=(outdoorid, callback)=>{
     }
 
     // 删完了还得存到数据库中，调用云函数写入
-    cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, null)
+    cloudfun.updateOutdoorMembers(outdoorid, members, null)
 
     if (callback){
       callback(members)

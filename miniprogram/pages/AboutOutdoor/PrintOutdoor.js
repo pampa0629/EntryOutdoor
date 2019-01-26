@@ -24,7 +24,7 @@ Page({
     const self = this;
     if (options && options.outdoorid) {
       var isLeader = false
-      if (options.isLeader && options.isLeader=="tue") {
+      if (options.isLeader && options.isLeader=="true") {
         isLeader = true
       }
       self.setData({
@@ -53,6 +53,7 @@ Page({
         self.dealChecked()
 
         // 不是领队，隐藏电话号码中间三位
+        console.log(self.data.isLeader)
         if (!self.data.isLeader) { 
           self.hidePhone()
         }

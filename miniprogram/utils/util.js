@@ -229,7 +229,7 @@ const buildPersonPhotoSrc = (personid, index) => { // index:0,1,2 图片顺序
 // 按照绿野习惯，发布出去的电话号码做谐音处理，防止网络爬虫获取隐私
 // 第一步实现：0->O，1->I；其他如2->Z，5->S，8->B，9->q 再议
 const changePhone = (phone) => {
-  return phone.replace("0", "O").replace("1", "I")
+  return phone.replace(/0/g, "O").replace(/1/g, "I") 
 }
 
 // 隐藏手机号码的中间三位

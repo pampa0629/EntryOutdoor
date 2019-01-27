@@ -20,7 +20,8 @@ Page({
     outdoorid:null, 
     title:null,
     members:null, // 当前已报名队员
-    newPersonCount:null, // 变化后的人数
+    //newPersonCount:null, // 变化后的人数
+    oldPersonCount:null, 
   },
 
   onLoad: function (options) {
@@ -37,7 +38,7 @@ Page({
       title: prevPage.data.title.whole,
       limits: prevPage.data.limits,
       members: prevPage.data.members, // 当前已报名队员
-      newPersonCount: prevPage.data.limits.personCount, 
+      oldPersonCount: prevPage.data.limits.personCount, 
       hasModified: prevPage.data.hasModified,
     })
     console.log(self.data)
@@ -61,12 +62,6 @@ Page({
     console.log(self.data)
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
-
-    if (self.data.newPersonCount != self.data.limits.personCount) {
-      self.data.hasModified = true
-      self.data.limits.personCount = self.data.newPersonCount
-    }
-
     prevPage.setData({
       limits: self.data.limits,
       hasModified: self.data.hasModified,
@@ -98,17 +93,17 @@ Page({
   // 调整人数限制
   bindAddPerson: function(e) {
     this.setData({
-      newPersonCount: e.detail,
+      "limits.personCount": e.detail,
+      hasModified: true
     })
-    console.log("newPersonCount" + this.data.newPersonCount)
   },
 
   // 扩编：允许人数增加，且已经有替补队员时--> 把对应的替补队员改为正式队员，并发微信通知
   tapEnlarge() {
     const self = this
     const members = self.data.members
-    var begin = self.data.limits.personCount // 起点index
-    var end = Math.min(members.length, self.data.newPersonCount)
+    var begin = self.data.oldPersonCount // 起点index
+    var end = Math.min(members.length, self.data.limits.personCount)
     for (var i = begin; i < end; i++) {
       members[i].entryInfo.status = "报名中"
       template.sendEntryMsg2Bench(members[i].personid, self.data.outdoorid, self.data.title, members[i].userInfo.nickName)
@@ -122,8 +117,8 @@ Page({
   tapReduce() {
     const self = this
     const members = self.data.members
-    var begin = self.data.newPersonCount // 起点index
-    var end = Math.min(members.length, self.data.limits.personCount)
+    var begin = self.data.limits.personCount // 起点index
+    var end = Math.min(members.length, self.data.oldPersonCount)
     for (var i = begin; i < end; i++) {
       template.sendBenchMsg2Member(members[i].personid, self.data.outdoorid, self.data.title, members[i].entryInfo.status, members[i].userInfo.nickName)
       members[i].entryInfo.status = "替补中"
@@ -137,8 +132,7 @@ Page({
   savePersonCount(){
     const self = this
     self.setData({
-      "limits.personCount":self.data.newPersonCount,
-      hasModified : true
+      oldPersonCount: self.data.limits.personCount,
     })
   },
 

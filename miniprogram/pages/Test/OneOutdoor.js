@@ -137,7 +137,7 @@ Page({
         dbTemp.doc(app.globalData.personid).set({
           data: {
             raw: res.rawData,
-            decode: self.decode(res.rawData),
+            //decode: self.decode(res.rawData),
             result: res.result,
           }
         })

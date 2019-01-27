@@ -5,16 +5,16 @@
       <van-checkbox value="{{limits.maxPerson}}" bind:change="checkMaxPerson"/>
     </van-cell>
   </van-checkbox-group>
-  <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{newPersonCount}}人" border="{{false}}">
-    <van-stepper value="{{newPersonCount}}" min="1" max="100" bind:change="bindAddPerson" />
+  <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}">
+    <van-stepper value="{{limits.personCount}}" min="1" max="100" bind:change="bindAddPerson" />
   </van-cell>  
   <!--扩编：允许人数增加，且已经有替补队员时-->
-  <block wx:if="{{newPersonCount>limits.personCount && members.length>limits.personCount}}">
+  <block wx:if="{{limits.personCount>oldPersonCount && members.length>oldPersonCount}}">
     <van-tag type="primary" plain>已有替补队员，请点击下面的“扩编”按钮转为正式队员。</van-tag>
     <van-button type="primary" size="large" plain bindtap='tapEnlarge'>扩编</van-button>
   </block>
   <!--缩编：允许人数减少，且需要把队员转为替补时-->
-  <block wx:if="{{newPersonCount<limits.personCount && members.length>newPersonCount}}">
+  <block wx:if="{{limits.personCount<oldPersonCount && members.length>limits.personCount}}">
     <van-tag type="danger" plain>减少人数会造成已有队员转为替补，如确有必要，请点击点击下面的“缩编”。</van-tag>
     <van-button type="danger" size="large" plain bindtap='tapReduce'>缩编</van-button>
   </block>

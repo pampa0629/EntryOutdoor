@@ -16,7 +16,7 @@ Page({
       gender: "GG",
       phone: "136",
     }, 
-
+ 
     myOutdoors: [], // 活动id
     entriedOutdoors: [],
     caredOutdoors: [],

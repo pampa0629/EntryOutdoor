@@ -357,7 +357,7 @@ const buildCarInfo=(traffic)=>{
 } 
 
 // 移除某个队员（自己退出，或者领队驳回报名），回调返回新成员名单
-const removeMember=(outdoorid, personid, callback)=>{
+const removeMember=(outdoorid, personid, selfQuit, callback)=>{
   // 先重新获取members，再删除personid，再调用云函数
   // 刷新一下队员列表
   dbOutdoors.doc(outdoorid).get()
@@ -383,8 +383,14 @@ const removeMember=(outdoorid, personid, callback)=>{
       if (self.entryInfo.status == "占坑中" || self.entryInfo.status == "报名中") {
         changeStatus = true;
       }
-      // 给自己发模板消息
-      template.sendQuitMsg2Self(personid, outdoorid, res.data.title.whole, self.userInfo.nickName)
+      // 给自己发模板消息 
+      var remark = ""
+      if(selfQuit) {
+        remark = "您已自行退出本次活动。您仍可以点击进入小程序继续报名。"
+      } else {
+        remark = "您已被领队驳回报名。若仍有意参加，请参考领队驳回理由，并联系领队确认情况。"
+      }
+      template.sendQuitMsg2Self(personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, self.userInfo.nickName, remark)
       // 删除自己的
       res.data.members.splice(selfIndex, 1)
       
@@ -419,7 +425,7 @@ const removeOcuppy=(outdoorid, callback)=>{
       if (members[i].entryInfo.status=="占坑中") {
         count ++
         // 给被强制退坑者发模板消息
-        template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
+        template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
         members.splice(i,1)
         i-- // i 要回退一格
       }

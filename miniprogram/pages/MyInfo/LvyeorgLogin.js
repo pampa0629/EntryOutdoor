@@ -23,6 +23,8 @@ Page({
 
     hasModified: false, // 是否有修改
     hasLogin:false, // 是否已经登录
+
+    outdoorid:"", // 活动id
   },
 
   onLoad: function(options) {
@@ -230,5 +232,33 @@ Page({
       }
     }) 
   },
+
+  bindOutdoorid(e){
+    this.setData({
+      outdoorid: e.detail,
+    })
+  },
+
+  pasteOutdoorid() {
+    const self = this
+    wx.getClipboardData({
+      success: function (res) {
+        console.log(res.data)
+        self.setData({
+          outdoorid: res.data,
+        })
+      }
+    })
+  },
+
+  // 通过活动id查找定位到“同步到org”上的活动
+  tapGotoEntry(){
+    const self = this
+    if(self.data.outdoorid) {
+      wx.navigateTo({
+        url: "../EntryOutdoor/EntryOutdoor?outdoorid=" + self.data.outdoorid
+      })
+    }
+  }
 
 })

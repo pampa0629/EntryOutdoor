@@ -226,7 +226,8 @@ Page({
       cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
 
       // 从队员报名表中剔除
-      outdoor.removeMember(self.data.outdoorid, item.personid, members=> {
+      var selfQuit = false
+      outdoor.removeMember(self.data.outdoorid, item.personid, selfQuit, members=> {
         console.log(members)
         self.flushMembers(members)
       })

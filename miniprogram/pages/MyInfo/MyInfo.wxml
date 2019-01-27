@@ -15,7 +15,7 @@
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>0.7.1</view>
+      <view style='font-family:黑体;font-size:11pt'>0.7.2</view>
     </view>
   </van-col>
   

@@ -446,13 +446,15 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   }
 
   // 报名须知：请微信扫描二维码，登录小程序报名； 贴上二维码
+  var idMsg = "未登录org网站时，可拷贝活动ID，然后在微信APP中搜索“户外报名”找到小程序；并在小程序的“我的信息”--“绿野ORG登录”页面最后位置，输入活动ID，直接定位到本活动的报名页面。" + NL + "本活动ID为：" + data.outdoorid + NL
   if (first) {
     message += NL + "报名须知：请到帖子末尾，用微信扫描二维码，登录小程序报名。" + NL
   } else {
     message += NL + "报名须知：请到帖子一楼，用微信扫描二维码，登录小程序报名。" + NL
   }
+  message += idMsg
   if (!allowSiteEntry) { // 用当前活动表的设置
-    message += "为方便领队汇总名单和后续提供微信后台消息通知，本活动不接受网站直接跟帖报名，敬请注意" + NL
+    message += "为方便领队汇总名单和提供微信即时消息通知，本活动不接受网站直接跟帖报名，敬请注意" + NL
   }
 
   return message

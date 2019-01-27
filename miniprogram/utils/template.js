@@ -84,7 +84,7 @@ const personid2openid = (personid, callback) => {
 }
 
 // 给订阅者发“新活动”消息
-const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone) =>{
+const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone) => {
   console.log("sendCreateMsg2Subscriber")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
@@ -132,21 +132,21 @@ const sendCancelMsg2Member = (personid, title, outdoorid, leader, reason) => {
 }
 
 // 给全体队员发送活动重要内容修改通知
-const sendModifyMsg2Member=(personid, outdoorid, title, leader, modifys)=>{
+const sendModifyMsg2Member = (personid, outdoorid, title, leader, modifys) => {
   console.log("sendModifyMsg2Member")
   var info = "您报名的户外活动"
-  var tip=""
+  var tip = ""
   console.log(modifys)
-  if(modifys.title) {
-    info += "基本信息被修改为：“" + title +"”，"
+  if (modifys.title) {
+    info += "基本信息被修改为：“" + title + "”，"
     tip += "本次修改涉及活动重大内容修改，请点击进入小程序查看修改后的内容，若不能确保自己仍然能参加活动，请及时退出活动！"
-  } 
+  }
   if (modifys.meets) {
     info += "集合地点信息被修改，"
     tip += "请点击进入小程序查看被修改后的集合地点，并选择自己适合的地点集合。"
   }
   info += "敬请留意！"
-  
+
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
     var tempid = "HrOjxx70qtkyerdup5zISeydonsvpH_f_vjLe2LwkIc"
@@ -172,7 +172,7 @@ const sendModifyMsg2Member=(personid, outdoorid, title, leader, modifys)=>{
 }
 
 // 给所有队员发活动成行通知
-const sendConfirmMsg2Member=(personid, outdoorid, title, count, leader)=>{
+const sendConfirmMsg2Member = (personid, outdoorid, title, count, leader) => {
   console.log("sendConfirmMsg2Member")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
@@ -203,7 +203,7 @@ const buildPage = (page, outdoorid) => {
 // 给自己发报名消息
 const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid, formid) => {
   console.log("sendEntryMsg2Self")
-  dbPersons.doc(personid).get().then(res => { 
+  dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
     var tempid = "IL3BSL-coDIGoIcLwxj6OzC-F68qCMknJTNlk--tL2M"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -223,7 +223,7 @@ const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid, 
     var page = buildPage("EntryOutdoor", outdoorid)
     console.log(formid)
     if (formid.indexOf("mock") >= 0) { // 模拟的不能用
-      fetchPersonFormid(personid, res.data.formids, formid=>{
+      fetchPersonFormid(personid, res.data.formids, formid => {
         console.log(formid)
         sendMessage(openid, tempid, formid, page, data)
       })
@@ -262,14 +262,14 @@ const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) =>
       }
     }
     var page = buildPage("CreateOutdoor", outdoorid)
-    fetchPersonFormid(leaderid, res.data.formids, formid=>{
+    fetchPersonFormid(leaderid, res.data.formids, formid => {
       sendMessage(openid, tempid, formid, page, data)
     })
   })
 }
 
 // 给报名者发消息，询问情况
-const sendChatMsg2Member=(personid, title, outdoorid, nickName, phone, content)=>{
+const sendChatMsg2Member = (personid, title, outdoorid, nickName, phone, content) => {
   console.log("sendChatMsg2Member")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
@@ -289,7 +289,7 @@ const sendChatMsg2Member=(personid, title, outdoorid, nickName, phone, content)=
       }
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-  
+
     fetchPersonFormid(personid, res.data.formids, formid => {
       console.log(formid)
       sendMessage(openid, tempid, formid, page, data)
@@ -342,14 +342,14 @@ const fetchOutdoorFormid = (outdoorid, callback) => {
 }*/
 
 // 清理过期的formids，回调返回可用的formids
-const clearPersonFormids=(personid, callback)=>{ 
-  dbPersons.doc(personid).get().then(res=>{
+const clearPersonFormids = (personid, callback) => {
+  dbPersons.doc(personid).get().then(res => {
     var oldCount = res.data.formids
-    findFirstFormid(res.data.formids, false, resFormids=>{
+    findFirstFormid(res.data.formids, false, resFormids => {
       if (oldCount > resFormids.formids.length) {
         cloudfun.updatePersonFormids(personid, resFormids.formids)
       }
-      if(callback) {
+      if (callback) {
         callback(resFormids.formids)
       }
     })
@@ -372,7 +372,7 @@ const findFirstFormid = (formids, isDelFind, callback) => {
         findIndex = index
         console.log("find formid, is: " + formid)
         var delCount = isDelFind ? (findIndex + 1) : findIndex
-        formids.splice(0, delCount) 
+        formids.splice(0, delCount)
         if (callback) {
           callback({
             "formid": formid,
@@ -411,17 +411,26 @@ const fetchPersonFormid = (personid, formids, callback) => {
 }
 
 // 给自己发报名退出消息
-const sendQuitMsg2Self=(personid, outdoorid, title, nickName)=>{
+const sendQuitMsg2Self = (personid, outdoorid, title, date, leader, nickName, remark) => {
   console.log("sendQuitMsg2Self")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
-    var tempid = "mHbrqjd8FBpkM_hZgkcuEonpCXYgF6QeW1DyKhHsxIc"
+    var tempid = "mHbrqjd8FBpkM_hZgkcuEj0TDDxuiV-dT160jhK1tNw"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
-      "keyword1": { // 登录账号
-        "value": nickName
-      },
-      "keyword2": { // 备注
+      "keyword1": { // 活动主题
         "value": title
+      },
+      "keyword2": { // 活动时间
+        "value": date
+      },
+      "keyword3": { // 领队
+        "value": leader
+      },
+      "keyword4": { // 备注
+        "value": remark
+      },
+      "keyword5": { // 登录账号
+        "value": nickName
       },
     }
     var page = buildPage("EntryOutdoor", outdoorid)
@@ -432,14 +441,31 @@ const sendQuitMsg2Self=(personid, outdoorid, title, nickName)=>{
 }
 
 // 给被强制退坑者发模板消息
-const sendQuitMsg2Occupy = (personid, outdoorid, title, nickName) => {
-  var newTitle = "您所占坑的活动："+title+"，由于占坑截止时间已过，您已被强制退出；若想参加此次活动，请尽快重新报名"
-  sendQuitMsg2Self(personid, outdoorid, newTitle, nickName) // 复用
+const sendQuitMsg2Occupy = (personid, outdoorid, title, date, leader, nickName) => {
+  console.log("sendQuitMsg2Occupy")
+  var remark = "您所占坑的活动由于占坑截止时间已过，您已被强制退出；若有意参加此次活动，请尽快点击进入小程序重新报名。"
+  sendQuitMsg2Self(personid, outdoorid, title, date, leader, nickName, remark) // 复用
 }
 
 // 替补队员转为正式队员时，发消息提醒
 const sendEntryMsg2Bench = (personid, outdoorid, title, nickName) => {
   console.log("sendEntryMsg2Bench")
+  var statusChange = "从替补中转为报名中"
+  var remark= "前面队员退出或领队扩编，您已经转为正式队员；若不能参加，请及时退出活动"
+  sendStatusChangeMsg2Member(personid, outdoorid, title, nickName, statusChange, remark)
+}
+
+// 正式队员转为替补队员时，发消息提醒
+const sendBenchMsg2Member = (personid, outdoorid, title, oldStatus, nickName) => {
+  console.log("sendBenchMsg2Member")
+  var statusChange = "从"+oldStatus+"转为替补中"
+  var remark = "由于领队降低队伍的最大人数（缩编），您报名靠后，报名状态被改为“替补中”。您可点击进入小程序查看详情。"
+  sendStatusChangeMsg2Member(personid, outdoorid, title, nickName, statusChange, remark)
+}
+
+// 替补队员转为正式队员时，发消息提醒
+const sendStatusChangeMsg2Member = (personid, outdoorid, title, nickName, statusChange, remark) => {
+  console.log("sendStatusChangeMsg2Member")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
     var tempid = "Cbw4Bpfa97gmQWOxTKHWrhOqtFYDj30gM5lE1SvawWY"
@@ -451,10 +477,10 @@ const sendEntryMsg2Bench = (personid, outdoorid, title, nickName) => {
         "value": nickName
       },
       "keyword3": { // 报名状态
-        "value": "从替补中转为报名中"
+        "value": statusChange
       },
       "keyword4": { // 备注
-        "value": "前面队员退出，您已经转为正式队员；若不能参加，请及时退出活动"
+        "value": remark
       },
 
     }
@@ -510,6 +536,7 @@ module.exports = {
   sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
   sendQuitMsg2Self: sendQuitMsg2Self, // 给自己发报名退出消息
   sendEntryMsg2Bench: sendEntryMsg2Bench, // 给替补队员发转为正式队员的消息
+  sendBenchMsg2Member: sendBenchMsg2Member, // 给队员(报名/占坑)发转为替补队员的消息，用于领队缩编时
   sendQuitMsg2Occupy: sendQuitMsg2Occupy, // 给被强制退坑者发消息提醒
   sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况
   sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息

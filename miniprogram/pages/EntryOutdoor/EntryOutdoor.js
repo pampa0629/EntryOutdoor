@@ -547,7 +547,8 @@ Page({
   tapQuit: function() {
     console.log("tapQuit")
     const self = this;
-    outdoor.removeMember(self.data.outdoorid, app.globalData.personid, members => {
+    var selfQuit = true
+    outdoor.removeMember(self.data.outdoorid, app.globalData.personid, selfQuit, members => {
       // 删除Persons表中的entriedOutdoors中的对应id的item
       self.updateEntriedOutdoors(true)
       // 退出后还可以继续再报名

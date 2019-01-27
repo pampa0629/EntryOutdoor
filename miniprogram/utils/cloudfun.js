@@ -37,7 +37,7 @@ const pushOutdoorChatMsg = (outdoorid, message)=>{
     }
   })
 }
-
+ 
 // 一次性刷新Outdoors表中对应id记录中，所有的成员信息
 const updateOutdoorMembers = (outdoorid, members, callback)=>{
   console.log("updateOutdoorMembers")

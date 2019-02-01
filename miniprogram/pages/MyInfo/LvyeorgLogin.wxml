@@ -38,10 +38,12 @@
   <van-button size="large"  type="warning" bindtap='tapLvyeorgLogout' plain>退出登录</van-button>
 </block>
 
-<van-panel title="绿野活动">
-  <van-tag type="primary" plain>对于同步到org网站的活动，由于网站限制，在未登录时看不到报名二维码图片。可以在这里拷贝输入网站上显示的活动id，并直接定位到小程序中的活动报名页面</van-tag>
-  <van-field label="活动ID" value="{{outdoorid}}" type="textarea" placeholder="请输入活动ID" bind:confirm="bindOutdoorid" bind:change="bindOutdoorid" icon="arrow-left" bind:click-icon="pasteOutdoorid" />
-  <van-button size="large" type="primary" plain bindtap='tapGotoEntry'>定位活动</van-button>
+<van-button size="large" bindtap='tapHall'>绿野活动大厅</van-button>
 
-  <van-button size="large" bindtap='tapHall'>绿野活动大厅</van-button>
-</van-panel>
+<!-- <van-panel title="查找绿野活动">
+  <van-tag type="primary" plain>对于同步到org网站的活动，由于网站限制，在未登录时看不到报名二维码图片。可以在这里拷贝输入网站上显示的活动id，并直接定位到小程序中的活动报名页面</van-tag>
+  <van-field label="活动ID" value="{{outdoorid}}" type="textarea" placeholder="请输入活动ID" clearable bind:confirm="bindOutdoorid" bind:change="bindOutdoorid" use-button-slot>
+    <van-button slot="button" size="small" plain type="primary" bind:click="pasteOutdoorid">复制</van-button>
+  </van-field>
+  <van-button size="large" type="primary" plain bindtap='tapGotoEntry'>定位活动</van-button>
+</van-panel> -->

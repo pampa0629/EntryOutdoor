@@ -37,6 +37,57 @@ const pushOutdoorChatMsg = (outdoorid, message)=>{
     }
   })
 }
+
+// 更新在Outdoors表的chat
+const updateOutdoorChat = (outdoorid, chat) => {
+  console.log("updateOutdoorChat")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "chat",
+      command: "",
+      value: chat
+    }
+  })
+}
+
+// 更新在Outdoors表的chat中的qrcode
+const updateOutdoorChatQrcode = (outdoorid, qrcode) => {
+  console.log("updateOutdoorChatQrcode")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "chat.qrcode",
+      command: "",
+      value: qrcode
+    }
+  })
+}
+
+const updateOutdoorAddMembers = (outdoorid, addMembers, callback) => {
+  console.log("updateOutdoorAddMembers")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "addMembers",
+      command: "",
+      value: addMembers
+    }
+  }).then(res => {
+    if (callback) {
+      callback(res)
+    }
+  })
+}
  
 // 一次性刷新Outdoors表中对应id记录中，所有的成员信息
 const updateOutdoorMembers = (outdoorid, members, callback)=>{
@@ -141,6 +192,21 @@ const updateOutdoorFormids=(outdoorid, formids)=>{
   })
 }
 
+const updateOutdoorWebsites=(outdoorid, websites)=>{
+  console.log("updateOutdoorWebsites")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "websites",
+      command: "",
+      value: websites,
+    }
+  })
+}
+
 
 ////===========  Persons ===========/////
 // 在Persons表的 caredOutdoors, 最前面追加一条户外活动信息
@@ -221,11 +287,14 @@ const getServerDate=(callback)=>{
 
 module.exports = {
   // Outdoors
+  updateOutdoorChat: updateOutdoorChat,
   updateOutdoorChatSeen: updateOutdoorChatSeen,
+  updateOutdoorChatQrcode: updateOutdoorChatQrcode,
   pushOutdoorChatMsg: pushOutdoorChatMsg,
 
   updateOutdoorMembers: updateOutdoorMembers,
   pushOutdoorMember: pushOutdoorMember,
+  updateOutdoorAddMembers: updateOutdoorAddMembers, // 更新附加队员
   
   addOutdoorNoticeCount: addOutdoorNoticeCount,
 
@@ -233,6 +302,8 @@ module.exports = {
   shiftOutdoorLvyeWaitings: shiftOutdoorLvyeWaitings,
 
   updateOutdoorFormids: updateOutdoorFormids,
+
+  updateOutdoorWebsites: updateOutdoorWebsites,
 
   // Persons
   unshiftPersonCared:unshiftPersonCared,

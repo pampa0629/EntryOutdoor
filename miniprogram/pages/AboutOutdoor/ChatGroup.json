@@ -1,9 +1,7 @@
 {
-  "navigationBarTitleText": "活动留言",
-  "enablePullDownRefresh": true,
-  "onReachBottomDistance":300,
+  "navigationBarTitleText": "微信群聊",
   "usingComponents": {
-    "van-icon": "/vant-weapp/icon/index", 
+    "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",
     "van-dialog": "/vant-weapp/dialog/index",
     "van-cell": "/vant-weapp/cell/index",

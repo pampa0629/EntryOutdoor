@@ -3,7 +3,7 @@ const util = require('../../utils/util.js')
 wx.cloud.init()
 
 Page({
-
+ 
   data: {
     pics: [], // {src:string} 云存储路径
     outdoorid:null, // 活动id

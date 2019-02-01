@@ -19,7 +19,14 @@ VantComponent({
   },
   props: {
     color: String,
+    sticky: Boolean,
+    animated: Boolean,
+    swipeable: Boolean,
     lineWidth: {
+      type: Number,
+      value: -1
+    },
+    lineHeight: {
       type: Number,
       value: -1
     },
@@ -47,13 +54,10 @@ VantComponent({
       type: Number,
       value: 4
     },
-    animated: Boolean,
-    sticky: Boolean,
     offsetTop: {
       type: Number,
       value: 0
     },
-    swipeable: Boolean,
     scrollTop: {
       type: Number,
       value: 0
@@ -76,6 +80,7 @@ VantComponent({
     },
     color: 'setLine',
     lineWidth: 'setLine',
+    lineHeight: 'setLine',
     active: 'setActiveTab',
     animated: 'setTrack',
     scrollTop: 'onScroll',
@@ -88,6 +93,9 @@ VantComponent({
     this.setLine();
     this.setTrack();
     this.scrollIntoView();
+  },
+  destroyed: function destroyed() {
+    wx.createIntersectionObserver(this).disconnect();
   },
   methods: {
     updateTabs: function updateTabs(tabs) {
@@ -134,17 +142,19 @@ VantComponent({
           color = _this$data.color,
           active = _this$data.active,
           duration = _this$data.duration,
-          lineWidth = _this$data.lineWidth;
+          lineWidth = _this$data.lineWidth,
+          lineHeight = _this$data.lineHeight;
       this.getRect('.van-tab', true).then(function (rects) {
         var rect = rects[active];
         var width = lineWidth !== -1 ? lineWidth : rect.width / 2;
+        var height = lineHeight !== -1 ? "height: " + lineHeight + "px;" : '';
         var left = rects.slice(0, active).reduce(function (prev, curr) {
           return prev + curr.width;
         }, 0);
         left += (rect.width - width) / 2;
 
         _this.set({
-          lineStyle: "\n            width: " + width + "px;\n            background-color: " + color + ";\n            -webkit-transform: translateX(" + left + "px);\n            -webkit-transition-duration: " + duration + "s;\n            transform: translateX(" + left + "px);\n            transition-duration: " + duration + "s;\n          "
+          lineStyle: "\n            " + height + "\n            width: " + width + "px;\n            background-color: " + color + ";\n            -webkit-transform: translateX(" + left + "px);\n            -webkit-transition-duration: " + duration + "s;\n            transform: translateX(" + left + "px);\n            transition-duration: " + duration + "s;\n          "
         });
       });
     },

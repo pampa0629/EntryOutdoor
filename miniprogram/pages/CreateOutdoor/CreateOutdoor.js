@@ -10,8 +10,8 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
-const _ = db.command  
- 
+const _ = db.command
+
 Page({
   data: {
     outdoorid: null, // 页面活动已经存储到数据库中的活动id
@@ -85,7 +85,9 @@ Page({
       reason: "",
       Reasons: ["人数不够", "空气污染太重", "天气状况不适合户外活动", "领队临时有事","其他原因"],
     },
-    newChat: false, // 是否有新留言
+    chatStatus:"", // 留言状态：new，有新留言；self，有@我的留言，
+    chatChange:false, 
+    interval:null, // 计时器
   },
 
   // 设置临时修改项目全部为false或true，包括整体是否修改标记
@@ -278,7 +280,7 @@ Page({
       })
     }
     // chat 
-    self.setNewchat(res.data.chat)
+    self.setChat(res.data.chat)
 
     // 判断处理占坑过期的问题
     if(outdoor.calcRemainTime(self.data.title.date, res.data.limits.ocuppy,true) < 0) {
@@ -756,7 +758,7 @@ Page({
   },
 
   // 保存修改时，在org网站跟帖发布信息
-  postModifys: function () {
+  postModifys: function () { 
     console.log("postModifys:function")
     console.log(this.data.modifys)
     if (this.anyModify(this.data.modifys)) { // 有修改，才有必要跟帖发布
@@ -792,17 +794,17 @@ Page({
     // 导航到 printOutdoor页面
     const self = this;
     wx.navigateTo({
-      url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader=true"
+      url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader="+true
     })
   },
 
   chatOutdoor(){
     const self = this;
     wx.navigateTo({
-      url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.outdoorid,
+      url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader=" + true,
       complete (res) {
         self.setData({
-          newChat: false,
+          chatStatus: "",
         })
       }
     })
@@ -818,23 +820,30 @@ Page({
       self.setData({
         members:res.data.members,
       })
-      self.setNewchat(res.data.chat)
+      self.setChat(res.data.chat)
       wx.hideNavigationBarLoading();
       wx.stopPullDownRefresh();
     })
   },
 
   // 判断是否有新留言
-  setNewchat(chat){
-    if (chat && chat.messages) {
-      var count = 0
-      if(chat.seen && chat.seen[app.globalData.personid]){
-        count = chat.seen[app.globalData.personid]
-      }
-      this.setData({
-        newChat: chat.messages.length > count,
+  setChat(chat) {
+    const self = this
+    outdoor.getChatStatus(app.globalData.personid, app.globalData.userInfo.nickName, chat, status=>{
+      self.setData({
+        chatStatus: status,
       })
-    }
+      console.log(self.data.chatStatus)
+      if(self.data.chatStatus == "atme") {
+        self.data.interval = setInterval(function () {
+         this.setData({
+            chatChange: !this.data.chatChange,
+          })
+       }.bind(this), 800)
+      } else {
+        clearInterval(self.data.interval)
+      }
+    })
   },
 
   onPopup() {

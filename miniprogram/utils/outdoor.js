@@ -504,6 +504,32 @@ const calcRemainTime=(outdoorDate, limitItem, isOccupy)=> {
   return remainMinute
 }
 
+const getChatStatus=(personid, nickName, chat, callback)=>{
+  if (chat && chat.messages) {
+    var count = 0
+    if (chat.seen && chat.seen[personid]) {
+      count = chat.seen[personid]
+    }
+
+    var status = ""
+    if (chat.messages.length > count) {
+      for (var i = count; i < chat.messages.length; i++) {
+        console.log(chat.messages[i])
+        const msg = chat.messages[i].msg
+        if (msg.indexOf("@" + nickName) != -1 || msg.indexOf("@所有人") != -1) {
+          status = "atme"
+        }
+      }
+      if(status == "") {
+        status = "new"
+      }
+    }
+    if (callback) {
+      callback(status)
+    }
+  }
+}
+
 module.exports = {
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
@@ -517,4 +543,6 @@ module.exports = {
 
   removeMember: removeMember, // 移除某个队员（自己退出，或者领队驳回报名）
   removeOcuppy: removeOcuppy, // 清退占坑队员
+
+  getChatStatus: getChatStatus, // 判断留言的状态：self、new等
 }

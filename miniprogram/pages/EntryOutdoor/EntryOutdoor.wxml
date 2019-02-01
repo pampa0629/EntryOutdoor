@@ -44,7 +44,9 @@
   <!--留言-->
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
-      <van-icon wx:if="{{newChat}}" name="chat-o" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:if="{{chatStatus=='atme' && chatChange}}" name="chat" size="24px" color="#5959F6" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:elif="{{chatStatus=='atme' && !chatChange}}" name="chat" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:elif="{{chatStatus=='new'}}" name="chat-o" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
       <van-icon wx:else name="chat-o" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
       <view class="icon_tip">留言</view>
     </view>
@@ -129,7 +131,7 @@
     <van-checkbox value="{{entryInfo.knowWay}}" bind:change="checkKnowWay" />
   </van-cell>
 </van-checkbox-group>
-
+ 
 <!--状态提示-->
 <van-tag type="primary" plain>活动状态：{{status}}</van-tag>
 <van-tag type="primary" plain>报名状态：{{entryInfo.status}}</van-tag>

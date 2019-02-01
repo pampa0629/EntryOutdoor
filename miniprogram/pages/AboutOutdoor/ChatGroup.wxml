@@ -1,0 +1,37 @@
+<!--领队，分两步：-->
+<block wx:if="{{isLeader}}">
+ 
+<!--文字提示-->
+<van-tag type="primary" plain>建立活动专用微信群方法如下</van-tag>
+<van-tag type="primary" plain>第一步：在微信中通过面对面建立空的微信群，并保存微信群二维码</van-tag>
+<van-tag type="primary" plain>第二步：点击上传群二维码</van-tag>
+<van-tag type="primary" plain>第三步：小程序会自动在活动留言页面“@所有人”提示队员扫码加入微信群</van-tag>
+<van-tag type="primary" plain>注意二维码的有效期，过期则需要重新生成并上传二维码</van-tag>
+
+<!--上传群二维码-->
+<van-row>
+  <van-col span="20" offset="2">
+    <image mode="widthFix" src="{{chat.qrcode}}"></image>
+  </van-col>
+</van-row>
+<van-button wx:if="{{chat.qrcode}}" size="large" type="primary" bind:click='uploadQrcode'>更新群二维码</van-button>
+<van-button wx:else size="large" type="primary" bind:click='uploadQrcode'>上传群二维码</van-button>
+
+</block>
+
+<!--队员，保存群二维码图片，扫码加入：-->
+<block wx:elif="{{chat.qrcode}}">
+  <van-tag type="primary" plain>请保存二维码图片到手机相册，然后用微信扫码加入活动专用微信群</van-tag>
+  <van-row>
+    <van-col span="20" offset="2">
+      <image mode="widthFix" src="{{chat.qrcode}}"></image>
+    </van-col>
+  </van-row>
+  <van-button size="large" type="primary" bind:click='saveQrcode'>保存群二维码</van-button>
+</block>
+
+<!--队员，尚未有群二维码图片：-->
+<block wx:else>
+  <van-tag type="primary" plain>领队比较懒，尚未创建活动专用微信群</van-tag>
+  <van-tag type="primary" plain>可以在留言中@昵称 与领队和队员沟通</van-tag>
+</block>

@@ -31,7 +31,8 @@
     "pages/AboutOutdoor/ChatOutdoor",
     "pages/CreateOutdoor/CheckMembers",
     "pages/CreateOutdoor/LookCareer",
-    "pages/MyInfo/LookEmergency"
+    "pages/MyInfo/LookEmergency",
+    "pages/AboutOutdoor/ChatGroup"
   ],
   "window": {
     "backgroundTextStyle": "dark",

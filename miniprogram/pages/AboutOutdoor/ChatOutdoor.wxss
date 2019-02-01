@@ -28,7 +28,7 @@
 }
 
 .resp-input-cell {
-  width: 70%;
+  width: 85%;
   margin-right: 20rpx;
 }
 
@@ -37,7 +37,12 @@
   width: 16%;
   line-height: 60rpx;
   text-align: center;
-  margin-right:8rpx;  
+  margin-right:8rpx;   
   color: #4b0;
   font-size: 30rpx;
+}
+
+.icon_tip{
+  font-family:黑体;
+  font-size:10pt
 }

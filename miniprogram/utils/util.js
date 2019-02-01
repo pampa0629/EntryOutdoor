@@ -5,7 +5,7 @@ const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database()
 const dbPersons = db.collection('Persons')
-
+ 
 const formatTime = date => {
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -220,7 +220,13 @@ const buildPicSrc = (outdoorid, index) => { // index:0,1,2 图片顺序
   return "Outdoors/" + outdoorid + "/" + new Date().getTime() + ".jpg"
 }
 
-// 构建图片存储的路径
+// 构建活动二维码图片存储的路径
+const buildChatQrcode = (outdoorid) => { 
+  // 没有办法，只能先用时间（毫秒）作为随时文件名，等待微信解决bug
+  return "Outdoors/" + outdoorid + "/chat/qrcode" + new Date().getTime() + ".jpg"
+}
+
+// 构建个人照片存储的路径
 const buildPersonPhotoSrc = (personid, index) => { // index:0,1,2 图片顺序
   // 没有办法，只能先用时间（毫秒）作为随时文件名，等待微信解决bug
   return "Persons/" + personid + "/" + new Date().getTime() + ".jpg"
@@ -391,6 +397,7 @@ module.exports = {
   parseChar: parseChar,
   // 图片在云存储上的位置
   buildPicSrc: buildPicSrc,
+  buildChatQrcode: buildChatQrcode,
   buildPersonPhotoSrc: buildPersonPhotoSrc,
   // 截止日期数组和字符串的相互转化
   getLimitDates: getLimitDates,

@@ -6,7 +6,7 @@ const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 
-wx.cloud.init()
+wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -55,7 +55,10 @@ Page({
     entriedOutdoors: null, // 报名的id列表
     caredOutdoors: null, // 关注的活动id列表
     hasCared: false, // 该活动是否已经加了关注
-    newChat: false, // 是否有新留言
+
+    chatStatus: "", // 留言状态：new，有新留言；self，有@我的留言，
+    chatChange: false,
+    interval: null, // 计时器
 
     showPopup: false, // 分享弹出菜单
   },
@@ -289,7 +292,7 @@ Page({
       })
     }
     // chat
-    self.setNewchat(res.data.chat)
+    self.setChat(res.data.chat)
 
     // next 
 
@@ -565,9 +568,9 @@ Page({
   printOutdoor() {
     // 导航到 printOutdoor页面
     const self = this;
-    var isLeader = "&isLeader=false";
+    var isLeader = "&isLeader="+false
     if (self.data.entryInfo.status == "领队") {
-      isLeader = "&isLeader=true";
+      isLeader = "&isLeader="+true
     }
     wx.navigateTo({
       url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + isLeader
@@ -577,10 +580,10 @@ Page({
   chatOutdoor() {
     const self = this;
     wx.navigateTo({
-      url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.outdoorid,
+      url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader=" + false,
       complete(res) {
         self.setData({
-          newChat: false,
+          chatStatus: "",
         })
       }
     })
@@ -596,23 +599,30 @@ Page({
       self.setData({
         members: res.data.members,
       })
-      self.setNewchat(res.data.chat)
+      self.setChat(res.data.chat)
       wx.hideNavigationBarLoading();
       wx.stopPullDownRefresh();
     })
   },
 
   // 判断是否有新留言
-  setNewchat(chat) {
-    if (chat && chat.messages) {
-      var count = 0
-      if (chat.seen && chat.seen[app.globalData.personid]) {
-        count = chat.seen[app.globalData.personid]
-      }
-      this.setData({
-        newChat: chat.messages.length > count,
+  setChat(chat) {
+    const self = this
+    outdoor.getChatStatus(app.globalData.personid, app.globalData.userInfo.nickName, chat, status => {
+      self.setData({
+        chatStatus: status,
       })
-    }
+      console.log(self.data.chatStatus)
+      if (self.data.chatStatus == "atme") {
+        self.data.interval = setInterval(function () {
+          this.setData({
+            chatChange: !this.data.chatChange,
+          })
+        }.bind(this), 800)
+      } else {
+        clearInterval(self.data.interval)
+      }
+    })
   },
 
 // 选择或改变集合地点选择

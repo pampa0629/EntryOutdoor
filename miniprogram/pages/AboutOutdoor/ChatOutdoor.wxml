@@ -1,23 +1,42 @@
+<!--@选择队员名单-->
+<van-popup show="{{ showMembers }}" bind:close="onCloseMembers" position="bottom">
+  <van-picker columns="{{ members }}" show-toolbar title="选择要留言的队员" bind:change="onChangeMembers"  bind:cancel="onCancelMembers" bind:confirm="onConfirmMembers"/>
+</van-popup>
+
 <!--活动标题-->
-<van-notice-bar scrollable="{{false}}" text="活动：{{title}}" />
-<van-tag size="large" type="success">下拉即可刷新留言</van-tag>
+<van-row>
+  <van-col span="20">
+    <van-notice-bar scrollable="{{true}}" text="{{title}}" />
+  </van-col>
+  <van-col span="2" offset="1">
+    <view wx:if="{{isLeader}}" style="flex-direction:column">
+      <van-icon name="upgrade" size="24px" color="#1aad19" bind:click="onEnterGroup"></van-icon>
+      <view class="icon_tip">升级</view>
+    </view>
+    <view wx:else style="flex-direction:column">
+      <van-icon name="friends-o" size="24px" color="#1aad19" bind:click="onEnterGroup"></van-icon>
+      <view class="icon_tip">群聊</view>
+    </view>
+  </van-col>
+</van-row>
+
+<!--刷新提示-->
+<van-tag wx:if="{{!hasPullFlush}}" size="large" type="success">下拉即时刷新留言</van-tag>
 
 <!--活动留言-->
 <van-row wx:for="{{chat.messages}}" wx:key="who+msg">
   <block wx:if="{{!item.self}}">
-    <van-col span="4" offset="">
+    <van-col span="4" offset=""> 
       <van-tag bindtap="tapWho" plain size="large" type="primary">{{item.who}}</van-tag>
     </van-col>
     <van-col span="20" offset="">
-      <view style='font-size:14pt;color:#ef9284;background-color:#fffbe8' wx:if="{{item.atme}}">@{{item.at}}：{{item.msg}}</view>
-      <view style='font-size:14pt' wx:elif="{{item.at}}">@{{item.at}}：{{item.msg}}</view>
-      <view style='font-size:14pt' wx:else>{{item.msg}}</view>
+      <view bindlongpress="copyMessage{{index}}" style='font-size:14pt;color:#ef9284;background-color:#fffbe8' wx:if="{{item.atme}}">{{item.msg}}</view>
+     <view bindlongpress="copyMessage{{index}}" style='font-size:14pt' wx:else>{{item.msg}}</view>
     </van-col>
   </block>
   <block wx:else>
     <van-col span="20" offset="0">
-      <view style='font-size:14pt;text-align:right' wx:if="{{item.at}}">@{{item.at}}：{{item.msg}}</view>
-      <view style='font-size:14pt;text-align:right' wx:else>{{item.msg}}</view>
+      <view style='font-size:14pt;text-align:right'>{{item.msg}}</view>
     </van-col>
     <van-col span="4" offset="0">
       <van-tag plain size="large" type="primary">{{item.who}}</van-tag>
@@ -32,7 +51,6 @@
 
 <!--回复留言-->
 <view class="page-tail">
-  <view class="resp-at-cell" wx:if="{{message.at}}">@{{message.at}}</view>
   <view class="resp-input-cell">
     <input class="resp-input" type="text" placeholder="说点什么吧..." value="{{message.msg}}" bindinput="inputChat" focus />
   </view>

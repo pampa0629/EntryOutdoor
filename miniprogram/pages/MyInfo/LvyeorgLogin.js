@@ -233,32 +233,33 @@ Page({
     }) 
   },
 
-  bindOutdoorid(e){
-    this.setData({
-      outdoorid: e.detail,
-    })
-  },
+///////////// 通过id定位活动的功能，暂时封起来，有需要再提供 //////////
+  // bindOutdoorid(e){
+  //   this.setData({
+  //     outdoorid: e.detail,
+  //   })
+  // },
 
-  pasteOutdoorid() {
-    const self = this
-    wx.getClipboardData({
-      success: function (res) {
-        console.log(res.data)
-        self.setData({
-          outdoorid: res.data,
-        })
-      }
-    })
-  },
+  // pasteOutdoorid() {
+  //   const self = this
+  //   wx.getClipboardData({
+  //     success: function (res) {
+  //       console.log(res.data)
+  //       self.setData({
+  //         outdoorid: res.data,
+  //       })
+  //     }
+  //   })
+  // },
 
-  // 通过活动id查找定位到“同步到org”上的活动
-  tapGotoEntry(){
-    const self = this
-    if(self.data.outdoorid) {
-      wx.navigateTo({
-        url: "../EntryOutdoor/EntryOutdoor?outdoorid=" + self.data.outdoorid
-      })
-    }
-  }
+  // // 通过活动id查找定位到“同步到org”上的活动
+  // tapGotoEntry(){
+  //   const self = this
+  //   if(self.data.outdoorid) {
+  //     wx.navigateTo({
+  //       url: "../EntryOutdoor/EntryOutdoor?outdoorid=" + self.data.outdoorid
+  //     })
+  //   }
+  // }
 
 })

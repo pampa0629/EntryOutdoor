@@ -7,7 +7,7 @@ const outdoor = require('../../utils/outdoor.js')
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
-
+ 
 Page({
  
   data: {
@@ -28,7 +28,12 @@ Page({
       content: "",
       select: null,
       Options: ["体力不能胜任", "户外装备不全",  "户外经验不足", "必须认路", "只限熟人", "其它"],
-    },
+    }, 
+
+    addMembers:[], // 领队外挂
+    addMember:"",
+    hasModified:false, // 
+    openAdd:false, // 是否开启附加队员
   }, 
 
   onLoad: function (options) {
@@ -38,6 +43,17 @@ Page({
     self.data.outdoorid = prevPage.data.outdoorid
     self.data.title = prevPage.data.title.whole
     self.flushMembers(prevPage.data.members)
+    // 处理附加队员
+    self.loadAddMembers(self.data.outdoorid)
+  },
+
+  loadAddMembers(outdoorid){
+    const self = this
+    dbOutdoors.doc(outdoorid).get().then(res=>{
+      if(res.data.addMembers) {
+        self.flushAddMembers(res.data.addMembers)
+      }
+    })
   },
 
   flushMembers(members){
@@ -72,6 +88,9 @@ Page({
         members: res.data.members,
       })
     })
+    if (self.data.hasModified){
+      cloudfun.updateOutdoorAddMembers(self.data.outdoorid, self.data.addMembers)
+    }
   },
 
   longPressMember(index){
@@ -262,6 +281,58 @@ Page({
     })
   },
 
-  
+/////////////////////////// 附加队员的处理
+  // 是否开启附加队员编辑功能
+  changeAddOpen(e){
+    this.setData({
+      openAdd: e.detail,
+    })
+  },
 
+  // 删除 index位置的附加队员
+  delAddMembers(index){
+    const self = this
+    self.data.addMembers.splice(index, 1)
+    self.data.hasModified= true
+    self.flushAddMembers(self.data.addMembers)
+  }, 
+
+  // 拷贝附加队员信息
+  copyAddMember(){
+    const self = this
+    wx.getClipboardData({
+      success: function (res) {
+        console.log(res.data)
+        self.setData({
+          addMember: res.data,
+        })
+      }
+    })
+  }, 
+
+  // 增加附加队员到列表中
+  addOneMember(){
+    const self = this
+    self.data.addMembers.push(self.data.addMember)
+    self.data.hasModified = true
+    self.flushAddMembers(self.data.addMembers)
+    self.setData({
+      addMember:"" // 清空
+    })
+  },
+
+  // 创建 删除附加队员按钮
+  flushAddMembers(addMembers){
+    const self = this
+    self.setData({
+      addMembers: addMembers
+    })
+    for (var i = 0; i < self.data.addMembers.length; i++) {
+      let index = i // 还必须用let才行
+      this["delAddMembers" + index] = () => {
+        self.delAddMembers(index)
+      }
+    }
+  }
+  
 })

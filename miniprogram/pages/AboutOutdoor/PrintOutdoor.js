@@ -6,7 +6,7 @@ const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
 
-Page({
+Page({ 
  
   data: {   
     outdoorid: null, // 活动id
@@ -15,26 +15,21 @@ Page({
     route: {}, // 活动路线
     meets: [], //集合点，可多个
     meetMembers: [], // 按照集合地点分组的队员名单
+    addMembers:[], // 附加队员名单
     isLeader: false, // 是否是领队：领队能看到队员的电话，非领队看不到；领队按照集合地点排列名单，队员不需要
     status: null, // 活动状态
   },
  
   onLoad: function(options) {
-    console.log("PrintOutdoor.js in onLoad fun, options is:" + JSON.stringify(options, null, 2))
     const self = this;
-    if (options && options.outdoorid) {
-      var isLeader = false
-      if (options.isLeader && options.isLeader=="true") {
-        isLeader = true
-      }
+    self.setData({
+      outdoorid: options.outdoorid,
+    })
+    if (options.isLeader && options.isLeader == "true") {
       self.setData({
-        outdoorid: options.outdoorid,
-        isLeader: isLeader,
+        isLeader: true,
       })
-    } else { // id要是都没有，就直接返回吧
-      return
     }
-    
     console.log("PrintOutdoor.js in onLoad fun, isLeader is:" + self.data.isLeader)
     dbOutdoors.doc(self.data.outdoorid).get()
       .then(res => {
@@ -92,6 +87,12 @@ Page({
       })
     }
 
+    if (res.data.addMembers) {
+      self.setData({
+        addMembers: res.data.addMembers,
+      })
+    }
+    
     // next
   }, 
 

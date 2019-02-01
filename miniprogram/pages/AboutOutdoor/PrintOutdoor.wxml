@@ -8,7 +8,7 @@
   <text class="tip">地点：</text>
   <text>{{title.place}}\n</text>  
   <text class="tip">活动日期：</text>
-  <text>{{title.date}}\n</text>
+  <text>{{title.date}}\n</text> 
   <text class="tip">活动强度：</text>
   <text>{{title.level}}（累积距离{{title.addedLength}}公里，累积上升{{title.addedUp}}00米）</text>
 </view>
@@ -27,8 +27,8 @@
   <text class="tip">\n队员列表（共{{members.length}}人）\n</text>
 </view>
 
-<!--对领队，要按照集合地点排列名单--> 
-<block wx:if="{{true}}">
+<!--要按照集合地点排列名单--> 
+<block>
   <checkbox-group bindchange="cbCallName">
     <view wx:for="{{meetMembers}}" wx:key="**this">
       <view  class="multi_row">
@@ -43,10 +43,10 @@
   </checkbox-group>
 </block>
 
-<!--非领队，看到的就是直接的队员列表-->
-<block wx:if="{{false}}">
-  <view wx:for="{{members}}" wx:key="personid" bindlongpress="longTapMembers{{index}}">{{item.userInfo.nickName}}/{{item.userInfo.gender}}/{{item.userInfo.phone}}/{{item.entryInfo.knowWay}}/{{item.entryInfo.agreedDisclaimer}}/第{{item.entryInfo.meetsIndex+1}}集合点({{item.entryInfo.status}})
-  </view>
-</block>
+<!--附加队员列表-->
+<view wx:if="{{addMembers.length>0}}"> 
+  <text class="tip">\n附加队员列表（共{{addMembers.length}}人）\n</text>
+  <view wx:for="{{addMembers}}" wx:key="*this">{{item}}</view>
+</view>
 
 </view>

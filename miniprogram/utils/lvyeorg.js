@@ -7,7 +7,7 @@ const cloudfun = require('./cloudfun.js')
 wx.cloud.init()
 const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
- 
+
 const LvyeOrgURL = 'https://www.lvye.net/panpa/'
 
 // 得到登录org网站所需要的token， 用callback传回
@@ -217,8 +217,11 @@ const uploadOneImage = (outdoorid, cloudPath, callback) => {
         if (resp_dict.err_code == 0) {
           console.log(resp_dict.data.file_url)
           if (callback) {
-            console.log("uploadOneImage OK, return by callback")
-            callback(resp_dict.data.aid)
+            console.log("uploadOneImage OK, url is: " + resp_dict.data.aid)
+            callback({
+              aid: resp_dict.data.aid,
+              url: resp_dict.data.file_url
+            })
           }
         } else {
           logError(resp)
@@ -233,11 +236,11 @@ const uploadQrCode = (outdoorid, callback) => {
   console.log("uploadQrCode, outdoorid is:" + outdoorid)
   qrcode.getCloudPath(outdoorid, qrCode => {
     console.log("qrCode is:" + qrCode)
-    uploadOneImage(outdoorid, qrCode, aid => {
+    uploadOneImage(outdoorid, qrCode, res => {
       if (callback) {
-        console.log("uploadQrCode, aid is:")
-        console.log(aid)
-        callback(aid)
+        console.log("uploadQrCode, res is:")
+        console.log(res)
+        callback(res)
       }
     })
   })
@@ -250,7 +253,7 @@ const uploadImages = (outdoorid, pics, aids, callback) => {
   console.log(pics)
   if (pics.length > 0) {
     uploadOneImage(outdoorid, (pics.shift()).src, res => {
-      aids.push(res)
+      aids.push(res.aid)
       uploadImages(outdoorid, pics, aids, callback)
     })
   } else {
@@ -306,7 +309,7 @@ const buildMembersMessage = (meets, members) => {
   var message = "活动名单如下：" + NL
   var meetMembers = groupMembersByMeets(meets, members)
   meetMembers.forEach((item, index) => {
-    message += "第" +(index + 1) + "）集合地点：" + meets[index].place + "，活动" + meets[index].date + " " + meets[index].time + NL
+    message += "第" + (index + 1) + "）集合地点：" + meets[index].place + "，活动" + meets[index].date + " " + meets[index].time + NL
     meetMembers[index].forEach((citem, cindex) => {
       var result = buildEntryMessage(meetMembers[index][cindex].userInfo, meetMembers[index][cindex].entryInfo, false, true)
       message += result.message + NL
@@ -333,7 +336,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
         message += "活动人数：限" + data.limits.personCount + "人" + NL
         message += "已报名：" + data.members.length + "人"
       } else {
-        message += "活动人数不限人数"+ NL
+        message += "活动人数不限人数" + NL
       }
       message += NL + buildMembersMessage(data.meets, data.members)
       message += NL
@@ -341,14 +344,14 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   }
 
   // 活动介绍
-  if (first || modifys.brief) { 
+  if (first || modifys.brief) {
     message += "活动介绍：" + NL + data.brief.disc + NL2
   }
 
   // 活动基本信息
   if (first || modifys.title) {
     // 领队，联系方式
-    message += "领队：" + data.leader.userInfo.nickName + " " + util.changePhone(data.leader.userInfo.phone) + NL2 
+    message += "领队：" + data.leader.userInfo.nickName + " " + util.changePhone(data.leader.userInfo.phone) + NL2
     // 活动时间：
     message += "活动时间：" + data.title.date + "（" + util.getDay(data.title.date) + "）" + NL2
     // 活动地点：
@@ -369,7 +372,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   }
 
   // 活动路线
-  if ((first || modifys.route) && data.route.wayPoints ) {
+  if ((first || modifys.route) && data.route.wayPoints) {
     message += NL + "活动路线及行程安排：" + NL
     data.route.wayPoints.forEach((item, index) => {
       message += (index + 1) + "） " + (item.date ? item.date : '当天') + " " + (item.time ? item.time : ' ') + " " + item.place + NL
@@ -382,15 +385,15 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     message += NL + "交通方式及费用：" + NL
     message += data.traffic.mode
     message += "，" + data.traffic.cost
-    if (data.traffic.cost != "免费"){
+    if (data.traffic.cost != "免费") {
       message += "，" + data.traffic.money + "元，以实际发生为准"
     }
-    if (data.traffic.mode!="公共交通" && data.traffic.car) {
+    if (data.traffic.mode != "公共交通" && data.traffic.car) {
       message += NL + "车辆信息：" + data.traffic.car.brand
-      if (data.traffic.mode == "自驾" && data.traffic.car.color){
+      if (data.traffic.mode == "自驾" && data.traffic.car.color) {
         message += "，" + data.traffic.car.color
       }
-      if (data.traffic.car.number){
+      if (data.traffic.car.number) {
         message += "，车牌尾号：" + data.traffic.car.number
       }
     }
@@ -421,15 +424,15 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     // 装备要求
     if (data.limits && data.limits.equipments) {
       message += NL + "活动装备要求"
-      message += NL+"必须有的装备：" 
-      data.limits.equipments.mustRes.forEach((item, index)=>{
+      message += NL + "必须有的装备："
+      data.limits.equipments.mustRes.forEach((item, index) => {
         message += item + "，"
       })
-      message += NL +"可以有的装备："
+      message += NL + "可以有的装备："
       data.limits.equipments.canRes.forEach((item, index) => {
         message += item + "，"
       })
-      message += NL +"不能有的装备："
+      message += NL + "不能有的装备："
       data.limits.equipments.noRes.forEach((item, index) => {
         message += item + "，"
       })
@@ -446,15 +449,17 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   }
 
   // 报名须知：请微信扫描二维码，登录小程序报名； 贴上二维码
-  var idMsg = "未登录org网站时，可拷贝活动ID，然后在微信APP中搜索“户外报名”找到小程序；并在小程序的“我的信息”--“绿野ORG登录”页面最后位置，输入活动ID，直接定位到本活动的报名页面。" + NL + "本活动ID为：" + data.outdoorid + NL
-  if (first) {
+  var qrcodeMsg = "[url=" + data.websites.lvyeorg.qrcodeUrl + "]活动二维码[/url]"
+  if (first) { // 发布活动时的报名信息
     message += NL + "报名须知：请到帖子末尾，用微信扫描二维码，登录小程序报名。" + NL
-  } else {
-    message += NL + "报名须知：请到帖子一楼，用微信扫描二维码，登录小程序报名。" + NL
+    message += "若看不到二维码图片，请点击这里查看并微信扫码：" + qrcodeMsg + NL
+  } else { // 活动内容修改时的报名信息
+    message += NL + "报名须知：请点击这里：" + qrcodeMsg + "，用微信扫描二维码，登录小程序报名。" + NL
+    message += "或者回到帖子一楼扫描二维码图报名：" + NL
   }
-  message += idMsg
+
   if (!allowSiteEntry) { // 用当前活动表的设置
-    message += "为方便领队汇总名单和提供微信即时消息通知，本活动不接受网站直接跟帖报名，敬请注意" + NL
+    message += "为方便领队汇总名单和提供微信服务消息通知，本活动不接受网站直接跟帖报名，敬请注意" + NL
   }
 
   return message
@@ -474,7 +479,7 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
   } else {
     // 昵称/性别/电话（隐藏中间三位）/认路情况/同意免责/集合地点（报名状态）
     var temp = userInfo.nickName + "/" + userInfo.gender + "/"
-    
+
     // 隐藏手机号码中间三位
     var phone = util.hidePhone(userInfo.phone.toString());
     var knowWay = entryInfo.knowWay ? "认路" : "不认路"
@@ -484,10 +489,16 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
     }
     temp += "（" + entryInfo.status + "）"
 
-    message += "代报名：" + temp
+    if (!isPrint) { // 集中打印就不要标注为“代报名”了
+      message += "代报名："
+    }
+    message += temp
     title += temp
   }
-  return {title: title,message: message,}
+  return {
+    title: title,
+    message: message
+  }
 }
 
 // 发布活动
@@ -497,11 +508,13 @@ const addThread = function(outdoorid, data, isTesting, callback) {
   uploadImages(outdoorid, data.brief.pics, temp, resAids => {
     console.log("resAids is:")
     console.log(resAids)
-    uploadQrCode(outdoorid, resQcCode => {
-      console.log("resQcCode is:")
-      console.log(resQcCode)
-      resAids.push(resQcCode)
-      
+    uploadQrCode(outdoorid, resQrCode => {
+      console.log("resQrCode is:")
+      console.log(resQrCode)
+      resAids.push(resQrCode.aid)
+      console.log("图片地址：" + resQrCode.url)
+      data.websites.lvyeorg.qrcodeUrl = resQrCode.url // 记录下来
+
       var fid = chooseForum(data.title, isTesting) // 要发帖的版面
       var message = buildOutdoorMesage(data, true, data.modifys, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
       // console.log(message)
@@ -510,7 +523,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
 
       // 发帖
       wx.request({
-        url: LvyeOrgURL + "add_thread.php", 
+        url: LvyeOrgURL + "add_thread.php",
         method: "POST",
         header: {
           "content-type": "application/x-www-form-urlencoded"
@@ -538,6 +551,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
             wx.showToast({
               title: 'ORG发帖成功',
             });
+            data.websites.lvyeorg.tid = resp.data.data.tid
             if (callback) {
               callback(resp.data.data.tid)
             }
@@ -706,13 +720,53 @@ const postOneWaiting = (outdoorid, tid, waiting, callback) => {
       var resp_dict = resp.data;
       console.log(resp_dict)
       if (resp_dict.err_code == 0) {
-        cloudfun.shiftOutdoorLvyeWaitings(outdoorid, res=>{
+        cloudfun.shiftOutdoorLvyeWaitings(outdoorid, res => {
           if (callback) { // 回调
             callback()
           }
         })
       } else {
         logError(resp)
+      }
+    }
+  })
+}
+
+const loadPosts = (tid, begin, callback) => {
+  console.log("loadPosts")
+  console.log(begin)
+  var page = {
+    size: 100,
+    index: 0
+  }
+  if (begin > 50) {
+    page.size = begin
+    page.index = 1
+  }
+  var token = wx.getStorageSync("LvyeOrgToken")
+  wx.request({
+    url: LvyeOrgURL + "get_post_detail.php",
+    method: "post",
+    header: {
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    data: {
+      token: token,
+      tid: tid,
+      page_size: page.size,
+      page_index: page.index,
+    },
+    success: function(resp) {
+      console.log(resp)
+      let posts = resp.data.data.post_list
+      if (posts) {
+        console.log(posts)
+        if (page.index == 0) { // 只取一部分
+          posts = posts.slice(begin, posts.length);
+        }
+        if (callback) {
+          callback(posts)
+        }
       }
     }
   })
@@ -787,6 +841,8 @@ module.exports = {
   postMessage: postMessage, // 跟帖
   add2Waitings: add2Waitings, // 往waiting中增加一条信息
   postWaitings: postWaitings, // 把正在等待发布的信息发布出去
+
+  loadPosts: loadPosts, // 从帖子中读取跟帖
 
   // 处理错误信息
   getError: getError,

@@ -26,12 +26,16 @@ VantComponent({
     currentIndex: 0
   },
   created: function created() {
+    var _this = this;
+
     var _this$data = this.data,
         defaultIndex = _this$data.defaultIndex,
         initialOptions = _this$data.initialOptions;
     this.set({
       currentIndex: defaultIndex,
       options: initialOptions
+    }, function () {
+      _this.setIndex(defaultIndex);
     });
   },
   computed: {
@@ -102,17 +106,23 @@ VantComponent({
       return isObj(option) && data.valueKey in option ? option[data.valueKey] : option;
     },
     setIndex: function setIndex(index, userAction) {
+      var _this2 = this;
+
       var data = this.data;
       index = this.adjustIndex(index) || 0;
-      this.set({
-        offset: -index * data.itemHeight
-      });
+      var offset = -index * data.itemHeight;
 
       if (index !== data.currentIndex) {
-        this.set({
+        return this.set({
+          offset: offset,
           currentIndex: index
+        }).then(function () {
+          userAction && _this2.$emit('change', index);
         });
-        userAction && this.$emit('change', index);
+      } else {
+        return this.set({
+          offset: offset
+        });
       }
     },
     setValue: function setValue(value) {
@@ -123,6 +133,8 @@ VantComponent({
           return this.setIndex(i);
         }
       }
+
+      return Promise.resolve();
     },
     getValue: function getValue() {
       var data = this.data;

@@ -5,7 +5,7 @@
     <van-button wx:if="{{index>0}}" plain size="small" type="primary" bind:click="onPopup{{index}}">审核</van-button>
   </van-cell>
 </van-panel>
- 
+  
 <!--留言询问对话框-->
 <van-dialog use-slot async-close show="{{chatDlg.show}}" show-cancel-button  bind:close="closeChatDlg" bind:confirm="confirmChatDlg" title="留言询问" confirmButtonText="发送留言" cancelButtonText="取消">
   <van-panel title="请选择留言询问内容">
@@ -50,3 +50,17 @@
     </van-col>
   </van-row>
 </van-popup>
+
+<!--领队编辑附加队员-->
+<van-switch-cell title="开启附加队员" wx:if="{{addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
+<block wx:if="{{openAdd || addMembers.length>0}}">
+  <van-panel title="附加队员" desc="领队可增删非小程序报名队员">
+    <van-field wx:for="{{addMembers}}" wx:key="*this" value="{{item}}" readonly use-button-slot>
+      <van-button slot="button" plain size="small" type="warning" bind:click="delAddMembers{{index}}">删除</van-button>
+    </van-field>
+  </van-panel>
+
+  <van-field label="队员信息" placeholder="请输入要增加的队员信息" value="{{addMember}}" clearable use-button-slot icon="arrow-left" bind:click-icon="copyAddMember">
+    <van-button slot="button" disabled="{{!addMember}}" plain size="small" type="primary" bind:click="addOneMember">增加</van-button>
+  </van-field>
+</block>

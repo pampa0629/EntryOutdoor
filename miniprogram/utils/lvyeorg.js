@@ -585,11 +585,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
               })
             })
           }
-          dbOutdoors.doc(outdoorid).update({
-            data: { // 这里要更新Outdoors表
-              websites: data.websites,
-            }
-          })
+          cloudfun.updateOutdoorWebsites(outdoorid, data.websites)
         }
       })
     })

@@ -530,6 +530,16 @@ const getChatStatus=(personid, nickName, chat, callback)=>{
   }
 }
 
+const buildChatMessage=(msg)=>{
+  var message = {}
+  //  { who: "", msg: "", personid:"", self: false},
+  message.who = app.globalData.userInfo.nickName
+  message.personid = app.globalData.personid
+  message.msg = msg
+  message.self = true // 肯定是自己了
+  return message
+}
+
 module.exports = {
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
@@ -545,4 +555,5 @@ module.exports = {
   removeOcuppy: removeOcuppy, // 清退占坑队员
 
   getChatStatus: getChatStatus, // 判断留言的状态：self、new等
+  buildChatMessage: buildChatMessage, // 构建一条留言
 }

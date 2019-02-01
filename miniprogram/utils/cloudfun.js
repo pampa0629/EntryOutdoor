@@ -5,7 +5,22 @@ const db = wx.cloud.database()
 const dbPersons = db.collection('Persons')
 const dbOutdoors = db.collection('Outdoors')
 const _ = db.command
- 
+  
+const updateOutdoor=(outdoorid, data, callback)=>{
+  console.log("updateOutdoor")
+  wx.cloud.callFunction({
+    name: 'updateOutdoor', // 云函数名
+    data: {
+      outdoorid: outdoorid,
+      data: data
+    }
+  }).then(res=>{
+    if(callback) {
+      callback(res)
+    }
+  })
+}
+
 // 更新Outdoors表中，chat.seen.personid的值
 const updateOutdoorChatSeen = (outdoorid, personid, count) => {
   console.log("updateOutdoorChatSeen")
@@ -139,6 +154,25 @@ const addOutdoorNoticeCount=(outdoorid, count)=>{
       item: "limits.wxnotice.alreadyCount",
       command: "inc",
       value: count
+    }
+  })
+}
+
+const updateOutdoorStatus = (outdoorid, status, callback) => {
+  console.log("updateOutdoorStatus")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "status",
+      command: "",
+      value: status
+    }
+  }).then(res=>{
+    if(callback) {
+      callback(res)
     }
   })
 }
@@ -287,6 +321,7 @@ const getServerDate=(callback)=>{
 
 module.exports = {
   // Outdoors
+  updateOutdoor: updateOutdoor, 
   updateOutdoorChat: updateOutdoorChat,
   updateOutdoorChatSeen: updateOutdoorChatSeen,
   updateOutdoorChatQrcode: updateOutdoorChatQrcode,
@@ -296,14 +331,14 @@ module.exports = {
   pushOutdoorMember: pushOutdoorMember,
   updateOutdoorAddMembers: updateOutdoorAddMembers, // 更新附加队员
   
+  updateOutdoorStatus: updateOutdoorStatus,
   addOutdoorNoticeCount: addOutdoorNoticeCount,
 
+  updateOutdoorWebsites: updateOutdoorWebsites,
   pushOutdoorLvyeWaiting: pushOutdoorLvyeWaiting,
   shiftOutdoorLvyeWaitings: shiftOutdoorLvyeWaitings,
 
   updateOutdoorFormids: updateOutdoorFormids,
-
-  updateOutdoorWebsites: updateOutdoorWebsites,
 
   // Persons
   unshiftPersonCared:unshiftPersonCared,

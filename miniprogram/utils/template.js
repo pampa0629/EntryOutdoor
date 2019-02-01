@@ -49,30 +49,6 @@ const savePersonFormid = (personid, formid, callback) => {
   }
 }
 
-// 把获得的formid给指定活动存起来，还有过期时间
-/*const saveOutdoorFormid = (outdoorid, formid) => {
-  console.log(formid)
-  var result = buildOneFormid(formid)
-  if (result) { // 模拟的不要记录
-    dbOutdoors.doc(outdoorid).update({
-      data: {
-        "limits.wxnotice.formids": _.push(result)
-      }
-    })
-  }
-}*/
-
-/*
-const loadOutdoorFormids = (outdoorid, callback) => {
-  dbOutdoors.doc(outdoorid).get().then(res => {
-    if (callback && res.data.limits && res.data.limits.wxnotice) {
-      console.log("loadOutdoorFormids OK")
-      console.log(res.data.limits.wxnotice.formids)
-      callback(res.data.limits.wxnotice.formids)
-    }
-  })
-}*/
-
 // 根据personid找到openid
 const personid2openid = (personid, callback) => {
   dbPersons.doc(personid).get().then(res => {

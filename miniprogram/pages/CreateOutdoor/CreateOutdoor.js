@@ -5,7 +5,7 @@ const qrcode = require('../../utils/qrcode.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
- 
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -52,6 +52,7 @@ Page({
     meets: [], //集合点，可加多个
     traffic: null, // 交通方式
     members: [], // 已报名成员（含领队）
+    myself:{}, // 自己的报名信息（作为领队组成员）
     leader: { // 领队的信息也要记录起来
       personid: null,
       userInfo: null,
@@ -88,6 +89,13 @@ Page({
     chatStatus:"", // 留言状态：new，有新留言；self，有@我的留言，
     chatChange:false, 
     interval:null, // 计时器
+    editTitle:false, // 开启基础信息编辑
+  },
+  
+  openEditTitle(e){
+    this.setData({
+      editTitle: e.detail,
+    })
   },
 
   // 设置临时修改项目全部为false或true，包括整体是否修改标记
@@ -144,7 +152,7 @@ Page({
             status: res.data.status,
             // route: res.data.route, // 做兼容性处理了
             meets: res.data.meets,
-            leader: res.data.members[0],
+            leader: res.data.members[0], 
             members: res.data.members,
           })
           // 读取之前活动数据时的兼容性处理
@@ -152,8 +160,8 @@ Page({
           self.loadDisclaimer(); // 还需要单独处理“免责条款”的内容
 
           // 这里要判断从本地缓存中读取到的outdoorid是自己创建的，还是用来当模板的
-          // 依据是 从数据库读取的leader是否为自己
-          if (self.data.leader.personid != app.globalData.personid) {
+          // 依据是 从数据库读取的myself是否为自己  
+          if (self.data.myself.personid != app.globalData.personid) {
             self.newOutdoor(null); //不是自己，就等于要新建活动
           }
           self.createAutoInfo();
@@ -183,9 +191,10 @@ Page({
   // 把几个关键设置为默认值即可，当新创建活动或者模板创建活动后调用
   setDefault: function() {
     const self = this
-    // leader要设置为当前用户
+    // leader要设置为当前用户  
     self.data.leader.userInfo = app.globalData.userInfo;
     self.data.leader.personid = app.globalData.personid;
+    self.data.myself = self.data.leader // 新创建活动，自己就是领队
     self.setData({
       canPublish: false, // 判断是否可发布
       hasModified: false, // 是否被修改了
@@ -205,7 +214,7 @@ Page({
   },
 
   onShow: function() {
-    const self = this;
+    const self = this; 
     var outdoorid = util.loadOutdoorID()
 
     if (outdoorid != null && outdoorid != self.data.memOutdoorid) {
@@ -290,6 +299,15 @@ Page({
         })
       }) 
     }
+
+    // myself 得到自己的报名信息
+    res.data.members.forEach((item, index)=>{
+      if (item.personid == app.globalData.personid) {
+        self.setData({
+          myself: item
+        })
+      }
+    })
     
     // next 
   },
@@ -320,7 +338,7 @@ Page({
   createTitle: function() {
     console.log("createTitle")
     const self = this
-    self.setData({
+    self.setData({  
       "title.whole": outdoor.createTitle(self.data.title, self.data.leader.userInfo.nickName),
     })
   },
@@ -461,13 +479,11 @@ Page({
     })
   },
 
-  // 把取消的事情通告队员
+  // 把取消的事情通告所有人，包括自己
   postCancel2Template() {
     const self = this
     self.data.members.forEach((item, index) => {
-      if (index > 0) { // 跳过领队
-        template.sendCancelMsg2Member(item.personid, self.data.title.whole, self.data.outdoorid, self.data.leader.userInfo.nickName, self.data.cancelDlg.reason) 
-      }
+        template.sendCancelMsg2Member(item.personid, self.data.title.whole, self.data.outdoorid, self.data.myself.userInfo.nickName, self.data.cancelDlg.reason) 
     })
   },
 
@@ -498,11 +514,10 @@ Page({
           if (!wx.getStorageSync(key) ) {
             console.log(key)
             wx.setStorageSync(key, true)
-            // 给所有队员发活动成行通知
-            for(var i=1; i<self.data.members.length; i++){
-              const member = self.data.members[i]
-              template.sendConfirmMsg2Member(member.personid, self.data.outdoorid, self.data.title.whole, self.data.members.length, self.data.leader.userInfo.nickName)
-            }
+            // 给所有队员发活动成行通知，除了自己
+            self.data.members.forEach((item, index)=>{
+              template.sendConfirmMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole, self.data.members.length, self.data.myself.userInfo.nickName) 
+            })
           }
         } else if (res.cancel) {
           console.log('用户点击取消')
@@ -576,11 +591,7 @@ Page({
     self.setData({
       status: status
     })
-    dbOutdoors.doc(self.data.outdoorid).update({
-      data: {
-        status: self.data.status,
-      }
-    }).then(res => {
+    cloudfun.updateOutdoorStatus(self.data.outdoorid, self.data.status, res=>{
       // 同步到网站
       self.data.modifys.status = true // 标记一下：活动状态改变了
       self.keepSameWithWebsites()
@@ -595,24 +606,31 @@ Page({
     dbOutdoors.doc(self.data.outdoorid).get().then(res=>{
       self.setData({
         members:res.data.members,
-        ["members["+ 0 +"]"]: self.data.leader // 领队信息也要更新一下
       })
-      dbOutdoors.doc(self.data.outdoorid).update({
-        data: {
-          title: self.data.title,
-          route: _.set(self.data.route),
-          meets: self.data.meets,
-          traffic: self.data.traffic,
-          status: self.data.status,
-          members: self.data.members,
-          brief: self.data.brief,
-          limits: self.data.limits,
+      // 找到自己的index，并更新信息
+      self.data.members.forEach((item, index)=>{
+        if(item.personid == self.data.myself.personid){
+          self.setData({
+            ["members[" + index + "]"]: self.data.myself // 自己的信息更新一下
+          })
         }
-      }).then(res => {
+      })
+      // dbOutdoors.doc(self.data.outdoorid).update({ 
+      //   data: {
+      //     title: self.data.title,
+      //     route: _.set(self.data.route),
+      //     meets: self.data.meets,
+      //     traffic: self.data.traffic,
+      //     status: self.data.status,
+      //     members: self.data.members,
+      //     brief: self.data.brief,
+      //     limits: self.data.limits,
+      //   }
+      cloudfun.updateOutdoor(self.data.outdoorid, self.data, res=>{
         self.afterSaveOutdoor(isPublishing);
         // 这里还应该把 Person表中对应的MyOutdoors中的title更新一下
         self.updatePersonMyoutdoors();
-      }).catch(console.error)
+      })
     })
   },
 
@@ -693,9 +711,7 @@ Page({
     } else if (self.data.modifys.title || self.data.modifys.meets){ 
       // 非第一次发布，如果包括活动重要信息修改，则要给全体队员发送消息提示
       self.data.members.forEach((item, index) => {
-        if (index > 0) { // 跳过领队
-          template.sendModifyMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole,  self.data.leader.userInfo.nickName, self.data.modifys)
-        }
+        template.sendModifyMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole,  self.data.myself.userInfo.nickName, self.data.modifys) 
       })
     }
     // 这里处理和ORG网站同步的事情
@@ -709,7 +725,6 @@ Page({
     console.log(self.data.websites)
     if (self.data.websites && self.data.websites.lvyeorg 
       && (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
-      && (self.data.leader.personid == app.globalData.personid) // 并且还是自己的活动
       && self.data.outdoorid // 活动id必须有了
     ) {
       this.keepSameWithLvyeorg() // 同步到org上
@@ -888,7 +903,7 @@ Page({
   clickMeets: function(e) {
     console.log(e)
     this.setData({
-      "leader.entryInfo.meetsIndex": parseInt(e.target.dataset.name),
+      "myself.entryInfo.meetsIndex": parseInt(e.target.dataset.name),  
       hasModified: true,
     })
   },
@@ -897,7 +912,7 @@ Page({
   changeMeets: function(e) {
     console.log(e)
     this.setData({
-      "leader.entryInfo.meetsIndex": parseInt(e.detail),
+      "myself.entryInfo.meetsIndex": parseInt(e.detail),  
       hasModified: true,
     })
   },

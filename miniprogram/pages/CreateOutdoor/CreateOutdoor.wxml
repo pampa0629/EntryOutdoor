@@ -2,7 +2,7 @@
 <van-dialog use-slot async-close show="{{cancelDlg.show}}" show-cancel-button  bind:close="closeCancelDlg" bind:confirm="confirmCancelDlg" title="是否确认取消活动" confirmButtonText="确认取消" cancelButtonText="我再想想">
   <van-panel title="请选择活动取消主要原因">
     <van-radio-group value="{{cancelDlg.reason}}" bind:change="changeCancelReason">
-      <van-radio  wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio>
+      <van-radio  wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio> 
     </van-radio-group>
   </van-panel>
 </van-dialog> 
@@ -83,7 +83,8 @@
 
 <!--活动标题信息-->
 <van-panel title="{{title.whole}}" desc="自动生成">
-  <block wx:if="{{status=='拟定中'||status=='已发布'}}">
+  <van-switch-cell title="开启活动基本信息编辑" wx:if="{{status=='已发布'||status=='已成行'}}" checked="{{editTitle}}" bind:change="openEditTitle"/>
+  <block wx:if="{{status=='拟定中'||editTitle}}">
     <van-tag plain type="danger" wx:if="{{status=='已发布'}}">活动基本信息请勿轻易修改，修改后将自动通知全体队员重新考虑是否能继续参加！</van-tag>
     <van-field label="活动地点" required value="{{title.place}}" placeholder="请输入活动地点" bind:change="bindPlace" />
     <picker mode="date" value="{{title.date}}" start="{{startDate}}" end="{{endDate}}" bindchange="bindDateChange">
@@ -111,7 +112,7 @@
 <!--集合地点-->
 <van-panel title="集合地点">
   <van-cell title="必须选择集合地点" value="点击编辑集合地点" required is-link url="EditMeets" />
-  <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{leader.entryInfo.meetsIndex}}" bind:change="changeMeets">
+  <van-radio-group wx:for="{{meets}}" wx:key="place" value="{{myself.entryInfo.meetsIndex}}" bind:change="changeMeets">
     <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="80%" border="{{index<meets.length-1}}">
       <van-radio name="{{index}}" />
     </van-cell>

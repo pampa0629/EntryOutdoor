@@ -137,6 +137,7 @@ Page({
         }
       }
       if (addMessage) {
+        console.log(self.data.chat.messages)
         self.data.chat.messages.push(addMessage)
       }
       self.setData({
@@ -191,21 +192,11 @@ Page({
     })
   },
 
-  buildMessage(msg) {
-    var message = {}
-    //  { who: "", msg: "", personid:"", self: false},
-    message.who = app.globalData.userInfo.nickName
-    message.personid = app.globalData.personid
-    message.msg = msg
-    message.self = true // 肯定是自己了
-    return message
-  },
-
   submitChat() {
     console.log("submitChat")
     const self = this
     if (self.data.message.msg) {
-      var message = self.buildMessage(self.data.message.msg)
+      var message = outdoor.buildChatMessage(self.data.message.msg)
       console.log(self.data.message)
       // load
       self.flushChats(message, null)

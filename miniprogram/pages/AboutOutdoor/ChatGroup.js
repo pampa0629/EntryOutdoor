@@ -1,7 +1,8 @@
 const cloudfun = require('../../utils/cloudfun.js')
 const util = require('../../utils/util.js')
-const app = getApp()
+const outdoor = require('../../utils/outdoor.js')
 
+const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -25,11 +26,24 @@ Page({
         isLeader: true,
       })
     }
+    self.loadChat(null)
+  },
+
+  loadChat(callback) {
+    const self = this
     dbOutdoors.doc(self.data.outdoorid).get().then(res => {
       if (res.data.chat) {
         self.setData({
           chat: res.data.chat,
         })
+      }
+      if (!self.data.chat.messages) {
+        self.data.chat.messages = []
+      }
+      console.log("self.data.chat.messages")
+      console.log(self.data.chat.messages)
+      if(callback) {
+        callback(self.data.chat)
       }
     })
   },
@@ -51,27 +65,22 @@ Page({
             cloudPath: util.buildChatQrcode(self.data.outdoorid),
             filePath: item.path, // 小程序临时文件路径
           }).then(resUpload => {
-            dbOutdoors.doc(self.data.outdoorid).get().then(res => {
-              if (res.data.chat) {
-                self.setData({
-                  chat: res.data.chat,
-                })
-              }
+            self.loadChat(none=>{
               var oldpath = self.data.chat.qrcode
               self.setData({
                 "chat.qrcode": resUpload.fileID,
               })
-              self.data.chat.messages.push({
-                who: app.globalData.userInfo.nickName,
-                msg: "@所有人 领队设置了活动专用微信群，请在留言页面右上角点击查看并扫描入群。谢谢！",
-                personid: app.globalData.personid
-              })
-              if (oldpath) {
+              // 写入qrcode到数据库中
+              cloudfun.updateOutdoorChatQrcode(self.data.outdoorid, self.data.chat.qrcode)
+              // 构建留言信息
+              var message = outdoor.buildChatMessage("@所有人 领队设置了活动专用微信群，请在留言页面右上角点击查看并扫码入群。谢谢！")
+              cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
+              if (oldpath) { // 删除原来的二维码文件
                 wx.cloud.deleteFile({
                   fileList: [oldpath]
                 })
               }
-              cloudfun.updateOutdoorChat(self.data.outdoorid, self.data.chat)
+              
             })
           })
         })

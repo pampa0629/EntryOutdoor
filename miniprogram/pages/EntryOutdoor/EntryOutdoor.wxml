@@ -2,7 +2,7 @@
 <van-popup show="{{ showPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closePopup">
   <van-row>
     <van-col span="20" offset="2">
-      <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
+      <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button> 
     </van-col>
   </van-row>
   <van-row>
@@ -18,7 +18,7 @@
 <!--图标按钮-->
 <van-row>
   <!--分享-->
-  <van-col span="2" offset="6">
+  <van-col span="2" offset="3">
     <view wx:if="{{status!='已取消'}}" style="flex-direction:column">
       <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
       <view class="icon_tip">分享</view>
@@ -38,7 +38,7 @@
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon name="contact" size="24px" color="#1aad19" bind:click="clickLeader"></van-icon>
-      <view class="icon_tip">领队</view>
+      <view class="icon_tip">订阅</view>
     </view>
   </van-col>
   <!--留言-->
@@ -51,7 +51,13 @@
       <view class="icon_tip">留言</view>
     </view>
   </van-col>
-  <!--打印详情与回到首页-->
+  <!--领队、打印详情与回到首页-->
+  <van-col wx:if="{{entryInfo.status=='领队组'}}" span="2" offset="1">
+    <view style="flex-direction:column">
+      <van-icon name="flag-o" size="24px" color="#1aad19" bind:click="editOutdoor"></van-icon>
+      <view class="icon_tip">领队</view>
+    </view>
+  </van-col>
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon name="description" size="24px" color="#1aad19" bind:click="printOutdoor"></van-icon>
@@ -250,7 +256,7 @@
     </form>
   </block>
   <!--退出-->
-  <block wx:if="{{(entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中') && remains.entry.time>=0}}">
+  <block wx:if="{{(entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中'||entryInfo.status=='领队组') && remains.entry.time>=0}}">
     <view class="fix" style="left:540rpx">
       <button style="color:#F65959;background-color:#ffffff" plain size="large" bindtap='tapQuit'>退出</button>
     </view>

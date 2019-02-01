@@ -48,7 +48,7 @@ exports.main = async (event, context) => {
         }
       })
     } else {
-      console.error("缺对该命令的代码实现：" + event.command)
+      console.error("缺少对该命令的代码实现：" + event.command)
     }
     
   } catch (e) {

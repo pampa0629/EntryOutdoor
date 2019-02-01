@@ -5,7 +5,7 @@ const lvyeorg = require('../../utils/lvyeorg.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
-
+ 
 wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -586,6 +586,14 @@ Page({
           chatStatus: "",
         })
       }
+    })
+  },
+
+  editOutdoor(){
+    const self = this
+    util.saveOutdoorID(self.data.outdoorid)
+    wx.switchTab({
+      url: "../CreateOutdoor/CreateOutdoor" 
     })
   },
 

@@ -1,11 +1,3 @@
-<!--审核队员-->
-<van-panel title="审核队员报名">
-  <van-cell wx:if="{{false}}" title="昵称/性别/电话/认路/状态" value="审核结果"/>
-  <van-cell wx:for="{{members}}" title-width="80%" wx:key="item.personid" title="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}">
-    <van-button wx:if="{{index>0}}" plain size="small" type="primary" bind:click="onPopup{{index}}">审核</van-button>
-  </van-cell>
-</van-panel>
-  
 <!--留言询问对话框-->
 <van-dialog use-slot async-close show="{{chatDlg.show}}" show-cancel-button  bind:close="closeChatDlg" bind:confirm="confirmChatDlg" title="留言询问" confirmButtonText="发送留言" cancelButtonText="取消">
   <van-panel title="请选择留言询问内容">
@@ -45,11 +37,25 @@
     <van-col span="6" offset="1" >
         <van-button plain size="large" type="danger" bind:click="onReject">驳回报名</van-button>
     </van-col>
-    <van-col span="6" offset="8">
+    <van-col span="6" offset="1">
+      <block wx:if="{{isLeader}}">
+        <van-button wx:if="{{members[index].status!='领队组'}}" disabled="{{members[index].status!='报名中'}}" plain size="large" bind:click="onLeaderGroup">设为领队组</van-button>
+        <van-button wx:else plain size="large" bind:click="onLeaderGroup">取消领队组</van-button>
+      </block>
+    </van-col>
+    <van-col span="6" offset="1">
       <van-button plain size="large" bind:click="closePopup">取消</van-button>
     </van-col>
   </van-row>
 </van-popup>
+
+<!--审核队员-->
+<van-panel title="审核队员报名">
+  <van-cell wx:if="{{false}}" title="昵称/性别/电话/认路/状态" value="审核结果"/>
+  <van-cell wx:for="{{members}}" title-width="80%" wx:key="item.personid" title="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}">
+    <van-button wx:if="{{index>0}}" plain size="small" type="primary" bind:click="onPopup{{index}}">审核</van-button>
+  </van-cell> 
+</van-panel> 
 
 <!--领队编辑附加队员-->
 <van-switch-cell title="开启附加队员" wx:if="{{addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>

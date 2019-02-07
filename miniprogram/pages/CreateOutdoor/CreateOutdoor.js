@@ -19,7 +19,7 @@ Page({
     canPublish: false, // 判断是否可发布，必须定义关键的几项：地点、日期、集合时间地点等,不保存
     hasModified: false, // 是否被修改了，可以保存起来
     modifys: { // 到底更新了哪些条目，这里做一个临时记录
-      title:false, // 主题类消息
+      title: false, // 主题类消息
       brief: false, // 文字介绍，图片暂时不管
       meets: false, // 集合地点
       traffic: false, // 交通方式
@@ -48,11 +48,13 @@ Page({
     startDate: util.formatDate(new Date()), // 起始日期，格式化为字符串；只能从今天开始
     endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，格式化为字符串，不保存；不能发半年之后的活动
 
-    route: { wayPoints:[]}, // 活动路线，包括途经点和轨迹文件
+    route: {
+      wayPoints: []
+    }, // 活动路线，包括途经点和轨迹文件
     meets: [], //集合点，可加多个
     traffic: null, // 交通方式
     members: [], // 已报名成员（含领队）
-    myself:{}, // 自己的报名信息（作为领队组成员）
+    myself: {}, // 自己的报名信息（作为领队组成员）
     leader: { // 领队的信息也要记录起来
       personid: null,
       userInfo: null,
@@ -73,7 +75,7 @@ Page({
 
     // 同步到网站的信息
     websites: {
-      lvyeorg: { 
+      lvyeorg: {
         //fid: null, // 版块id
         tid: null, // 帖子id
         keepSame: false, // 是否保持同步
@@ -84,15 +86,15 @@ Page({
     cancelDlg: { // 活动取消对话框
       show: false,
       reason: "",
-      Reasons: ["人数不够", "空气污染太重", "天气状况不适合户外活动", "领队临时有事","其他原因"],
+      Reasons: ["人数不够", "空气污染太重", "天气状况不适合户外活动", "领队临时有事", "其他原因"],
     },
-    chatStatus:"", // 留言状态：new，有新留言；self，有@我的留言，
-    chatChange:false, 
-    interval:null, // 计时器
-    editTitle:false, // 开启基础信息编辑
+    chatStatus: "", // 留言状态：new，有新留言；self，有@我的留言，
+    chatChange: false,
+    interval: null, // 计时器
+    editTitle: false, // 开启基础信息编辑
   },
-  
-  openEditTitle(e){
+
+  openEditTitle(e) {
     this.setData({
       editTitle: e.detail,
     })
@@ -119,22 +121,16 @@ Page({
   },
 
   onLoad: function() {
-    if (!app.globalData.hasUserInfo) { // 判断是否登录先
-      wx.showModal({
-        title: '发起活动需先登录',
-        content: '小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录；然后再回来创建活动',
-        showCancel: false,
-        confirmText: "知道了",
-        complete: function(res) {
-          wx.switchTab({
-            url: '../MyInfo/MyInfo'
-          })
-        }
-      })
-      return; // 没有登录直接返回
-    } else { // 貌似 onshow中加载即可，这里不需要加载
-    //  this.loadOutdoorInTable(util.loadOutdoorID());
-    }
+    this.checkLogin()
+    wx.showShareMenu({
+      withShareTicket: true
+    })
+  },
+
+  checkLogin() {
+    var title = "发起活动需先登录"
+    var content = "小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录；然后再回来创建活动"
+    return app.checkLogin(title, content)
   },
 
   loadOutdoorInTable: function(outdoorid) {
@@ -152,12 +148,14 @@ Page({
             status: res.data.status,
             // route: res.data.route, // 做兼容性处理了
             meets: res.data.meets,
-            leader: res.data.members[0], 
+            leader: res.data.members[0],
             members: res.data.members,
           })
           // 读取之前活动数据时的兼容性处理
           self.dealCompatibility(res);
           self.loadDisclaimer(); // 还需要单独处理“免责条款”的内容
+          // 加载后就要构建画布生成分享图片文件
+          self.createCanvasFile()
 
           // 这里要判断从本地缓存中读取到的outdoorid是自己创建的，还是用来当模板的
           // 依据是 从数据库读取的myself是否为自己  
@@ -176,7 +174,7 @@ Page({
 
   // 新建活动就是把 outdoor id清空，把关键信息删除
   newOutdoor: function(e) {
-    if (e) { 
+    if (e) {
       console.log(e.detail)
       template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     }
@@ -214,12 +212,13 @@ Page({
   },
 
   onShow: function() {
-    const self = this; 
+    const self = this;
     var outdoorid = util.loadOutdoorID()
-
-    if (outdoorid != null && outdoorid != self.data.memOutdoorid) {
-      // 缓存中有id，且还和内存中加载的outdoorid不一样，则说明要重新加载
-      self.loadOutdoorInTable(outdoorid);
+    if (self.checkLogin()) {
+      if (outdoorid != null && outdoorid != self.data.memOutdoorid) {
+        // 缓存中有id，且还和内存中加载的outdoorid不一样，则说明要重新加载
+        self.loadOutdoorInTable(outdoorid);
+      }
     }
   },
 
@@ -292,23 +291,23 @@ Page({
     self.setChat(res.data.chat)
 
     // 判断处理占坑过期的问题
-    if(outdoor.calcRemainTime(self.data.title.date, res.data.limits.ocuppy,true) < 0) {
+    if (outdoor.calcRemainTime(self.data.title.date, res.data.limits.ocuppy, true) < 0) {
       outdoor.removeOcuppy(self.data.outdoorid, members => {
         self.setData({
           members: members
         })
-      }) 
+      })
     }
 
     // myself 得到自己的报名信息
-    res.data.members.forEach((item, index)=>{
+    res.data.members.forEach((item, index) => {
       if (item.personid == app.globalData.personid) {
         self.setData({
           myself: item
         })
       }
     })
-    
+
     // next 
   },
 
@@ -338,7 +337,7 @@ Page({
   createTitle: function() {
     console.log("createTitle")
     const self = this
-    self.setData({  
+    self.setData({
       "title.whole": outdoor.createTitle(self.data.title, self.data.leader.userInfo.nickName),
     })
   },
@@ -452,7 +451,7 @@ Page({
   confirmCancelDlg(e) {
     console.log(e)
     console.log(this.data.cancelDlg.reason)
-    if(this.data.cancelDlg.reason){
+    if (this.data.cancelDlg.reason) {
       this.updateStatus("已取消")
       // 活动取消，得给所有已报名队员发消息
       this.postCancel2Template()
@@ -466,8 +465,8 @@ Page({
       wx.showModal({
         title: '必须选择',
         content: '取消活动必须选择一个取消原因',
-        confirmText:"知道了",
-        showCancel:false,
+        confirmText: "知道了",
+        showCancel: false,
       })
     }
   },
@@ -483,7 +482,7 @@ Page({
   postCancel2Template() {
     const self = this
     self.data.members.forEach((item, index) => {
-        template.sendCancelMsg2Member(item.personid, self.data.title.whole, self.data.outdoorid, self.data.myself.userInfo.nickName, self.data.cancelDlg.reason) 
+      template.sendCancelMsg2Member(item.personid, self.data.title.whole, self.data.outdoorid, self.data.myself.userInfo.nickName, self.data.cancelDlg.reason)
     })
   },
 
@@ -511,12 +510,12 @@ Page({
           self.updateStatus("已成行")
           // 成行的活动通知，只发一次
           var key = self.data.outdoorid + ".confirmOutdoor"
-          if (!wx.getStorageSync(key) ) {
+          if (!wx.getStorageSync(key)) {
             console.log(key)
             wx.setStorageSync(key, true)
             // 给所有队员发活动成行通知，除了自己
-            self.data.members.forEach((item, index)=>{
-              template.sendConfirmMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole, self.data.members.length, self.data.myself.userInfo.nickName) 
+            self.data.members.forEach((item, index) => {
+              template.sendConfirmMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole, self.data.members.length, self.data.myself.userInfo.nickName)
             })
           }
         } else if (res.cancel) {
@@ -526,7 +525,7 @@ Page({
     })
   },
 
-  stopEntry(){
+  stopEntry() {
     this.updateStatus("报名截止")
   },
 
@@ -556,17 +555,17 @@ Page({
     }
   },
 
-// 给自己的订阅者发消息
+  // 给自己的订阅者发消息
   post2Subscribe() {
     const self = this
-    console.log("outdoorid: "+self.data.outdoorid)
+    console.log("outdoorid: " + self.data.outdoorid)
     dbPersons.doc(app.globalData.personid).get().then(res => {
       for (var key in res.data.subscribers) {
         console.log("key: " + key);
         console.log(res.data.subscribers[key]);
         // 加到cared列表中
         cloudfun.unshiftPersonCared(key, self.data.outdoorid, self.data.title.whole)
-        
+
         // 发微信消息
         if (res.data.subscribers[key].acceptNotice) {
           template.sendCreateMsg2Subscriber(key, self.data.title.whole, self.data.outdoorid, app.globalData.userInfo.phone)
@@ -591,7 +590,7 @@ Page({
     self.setData({
       status: status
     })
-    cloudfun.updateOutdoorStatus(self.data.outdoorid, self.data.status, res=>{
+    cloudfun.updateOutdoorStatus(self.data.outdoorid, self.data.status, res => {
       // 同步到网站
       self.data.modifys.status = true // 标记一下：活动状态改变了
       self.keepSameWithWebsites()
@@ -599,17 +598,17 @@ Page({
   },
 
   // 更新信息
-  updateOutdoorInTable: function (isPublishing) {
+  updateOutdoorInTable: function(isPublishing) {
     const self = this;
     console.log(self.data.route)
     // 必须先刷新一下成员，不然容易覆盖
-    dbOutdoors.doc(self.data.outdoorid).get().then(res=>{
+    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
       self.setData({
-        members:res.data.members,
+        members: res.data.members,
       })
       // 找到自己的index，并更新信息
-      self.data.members.forEach((item, index)=>{
-        if(item.personid == self.data.myself.personid){
+      self.data.members.forEach((item, index) => {
+        if (item.personid == self.data.myself.personid) {
           self.setData({
             ["members[" + index + "]"]: self.data.myself // 自己的信息更新一下
           })
@@ -626,7 +625,7 @@ Page({
       //     brief: self.data.brief,
       //     limits: self.data.limits,
       //   }
-      cloudfun.updateOutdoor(self.data.outdoorid, self.data, res=>{
+      cloudfun.updateOutdoor(self.data.outdoorid, self.data, res => {
         self.afterSaveOutdoor(isPublishing);
         // 这里还应该把 Person表中对应的MyOutdoors中的title更新一下
         self.updatePersonMyoutdoors();
@@ -635,7 +634,7 @@ Page({
   },
 
   // 创建活动信息记录
-  createOutdoorInTable: function (isPublishing) {
+  createOutdoorInTable: function(isPublishing) {
     const self = this;
     // 先把领队的信息从数据库中调出来
     var personid = app.globalData.personid; // util.loadPersonID();
@@ -708,10 +707,10 @@ Page({
     self.copyPics(); // 把照片中不是自己的，拷贝一份给自己用
     if (isPublishing) { // 第一次发布，需要给订阅者发消息
       self.post2Subscribe()
-    } else if (self.data.modifys.title || self.data.modifys.meets){ 
+    } else if (self.data.modifys.title || self.data.modifys.meets) {
       // 非第一次发布，如果包括活动重要信息修改，则要给全体队员发送消息提示
       self.data.members.forEach((item, index) => {
-        template.sendModifyMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole,  self.data.myself.userInfo.nickName, self.data.modifys) 
+        template.sendModifyMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole, self.data.myself.userInfo.nickName, self.data.modifys)
       })
     }
     // 这里处理和ORG网站同步的事情
@@ -719,13 +718,14 @@ Page({
   },
 
   // 判断是否需要与网站同步
-  keepSameWithWebsites: function () {
+  keepSameWithWebsites: function() {
     const self = this
     console.log("keepSameWithWebsites")
     console.log(self.data.websites)
-    if (self.data.websites && self.data.websites.lvyeorg 
-      && (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
-      && self.data.outdoorid // 活动id必须有了
+    if (self.data.websites && self.data.websites.lvyeorg &&
+      (self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) // 设置要同步或已同步过
+      &&
+      self.data.outdoorid // 活动id必须有了
     ) {
       this.keepSameWithLvyeorg() // 同步到org上
     } else { // 不同步也要把修改信息给抹掉
@@ -755,8 +755,8 @@ Page({
     console.log("post2Lvyeorg:function")
     const self = this
     // 没有 tid，则先生成tid；再处理waitings
-    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && (self.data.status == "已发布" || self.data.status == "已成行") ) { // 没有tid，则必须有keepSame，同时还必须是“已发布”或“已成行”状态的活动
-      lvyeorg.addThread(self.data.outdoorid, self.data, app.globalData.lvyeorgInfo.isTesting, tid => {
+    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && (self.data.status == "已发布" || self.data.status == "已成行")) { // 没有tid，则必须有keepSame，同时还必须是“已发布”或“已成行”状态的活动
+      lvyeorg.addThread(self.data.outdoorid, self.data, app.globalData.lvyeorgInfo.isTesting || self.data.limits.isTest, tid => {
         if (tid) {
           self.data.websites.lvyeorg.tid = tid
           lvyeorg.postWaitings(self.data.outdoorid, tid, null)
@@ -773,7 +773,7 @@ Page({
   },
 
   // 保存修改时，在org网站跟帖发布信息
-  postModifys: function () { 
+  postModifys: function() {
     console.log("postModifys:function")
     console.log(this.data.modifys)
     if (this.anyModify(this.data.modifys)) { // 有修改，才有必要跟帖发布
@@ -809,15 +809,15 @@ Page({
     // 导航到 printOutdoor页面
     const self = this;
     wx.navigateTo({
-      url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader="+true
+      url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader=" + true
     })
   },
 
-  chatOutdoor(){
+  chatOutdoor() {
     const self = this;
     wx.navigateTo({
       url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader=" + true,
-      complete (res) {
+      complete(res) {
         self.setData({
           chatStatus: "",
         })
@@ -826,14 +826,14 @@ Page({
   },
 
   // 页面相关事件处理函数--监听用户下拉动作  
-  onPullDownRefresh: function () {
+  onPullDownRefresh: function() {
     console.log("onPullDownRefresh")
     const self = this
     wx.showNavigationBarLoading();
     // 主要就刷新队员和留言信息
-    dbOutdoors.doc(self.data.outdoorid).get().then(res=>{
+    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
       self.setData({
-        members:res.data.members,
+        members: res.data.members,
       })
       self.setChat(res.data.chat)
       wx.hideNavigationBarLoading();
@@ -844,17 +844,17 @@ Page({
   // 判断是否有新留言
   setChat(chat) {
     const self = this
-    outdoor.getChatStatus(app.globalData.personid, app.globalData.userInfo.nickName, chat, status=>{
+    outdoor.getChatStatus(app.globalData.personid, app.globalData.userInfo.nickName, chat, status => {
       self.setData({
         chatStatus: status,
       })
       console.log(self.data.chatStatus)
-      if(self.data.chatStatus == "atme") {
-        self.data.interval = setInterval(function () {
-         this.setData({
+      if (self.data.chatStatus == "atme") {
+        self.data.interval = setInterval(function() {
+          this.setData({
             chatChange: !this.data.chatChange,
           })
-       }.bind(this), 800)
+        }.bind(this), 800)
       } else {
         clearInterval(self.data.interval)
       }
@@ -875,21 +875,37 @@ Page({
     })
   },
 
-  onCancelShare(){
+  onCancelShare() {
     this.setData({
       showPopup: false,
     })
   },
 
+  createCanvasFile() {
+    console.log("createCanvasFile")
+    const self = this
+    self.data.hideCanvas = false
+    const shareCanvas = wx.createCanvasContext('shareCanvas')
+    // todo 分享到朋友圈的图片
+    outdoor.drawShareCanvas(shareCanvas, self.data, shareCanvasFile => {
+      self.setData({
+        shareCanvasFile: shareCanvasFile,
+        hideCanvas: true,
+      })
+    })
+  },
+
   onShareAppMessage: function(options) {
+    console.log(options)
     const self = this;
-    this.closePopup() 
+    this.closePopup()
     // options.from == "menu" &&     // options.type = "tap" from="button"
     if (self.data.outdoorid) { // 数据库里面有，才能分享出去
       return {
         title: self.data.title.whole,
         desc: '分享活动',
-        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.outdoorid
+        imageUrl: self.data.shareCanvasFile,
+        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.outdoorid,
       }
     }
   },
@@ -903,7 +919,7 @@ Page({
   clickMeets: function(e) {
     console.log(e)
     this.setData({
-      "myself.entryInfo.meetsIndex": parseInt(e.target.dataset.name),  
+      "myself.entryInfo.meetsIndex": parseInt(e.target.dataset.name),
       hasModified: true,
     })
   },
@@ -912,7 +928,7 @@ Page({
   changeMeets: function(e) {
     console.log(e)
     this.setData({
-      "myself.entryInfo.meetsIndex": parseInt(e.detail),  
+      "myself.entryInfo.meetsIndex": parseInt(e.detail),
       hasModified: true,
     })
   },
@@ -977,6 +993,6 @@ Page({
         }
       })
     }
-  }, 
+  },
 
 })

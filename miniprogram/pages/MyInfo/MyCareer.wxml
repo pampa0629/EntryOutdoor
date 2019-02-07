@@ -5,7 +5,7 @@
 <van-panel title="户外评测">
   <van-cell wx:if="{{!career.evaluation}}" title="新人户外评测"  value="点击进行户外评测" is-link url="MyEvaluate" border="{{false}}" />
   <van-cell wx:else title="户外评测" label="户外达人指数为：{{career.evaluation.level}}" value="点击再次评测" is-link url="MyEvaluate" border="{{false}}" />
-</van-panel>
+</van-panel>  
 
 <!--最近运动步数-->
 <van-panel title="最高运动步数" desc="最后更新时间：{{career.step.update}}">
@@ -14,6 +14,23 @@
   </van-cell>
   <van-switch-cell title="是否自动更新步数" checked="{{career.step.autoUpdate}}" bind:change="changeAutoUpdate"/>
 </van-panel>
+
+<!--活动统计-->
+<van-panel title="活动统计" use-footer-slot>
+  <van-radio-group wx:for="{{StatisticsModes}}" wx:key="item.mode" value="{{career.statistics.mode}}" bind:change="changeStatMode">
+    <van-radio name="{{item.mode}}">{{item.disc}}：{{career.statistics.mode==item.mode?career.statistics.option:""}}</van-radio>
+  </van-radio-group>
+  <text style="font-size:12pt">{{career.statistics.result.disc}}</text>
+  <view slot="footer" class="footer">
+    <van-button plain type="primary" size="normal" bind:click="clickStatistics">统计</van-button>
+    <van-button plain size="normal" disabled="{{!career.statistics.result.disc}}" bind:click="clickCopyResult">复制结果</van-button>
+  </view>
+</van-panel>
+
+<!--弹出统计模式选项-->
+<van-popup show="{{ showOptions }}" bind:close="closePopup" position="bottom">
+  <van-picker show-toolbar columns="{{ StatisticsOptions }}" bind:cancel="cancelOptions" bind:confirm="confirmOptions"/>
+</van-popup>
 
 <!--Top N 活动-->
 <van-panel title="我的最佳战绩（Top 3）">

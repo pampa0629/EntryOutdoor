@@ -6,7 +6,7 @@
   <van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">
       <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender">
         <van-radio name="{{item}}"/>
-      </van-cell>
+      </van-cell> 
   </van-radio-group> 
 
   <van-field value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="请输入手机号码（真实有效方便领队联系）" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" />

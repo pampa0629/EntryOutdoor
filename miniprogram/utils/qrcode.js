@@ -28,7 +28,7 @@ const save2Album = (outdoorid, title, isLeader) => {
         fail(err) {
           console.log(err)
         },
-        success(res) {
+        success(res) { 
           console.log(res)
           console.log(isLeader)
           // 把活动信息拷贝到剪贴板中

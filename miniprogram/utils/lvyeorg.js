@@ -271,7 +271,7 @@ const chooseForum = (title, isTesting) => {
 
   var fid = 67 // 默认户外
   if (isTesting) {
-    fid = 93 // 技术小组版 todo 回头记得注释起来
+    fid = 93 // 技术小组版 
   } else {
     var fid = 67 // 默认户外
     var day1 = new Date(title.date); // 活动日期
@@ -285,7 +285,12 @@ const chooseForum = (title, isTesting) => {
       fid = 67
     }
   }
-  return fid
+  return fid 
+}
+
+// 判断版面id是否为测试类活动
+const isTestForum=(fid)=>{
+  return fid == 93?true:false
 }
 
 const NL = "\r\n"
@@ -503,7 +508,7 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
 
 // 发布活动
 const addThread = function(outdoorid, data, isTesting, callback) {
-  console.log("addThread fun")
+  console.log("addThread fun") 
   var temp = []
   uploadImages(outdoorid, data.brief.pics, temp, resAids => {
     console.log("resAids is:")
@@ -551,7 +556,8 @@ const addThread = function(outdoorid, data, isTesting, callback) {
             wx.showToast({
               title: 'ORG发帖成功',
             });
-            data.websites.lvyeorg.tid = resp.data.data.tid
+            data.websites.lvyeorg.tid = resp.data.data.tid // 帖子id 
+            data.websites.lvyeorg.fid = fid // 版面id 也记录下来
             if (callback) {
               callback(resp.data.data.tid)
             }
@@ -839,6 +845,8 @@ module.exports = {
   postWaitings: postWaitings, // 把正在等待发布的信息发布出去
 
   loadPosts: loadPosts, // 从帖子中读取跟帖
+
+  isTestForum: isTestForum, // 判断fid是否属于测试帖
 
   // 处理错误信息
   getError: getError,

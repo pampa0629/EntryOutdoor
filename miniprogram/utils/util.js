@@ -308,7 +308,7 @@ const authorize = (which, message, callback) => {
 
 // 得到唯一的户外昵称
 const getUniqueNickname = (nickName, callback) => {
-  dbPersons.where({
+  dbPersons.where({ 
     "userInfo.nickName": nickName
   }).get().then(res => {
     console.log(res.data)
@@ -410,8 +410,8 @@ module.exports = {
   myParseInt: myParseInt,
   // 统一授权入口
   authorize: authorize,
-  // 得到唯一的户外昵称
-  getUniqueNickname: getUniqueNickname,
+  // 得到唯一的户外昵称 放到person.js中了
+  // getUniqueNickname: getUniqueNickname,
   // 得到最近步数的top值
   stepsTopNs: stepsTopNs,
 }

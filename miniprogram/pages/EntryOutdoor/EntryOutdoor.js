@@ -5,7 +5,8 @@ const lvyeorg = require('../../utils/lvyeorg.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
- 
+const person = require('../../utils/person.js')
+  
 wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -51,9 +52,9 @@ Page({
     status: null, //活动状态 
     members: null, // 队员报名信息，包括:personid,基本信息（userInfo)内容从Persons数据库中读取; 报名信息（entryInfo），报名时填写
     // 还是把userinfo和outdoors信息都保存下来方便使用
-    userInfo: null,
-    entriedOutdoors: null, // 报名的id列表
-    caredOutdoors: null, // 关注的活动id列表
+    userInfo: {},
+    entriedOutdoors: [], // 报名的id列表
+    caredOutdoors: [], // 关注的活动id列表
     hasCared: false, // 该活动是否已经加了关注
 
     chatStatus: "", // 留言状态：new，有新留言；self，有@我的留言，
@@ -61,6 +62,8 @@ Page({
     interval: null, // 计时器
 
     showPopup: false, // 分享弹出菜单
+    entryError:"", // 报名时没有选择必要内容的错误提示
+    Genders: ["GG", "MM"]
   },
 
   onLoad: function(options) {
@@ -85,41 +88,34 @@ Page({
     } else {
       this.checkLogin(outdoorid);
     }
+    wx.showShareMenu({
+      withShareTicket: true
+    })
   },
 
   // 处理是否登录的问题
   checkLogin: function(outdoorid) {
+    console.log("checkLogin, outdoorid is:" + outdoorid)
     if (app.globalData.hasUserInfo && app.globalData.userInfo != null) {
       this.setData({
         userInfo: app.globalData.userInfo,
       });
-      this.loadInfo(outdoorid); // 这里调用 personid相关的代码
+      this.loadOutdoor(outdoorid); 
     } else {
       app.personidCallback = (personid, userInfo) => {
         if (personid != null) {
           this.setData({
             userInfo: userInfo,
           });
-          this.loadInfo(outdoorid); // 这里调用 personid相关的代码
-        } else {
-          wx.showModal({
-            title: '报名需先登录',
-            content: '小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录；然后再点击“回到最近的活动”按钮回到报名页面',
-            showCancel: false,
-            confirmText: "知道了",
-            success: function(res) {
-              wx.switchTab({
-                url: '../MyInfo/MyInfo'
-              })
-            }
-          })
         }
+        this.loadOutdoor(outdoorid); 
       }
     }
   },
 
   // 从数据库中装载信息
-  loadInfo: function(outdoorid) {
+  loadOutdoor: function(outdoorid) {
+    console.log("loadOutdoor, id is: "+outdoorid)
     const self = this;
     // 这里得到活动id，读取数据库，加载各类信息
     self.data.outdoorid = outdoorid
@@ -134,6 +130,8 @@ Page({
         })
         self.dealOutdoorCompatibility(res) // 处理Outdoors表中数据的兼容性
         self.checkOcuppyLimitDate() // 处理占坑截止时间过了得退坑的问题
+        // 加载后就要构建画布生成分享图片文件
+        self.createCanvasFile()
 
         if (res.data.meets.length <= 1) { // 若只有一个集合地点，默认设置就好了
           self.setData({
@@ -151,8 +149,8 @@ Page({
       })
 
     // 从Person表中找到自己的信息
-    dbPersons.doc(app.globalData.personid).get()
-      .then(res => {
+    if (app.globalData.personid) {
+      dbPersons.doc(app.globalData.personid).get().then(res => {
         self.data.userInfo = res.data.userInfo
         self.data.entriedOutdoors = res.data.entriedOutdoors
         self.data.caredOutdoors = res.data.caredOutdoors
@@ -163,6 +161,7 @@ Page({
             })
         })
       })
+    }
 
     // 最后帮助把之前积累的信息同步到网站上
     self.postWaitings()
@@ -294,6 +293,16 @@ Page({
     // chat
     self.setChat(res.data.chat)
 
+    // QcCode
+    self.data.QcCode = res.data.QcCode
+
+    // leader 
+    if(self.data.members.length>0) {
+      self.setData({
+        leader: self.data.members[0],
+      })
+    }
+
     // next 
 
   },
@@ -358,6 +367,20 @@ Page({
     })
   }, 
 
+  createCanvasFile() {
+    console.log("createCanvasFile")
+    const self = this
+    self.data.hideCanvas = false
+    const shareCanvas = wx.createCanvasContext('shareCanvas')
+    // todo 分享到朋友圈的图片
+    outdoor.drawShareCanvas(shareCanvas, self.data, shareCanvasFile => {
+      self.setData({
+        shareCanvasFile: shareCanvasFile,
+        hideCanvas:true,
+      })
+    })
+  },
+
   onShareAppMessage: function() {
     const self = this;
     this.closePopup()
@@ -365,6 +388,7 @@ Page({
       return {
         title: self.data.title.whole,
         desc: '分享活动',
+        imageUrl: self.data.shareCanvasFile,
         path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.outdoorid
       }
     }
@@ -404,9 +428,9 @@ Page({
   },
 
   // 报名就是在活动表中加上自己的id，同时还要在Person表中加上活动的id
-  entryOutdoor: function(status, formid) {
+  entryOutdoorInner: function(status, formid) {
     const self = this;
-    console.log("EntryOutdoors.js in entryOutdoor fun, status is:" + JSON.stringify(status, null, 2))
+    console.log("status is:" + JSON.stringify(status, null, 2))
     // 再判断一下是否属于 修改报名的类型，即在“占坑”和“报名”中切换
     if (self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "报名中") {
       // 属于的话，就只更新 Outdoors表members的entryInfo信息就好
@@ -511,7 +535,7 @@ Page({
             lvyeorg.postWaitings(self.data.outdoorid, self.data.websites.lvyeorg.tid, callback => {
               lvyeorg.postMessage(self.data.outdoorid, self.data.websites.lvyeorg.tid, entryMessage.title, entryMessage.messageentryMessage.title, entryMessage.message)
             })
-          } else if (res.error) { // 登录失败也记录到waitings中 // todo 标题先不加了
+          } else if (res.error) { // 登录失败也记录到waitings中 
             lvyeorg.add2Waitings(self.data.outdoorid, entryMessage.message)
           }
         }
@@ -537,10 +561,192 @@ Page({
     this.doEntry("报名中", e.detail.formId)
   },
 
+  // 检查报名选项是否完整
+  checkEntryInfo(){
+    const self = this
+    if (self.data.entryInfo.meetsIndex < 0) {
+      self.data.entryError += "请选择一个集合地点才能报名。"
+    }
+    if (!self.data.entryInfo.agreedDisclaimer) {
+      self.data.entryError += "必须勾选同意活动条款和规则才能报名。"
+    }
+    if (self.data.entryError) {
+      wx.showModal({
+        title: '报名提示',
+        content: self.data.entryError,
+        showCancel: false,
+        confirmText: "知道了",
+        complete(res) {
+          self.data.entryError = ""
+        }
+      })
+    } else { 
+      return true
+    }
+  },
+
+  // 判断是否有账号了
+  checkPersonInfo(){
+    const self = this
+    if(!app.globalData.personid) {
+      self.setData({
+        genderErrMsg: self.data.userInfo.gender?"":"必须选择性别",
+        nickErrMsg: self.data.userInfo.nickName ? "" :"昵称不能为空",
+        phoneErrMsg: self.data.userInfo.phone ? "" :"电话不能为空",
+      })
+      self.setData({
+        showLoginDlg:true,
+      })
+      return false
+    }
+    return true
+  },
+
+  changeNickname: function (e) {
+    console.log(e)
+    const self = this
+    self.setData({
+      "userInfo.nickName": e.detail,
+      nickErrMsg: self.data.userInfo.nickName ? "" : "昵称不能为空",
+    })
+  },
+
+  blurNickname(e) {
+    console.log(e)
+    this.checkNickname(this.data.userInfo.nickName)
+  },
+
+  // 这里判断昵称的唯一性和不能为空
+  checkNickname(nickName) {
+    const self = this
+    self.setData({
+      nickErrMsg: self.data.userInfo.nickName ? "" : "昵称不能为空",
+    })
+    person.getUniqueNickname(nickName, uniqueName=>{
+      if (nickName != uniqueName) {
+        wx.showModal({
+          title: '昵称已被占用',
+          content: "您系统已为您自动取名为“" + uniqueName + "”，点击取消按钮重新取名",
+          success(res) {
+            if (res.confirm) {
+              self.setData({
+                nickErrMsg: "",
+                "userInfo.nickName": uniqueName,
+              })
+            } else if (res.cancel) {
+              self.setData({
+                nickErrMsg: "该昵称已被占用不能使用",
+              })
+            }
+          }
+        })
+      }
+    })
+  },
+
+  changeGender: function (e) {
+    console.log(e)
+    this.setData({
+      "userInfo.gender": e.detail,
+    })
+    this.checkGender()
+  },
+
+  clickGender(e) {
+    console.log(e)
+    this.setData({
+      "userInfo.gender": e.target.dataset.name,
+    })
+    this.checkGender()
+  },
+
+  checkPhone() {
+    const self = this
+    if (self.data.userInfo.phone.length != 11) {
+      self.setData({
+        phoneErrMsg: "请输入11位手机号码"
+      })
+    } else {
+      self.setData({
+        phoneErrMsg: ""
+      })
+    }
+  },
+
+  changePhone: function (e) {
+    console.log(e)
+    const self = this
+    self.setData({
+      "userInfo.phone": e.detail.toString(), // 转为字符串
+    })
+    self.checkPhone()
+  },
+
+  cancelLoginDlg() {
+    console.log("cancelLoginDlg")
+    this.setData({
+      showLoginDlg:false,
+    })
+  },
+
+  // 判断各项目都ok了，然后创建表，设置app data
+  confirmLoginDlg(){
+    console.log("confirmLoginDlg")
+    const self = this
+    var error = self.data.nickErrMsg + self.data.genderErrMsg + self.data.phoneErrMsg
+    if(error) {
+      wx.showModal({
+        title: '补充个人信息',
+        content: '请先输入正确的个人信息，然后再报名',
+        showCancel:false, 
+        confirmText:"知道了"
+      })
+      self.setData({
+        showLoginDlg: true,
+      })
+    } else {
+      person.createRecord(self.data.userInfo, app.globalData.openid, res=>{
+        app.globalData.personid = res.personid
+        app.globalData.userInfo = res.userInfo
+        app.globalData.hasUserInfo = true
+        self.setData({
+          showLoginDlg: false,
+        })
+        // 最后还得继续报名才行
+        self.entryOutdoorInner(self.data.entryTemp.status, self.data.entryTemp.formid)
+      })
+    }
+  },
+
+  checkGender() {
+    const self = this
+    self.setData({
+      genderErrMsg: self.data.userInfo.gender ? "" : "必须选择性别"
+    })
+  },
+
+  dlgGetUserinfo(e) {
+    console.log(e)
+    const self = this
+    self.setData({
+      "userInfo.gender": util.fromWxGender(e.detail.userInfo.gender),
+      "userInfo.nickName": e.detail.userInfo.nickName,
+    })
+    self.checkGender()
+    self.checkNickname(self.data.userInfo.nickName)
+  },
+
   // 替补、占坑、报名，用同一个函数，减少重复代码
   doEntry(status, formid) {
-    if (this.data.entryInfo.status != status) {
-      this.entryOutdoor(status, formid)
+    const self = this
+    console.log("doEntry: "+status) 
+    if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg)  {
+      self.data.entryTemp = {status:status, formid:formid}
+      var check1 = this.checkEntryInfo()
+      var check2 = check1 ? this.checkPersonInfo():false
+      if(check1 && check2) {
+        this.entryOutdoorInner(status, formid)
+      }
     } else {
       template.savePersonFormid(this.data.personid, formid, null)
     }
@@ -642,7 +848,7 @@ Page({
     })
     // 如果已经报名，则需要修改集合地点
     if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "替补中") {
-      self.entryOutdoor(self.data.entryInfo.status, null)
+      self.entryOutdoorInner(self.data.entryInfo.status, null)
     }
   },
 
@@ -681,7 +887,7 @@ Page({
       "entryInfo.knowWay": !self.data.entryInfo.knowWay,
     })
     if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "替补中") {
-      self.entryOutdoor(self.data.entryInfo.status, null)
+      self.entryOutdoorInner(self.data.entryInfo.status, null)
     }
   },
 
@@ -736,8 +942,9 @@ Page({
 
   // 回到首页
   toMainpage: function() {
+    var url = app.globalData.hasUserInfo ? "../AboutOutdoor/HallOutdoor" :"../MyInfo/MyInfo"
     wx.switchTab({
-      url: "../MyOutdoors/MyOutdoors",
+      url: url,
     })
   },
 

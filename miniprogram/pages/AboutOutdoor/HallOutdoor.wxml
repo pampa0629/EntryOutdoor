@@ -1,0 +1,14 @@
+<!--没有活动的提示-->
+<view wx:if="{{outdoors.length == 0}}">居然没有活动。点击“发起活动”可以创建并发布自己的活动。
+</view>
+
+<!--活动列表-->
+<view wx:for="{{outdoors}}" wx:key="id">
+  <van-panel title="{{item.title}}" title-width="80%" status="{{item.status}}"  bindtap="intoOutdoor{{index}}">
+    <van-row wx:if="{{item.pic}}">
+      <van-col span="20" offset="2">
+        <image  mode="widthFix" src="{{item.pic}}"></image>
+      </van-col>
+    </van-row>
+  </van-panel>
+</view>

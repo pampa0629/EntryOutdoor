@@ -1,14 +1,16 @@
 const app = getApp()
 const util = require('../../utils/util.js')
+const person = require('../../utils/person.js')
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
- 
-Page({
+  
+Page({ 
 
   data: {
-    isTesting: false, // for test， false true
+    isTesting: true, // for test， false true
 
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
     userInfo: {
@@ -125,7 +127,7 @@ Page({
         } else { 
           // openid不为null，说明真的需要创建新记录了
           self.createOnePerson(e);
-        }
+        } 
       }
       if (e) { // 如果e不为null，则说明是通过按钮调用的，那就需要启动app的函数
         app.getPersonInfo(); // 调用app 获得个人信息的函数
@@ -185,7 +187,19 @@ Page({
     }
   },
 
-  createOnePerson: function(e) {
+  createOnePerson: function (e) {
+    const self = this;
+    if (e != null) {
+      console.log("MyInfo.js in createOnePerson fun, e is:" + +JSON.stringify(e, null, 2))
+      self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
+      self.data.userInfo.nickName = e.detail.userInfo.nickName
+      person.createRecord(self.data.userInfo, app.globalData.openid, res=>{
+        self.setPersonInfo(res.personid, res.userInfo)
+      })
+    }
+  },
+  
+  createOnePerson_old: function(e) {
     const self = this;
     if (e != null) {
       console.log("MyInfo.js in createOnePerson fun, e is:" + +JSON.stringify(e, null, 2))
@@ -252,7 +266,7 @@ Page({
     dbOutdoors.doc(outdoorid).get()
       .then(res => {
         if (res.data._openid == app.globalData.openid) {
-          // 自己的活动
+          // 自己的活动 
           wx.switchTab({
             url: "../CreateOutdoor/CreateOutdoor",
           })
@@ -273,6 +287,12 @@ Page({
           }
         })
       })
+  },
+
+  tapMyOutdoors() {
+    wx.navigateTo({
+      url: './MyOutdoors',
+    })
   },
 
   bindHelp: function() {

@@ -287,19 +287,35 @@ const updatePersonSubscriber=(leaderid, personid, mine)=>{
       value: mine
     }
   })
+} 
+
+const updateGroupMembers=(groupid, members)=>{
+  console.log("updateGroupMembers")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: { // 
+      table: "Groups",
+      id: groupid,
+      item: "members",
+      command: "",
+      value: members
+    }
+  })
 }
 
-// 解密微信步数
-const decryptWeRun=(encrypedData, iv, code, callback)=>{
-  console.log("decryptWeRun")
+// 采用云函数对数据进行解密
+const decrypt=(encrypedData, iv, code, callback)=>{
+  console.log("cloudfun.decrypt")
   wx.cloud.callFunction({
-    name: 'decryptWeRun', // 云函数名称
+    name: 'decrypt', // 云函数名称
     data: { // 
       encrypedData: encrypedData,
       iv: iv,
       code:code,
     }
   }).then(res=>{
+    console.log("cloudfun.decrypt res:")
     console.log(res)
     if(callback){
       callback(res.result)
@@ -345,7 +361,10 @@ module.exports = {
   updatePersonFormids: updatePersonFormids,
   updatePersonSubscriber: updatePersonSubscriber,
 
+  // Groups
+  updateGroupMembers:updateGroupMembers, // 更新群的成员
+
   // other 
-  decryptWeRun: decryptWeRun, 
+  decrypt: decrypt,  // 采用云函数进行数据解密
   getServerDate: getServerDate, 
 }

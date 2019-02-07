@@ -3,7 +3,7 @@
   <van-checkbox-group>
     <van-cell title="{{limits.maxPerson?'限制人数':'不限制人数'}}" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
       <van-checkbox value="{{limits.maxPerson}}" bind:change="checkMaxPerson"/>
-    </van-cell>
+    </van-cell> 
   </van-checkbox-group>
   <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}">
     <van-stepper value="{{limits.personCount}}" min="1" max="100" bind:change="bindAddPerson" />
@@ -28,16 +28,16 @@
   </block>
 </van-panel>
 
-<!--活动装备-->
-<van-panel title="活动规则" >
-  <van-checkbox-group>
-    <van-cell title="环保" label="野外不得丢弃不可降解物品" clickable bind:click="checkEnvironment">
-      <van-checkbox value="{{limits.isEnvironment}}" bind:change="checkEnvironment"/>
-    </van-cell>
-      <van-cell title="守时" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime">
-        <van-checkbox value="{{limits.isKeepTime}}" bind:change="checkKeepTime"/>
-    </van-cell>
-  </van-checkbox-group>
+<!--活动性质选项-->
+<van-panel title="活动性质选项" >
+<!--活动大厅-->
+  <van-cell title="{{limits.intoHall?'':'不'}}进入活动大厅" label="活动大厅能被所有人看到" clickable bind:click="checkIntoHall">
+    <van-checkbox value="{{limits.intoHall}}" bind:change="checkIntoHall"/>
+  </van-cell>
+  <!--测试发帖-->
+  <van-cell title="{{limits.isTest?'测试发帖':'正式活动'}}" title-width="80%" label="测试发帖不进入活动大厅，不纳入统计" clickable bind:click="checkTest">
+    <van-checkbox value="{{limits.isTest}}" bind:change="checkTest"/>
+  </van-cell>
 </van-panel>
 
 <!--截止时间-->
@@ -49,3 +49,14 @@
 <!--微信服务通知-->
 <van-cell title="微信服务通知" label="" value="点击设置微信通知" is-link url="EditWxnotice" border="{{false}}"/>
 
+<!--活动规则-->
+<van-panel title="活动规则" >
+  <van-checkbox-group>
+    <van-cell title="环保" title-width="80%" label="野外不得丢弃不可降解物品" clickable bind:click="checkEnvironment">
+      <van-checkbox value="{{limits.isEnvironment}}" bind:change="checkEnvironment"/>
+    </van-cell>
+      <van-cell title="守时" title-width="80%" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime">
+        <van-checkbox value="{{limits.isKeepTime}}" bind:change="checkKeepTime"/>
+    </van-cell>
+  </van-checkbox-group>
+</van-panel>

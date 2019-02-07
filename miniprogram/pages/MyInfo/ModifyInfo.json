@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "修改我的信息",
+  "navigationBarTitleText": "编辑我的信息",
   "usingComponents": {
     "van-radio": "/vant-weapp/radio/index",
     "van-radio-group": "/vant-weapp/radio-group/index",

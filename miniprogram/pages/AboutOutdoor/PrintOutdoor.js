@@ -18,6 +18,7 @@ Page({
     addMembers:[], // 附加队员名单
     isLeader: false, // 是否是领队：领队能看到队员的电话，非领队看不到；领队按照集合地点排列名单，队员不需要
     status: null, // 活动状态
+    interphone:"", // 手台频率
   },
  
   onLoad: function(options) {
@@ -87,9 +88,17 @@ Page({
       })
     }
 
+    // 附加队员
     if (res.data.addMembers) {
       self.setData({
         addMembers: res.data.addMembers,
+      })
+    }
+
+    // 手台频率
+    if (res.data.route && res.data.route.interphone) {
+      self.setData({
+        interphone: res.data.route.interphone,
       })
     }
     

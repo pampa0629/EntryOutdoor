@@ -4,7 +4,7 @@
     <van-col span="20" offset="2">
       <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button> 
     </van-col>
-  </van-row>
+  </van-row>  
   <van-row>
     <van-col span="9" offset="2">
       <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
@@ -175,7 +175,7 @@
                           <button form-type="submit" class="no_btn">
                             <view class="fix" style="left:30rpx">
                               <form bindsubmit="tapBench" report-submit="true">
-                                <button style="color:#1aad19;background-color:#ffffff" disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" size="large" plain>替补</button>
+                                <button style="color:#1aad19;background-color:#ffffff"  size="large" plain>替补</button>
                               </form>
                             </view>
                           </button>
@@ -207,7 +207,7 @@
                           <button form-type="submit" class="no_btn">
                             <view class="fix" style="left:200rpx">
                               <form bindsubmit="tapOcuppy" report-submit="true">
-                                <button style="color:#1aad19;background-color:#ffffff" form-type="submit" disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" size="large" plain>占坑</button>
+                                <button style="color:#1aad19;background-color:#ffffff" form-type="submit" size="large" plain>占坑</button>
                               </form>
                             </view>
                           </button>
@@ -239,7 +239,7 @@
                           <button form-type="submit" class="no_btn">
                             <view class="fix" style="left:370rpx">
                               <form bindsubmit="tapEntry" report-submit="true">
-                                <button disabled="{{entryInfo.meetsIndex<0||!entryInfo.agreedDisclaimer}}" style="color:#1aad19;background-color:#ffffff" size="large" plain>报名</button>
+                                <button style="color:#1aad19;background-color:#ffffff" size="large" plain>报名</button>
                               </form>
                             </view>
                           </button>
@@ -261,4 +261,27 @@
       <button style="color:#F65959;background-color:#ffffff" plain size="large" bindtap='tapQuit'>退出</button>
     </view>
   </block>
+</block>
+
+<!--快速注册对话框-->
+<van-dialog use-slot show="{{showLoginDlg}}" show-cancel-button  bind:cancel="cancelLoginDlg" bind:confirm="confirmLoginDlg" title="请填写个人信息" confirmButtonText="确定" cancelButtonText="取消">
+ 
+    <van-field required value="{{userInfo.nickName}}" label="户外昵称：" placeholder="好听、易记、非真名"  bind:change="changeNickname" bind:blur="blurNickname" error-message="{{nickErrMsg}}"/>
+
+  <van-field required label="性别：" value="{{userInfo.gender}}" error-message="{{genderErrMsg}}" disabled/>
+  <van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">
+      <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender">
+        <van-radio name="{{item}}"/>
+      </van-cell>
+  </van-radio-group> 
+  <van-button open-type="getUserInfo" type="primary" size="large" plain bindgetuserinfo="dlgGetUserinfo">填入微信昵称和性别</van-button>
+
+  <van-field required value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="真实、有效、方便领队联系" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" />
+
+</van-dialog>
+
+<!--画布-->
+<block wx:if="{{!hideCanvas}}">
+  <canvas style="width: 500px; height: 400px;" canvas-id="shareCanvas"/>
+  <!-- todo <canvas style="width: 720px; height: 1280px;" canvas-id="circleCanvas"/> -->
 </block>

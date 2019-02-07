@@ -4,7 +4,7 @@
     "pages/Test/OneOutdoor",
     "pages/EntryOutdoor/EntryOutdoor",
     "pages/AboutOutdoor/PrintOutdoor",
-    "pages/MyOutdoors/MyOutdoors",
+    "pages/MyInfo/MyOutdoors",
     "pages/CreateOutdoor/CreateOutdoor",
     "pages/MyInfo/ModifyInfo",
     "pages/CreateOutdoor/EditMeets",
@@ -32,7 +32,8 @@
     "pages/CreateOutdoor/CheckMembers",
     "pages/CreateOutdoor/LookCareer",
     "pages/MyInfo/LookEmergency",
-    "pages/AboutOutdoor/ChatGroup"
+    "pages/AboutOutdoor/ChatGroup",
+    "pages/AboutOutdoor/HallOutdoor"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -48,16 +49,22 @@
     "backgroundColor": "#ffffff",
     "list": [
       {
-        "pagePath": "pages/CreateOutdoor/CreateOutdoor",
-        "text": "发起活动"
+        "pagePath": "pages/AboutOutdoor/HallOutdoor",
+        "text": "活动大厅",
+        "iconPath": "res/home.png",
+        "selectedIconPath": "res/home-green.png"
       },
       {
-        "pagePath": "pages/MyOutdoors/MyOutdoors",
-        "text": "我的活动"
+        "pagePath": "pages/CreateOutdoor/CreateOutdoor",
+        "text": "发起活动",
+        "iconPath": "res/add.png",
+        "selectedIconPath": "res/add-green.png"
       },
       {
         "pagePath": "pages/MyInfo/MyInfo",
-        "text": "我的信息"
+        "text": "我的信息",
+        "iconPath": "res/user.png",
+        "selectedIconPath": "res/user-green.png"
       }
     ]
   },

@@ -105,7 +105,7 @@ Page({
   // 退出时，把当前留言有几条记录下来
   onUnload() {
     console.log("onUnload")
-    const self = this
+    const self = this 
     cloudfun.updateOutdoorChatSeen(self.data.outdoorid, app.globalData.personid, self.data.chat.messages.length)
   },
 
@@ -169,11 +169,6 @@ Page({
     this.setData({
       showMembers: false,
     })
-  },
-
-  // 进行@ 选择
-  onChangeMembers(e) {
-    console.log(e)
   },
 
   onCancelMembers() {

@@ -16,4 +16,6 @@
 <van-button size="large" bind:click="tapScan">扫描二维码</van-button>
 <van-button size="large" bind:click="tapDecode">解密</van-button>
 <van-button size="large" bind:click="tapCreateQrcode">生成二维码</van-button>
+<van-button size="large" bind:click="tapGroup">微信群</van-button>
+<open-data type="groupName" open-gid="GgNmG5ApyZgxkkbDndLPz_5Odl6U"></open-data>
 <canvas class='canvas' canvas-id='canvas' bindlongtap='save'></canvas>

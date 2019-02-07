@@ -13,7 +13,7 @@
   <van-panel title="请选择驳回理由">
     <van-checkbox-group value="{{rejectDlg.selects}}" bind:change="changeRejectSelects">
       <van-checkbox wx:for="{{rejectDlg.Options}}" wx:key="item" name="{{index}}">{{rejectDlg.Options[index]}}</van-checkbox>
-    </van-checkbox-group>
+    </van-checkbox-group> 
     <van-field wx:if="{{rejectDlg.Options[rejectDlg.selects[rejectDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体驳回理由" border="{{false}}" bind:change="changeRejectContent" value="{{ rejectDlg.content }}"/>
   </van-panel>
 </van-dialog>
@@ -30,17 +30,19 @@
       <van-button plain size="large" bind:click="onChatMessage">留言询问</van-button>
     </van-col>
     <van-col span="6" offset="1">
-      <van-button plain size="large" bind:click="onMakecall">拨打电话</van-button>
+      <van-button plain size="large" type="danger" bind:click="onReject">驳回报名</van-button>
     </van-col>
   </van-row>
   <van-row>
-    <van-col span="6" offset="1" >
-        <van-button plain size="large" type="danger" bind:click="onReject">驳回报名</van-button>
-    </van-col>
     <van-col span="6" offset="1">
       <block wx:if="{{isLeader}}">
         <van-button wx:if="{{members[index].status!='领队组'}}" disabled="{{members[index].status!='报名中'}}" plain size="large" bind:click="onLeaderGroup">设为领队组</van-button>
         <van-button wx:else plain size="large" bind:click="onLeaderGroup">取消领队组</van-button>
+      </block>
+    </van-col>
+    <van-col span="6" offset="1" >
+      <block wx:if="{{isLeader}}">
+        <van-button wx:if="{{members[index].status=='领队组'}}" plain size="large" bind:click="onSetLeader">转让领队</van-button>
       </block>
     </van-col>
     <van-col span="6" offset="1">
@@ -53,8 +55,9 @@
 <van-panel title="审核队员报名">
   <van-cell wx:if="{{false}}" title="昵称/性别/电话/认路/状态" value="审核结果"/>
   <van-cell wx:for="{{members}}" title-width="80%" wx:key="item.personid" title="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}">
-    <van-button wx:if="{{index>0}}" plain size="small" type="primary" bind:click="onPopup{{index}}">审核</van-button>
+    <van-button wx:if="{{index>0}}" plain size="small" type="primary" bind:click="onPopup{{index}}">功能</van-button>
   </van-cell> 
+    <van-tag type="primary" plain >长按手机号码即可拨打电话</van-tag>
 </van-panel> 
 
 <!--领队编辑附加队员-->

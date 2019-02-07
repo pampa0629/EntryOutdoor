@@ -12,8 +12,8 @@ const updateWalkStep=(personid, callback)=>{
         wx.getWeRunData({
           success(res) {
             const encryptedData = res.encryptedData
-            cloudfun.decryptWeRun(res.encryptedData, res.iv, resLogin.code, run => {
-              console.log(run)
+            cloudfun.decrypt(res.encryptedData, res.iv, resLogin.code, run => {
+              console.log(run) 
               var step = {}
               var date = new Date()
               date.setTime(run.watermark.timestamp * 1000)
@@ -41,7 +41,71 @@ const updateWalkStep=(personid, callback)=>{
   })
 }
 
+const getUniqueNickname=(nickName, callback)=>{
+  dbPersons.where({
+    "userInfo.nickName": nickName
+  }).get().then(res => {
+    console.log(res.data)
+    if (res.data.length > 0) {
+      var time = new Date().getTime().toString()
+      var autoName = "驴友" + time.substr(-4)
+      getUniqueNickname(autoName, callback)
+    } else {
+      if(callback) {
+        callback(nickName)
+      }
+    }
+  })
+}
+
+// 在Persons表中创建一条记录（个人账号）
+const createRecord=(userInfo, openid, callback)=>{
+  console.log("createRecord")
+  // 最后仍然得判断openid真的在Persons表中没有，才创建新的
+  dbPersons.where({
+    _openid: openid,
+  }).get().then(res => {
+    if (res.data.length == 0) { // 确认没有才加新的记录
+      // 从微信登录信息中获取昵称和性别，不过不能与原有昵称重名
+      getUniqueNickname(userInfo.nickName, nickName => {
+        userInfo.nickName = nickName
+        // userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
+        // 在Persons表中创建一条新用户的记录
+        dbPersons.add({
+          data: {
+            userInfo: userInfo,
+            myOutdoors: [],
+            entriedOutdoors: [],
+            caredOutdoors: [],
+          }
+        }).then(res => {
+          if (callback) {
+            callback({ personid: res._id, userInfo: userInfo})
+          }
+        })
+      })
+    } else if (res.data.length == 1) { // 有的话，用读取的就好
+      if (callback) {
+        callback({ personid: res.data[0]._id, userInfo: userInfo })
+      }
+    } else { // 已经有多个账号，后台处理
+      wx.setClipboardData({
+        data: openid,
+        success: function (res) {
+          wx.showModal({
+            title: '检测到您有多个账号',
+            content: '可能会导致后续问题，OpenID已经复制到内存中，请发给作者“攀爬”予以核实。',
+            showCancel: false,
+            confirmText: "马上就去",
+          })
+        }
+      })
+    }
+  })
+}
+
 module.exports = {
-  // 更新步数
-  updateWalkStep: updateWalkStep, 
+  updateWalkStep: updateWalkStep,  // 更新步数
+  getUniqueNickname: getUniqueNickname, // 得到唯一的户外昵称（不重名）
+  createRecord: createRecord, // 创建账号
 }

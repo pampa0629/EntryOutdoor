@@ -3,6 +3,8 @@ const util = require('./utils/util.js')
 const qrcode = require('./utils/qrcode.js')
 const lvyeorg = require('./utils/lvyeorg.js')
 const person = require('./utils/person.js')
+const cloudfun = require('./utils/cloudfun.js')
+const group = require('./utils/group.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -12,18 +14,21 @@ const dbOutdoors = db.collection('Outdoors')
 App({
   globalData: {
     openid: null, // 每个微信用户的内部唯一id
-    personid: null, // Persons表中的当前用户_id
+    personid: "", // Persons表中的当前用户_id
 
     // 用户信息
     hasUserInfo: false,
-    userInfo: null,
+    userInfo: {},
 
     // 与户外网站对接
     lvyeorgInfo: null,
     lvyeorgLogin: false,
   },
 
-  onLaunch: function() {
+  onLaunch(options) {
+    console.log(options)
+    this.globalData.options = options // 存起来后面用
+
     // 判断微信版本号，太低的给予提示
     var versions = wx.getSystemInfoSync().version.split(".");
     if (versions[0] < '6' || (versions[0] == '6' && versions[1] < '6')) {
@@ -139,7 +144,68 @@ App({
         person.updateWalkStep(self.globalData.personid, null)
       }
     }
+    // 记录group id 和 openid， personid的对应关系
+    self.dealGroup()
+
     // next 
+  },
+
+  // 根据分享的群，得到群id
+  getGroupId(shareTicket, callback) {
+    console.log("getGroupId")
+    console.log(shareTicket)
+    wx.getShareInfo({
+      shareTicket: shareTicket,
+      success: function (res) {
+        console.log(res)
+        var encryptedData = res.encryptedData;
+        var iv = res.iv;
+        wx.login({
+          success: function (res) {
+            var code = res.code;
+            console.log(code)
+            cloudfun.decrypt(encryptedData, iv, code, group => {
+              console.log("openGId:")
+              console.log(group)
+              if (callback) {
+                callback(group.openGId)
+              }
+            })
+          }
+        })
+      }
+    })
+  },
+
+  // 记录group id 和 openid， personid的对应关系
+  dealGroup(){
+    console.log("dealGroup")
+    const self = this
+    if (this.globalData.options.scene == 1044) {
+      self.getGroupId(this.globalData.options.shareTicket, groupOpenid=>{
+        group.ensureMember(groupOpenid, self.globalData.openid, self.globalData.personid, self.globalData.userInfo)
+      })
+    }
+  }, 
+
+  checkLogin(title, content) {
+    const self = this
+    if (!self.globalData.hasUserInfo) { // 判断是否登录先
+      wx.showModal({
+        title: title, // '查看“我的活动”需先登录',
+        content: content, // '小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录',
+        showCancel: false,
+        confirmText: "知道了",
+        complete: function (res) {
+          wx.switchTab({
+            url: '../MyInfo/MyInfo'
+          })
+        }
+      })
+      return false
+    } else {
+      return true
+    }
   },
 
   // 登录绿野网站，用callback得到登录结果

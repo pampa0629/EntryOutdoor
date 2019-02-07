@@ -9,7 +9,7 @@ const util = require('../../utils/util.js')
 const crypto = require('../../utils/crypto.js')
 
 Page({
-  data: {
+  data: { 
     userInfo: {
       nickName: null, 
       gender: null,
@@ -54,6 +54,10 @@ Page({
         })
         console.log(self.data.emergency)
       }
+    })
+    
+    wx.showShareMenu({
+      withShareTicket: true
     })
   },
 

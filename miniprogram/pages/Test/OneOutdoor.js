@@ -5,6 +5,7 @@ const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const template = require('../../utils/template.js')
 const crypto = require('../../utils/crypto.js')
+const group = require('../../utils/group.js')
 
 const plugin = requirePlugin("WechatSI")
 const manager = plugin.getRecordRecognitionManager()
@@ -93,9 +94,9 @@ Page({
         console.log(resLogin)
         util.authorize("werun", "授权后才能获取步数", cb => {
           wx.getWeRunData({
-            success(res) {
+            success(res) { 
               const encryptedData = res.encryptedData
-              cloudfun.decryptWeRun(res.encryptedData, res.iv, resLogin.code, run => {
+              cloudfun.decrypt(res.encryptedData, res.iv, resLogin.code, run => {
                 console.log(run)
                 var date = new Date()
                 date.setTime(run.watermark.timestamp * 1000)
@@ -429,5 +430,10 @@ Page({
     })
   },
 
+  tapGroup(){
+    const self = this
+    var groupID = "GgNmG5ANDVP5iVBK1wu8nCvyp9g0"
+    group.ensureMember(groupID, app.globalData.openid, app.globalData.personid, app.globalData.userInfo)
+  },
 
 });

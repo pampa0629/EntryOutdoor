@@ -7,7 +7,7 @@ var WXBizDataCrypt = require('./WXBizDataCrypt')
 exports.main = async (event, context) => {
   // encrypedData  iv code
   console.log(event)
-
+ 
   var appID = "wx20edd5723fb67799"
   var res = await cloud.callFunction({
     name: 'code2Session', // 云函数名称

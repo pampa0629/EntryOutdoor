@@ -6,7 +6,7 @@
   <view slot="footer">
     <van-button size="large" type="primary" bindtap='addStop'>增加途经点</van-button>
   </view>
-</van-panel>
+</van-panel> 
  
 <!--弹出功能选项-->
 <van-action-sheet
@@ -48,3 +48,5 @@
   </view>
 </van-panel>
 
+<!--户外手台频率--> 
+<van-field label="手台频率" value="{{route.interphone}}" placeholder="请输入手台频率" clearable bind:change="changeInterphone" error-message="{{interphoneErrMsg}}" type="digit"/>

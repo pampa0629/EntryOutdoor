@@ -1,8 +1,8 @@
 <!--@选择队员名单-->
 <van-popup show="{{ showMembers }}" bind:close="onCloseMembers" position="bottom">
-  <van-picker columns="{{ members }}" show-toolbar title="选择要留言的队员" bind:change="onChangeMembers"  bind:cancel="onCancelMembers" bind:confirm="onConfirmMembers"/>
+  <van-picker columns="{{ members }}" show-toolbar title="选择要留言的队员"  bind:cancel="onCancelMembers" bind:confirm="onConfirmMembers"/>
 </van-popup>
-
+ 
 <!--活动标题-->
 <van-row>
   <van-col span="20">

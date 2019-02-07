@@ -110,8 +110,26 @@ Page({
     util.phoneCall(this.data.members[index].phone, false)
   },
 
-  onMakecall() {
-    util.phoneCall(this.data.members[this.data.index].phone, false)
+  onSetLeader() {
+    const self = this
+    dbOutdoors.doc(self.data.outdoorid).get().then(res=>{
+      outdoor.findPersonIndex(res.data.members, self.data.members[self.data.index].personid, index=>{
+        console.log("person index: "+index)
+        var temp = res.data.members[0]
+        res.data.members[0] = res.data.members[index]
+        res.data.members[0].entryInfo.status = "领队"
+        res.data.members[index] = temp
+        res.data.members[index].entryInfo.status = "领队组"
+        cloudfun.updateOutdoorMembers(self.data.outdoorid, res.data.members)
+        // 刷新当前列表
+        self.flushMembers(res.data.members)
+        // 给所有队员发通知
+        res.data.members.forEach((item, i)=>{
+          // old(index) ==> new （0）
+          template.sendResetMsg2Member(self.data.outdoorid, item.personid, res.data.title.whole, res.data.members[index].userInfo.nickName, res.data.members[0].userInfo.nickName)
+        })
+      })
+    })
   },
 
   onPopup(index) {
@@ -235,7 +253,6 @@ Page({
   },
 
   ///// 驳回报名 ////// 
-
   onReject() {
     console.log("onReject")
     const self = this

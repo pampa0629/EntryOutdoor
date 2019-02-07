@@ -4,10 +4,10 @@ Page({
     //活动路线，可加多个途经点和轨迹文件
     route: {
       wayPoints: [], // 途经点
-      trackFiles: [], // 轨迹文件
+      trackFiles: [], // 轨迹文件 
       trackSites: [], // 轨迹网站
     }, 
-
+ 
     index: 0, // 当前要处理的index
     hasModified: false,
 
@@ -250,5 +250,30 @@ Page({
 
   // todo
   deleteTrackFile(index) {},
+
+  // 手台频率
+  changeInterphone(e) {
+    console.log(e)
+    const self = this
+    self.setData({
+      "route.interphone":e.detail,
+      hasModified: true,
+    })
+    var error = false
+    if (self.data.route.interphone) {
+      var temps = self.data.route.interphone.split(".")
+      if (temps.length != 2 || temps[0].length != 3 || temps[1].length != 3) {
+        self.setData({
+          interphoneErrMsg: "手台频率应为：“abc.xyz”形式",
+        })
+        error = true
+      }
+    }
+    if(!error) {
+      self.setData({
+        interphoneErrMsg: "",
+      })
+    }
+  },
 
 })

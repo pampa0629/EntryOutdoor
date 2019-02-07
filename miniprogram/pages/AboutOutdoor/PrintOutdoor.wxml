@@ -10,7 +10,11 @@
   <text class="tip">活动日期：</text>
   <text>{{title.date}}\n</text> 
   <text class="tip">活动强度：</text>
-  <text>{{title.level}}（累积距离{{title.addedLength}}公里，累积上升{{title.addedUp}}00米）</text>
+  <text>{{title.level}}（累积距离{{title.addedLength}}公里，累积上升{{title.addedUp}}00米）\n</text>
+  <block wx:if="{{interphone}}">
+    <text class="tip">手台频率：</text>
+    <text>{{interphone}}\n</text> 
+  </block>
 </view>
 
 <!--活动路线-->

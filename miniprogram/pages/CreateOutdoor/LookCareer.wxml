@@ -23,6 +23,11 @@
   <van-cell wx:for="{{entriedOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<entriedOutdoors.length-1}}"/>
 </van-panel>
 
+<!--活动统计-->
+<van-panel title="活动统计结果" wx:if="{{career && career.statistics.result}}">
+  <text style="font-size:12pt">{{career.statistics.result.disc}}</text>
+</van-panel>
+
 <!--其他户外履历-->
 <van-panel title="其它户外履历" wx:if="{{career && career.other}}">
   <van-row>

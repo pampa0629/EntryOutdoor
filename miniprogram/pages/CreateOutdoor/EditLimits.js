@@ -13,6 +13,8 @@ Page({
       entry: { date: "不限", time: null }, // 报名截止时间
       isEnvironment:true, // 环保
       isKeepTime: true, // 守时
+      intoHall:true, // 活动是否进入活动大厅
+      isTest:false, // 是否为测试发帖
       },
     hasModified: false,
 
@@ -53,6 +55,12 @@ Page({
       self.setData({
         isEnvironment: true, // 环保
         isKeepTime: true, // 守时
+      })
+    }
+
+    if (!self.data.limits || self.data.limits.intoHall==undefined) {
+      self.setData({
+        intoHall: true, 
       })
     }
   },
@@ -154,6 +162,39 @@ Page({
     console.log(self.data.limits.isEnvironment)
     self.setData({
       "limits.isEnvironment": !self.data.limits.isEnvironment,
+      hasModified: true
+    })
+  },
+
+  // 是否进入活动大厅
+  checkIntoHall: function (e) {
+    console.log(e)
+    const self = this;
+    console.log(self.data.limits.intoHall)
+    self.setData({
+      "limits.intoHall": !self.data.limits.intoHall,
+      hasModified: true
+    })
+  },
+
+  // 是否进入活动大厅
+  checkIntoHall: function (e) {
+    console.log(e)
+    const self = this;
+    console.log(self.data.limits.intoHall)
+    self.setData({
+      "limits.intoHall": !self.data.limits.intoHall,
+      hasModified: true
+    })
+  },
+
+  // 是否为测试发帖
+  checkTest: function (e) {
+    console.log(e)
+    const self = this;
+    console.log(self.data.limits.isTest)
+    self.setData({
+      "limits.isTest": !self.data.limits.isTest,
       hasModified: true
     })
   },

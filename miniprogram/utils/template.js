@@ -171,6 +171,30 @@ const sendConfirmMsg2Member = (personid, outdoorid, title, count, leader) => {
   })
 }
 
+// 给队员发换领队的消息
+const sendResetMsg2Member=(outdoorid, personid, title, oldLeader, newLeader)=>{
+  console.log("sendResetMsg2Member")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "gE0pItk53ho16bMoJdjuuPPua-Ev2THvtiVe8KksEMU"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 项目名称
+        "value": title
+      },
+      "keyword2": { // 转单人员
+        "value": oldLeader
+      },
+      "keyword3": { //接单人员
+        "value": newLeader
+      },
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
 const buildPage = (page, outdoorid) => {
   var result = "pages/" + page + "/" + page + "?outdoorid=" + outdoorid
   return result
@@ -519,6 +543,7 @@ module.exports = {
   sendModifyMsg2Member: sendModifyMsg2Member, // // 给队员发送活动重要内容修改通知
   sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
   sendConfirmMsg2Member: sendConfirmMsg2Member, // 给队员发活动成行消息
+  sendResetMsg2Member: sendResetMsg2Member, // 给队员发换领队的消息
 
   // 给领队发消息
   sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息

@@ -15,10 +15,10 @@
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>0.7.4</view>
+      <view style='font-family:黑体;font-size:11pt'>0.7.6</view>
     </view>
   </van-col>
-</van-row> 
+</van-row>
 
 <!--个人信息-->
 <van-cell-group>
@@ -37,10 +37,13 @@
   </van-row>
 </view>
 
-<!--最近的活动-->
+<!--活动列表-->
 <van-row>
-  <van-col span="20" offset="2">
-    <van-button size="large" type="primary" disabled="{{!lastOutdoorid}}" bind:click="gotoLastOutdoor">回到最近的活动</van-button>
+  <van-col span="9" offset="2">
+    <van-button size="large" plain type="primary" bind:click="tapMyOutdoors">我的活动</van-button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <van-button size="large" plain  type="primary" disabled="{{!lastOutdoorid}}" bind:click="gotoLastOutdoor">最近的活动</van-button>
   </van-col>
 </van-row>
 

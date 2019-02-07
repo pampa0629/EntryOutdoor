@@ -540,6 +540,67 @@ const buildChatMessage=(msg)=>{
   return message
 }
 
+const findPersonIndex=(members, personid, callback)=>{
+  members.forEach((item, index)=>{
+    if(item.personid == personid) {
+      if(callback) {
+        callback(index)
+      }
+    }
+  })
+}
+
+const drawText=(canvas, text, x, y, size, dy, color)=>{
+  canvas.setFontSize(size)
+  canvas.setFillStyle(color)
+  canvas.fillText(text, x, y)
+  return {x:x,y:y+size+dy}
+}
+
+const drawShareCanvas=(canvas, data, callback)=>{
+  var green = "#1aad19", pos = { x: 10, y: 35 }, dx = 35
+  // 领队
+  pos = drawText(canvas, "领队："+data.leader.userInfo.nickName, pos.x, pos.y, 30, 15, green)
+
+  // 集合地点
+  pos = drawText(canvas, "集合时间及地点", pos.x, pos.y, 30, 10, green)
+  data.meets.forEach((item, index) => {
+    var message =  + (index + 1) + "）" + (item.date ? item.date : '当天') + " " + (item.time ? item.time : ' ')
+    pos = drawText(canvas, message, pos.x, pos.y, 24, 5, green)
+    pos = drawText(canvas, item.place, pos.x + dx, pos.y, 24, 10, green)
+    pos.x -= dx
+  })
+
+   // 人数
+  var countText = "已报名人数：" + data.members.length
+  if (data.limits.maxPerson) {
+    countText += "，本活动限" + data.limits.personCount + "人"
+  } else {
+    countText += "，本活动不限人数"
+  }
+  pos = drawText(canvas, countText, pos.x, pos.y + 5, 30, 10, green)
+  
+   // 活动状态
+  pos = drawText(canvas, "活动状态："+data.status, pos.x, pos.y+5, 30, 15, green)
+  
+  canvas.draw(false, function (res) {
+    console.log('sharing img done...')
+    wx.canvasToTempFilePath({
+      canvasId: 'shareCanvas',
+      width: 500,
+      height: 400,
+      destWidth: 500,
+      destHeight: 400,
+      success: res => {
+        console.log(res.tempFilePath)
+        if(callback) {
+          callback(res.tempFilePath)
+        }
+      }
+    })
+  })
+}
+
 module.exports = {
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
@@ -556,4 +617,9 @@ module.exports = {
 
   getChatStatus: getChatStatus, // 判断留言的状态：self、new等
   buildChatMessage: buildChatMessage, // 构建一条留言
+
+  findPersonIndex: findPersonIndex, // 从Members数组中找到自己的index
+
+  // 绘制画布
+  drawShareCanvas: drawShareCanvas, // 绘制分享的画布
 }

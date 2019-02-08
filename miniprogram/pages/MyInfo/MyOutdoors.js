@@ -6,7 +6,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 
-Page({
+Page({ 
   data: {
     currentTab: 1, // 默认是我参加的
     myOutdoors: [], // 我创建的活动列表

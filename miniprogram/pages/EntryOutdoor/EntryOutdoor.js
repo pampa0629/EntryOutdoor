@@ -68,7 +68,7 @@ Page({
 
   onLoad: function(options) {
     console.log(options)
-    var outdoorid = null; 
+    var outdoorid = null;  
     if (options.outdoorid) {
       outdoorid = options.outdoorid
     } else if (options.scene) {

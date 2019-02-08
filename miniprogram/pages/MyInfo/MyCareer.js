@@ -144,7 +144,7 @@ Page({
         dMonth = 12
       }
       range.begin.setMonth(today.getMonth() - dMonth);
-      range.end = today
+      range.end = today 
     } else if (s.mode == "byYear") {
       // 大于等于这一年的第一天， 小于等于这一年的最后一天
       console.log(s.option)

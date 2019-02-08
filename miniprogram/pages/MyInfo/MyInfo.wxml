@@ -6,10 +6,16 @@
   <van-col span="4" offset="1">
     <open-data type="userAvatarUrl"></open-data>
   </van-col>
-  <van-col span="2" offset="12">
+  <van-col span="2" offset="9">
     <view style="flex-direction:column">
       <van-icon size='32px' name="phone-o" bind:click="bindEmergencyCall"/>
       <view style='font-family:黑体;font-size:11pt'>紧急</view>
+    </view>
+  </van-col>
+  <van-col span="2" offset="1">
+    <view style="flex-direction:column">
+      <van-icon size='32px' name="friends-o" bind:click="bindGroup"/>
+      <view style='font-family:黑体;font-size:11pt'>群组</view>
     </view>
   </van-col>
   <van-col span="2" offset="1">

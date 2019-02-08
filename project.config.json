@@ -38,7 +38,7 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 0,
+			"current": 1,
 			"list": [
 				{
 					"id": -1,
@@ -46,6 +46,18 @@
 					"pathName": "pages/EntryOutdoor/EntryOutdoor",
 					"query": "outdoorid=XFZOo97E7L4wxQiR",
 					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "活动报名",
+					"pathName": "pages/MyInfo/MyInfo",
+					"query": "",
+					"scene": 1044,
+					"shareInfo": {
+						"groupName": "测试模拟群0",
+						"shareName": "ztYBwnrJW0azJolQzVU_Bs11GooxOBu6V6gzfphKe30@cr4dev",
+						"shareKey": "4lIL-Is3Iky_4WNjgwBwBblK2EPCsPxhQ8fxqUq7ij-BlyNwO111tWU9kB0tuKW11idS6mr4VuoVBrZ0oz1euA~~"
+					}
 				}
 			]
 		}

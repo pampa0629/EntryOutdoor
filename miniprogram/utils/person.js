@@ -9,7 +9,7 @@ const updateWalkStep=(personid, callback)=>{
   wx.login({
     success(resLogin) {
       util.authorize("werun", "授权后才能获取步数", cb => {
-        wx.getWeRunData({
+        wx.getWeRunData({ 
           success(res) {
             const encryptedData = res.encryptedData
             cloudfun.decrypt(res.encryptedData, res.iv, resLogin.code, run => {
@@ -104,8 +104,23 @@ const createRecord=(userInfo, openid, callback)=>{
   })
 }
 
+const adjustGroup=(personid, groupOpenid)=>{
+  console.log("person.adjustGroup")
+  dbPersons.doc(personid).get().then(res=>{
+    var groups = res.data.groups ? res.data.groups:[]
+    groups.forEach((item, index)=>{
+      if (item.openid == groupOpenid) {
+        groups.splice(index,1)
+      }
+    })
+    groups.unshift({openid:groupOpenid})
+    cloudfun.updatePersonGroups(personid, groups)
+  })
+}
+
 module.exports = {
   updateWalkStep: updateWalkStep,  // 更新步数
   getUniqueNickname: getUniqueNickname, // 得到唯一的户外昵称（不重名）
   createRecord: createRecord, // 创建账号
+  adjustGroup: adjustGroup, // 记录和调整加入的微信群的顺序
 }

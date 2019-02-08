@@ -295,6 +295,12 @@ Page({
     })
   },
 
+  bindGroup(){
+    wx.navigateTo({
+      url: '../AboutGroup/MyGroups',
+    })
+  },
+
   bindHelp: function() {
     var url = "https://docs.qq.com/doc/DVm1ITWx0V1dLVml3"
     var path = "/pages/detail/detail?url=" + url

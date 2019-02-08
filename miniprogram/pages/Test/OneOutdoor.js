@@ -6,6 +6,7 @@ const cloudfun = require('../../utils/cloudfun.js')
 const template = require('../../utils/template.js')
 const crypto = require('../../utils/crypto.js')
 const group = require('../../utils/group.js')
+const person = require('../../utils/person.js')
 
 const plugin = requirePlugin("WechatSI")
 const manager = plugin.getRecordRecognitionManager()
@@ -432,8 +433,10 @@ Page({
 
   tapGroup(){
     const self = this
-    var groupID = "GgNmG5ANDVP5iVBK1wu8nCvyp9g0"
+    // GgNmG5ApyZgxkkbDndLPz_5Odl6U GgNmG5ANDVP5iVBK1wu8nCvyp9g0
+    var groupID = "GgNmG5ApyZgxkkbDndLPz_5Odl6U" 
     group.ensureMember(groupID, app.globalData.openid, app.globalData.personid, app.globalData.userInfo)
+    person.adjustGroup(app.globalData.personid, groupID)
   },
 
 });

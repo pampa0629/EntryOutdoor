@@ -13,7 +13,7 @@ const _ = db.command
 
 Page({
 
-  data: {
+  data: { 
     outdoorid: null,
     title: null,
     message: {

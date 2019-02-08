@@ -10,7 +10,7 @@ const updateOutdoor=(outdoorid, data, callback)=>{
   console.log("updateOutdoor")
   wx.cloud.callFunction({
     name: 'updateOutdoor', // 云函数名
-    data: {
+    data: { 
       outdoorid: outdoorid,
       data: data
     }
@@ -289,6 +289,22 @@ const updatePersonSubscriber=(leaderid, personid, mine)=>{
   })
 } 
 
+const updatePersonGroups = (personid, groups) => {
+  console.log("updateGroups")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: { // 
+      table: "Persons",
+      id: personid,
+      item: "groups",
+      command: "",
+      value: groups
+    }
+  })
+} 
+
+///////////// 户外群组管理 ////////////////
 const updateGroupMembers=(groupid, members)=>{
   console.log("updateGroupMembers")
   wx.cloud.callFunction({
@@ -300,6 +316,37 @@ const updateGroupMembers=(groupid, members)=>{
       item: "members",
       command: "",
       value: members
+    }
+  })
+}
+
+// 更新群主
+const updateGroupOwner = (groupid, owner) => {
+  console.log("updateGroupOwner")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: { // 
+      table: "Groups",
+      id: groupid,
+      item: "owner",
+      command: "",
+      value: owner
+    }
+  })
+}
+
+const updateGroupRank=(groupid, rank)=>{
+  console.log("updateGroupRank")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: { // 
+      table: "Groups",
+      id: groupid,
+      item: "rank",
+      command: "",
+      value: rank
     }
   })
 }
@@ -360,9 +407,12 @@ module.exports = {
   unshiftPersonCared:unshiftPersonCared,
   updatePersonFormids: updatePersonFormids,
   updatePersonSubscriber: updatePersonSubscriber,
+  updatePersonGroups: updatePersonGroups, 
 
   // Groups
   updateGroupMembers:updateGroupMembers, // 更新群的成员
+  updateGroupOwner: updateGroupOwner, // 更新群主
+  updateGroupRank: updateGroupRank, // 更新排行榜
 
   // other 
   decrypt: decrypt,  // 采用云函数进行数据解密

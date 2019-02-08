@@ -33,7 +33,9 @@
     "pages/CreateOutdoor/LookCareer",
     "pages/MyInfo/LookEmergency",
     "pages/AboutOutdoor/ChatGroup",
-    "pages/AboutOutdoor/HallOutdoor"
+    "pages/AboutOutdoor/HallOutdoor",
+    "pages/AboutGroup/MyGroups",
+    "pages/AboutGroup/OneGroup"
   ],
   "window": {
     "backgroundTextStyle": "dark",

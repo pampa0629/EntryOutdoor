@@ -184,6 +184,7 @@ App({
     if (this.globalData.options.scene == 1044) {
       self.getGroupId(this.globalData.options.shareTicket, groupOpenid=>{
         group.ensureMember(groupOpenid, self.globalData.openid, self.globalData.personid, self.globalData.userInfo)
+        person.adjustGroup(self.globalData.personid, groupOpenid)
       })
     }
   }, 

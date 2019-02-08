@@ -40,7 +40,24 @@ const ensureMember=(groupOpenid, openid, personid, userInfo)=>{
   })
 }
 
+// 转让群主
+const changeOwner=(groupid, ownerOpenid, callback)=>{
+  console.log("group.changeOwner")
+  dbGroups.doc(groupid).get().then(res=>{
+    var owner = res.data.members[ownerOpenid]
+    cloudfun.updateGroupOwner(groupid, owner)
+    if (callback) {
+      callback(owner)
+    }
+  })
+}
+
+const saveRank=(groupid, rank)=>{
+  cloudfun.updateGroupRank(groupid, rank)
+}
+
 module.exports = {
-  // 确保群里有该成员
-  ensureMember: ensureMember, 
+  ensureMember: ensureMember,  // 确保群里有该成员
+  changeOwner: changeOwner, // 转让群主
+  saveRank: saveRank, // 保存排行榜
 }

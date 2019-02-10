@@ -308,6 +308,13 @@ Page({
       }
     })
 
+    // pay 支付
+    if (res.data.pay) {
+      self.setData({
+        pay: res.data.pay,
+      })
+    }
+
     // next 
   },
 
@@ -914,6 +921,15 @@ Page({
     const self = this;
     qrcode.share2Circle(self.data.outdoorid, self.data.title.whole, true)
     this.closePopup()
+  },
+
+  clickPay() {
+    const self = this
+    var url = '../AboutOutdoor/PayOutdoor?outdoorid=' + self.data.outdoorid
+    console.log(url)
+    wx.navigateTo({
+      url: url,
+    })
   },
 
   clickMeets: function(e) {

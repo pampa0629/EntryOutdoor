@@ -1,0 +1,21 @@
+{
+  "navigationBarTitleText": "活动收付款",
+  "usingComponents": { 
+    "van-icon": "/vant-weapp/icon/index",
+    "van-button": "/vant-weapp/button/index",
+    "van-dialog": "/vant-weapp/dialog/index",
+    "van-field": "/vant-weapp/field/index",
+    "van-stepper": "/vant-weapp/stepper/index",
+    "van-cell": "/vant-weapp/cell/index",
+    "van-cell-group": "/vant-weapp/cell-group/index",
+    "van-row": "/vant-weapp/row/index",
+    "van-col": "/vant-weapp/col/index",
+    "van-panel": "/vant-weapp/panel/index",
+    "van-notice-bar": "/vant-weapp/notice-bar/index",
+    "van-popup": "/vant-weapp/popup/index",
+    "van-picker": "/vant-weapp/picker/index",
+    "van-tab": "/vant-weapp/tab/index",
+    "van-tabs": "/vant-weapp/tabs/index",
+    "van-tag": "/vant-weapp/tag/index"
+  }
+}

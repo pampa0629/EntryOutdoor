@@ -9,7 +9,7 @@
 <!--弹出群成员列表-->
 <van-popup show="{{ showMembers }}" bind:close="onCloseMembers" position="bottom">
   <van-picker columns="{{ members }}" show-toolbar title="选择要转让的成员"  bind:cancel="onCancelMembers" bind:confirm="onConfirmMembers"/>
-</van-popup>
+</van-popup> 
 
 <!--群主是谁-->
 <block wx:if="{{isOwner}}">

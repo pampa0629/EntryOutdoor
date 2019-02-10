@@ -1,0 +1,31 @@
+<!--我是财务官-->
+<block wx:if="{{isCFO}}">
+  <van-cell  title="我是财务官" value="点击进入收款设置" is-link bind:click="clickCFO"/>
+  <van-notice-bar text="我是队员"/>
+</block>
+  
+<!--我是队员：下载二维码，微信支付，提交结果截屏--> 
+<van-panel title="第一步：保存收款二维码到本地相册">
+  <van-button size="large" plain type="primary" bind:click='downloadQrcode'>保存收款二维码</van-button>
+  <van-row>
+    <van-col span="20" offset="2">
+      <image mode="widthFix" src="{{pay.qrcode}}"></image>
+    </van-col>
+  </van-row>
+</van-panel>
+
+<van-panel title="第二步：确定费用，用微信APP扫码支付">
+  <van-cell title="人均：{{pay.average}}（元）" title-width="50%" value="{{pay.total}}除以{{pay.count}}" />
+  <van-cell title="您需要交纳的费用为：{{pay.average*mine.num}}（元）" title-width="60%">
+    <van-stepper value="{{mine.num}}" min="1" max="20" bind:change="bindNum" />
+  </van-cell>
+</van-panel>
+
+<van-panel title="第三步：上传微信支付截屏">
+  <van-button size="large" plain type="primary" bind:click='updateScreen'>上传支付截屏</van-button>
+  <van-row>
+      <van-col span="20" offset="2">
+        <image mode="widthFix" src="{{mine.screen}}"></image>
+      </van-col>
+    </van-row>
+</van-panel>

@@ -195,8 +195,42 @@ const sendResetMsg2Member=(outdoorid, personid, title, oldLeader, newLeader)=>{
   })
 }
 
+const sendPayMsg2Member=(outdoorid, personid, title, cfo, money, member)=>{
+  console.log("sendResetMsg2Member")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "sAE5UXzlJVVNPnCGG4C-nM9YnpSSz5WkH2d1XW2dq5Y"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 收款项目
+        "value": title
+      },
+      "keyword2": { // 收款方
+        "value": cfo
+      },
+      "keyword3": { //收款金额
+        "value": money
+      },
+      "keyword4": { //付款人
+        "value": member
+      },
+      "keyword5": { //备注
+        "value": "收款方（财务官）即作为活动AA收款执行者，不构成经营行为。请点击进入小程序页面，下载收款二维码进行微信支付。"
+      },
+    }
+    var page = buildPage2("AboutOutdoor", "PayOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
 const buildPage = (page, outdoorid) => {
   var result = "pages/" + page + "/" + page + "?outdoorid=" + outdoorid
+  return result
+}
+
+const buildPage2 = (page1, page2, outdoorid) => {
+  var result = "pages/" + page1 + "/" + page2 + "?outdoorid=" + outdoorid
   return result
 }
 
@@ -263,6 +297,30 @@ const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) =>
     }
     var page = buildPage("CreateOutdoor", outdoorid)
     fetchPersonFormid(leaderid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
+const sendAppointMsg2CFO=(personid, outdoorid, title, nickName)=>{
+  console.log("sendAppointMsg2CFO")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "VOM-G6WNZpfQldLmrw-Q_PJEZmqPE-f-5nNEf6_4PyQ"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 所在单位-->活动信息
+        "value": title
+      },
+      "keyword2": { // 授权者-->自己
+        "value": nickName
+      },
+      "keyword3": { // 备注：点击进入页面
+        "value": "您已被领队授权为财务官（CFO），请点击进入小程序收付款页面履行职务。"
+      },
+    }
+    var page = buildPage2("AboutOutdoor", "PayOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      console.log(formid)
       sendMessage(openid, tempid, formid, page, data)
     })
   })
@@ -544,8 +602,9 @@ module.exports = {
   sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
   sendConfirmMsg2Member: sendConfirmMsg2Member, // 给队员发活动成行消息
   sendResetMsg2Member: sendResetMsg2Member, // 给队员发换领队的消息
+  sendPayMsg2Member: sendPayMsg2Member, // 给队员发收款的消息
 
-  // 给领队发消息
+  // 给领队/领队组/财务官等发消息
   sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息
-
+  sendAppointMsg2CFO: sendAppointMsg2CFO, // 给cfo发当选消息
 }

@@ -6,7 +6,7 @@
     </van-checkbox-group>
     <van-field wx:if="{{chatDlg.Options[chatDlg.selects[chatDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体留言内容" border="{{false}}" bind:change="changeChatContent" value="{{ chatDlg.content }}"/>
   </van-panel>
-</van-dialog>
+</van-dialog> 
 
 <!--驳回报名对话框-->
 <van-dialog use-slot async-close show="{{rejectDlg.show}}" show-cancel-button  bind:close="closeRejectDlg" bind:confirm="confirmRejectDlg" title="驳回报名" confirmButtonText="确定驳回" cancelButtonText="取消">
@@ -18,8 +18,8 @@
   </van-panel>
 </van-dialog>
  
-<!--弹出功能按钮-->
-<van-popup show="{{ showPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closePopup">
+<!--弹出审核功能按钮-->
+<van-popup show="{{ showCheckPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closeCheckPopup">
   <van-notice-bar text="当前审核队员为：{{members[index].nickName}}"
 />
   <van-row>
@@ -30,9 +30,23 @@
       <van-button plain size="large" bind:click="onChatMessage">留言询问</van-button>
     </van-col>
     <van-col span="6" offset="1">
-      <van-button plain size="large" type="danger" bind:click="onReject">驳回报名</van-button>
+      <van-button plain size="large" bind:click="onCallPhone">拨打电话</van-button>
     </van-col>
   </van-row>
+  <van-row>
+    <van-col span="6" offset="1">
+      <van-button plain size="large" type="danger" bind:click="onReject">驳回报名</van-button>
+    </van-col>
+    <van-col span="6" offset="8">
+      <van-button plain size="large" bind:click="closeCheckPopup">取消</van-button>
+    </van-col>
+  </van-row>
+</van-popup>
+
+<!--弹出授权功能按钮-->
+<van-popup show="{{ showAppointPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closeAppointPopup">
+  <van-notice-bar text="当前被授权的队员为：{{members[index].nickName}}"
+/>
   <van-row>
     <van-col span="6" offset="1">
       <block wx:if="{{isLeader}}">
@@ -40,24 +54,29 @@
         <van-button wx:else plain size="large" bind:click="onLeaderGroup">取消领队组</van-button>
       </block>
     </van-col>
-    <van-col span="6" offset="1" >
+    <van-col span="6" offset="8" >
       <block wx:if="{{isLeader}}">
         <van-button wx:if="{{members[index].status=='领队组'}}" plain size="large" bind:click="onSetLeader">转让领队</van-button>
       </block>
     </van-col>
+  </van-row>
+  <van-row>
     <van-col span="6" offset="1">
-      <van-button plain size="large" bind:click="closePopup">取消</van-button>
+      <van-button disabled="{{members[index].status!='报名中'}}" plain size="large" bind:click="onSetCFO">设为财务官</van-button>
+    </van-col>
+    <van-col span="6" offset="8">
+      <van-button plain size="large" bind:click="closeAppointPopup">取消</van-button>
     </van-col>
   </van-row>
 </van-popup>
 
-<!--审核队员-->
-<van-panel title="审核队员报名">
-  <van-cell wx:if="{{false}}" title="昵称/性别/电话/认路/状态" value="审核结果"/>
-  <van-cell wx:for="{{members}}" title-width="80%" wx:key="item.personid" title="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}">
-    <van-button wx:if="{{index>0}}" plain size="small" type="primary" bind:click="onPopup{{index}}">功能</van-button>
-  </van-cell> 
-    <van-tag type="primary" plain >长按手机号码即可拨打电话</van-tag>
+<!--审核与授权-->
+<van-panel title="正式成员列表">
+  <van-cell wx:if="{{cfo.nickName}}" title="当前财务官（CFO）为：{{cfo.nickName}}" title-width="90%" />
+  <van-field wx:for="{{members}}" title-width="60%" wx:key="item.personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot>
+    <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onCheckPopup{{index}}">审核</van-button>
+    <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onAppointPopup{{index}}">授权</van-button>
+  </van-field> 
 </van-panel> 
 
 <!--领队编辑附加队员-->

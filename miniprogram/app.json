@@ -32,10 +32,12 @@
     "pages/CreateOutdoor/CheckMembers",
     "pages/CreateOutdoor/LookCareer",
     "pages/MyInfo/LookEmergency",
-    "pages/AboutOutdoor/ChatGroup",
+    "pages/AboutGroup/ChatGroup",
     "pages/AboutOutdoor/HallOutdoor",
     "pages/AboutGroup/MyGroups",
-    "pages/AboutGroup/OneGroup"
+    "pages/AboutGroup/OneGroup",
+    "pages/AboutOutdoor/PayOutdoor",
+    "pages/AboutOutdoor/CfoOutdoor"
   ],
   "window": {
     "backgroundTextStyle": "dark",

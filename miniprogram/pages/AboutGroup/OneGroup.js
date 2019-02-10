@@ -8,7 +8,7 @@ const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
 const dbGroups = db.collection('Groups')
 
-Page({
+Page({ 
 
   data: {
     groupid:"", // group 在表中的id
@@ -28,6 +28,10 @@ Page({
   },
 
   onLoad: function(options) {
+    wx.showShareMenu({
+      withShareTicket: true
+    })
+    
     const self = this
     self.setData({
       groupOpenid: options.groupOpenid

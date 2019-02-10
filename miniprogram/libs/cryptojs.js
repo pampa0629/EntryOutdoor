@@ -826,7 +826,7 @@
        *
        *     var wordArray = CryptoJS.enc.Base64.parse(base64String);
        */
-      parse: function (base64Str) {
+      parse: function (base64Str) { 
         // Shortcuts
         var base64StrLength = base64Str.length;
         var map = this._map;

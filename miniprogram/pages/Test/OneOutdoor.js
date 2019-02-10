@@ -7,12 +7,14 @@ const template = require('../../utils/template.js')
 const crypto = require('../../utils/crypto.js')
 const group = require('../../utils/group.js')
 const person = require('../../utils/person.js')
+const CryptoJS = require('../../libs/cryptojs.js')
 
-const plugin = requirePlugin("WechatSI")
+const plugin = requirePlugin("WechatSI") 
 const manager = plugin.getRecordRecognitionManager()
 
 wx.cloud.init()
 const db = wx.cloud.database({})
+const _ = db.command
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const dbTemp = db.collection('Temp')
@@ -42,6 +44,10 @@ Page({
         }
       })
     }, 10000)
+
+    wx.startGyroscope({
+      interval: 'normal'
+    })
   },
 
   onUnload() {
@@ -136,10 +142,14 @@ Page({
     wx.scanCode({
       complete: (res) => {
         console.log(res)
+        var decode = CryptoJS.enc.Base64.parse(res.rawData)
+        console.log(decode)
         dbTemp.doc(app.globalData.personid).set({
           data: {
             raw: res.rawData,
             //decode: self.decode(res.rawData),
+            decode: decode,
+            //var res = crypto.decrypt(enc, pwd)
             result: res.result,
           }
         })
@@ -438,5 +448,22 @@ Page({
     group.ensureMember(groupID, app.globalData.openid, app.globalData.personid, app.globalData.userInfo)
     person.adjustGroup(app.globalData.personid, groupID)
   },
+
+  tapAcc() {
+    console.log("tapAcc")
+    wx.onGyroscopeChange(function (res) {
+      console.log(res)
+      var t = Math.sqrt(Math.pow(res.x, 2) + Math.pow(res.y, 2) + Math.pow(res.z, 2))
+      var acc = {x:res.x, y:res.y, z:res.z, t:t}
+      //if (t > 1.2) {
+        dbTemp.doc(app.globalData.personid).update({
+          data: {
+          accs:_.push(acc)
+          }
+        })
+        console.log(acc)
+      // }
+    })
+  }
 
 });

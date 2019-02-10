@@ -226,6 +226,16 @@ const buildChatQrcode = (outdoorid) => {
   return "Outdoors/" + outdoorid + "/chat/qrcode" + new Date().getTime() + ".jpg"
 }
 
+// 构建收款二维码图片存储的路径
+const buildPayQrcode = (outdoorid) => {
+  // 没有办法，只能先用时间（毫秒）作为随时文件名，等待微信解决bug
+  return "Outdoors/" + outdoorid + "/pay/qrcode" + new Date().getTime() + ".jpg"
+}
+
+const buildPayResult=(outdoorid, personid)=>{
+  return "Outdoors/" + outdoorid + "/pay/" + personid + new Date().getTime() + ".jpg"
+}
+
 // 构建个人照片存储的路径
 const buildPersonPhotoSrc = (personid, index) => { // index:0,1,2 图片顺序
   // 没有办法，只能先用时间（毫秒）作为随时文件名，等待微信解决bug
@@ -397,7 +407,9 @@ module.exports = {
   parseChar: parseChar,
   // 图片在云存储上的位置
   buildPicSrc: buildPicSrc,
-  buildChatQrcode: buildChatQrcode,
+  buildChatQrcode: buildChatQrcode, // 活动专用群二维码
+  buildPayQrcode: buildPayQrcode, // 收款二维码
+  buildPayResult: buildPayResult, // 付款截屏
   buildPersonPhotoSrc: buildPersonPhotoSrc,
   // 截止日期数组和字符串的相互转化
   getLimitDates: getLimitDates,

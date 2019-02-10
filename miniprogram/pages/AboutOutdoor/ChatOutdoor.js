@@ -244,7 +244,7 @@ Page({
   onEnterGroup(){
     const self = this;
     wx.navigateTo({
-      url: "../AboutOutdoor/ChatGroup?outdoorid=" + self.data.outdoorid + "&isLeader="+self.data.isLeader
+      url: "../AboutGroup/ChatGroup?outdoorid=" + self.data.outdoorid + "&isLeader="+self.data.isLeader
     })
   },
 

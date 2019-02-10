@@ -303,6 +303,13 @@ Page({
       })
     }
 
+    // pay 支付
+    if (res.data.pay) {
+      self.setData({
+        pay: res.data.pay,
+      })
+    }
+
     // next 
 
   },
@@ -937,6 +944,13 @@ Page({
   clickLeader() {
     wx.navigateTo({
       url: '../EntryOutdoor/SubscribeLeader?leaderid=' + this.data.members[0].personid,
+    })
+  },
+
+  clickPay() {
+    const self = this
+    wx.navigateTo({
+      url: '../AboutOutdoor/PayOutdoor?outdoorid=' + self.data.outdoorid,
     })
   },
 

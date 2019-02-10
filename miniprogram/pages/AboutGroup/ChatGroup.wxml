@@ -7,7 +7,7 @@
 <van-tag type="primary" plain>第二步：点击上传群二维码</van-tag>
 <van-tag type="primary" plain>第三步：小程序会自动在活动留言页面“@所有人”提示队员扫码加入微信群</van-tag>
 <van-tag type="primary" plain>注意二维码的有效期，过期则需要重新生成并上传二维码</van-tag>
-
+ 
 <!--上传群二维码-->
 <van-row>
   <van-col span="20" offset="2">

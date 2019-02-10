@@ -9,7 +9,7 @@ const encrypt = (obj, pwd) => {
   });
   var str = encryptData.toString()
   return str
-}
+} 
 
 // 解密
 const decrypt = (str, pwd) => {

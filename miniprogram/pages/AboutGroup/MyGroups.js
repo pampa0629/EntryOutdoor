@@ -1,6 +1,7 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const person = require('../../utils/person.js')
+const cloudfun = require('../../utils/cloudfun.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -25,6 +26,9 @@ Page({
           this["tapGroup" + index] = (e) => {
             self.tapGroup(index, e)
           }
+          this["quitGroup" + index] = (e) => {
+            self.quitGroup(index, e)
+          }
         }
       }
     })
@@ -35,6 +39,16 @@ Page({
     wx.navigateTo({
       url: './OneGroup?groupOpenid='+self.data.groups[index].openid,
     })
+  },
+
+  // 退出群
+  quitGroup(index, e) {
+    const self = this
+    self.data.groups.splice(index, 1)
+    self.setData({
+      groups: self.data.groups
+    })
+    cloudfun.updatePersonGroups(app.globalData.personid, self.data.groups)
   },
 
   onShow: function () {

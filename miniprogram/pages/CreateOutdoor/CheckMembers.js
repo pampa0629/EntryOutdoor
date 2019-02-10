@@ -7,7 +7,7 @@ const outdoor = require('../../utils/outdoor.js')
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
-
+ 
 Page({
 
   data: {
@@ -17,7 +17,7 @@ Page({
     index: null, // 当前正在处理的index
     isLeader:false, // 判断自己是不是总领队
 
-    showPopup: false, // 分享弹出菜单
+    showCheckPopup: false, // 弹出审核菜单
     chatDlg: { // 留言对话框
       show: false,
       content: "",
@@ -30,6 +30,9 @@ Page({
       select: null,
       Options: ["体力不能胜任", "户外装备不全", "户外经验不足", "必须认路", "只限熟人", "其它"],
     },
+
+    showAppointPopup: false, // 弹出授权菜单
+    cfo:{}, // 财务官
 
     addMembers: [], // 领队外挂
     addMember: "",
@@ -48,6 +51,12 @@ Page({
         isLeader:true,
       })
     }
+    if (prevPage.data.pay && prevPage.data.pay.cfo){
+      self.setData({
+        cfo: prevPage.data.pay.cfo, 
+      })
+    }
+    // 构建正式队员列表
     self.flushMembers(prevPage.data.members)
     // 处理附加队员
     self.loadAddMembers(self.data.outdoorid)
@@ -80,8 +89,11 @@ Page({
 
       // 增加函数
       let index = i; // 还必须用let才行
-      this["onPopup" + index] = () => {
-        this.onPopup(index)
+      this["onCheckPopup" + index] = () => {
+        this.onCheckPopup(index)
+      }
+      this["onAppointPopup" + index] = () => {
+        this.onAppointPopup(index)
       }
       this["longPressMember" + index] = () => {
         this.longPressMember(index)
@@ -132,19 +144,37 @@ Page({
     })
   },
 
-  onPopup(index) {
-    console.log("onPopup")
+  onCheckPopup(index) {
+    console.log("onCheckPopup")
     console.log(index)
     this.setData({
-      showPopup: true,
+      showCheckPopup: true,
+      showAppointPopup: false,
       index: index,
     })
   },
 
-  closePopup() {
-    console.log("closePopup")
+  closeCheckPopup() {
+    console.log("closeCheckPopup")
     this.setData({
-      showPopup: false,
+      showCheckPopup: false,
+    })
+  },
+
+  onAppointPopup(index) {
+    console.log("onAppointPopup")
+    console.log(index)
+    this.setData({
+      showAppointPopup: true,
+      showCheckPopup: false,
+      index: index,
+    })
+  },
+
+  closeAppointPopup() {
+    console.log("closeAppointPopup")
+    this.setData({
+      showAppointPopup: false,
     })
   },
 
@@ -154,6 +184,11 @@ Page({
     wx.navigateTo({
       url: 'LookCareer?personid=' + self.data.members[self.data.index].personid,
     })
+  },
+
+  onCallPhone() {
+    console.log("onCallPhone")
+    util.phoneCall(this.data.members[this.data.index].phone, false)
   },
 
   onLeaderGroup() {
@@ -171,6 +206,18 @@ Page({
       })
       self.flushMembers(res.data.members)
       cloudfun.updateOutdoorMembers(self.data.outdoorid, res.data.members)
+    })
+  },
+
+  // 设为财务官
+  onSetCFO() {
+    console.log("onSetCFO")
+    const self = this
+    const member = self.data.members[self.data.index]
+    var cfo = {personid:member.personid, nickName:member.nickName}
+    outdoor.setCFO(self.data.outdoorid, cfo)
+    self.setData({
+      cfo:cfo, 
     })
   },
 

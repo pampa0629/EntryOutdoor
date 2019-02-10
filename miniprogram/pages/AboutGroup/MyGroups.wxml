@@ -1,8 +1,14 @@
 <!--加入的户外微信群-->
 <van-panel title="户外微信群" desc="点击群名查看排行榜" >
   <van-row wx:for="{{groups}}" wx:key="openid">
-    <van-col span="22" offset="1">
+    <van-col span="11" offset="1">
       <open-data type="groupName"  open-gid="{{item.openid}}" bindtap="tapGroup{{index}}"/>
     </van-col>
+    <van-row>
+    <van-col span="4" offset="6">
+      <van-button plain type="warning" bind:click="quitGroup{{index}}">退出</van-button>
+    </van-col>
+  </van-row>
   </van-row>
 </van-panel>
+ 

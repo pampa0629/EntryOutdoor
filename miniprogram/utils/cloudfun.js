@@ -226,6 +226,36 @@ const updateOutdoorFormids=(outdoorid, formids)=>{
   })
 }
 
+const updateOutdoorPay=(outdoorid, pay)=>{
+  console.log("updateOutdoorPay")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "pay",
+      command: "",
+      value: pay,
+    }
+  })
+}
+
+const updateOutdoorPayQrcode = (outdoorid, qrcode) => {
+  console.log("updateOutdoorPayQrcode")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "pay.qrcode",
+      command: "",
+      value: qrcode,
+    }
+  })
+}
+
 const updateOutdoorWebsites=(outdoorid, websites)=>{
   console.log("updateOutdoorWebsites")
   wx.cloud.callFunction({
@@ -402,6 +432,9 @@ module.exports = {
   shiftOutdoorLvyeWaitings: shiftOutdoorLvyeWaitings,
 
   updateOutdoorFormids: updateOutdoorFormids,
+
+  updateOutdoorPay: updateOutdoorPay, // 支付信息
+  updateOutdoorPayQrcode: updateOutdoorPayQrcode, // 支付二维码
 
   // Persons
   unshiftPersonCared:unshiftPersonCared,

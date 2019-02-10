@@ -18,7 +18,7 @@
 <!--图标按钮-->
 <van-row>
   <!--分享-->
-  <van-col span="2" offset="3">
+  <van-col span="2" offset="1">
     <view wx:if="{{status!='已取消'}}" style="flex-direction:column">
       <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
       <view class="icon_tip">分享</view>
@@ -64,6 +64,12 @@
       <view class="icon_tip">详情</view>
     </view>
   </van-col>
+  <van-col span="2" offset="1" wx:if="{{pay}}">
+    <view style="flex-direction:column">
+      <van-icon name="gold-coin-o" size="24px" color="#1aad19" bind:click="clickPay"></van-icon>
+      <view class="icon_tip">支付</view>
+    </view>
+  </van-col>
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon name="wap-home" size="24px" color="#1aad19" bind:click="toMainpage"></van-icon>
@@ -71,7 +77,7 @@
     </view>
   </van-col>
   <!--取消通知-->
-  <van-col wx:if="{{status=='已取消'}}" span="10" offset="2">
+  <van-col wx:if="{{status=='已取消'}}" span="8" offset="1">
     <view style="flex-direction:column">
       <view style="color:#F65959;font-size:20pt">本活动已取消</view>
     </view>

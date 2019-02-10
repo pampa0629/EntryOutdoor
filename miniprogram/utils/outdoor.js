@@ -601,6 +601,31 @@ const drawShareCanvas=(canvas, data, callback)=>{
   })
 }
 
+const setCFO=(outdoorid, cfo)=>{
+  dbOutdoors.doc(outdoorid).get().then(res=>{
+    var pay = {}
+    if(res.data.pay) {
+      pay = res.data.pay
+    }
+    pay.cfo = cfo
+    cloudfun.updateOutdoorPay(outdoorid, pay)
+    // 发模板消息
+    template.sendAppointMsg2CFO(cfo.personid, outdoorid, res.data.title.whole, cfo.nickName)    
+  })
+}
+
+// 设置我的活动费用支付结果
+const setPayMine=(outdoorid, personid, mine)=>{
+  dbOutdoors.doc(outdoorid).get().then(res => {
+    const pay = res.data.pay
+    if(!pay.results) {
+      pay.results = {}
+    }
+    pay.results[personid] = mine
+    cloudfun.updateOutdoorPay(outdoorid, pay)
+  })
+}
+
 module.exports = {
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
@@ -619,6 +644,9 @@ module.exports = {
   buildChatMessage: buildChatMessage, // 构建一条留言
 
   findPersonIndex: findPersonIndex, // 从Members数组中找到自己的index
+
+  setCFO: setCFO, // 设置财务官
+  setPayMine: setPayMine, // 设置我的活动费用支付结果
 
   // 绘制画布
   drawShareCanvas: drawShareCanvas, // 绘制分享的画布

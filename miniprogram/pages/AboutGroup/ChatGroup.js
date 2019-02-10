@@ -50,10 +50,10 @@ Page({
 
   onUnload: function() {
 
-  },
+  }, 
 
   uploadQrcode() {
-    var self = this;
+    const self = this;
     wx.chooseImage({
       count: 1, // 
       sizeType: ['original'], //['original', 'compressed'],   

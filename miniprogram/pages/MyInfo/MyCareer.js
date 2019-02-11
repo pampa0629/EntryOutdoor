@@ -35,7 +35,7 @@ Page({
     return {
       title: app.globalData.userInfo.nickName + "的户外履历",
       desc: '嘚瑟一下',
-      path: 'pages/CreateOutdoor/LookCareer?personid=' + app.globalData.personid
+      path: 'pages/MyInfo/LookCareer?personid=' + app.globalData.personid
     }
   },
 

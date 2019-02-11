@@ -71,12 +71,6 @@ const loadOpenID = () => {
   console.log("loadOpenID:" + value)
   return value
 }
-/* 应该不会这个需要，先注释掉
-const clearOpenID = () => {
-  wx.removeStorageSync("openid")
-  console.log("clearOpenID")
-}*/
-
 
 // outdoorid ：刚创建的活动信息,存储在数据库Outdoors中的_id
 const saveOutdoorID = value => {
@@ -197,7 +191,7 @@ const parseChar = (cchar) => {
 }
 
 // 得到截止日期数组
-const getLimitDates = () => {
+const getLimitDates = () => { 
   var LimitDates = ["不限", "前一天", "前两天", "前三天", "前四天", "前五天", "前六天"] // 截止日期
   return LimitDates;
 }
@@ -422,8 +416,6 @@ module.exports = {
   myParseInt: myParseInt,
   // 统一授权入口
   authorize: authorize,
-  // 得到唯一的户外昵称 放到person.js中了
-  // getUniqueNickname: getUniqueNickname,
   // 得到最近步数的top值
   stepsTopNs: stepsTopNs,
 }

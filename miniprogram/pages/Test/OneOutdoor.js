@@ -7,11 +7,12 @@ const template = require('../../utils/template.js')
 const crypto = require('../../utils/crypto.js')
 const group = require('../../utils/group.js')
 const person = require('../../utils/person.js')
+const outdoor = require('../../utils/outdoor.js')
 const CryptoJS = require('../../libs/cryptojs.js')
 
 const plugin = requirePlugin("WechatSI") 
 const manager = plugin.getRecordRecognitionManager()
-
+ 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const _ = db.command
@@ -464,6 +465,11 @@ Page({
         console.log(acc)
       // }
     })
-  }
+  },
+
+  tapEndTime() {
+    var time = outdoor.calcRemainTime("2019-02-11", {date: "不限",time: "21:00"}, false)
+    console.log(time)
+  },
 
 });

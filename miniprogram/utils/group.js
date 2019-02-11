@@ -39,7 +39,7 @@ const ensureMember=(groupOpenid, openid, personid, userInfo)=>{
     }
   })
 }
-
+ 
 // 转让群主
 const changeOwner=(groupid, ownerOpenid, callback)=>{
   console.log("group.changeOwner")

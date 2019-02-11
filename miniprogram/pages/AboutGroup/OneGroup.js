@@ -75,6 +75,7 @@ Page({
           self.setData({
             rank:group.rank
           })
+          self.buildFuntions()
         }
       }
     })
@@ -117,7 +118,8 @@ Page({
     console.log(e)
     const self = this
     const openid = self.data.openids[e.detail.index]
-    group.changeOwner(self.data.groupid, owner=>{
+    group.changeOwner(self.data.groupid, openid, owner=>{
+      console.log(owner)
       self.setData({
         showMembers: false,
         owner: owner,
@@ -155,6 +157,9 @@ Page({
       rank.lastyear = []
       rank.lastyear = rank.lastyear.concat(counts)
       console.log(rank.lastyear)
+      
+      // 构造函数
+      self.buildFuntions()
 
       // 最后更新时间
       rank.update = util.formatTime(new Date())
@@ -163,6 +168,52 @@ Page({
         rank:rank,
       })
       group.saveRank(self.data.groupid, rank)
+    })
+  },
+
+  buildFuntions() {
+    console.log("buildFuntions")
+    const self = this
+    const rank = self.data.rank
+    console.log(rank)
+
+    for (var i in rank.total) {
+      let index = i; // 还必须用let才行
+      this["clickTotal" + index] = (e) => {
+        self.clickTotal(index, e)
+      }
+    }
+
+    for (var i in rank.thisyear) {
+      let index = i; // 还必须用let才行
+      this["clickThisyear" + index] = (e) => {
+        self.clickThisyear(index, e)
+      }
+    }
+
+    for (var i in rank.lastyear) {
+      let index = i; // 还必须用let才行
+      this["clickLastyear" + index] = (e) => {
+        self.clickLastyear(index, e)
+      }
+    }
+  },
+
+  clickTotal(index, e) {
+    this.gotoPersonCareer(this.data.rank.total[index].personid)
+  },
+
+  clickThisyear(index, e) {
+    this.gotoPersonCareer(this.data.rank.thisyear[index].personid)
+  },
+
+  clickLastyear(index, e) {
+    this.gotoPersonCareer(this.data.rank.lastyear[index].personid)
+  },
+
+  gotoPersonCareer(personid) {
+    wx.navigateTo({
+      url: '../MyInfo/LookCareer?personid='+personid,
     })
   },
 
@@ -176,7 +227,7 @@ Page({
         outdoors = outdoors.concat(res.data.myOutdoors)
         outdoors = outdoors.concat(res.data.entriedOutdoors)
         var years = self.countOutdoor(outdoors)
-        var one = { nickName: res.data.userInfo.nickName, total: outdoors.length, thisyear: years.thisyear, lastyear: years.lastyear }
+        var one = { nickName: res.data.userInfo.nickName, total: outdoors.length, thisyear: years.thisyear, lastyear: years.lastyear,personid:item}
         console.log(one)
         counts.push(one)
         num ++ 

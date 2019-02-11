@@ -5,7 +5,7 @@
     </picker>
   <picker mode="time" value="{{ocuppy.time}}" start="00:00" end="24:00" bindchange="changOcuppyTime">
     <van-field label="时间" disabled  value="{{ocuppy.time}}" placeholder="请选择占坑截止时间" border="{{false}}"/>
-  </picker>
+  </picker> 
   </van-panel>
 
   <!--报名截止时间-->

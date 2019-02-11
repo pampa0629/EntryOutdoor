@@ -807,7 +807,7 @@
         if (paddingChar) {
           while (base64Chars.length % 4) {
             base64Chars.push(paddingChar);
-          }
+          } 
         }
 
         return base64Chars.join('');

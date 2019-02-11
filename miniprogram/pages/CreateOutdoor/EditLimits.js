@@ -28,11 +28,7 @@ Page({
 
   onLoad: function (options) {
     const self = this;
-    self.setData({
-      OcuppyDates: util.getLimitDates(),
-      EntryDates: util.getLimitDates(),
-    })
-
+    
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({

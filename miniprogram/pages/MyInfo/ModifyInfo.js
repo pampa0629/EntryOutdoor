@@ -11,7 +11,7 @@ const crypto = require('../../utils/crypto.js')
 Page({
   data: { 
     userInfo: {
-      nickName: null, 
+      nickName: null,  
       gender: null,
       phone: null
     },
@@ -49,6 +49,7 @@ Page({
 
     dbPersons.doc(app.globalData.personid).get().then(res => {
       if (res.data.emergency) {
+        console.log(res.data.emergency)
         self.setData({ // 解密
           emergency: crypto.decrypt(res.data.emergency, self.data.password)
         })

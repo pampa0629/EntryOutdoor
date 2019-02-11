@@ -41,19 +41,19 @@
   <!--总排行榜--> 
   <swiper-item>  
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-cell  wx:for="{{rank.total}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.total}}次"/>
+      <van-cell  wx:for="{{rank.total}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.total}}次" bind:click="clickTotal{{index}}"/>
     </scroll-view>
   </swiper-item>
   <!--本年度-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-cell  wx:for="{{rank.thisyear}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.thisyear}}次"/>
+      <van-cell  wx:for="{{rank.thisyear}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.thisyear}}次" bind:click="clickThisyear{{index}}"/>
     </scroll-view>
   </swiper-item> 
   <!--上年度-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-cell  wx:for="{{rank.lastyear}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.lastyear}}次"/>
+      <van-cell  wx:for="{{rank.lastyear}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.lastyear}}次" bind:click="clickLastyear{{index}}"/>
     </scroll-view>
   </swiper-item>
 </swiper>

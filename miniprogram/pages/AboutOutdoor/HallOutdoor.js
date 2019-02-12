@@ -15,30 +15,67 @@ Page({
 
   data: {
     outdoors: [],
+    setting:{},
+    Setting : "HallSetting",  // key 
+    page:{},
   },
 
   onLoad: function(options) {
-    this.flushOutdoors(null)
+    const self = this
+    var setting = wx.getStorageSync(self.data.Setting)
+    if(setting) {
+      self.setData({
+        setting:setting,
+      })
+    }
+
+    this.flushOutdoors(true, null)
     wx.showShareMenu({
       withShareTicket: true
     })
   },
 
-  flushOutdoors(callback) {
+  // isClear:是否清空之前结果重新查询
+  flushOutdoors(isClear, callback) {
     const self = this
-    self.data.outdoors = []
+    if (isClear) {
+      self.setData({
+        page:{bottom:false,no:0,limit:20},
+        outdoors:[],
+      })
+    }
     var today = util.formatDate(new Date())
-    dbOutdoors.orderBy("title.date", 'asc')
-      .where({"title.date": _.gte(today)})
-      .where({ "limits.intoHall": _.neq(false)})
-      .get().then(res => {
+    var query = dbOutdoors.where({ "limits.intoHall": _.neq(false) })
+    const setting = self.data.setting
+    console.log(setting)
+    if (!setting.showOutdate) { // 是否显示过期活动
+      query = query.where({ "title.date": _.gte(today) })
+    }
+    if (setting.keyword) { // 关键字搜索
+      query = query.where({
+        "title.place": db.RegExp({
+          regexp: setting.keyword,
+          options: 'i'})
+      })
+    }
+    // 按日期排序
+    query = query.orderBy("title.date", 'asc') 
+    // 分页
+    const page = self.data.page
+    query = query.skip(page.no * page.limit).limit(page.limit)
+    // 真正读取数据
+    query.get().then(res => {
       console.log(res)
+      self.setData({ // 到底部了
+        "page.bottom": res.data.length == 0?true:false,
+      })
+    
       res.data.forEach((item, index) => {
         console.log(item)
         var outdoor = {
           title: item.title.whole,
           id: item._id,
-          pic: (item.brief.pics && item.brief.pics.length > 0) ? item.brief.pics[0].src : null,
+          pic: (item.brief && item.brief.pics && item.brief.pics.length > 0) ? item.brief.pics[0].src : null,
           openid: item._openid,
           status:item.status,
         }
@@ -83,38 +120,74 @@ Page({
     }
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow: function() {
-
   },
 
   onUnload: function() {
-
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function() {
-    wx.showNavigationBarLoading()
-    this.flushOutdoors(res=>{
-      wx.hideNavigationBarLoading();
-      wx.stopPullDownRefresh();
+  openSetting() {
+    this.setData({
+      "setting.show":true,
     })
   },
 
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function() {
-
+  closeSetting() {
+    this.setData({
+      "setting.show": false,
+    })
   },
 
-  /**
-   * 用户点击右上角分享
-   */
+  onShowOutdate(e) {
+    console.log(e)
+    const self = this
+    this.setData({
+      "setting.showOutdate": !self.data.setting.showOutdate,
+    })
+  }, 
+
+  inputKeyword(e) {
+    console.log(e)
+    this.setData({
+      "setting.keyword": e.detail,
+    })
+  }, 
+
+  onConfirmSetting() {
+    this.flushOutdoors(true, null)
+    this.setData({
+      "setting.show": false,
+      "page.bottom":false,
+    })
+    wx.setStorageSync(this.data.Setting, this.data.setting)
+  },
+
+  onPullDownRefresh: function() {
+    console.log("onPullDownRefresh")
+    const self = this
+    self.setData({
+      isPulldown:true,
+    })
+    wx.showNavigationBarLoading()
+
+    this.flushOutdoors(true, res=>{
+      wx.hideNavigationBarLoading();
+      wx.stopPullDownRefresh();
+      self.setData({
+        isPulldown: false,
+      })
+    })
+  },
+
+  onReachBottom: function() {
+    console.log("onReachBottom")
+    const self = this
+    if (!self.data.page.bottom) {
+      self.data.page.no ++ 
+      self.flushOutdoors(false, null)
+    }
+  },
+
   onShareAppMessage: function() {
     return {
       title: 活动大厅,

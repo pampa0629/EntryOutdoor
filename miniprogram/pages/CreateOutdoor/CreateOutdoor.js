@@ -720,6 +720,7 @@ Page({
         template.sendModifyMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole, self.data.myself.userInfo.nickName, self.data.modifys)
       })
     }
+    self.createCanvasFile() // 把图片更新一下
     // 这里处理和ORG网站同步的事情
     self.keepSameWithWebsites()
   },
@@ -888,16 +889,14 @@ Page({
     })
   },
 
-  createCanvasFile() {
+  createCanvasFile() { 
     console.log("createCanvasFile")
     const self = this
-    self.data.hideCanvas = false
-    const shareCanvas = wx.createCanvasContext('shareCanvas')
+    const canvas = wx.createCanvasContext('shareCanvas', self)
     // todo 分享到朋友圈的图片
-    outdoor.drawShareCanvas(shareCanvas, self.data, shareCanvasFile => {
+    outdoor.drawShareCanvas(canvas, self.data, shareCanvasFile => {
       self.setData({
         shareCanvasFile: shareCanvasFile,
-        hideCanvas: true,
       })
     })
   },
@@ -906,6 +905,7 @@ Page({
     console.log(options)
     const self = this;
     this.closePopup()
+    console.log(self.data.shareCanvasFile)
     // options.from == "menu" &&     // options.type = "tap" from="button"
     if (self.data.outdoorid) { // 数据库里面有，才能分享出去
       return {

@@ -1,1 +1,7 @@
 /* miniprogram/pages/AboutOutdoor/HallOutdoor.wxss */
+
+
+.icon_tip{
+  font-family:黑体;
+  font-size:10pt
+}

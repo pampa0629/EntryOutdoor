@@ -1,5 +1,5 @@
 <!--集合地点-->
-<van-field label="集合地点" required value="{{meet.place}}" placeholder="请输入集合地点" bindinput="inputMeetPlace"/>
+<van-field label="集合地点" required value="{{meet.place}}" clearable placeholder="请输入集合地点" bindinput="inputMeetPlace"/>
 
 <!--地图上选择-->
 <van-field label="地图位置描述" value="{{meet.name}}" disabled placeholder="请选择地图位置"  use-button-slot>

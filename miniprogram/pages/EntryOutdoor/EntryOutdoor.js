@@ -377,13 +377,11 @@ Page({
   createCanvasFile() {
     console.log("createCanvasFile")
     const self = this
-    self.data.hideCanvas = false
-    const shareCanvas = wx.createCanvasContext('shareCanvas')
+    const shareCanvas = wx.createCanvasContext('shareCanvas', self)
     // todo 分享到朋友圈的图片
     outdoor.drawShareCanvas(shareCanvas, self.data, shareCanvasFile => {
       self.setData({
         shareCanvasFile: shareCanvasFile,
-        hideCanvas:true,
       })
     })
   },

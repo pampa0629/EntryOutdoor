@@ -558,6 +558,8 @@ const drawText=(canvas, text, x, y, size, dy, color)=>{
 }
 
 const drawShareCanvas=(canvas, data, callback)=>{
+  console.log("outdoor.drawShareCanvas")
+
   var green = "#1aad19", pos = { x: 10, y: 35 }, dx = 35
   // 领队
   pos = drawText(canvas, "领队："+data.leader.userInfo.nickName, pos.x, pos.y, 30, 15, green)
@@ -582,17 +584,16 @@ const drawShareCanvas=(canvas, data, callback)=>{
   
    // 活动状态
   pos = drawText(canvas, "活动状态："+data.status, pos.x, pos.y+5, 30, 15, green)
-  
+
   canvas.draw(false, function (res) {
-    console.log('sharing img done...')
+    console.log('canvas.draw done...')
     wx.canvasToTempFilePath({
       canvasId: 'shareCanvas',
-      width: 500,
+      width: 500, 
       height: 400,
       destWidth: 500,
       destHeight: 400,
       success: res => {
-        console.log(res.tempFilePath)
         if(callback) {
           callback(res.tempFilePath)
         }

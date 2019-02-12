@@ -235,7 +235,7 @@
             </form>
           </button>
         </form>
-      </button>
+      </button> 
     </form>
   </block>
   <!--保存修改-->
@@ -265,7 +265,7 @@
 </block>
 
 <!--画布-->
-<block wx:if="{{!hideCanvas}}">
+<view style='width:0px;height:0px;overflow:hidden;'>
   <canvas style="width: 500px; height: 400px;" canvas-id="shareCanvas"/>
   <!-- todo <canvas style="width: 720px; height: 1280px;" canvas-id="circleCanvas"/> -->
-</block>
+</view>

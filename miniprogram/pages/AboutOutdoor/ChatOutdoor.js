@@ -240,7 +240,7 @@ Page({
       data: self.data.chat.messages[index].msg,
     })
   },
-
+ 
   onEnterGroup(){
     const self = this;
     wx.navigateTo({

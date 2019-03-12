@@ -1,5 +1,7 @@
 const app = getApp()
 const util = require('../../utils/util.js')
+const outdoor = require('../../utils/outdoor.js')
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -99,6 +101,15 @@ Page({
     if (res.data.route && res.data.route.interphone) {
       self.setData({
         interphone: res.data.route.interphone,
+      })
+    }
+
+    // 交通方式
+    if (res.data.traffic) {
+      self.setData({
+        traffic: res.data.traffic,
+        "traffic.carInfo": outdoor.buildCarInfo(res.data.traffic),
+        "traffic.costInfo": outdoor.buildCostInfo(res.data.traffic),
       })
     }
     

@@ -182,7 +182,7 @@ Page({
     console.log("onLookCareer")
     const self = this
     wx.navigateTo({
-      url: './MyInfo/LookCareer?personid=' + self.data.members[self.data.index].personid,
+      url: '../MyInfo/LookCareer?personid=' + self.data.members[self.data.index].personid,
     })
   },
 

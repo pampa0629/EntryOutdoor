@@ -10,7 +10,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
-
+ 
 Page({
 
   data: {
@@ -58,8 +58,17 @@ Page({
           options: 'i'})
       })
     }
-    // 按日期排序
-    query = query.orderBy("title.date", 'asc') 
+    // 不能是拟定中的活动
+    query = query.where({ "status": _.neq("拟定中") })
+    // 不能是已取消的活动
+    query = query.where({ "status": _.neq("已取消") })
+    // 按日期排序，都优先看近期的活动；不显示过期活动时，日期从小到大（升序）；显示过期活动时，降序
+    if (!setting.showOutdate) { 
+      query = query.orderBy("title.date", 'asc') 
+    } else {
+      query = query.orderBy("title.date", 'desc') 
+    }
+    
     // 分页
     const page = self.data.page
     query = query.skip(page.no * page.limit).limit(page.limit)

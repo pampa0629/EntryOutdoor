@@ -1,4 +1,5 @@
 const select = require('../../libs/select.js')
+const outdoor = require('../../utils/outdoor.js')
 
 Page({
  
@@ -46,6 +47,8 @@ Page({
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
       traffic: self.data.traffic,
+      "traffic.carInfo": outdoor.buildCarInfo(self.data.traffic),
+      "traffic.costInfo": outdoor.buildCostInfo(self.data.traffic),
       hasModified: self.data.hasModified,
       "modifys.traffic": self.data.hasModified,
     })
@@ -65,7 +68,7 @@ Page({
     const self = this
     if (this.data.traffic.mode == "公共交通") {
       this.setData({
-        Costs: ["费用自理"],
+        Costs: ["费用自理"], 
         "traffic.cost": "费用自理",
       })
     } else if (this.data.traffic.mode == "包车") {

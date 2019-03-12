@@ -6,8 +6,8 @@ const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
-  
-wx.cloud.init() 
+   
+wx.cloud.init()  
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -257,7 +257,7 @@ Page({
     // 网站同步信息
     if (res.data.websites) {
       self.setData({
-        "websites": res.data.websites,
+        "websites": res.data.websites, 
       })
     }
     // 交通方式
@@ -265,6 +265,7 @@ Page({
       self.setData({
         "traffic": res.data.traffic,
         "traffic.carInfo": outdoor.buildCarInfo(res.data.traffic),
+        "traffic.costInfo": outdoor.buildCostInfo(res.data.traffic),
       })
     }
     console.log(self.data.traffic)
@@ -436,8 +437,8 @@ Page({
   entryOutdoorInner: function(status, formid) {
     const self = this;
     console.log("status is:" + JSON.stringify(status, null, 2))
-    // 再判断一下是否属于 修改报名的类型，即在“占坑”和“报名”中切换
-    if (self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "报名中") {
+    // 再判断一下是否属于 报名状态
+    if (outdoor.isEntriedStatus(self.data.entryInfo.status)) {
       // 属于的话，就只更新 Outdoors表members的entryInfo信息就好
       self.setData({
         "entryInfo.status": status,
@@ -517,7 +518,7 @@ Page({
         }
       }
     }
-  },
+  }, 
 
   // 把信息同步到网站上
   postEntry2Websites: function(isQuit) {
@@ -527,6 +528,8 @@ Page({
     if (self.data.websites && self.data.websites.lvyeorg &&
       self.data.websites.lvyeorg.keepSame || self.data.websites.lvyeorg.tid) {
       var entryMessage = lvyeorg.buildEntryMessage(self.data.userInfo, self.data.entryInfo, isQuit, false) // 构建报名信息
+      var entryNotice = lvyeorg.buildEntryNotice(self.data.websites.lvyeorg.qrcodeUrl, false, self.data.websites.lvyeorg.allowSiteEntry)
+      entryMessage.message += entryNotice
       console.log(entryMessage)
       console.log(app.globalData.lvyeorgLogin)
       if (app.globalData.lvyeorgLogin && self.data.websites.lvyeorg.tid) { // 登录了就直接发
@@ -803,9 +806,15 @@ Page({
   editOutdoor(){
     const self = this
     util.saveOutdoorID(self.data.outdoorid)
-    wx.switchTab({
+    wx.switchTab({ 
       url: "../CreateOutdoor/CreateOutdoor" 
     })
+  },
+
+  newOutdoor() {
+    // 这里给 app 设置一下，知道是要新创建活动了
+    app.globalData.newOutdoor = true
+    this.editOutdoor()
   },
 
   // 页面相关事件处理函数--监听用户下拉动作  
@@ -852,13 +861,14 @@ Page({
       "entryInfo.meetsIndex": parseInt(e.target.dataset.name),
     })
     // 如果已经报名，则需要修改集合地点
-    if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "替补中") {
+    if (outdoor.isEntriedStatus(self.data.entryInfo.status)) {
       self.entryOutdoorInner(self.data.entryInfo.status, null)
     }
   },
 
   // 查看集合地点的地图设置，并可导航
   lookMeetMap() {
+    console.log("lookMeetMap()")
     const self = this
     const index = self.data.entryInfo.meetsIndex
     // 选中了集合地点，并且有经纬度，才开启选择地图
@@ -891,7 +901,7 @@ Page({
     self.setData({
       "entryInfo.knowWay": !self.data.entryInfo.knowWay,
     })
-    if (self.data.entryInfo.status == "报名中" || self.data.entryInfo.status == "占坑中" || self.data.entryInfo.status == "替补中") {
+    if (outdoor.isEntriedStatus(self.data.entryInfo.status)) {
       self.entryOutdoorInner(self.data.entryInfo.status, null)
     }
   },

@@ -54,7 +54,8 @@ Page({
     meets: [], //集合点，可加多个
     traffic: null, // 交通方式
     members: [], // 已报名成员（含领队）
-    myself: {}, // 自己的报名信息（作为领队组成员）
+    myself: {}, // 自己的报名信息
+    isLeaderGroup: false, // 自己是否为领队组成员
     leader: { // 领队的信息也要记录起来
       personid: null,
       userInfo: null,
@@ -136,7 +137,7 @@ Page({
   loadOutdoorInTable: function(outdoorid) {
     console.log("loadOutdoorInTable")
     const self = this
-    self.setDefault(); // 每次先把几个关键信息置空，并加载当前用户为leader
+    self.setDefault(); // 每次先把几个关键信息置空
     // 判断是否应加载一个在数据库中的活动信息
     if (outdoorid != null && outdoorid.length > 0) {
       dbOutdoors.doc(outdoorid).get()
@@ -148,7 +149,7 @@ Page({
             status: res.data.status,
             // route: res.data.route, // 做兼容性处理了
             meets: res.data.meets,
-            leader: res.data.members[0],
+            leader: res.data.members[0], // 总领队默认为第一个
             members: res.data.members,
           })
           // 读取之前活动数据时的兼容性处理
@@ -158,9 +159,17 @@ Page({
           self.createCanvasFile()
 
           // 这里要判断从本地缓存中读取到的outdoorid是自己创建的，还是用来当模板的
-          // 依据是 从数据库读取的myself是否为自己  
-          if (self.data.myself.personid != app.globalData.personid) {
-            self.newOutdoor(null); //不是自己，就等于要新建活动
+          // 依据是 从数据库读取的leader是否为自己
+          console.log("self.data.myself.personid: " + self.data.myself.personid)
+          console.log("self.data.leader.personid: " + self.data.leader.personid)
+          console.log("app.globalData.personid: " + app.globalData.personid)
+          console.log("self.data.isLeaderGroup: " + self.data.isLeaderGroup)
+          console.log("app.globalData.newOutdoor: " + app.globalData.newOutdoor)
+          // 不是自己的，也不是领队组成员，就等于要新建活动
+          // 如果是用户主动发起的模板创建，也需要新建活动
+          if (((self.data.leader.personid != app.globalData.personid) && !self.data.isLeaderGroup) || app.globalData.newOutdoor) {
+            self.newOutdoor(null);
+            app.globalData.newOutdoor = false // 即时清空
           }
           self.createAutoInfo();
           self.checkPublish(); // 判断一下是否能发布活动
@@ -174,47 +183,57 @@ Page({
 
   // 新建活动就是把 outdoor id清空，把关键信息删除
   newOutdoor: function(e) {
-    if (e) {
+    console.log("newOutdoor: function(e)")
+    console.log(e)
+    if (e && e.detail && e.detail.formId) {
       console.log(e.detail)
       template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     }
+    console.log("this.data.outdoorid: " + this.data.outdoorid)
     if (this.data.outdoorid) {
       this.setData({
         outdoorid: null,
       })
       this.setDefault();
+      this.data.leader = this.data.myself // 新创建活动，自己就是领队
     }
   },
 
   // 把几个关键设置为默认值即可，当新创建活动或者模板创建活动后调用
   setDefault: function() {
+    console.log("setDefault: function()")
     const self = this
-    // leader要设置为当前用户  
-    self.data.leader.userInfo = app.globalData.userInfo;
-    self.data.leader.personid = app.globalData.personid;
-    self.data.myself = self.data.leader // 新创建活动，自己就是领队
+    // 设置myself 信息
+    self.data.myself.userInfo = app.globalData.userInfo;
+    self.data.myself.personid = app.globalData.personid;
+    console.log("self.data.myself: ")
+    console.log(self.data.myself)
     self.setData({
       canPublish: false, // 判断是否可发布
       hasModified: false, // 是否被修改了
       "title.date": null, // 新创建活动，关键是把日期置空了
       status: "拟定中",
+      members: [self.data.myself], // 只有自己
     })
     self.setWebsitesDefault() // 把网址同步的设置置空
   },
 
   setWebsitesDefault: function() {
-    this.setData({
-      "websites.lvyeorg.tid": null,
-      "websites.lvyeorg.waitings": [],
-      "websites.lvyeorg.keepSame": (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame : false),
-    })
+    this.data.websites = {
+      lvyeorg: {
+        keepSame: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame : false)
+      }
+    }
     console.log(this.data.websites)
   },
 
   onShow: function() {
+    console.log("CreateOutdoor.js onShow")
     const self = this;
     var outdoorid = util.loadOutdoorID()
     if (self.checkLogin()) {
+      console.log("outdoorid: " + outdoorid)
+      console.log("memOutdoorid: " + self.data.memOutdoorid)
       if (outdoorid != null && outdoorid != self.data.memOutdoorid) {
         // 缓存中有id，且还和内存中加载的outdoorid不一样，则说明要重新加载
         self.loadOutdoorInTable(outdoorid);
@@ -272,6 +291,8 @@ Page({
     if (res.data.traffic) {
       self.setData({
         traffic: res.data.traffic,
+        "traffic.carInfo": outdoor.buildCarInfo(res.data.traffic),
+        "traffic.costInfo": outdoor.buildCostInfo(res.data.traffic),
       })
     }
     // 活动路线，增加轨迹文件
@@ -305,6 +326,11 @@ Page({
         self.setData({
           myself: item
         })
+        if (item.entryInfo.status == "领队组") { // 判断自己是否为领队组成员
+          self.setData({
+            isLeaderGroup: true,
+          })
+        }
       }
     })
 
@@ -351,16 +377,23 @@ Page({
 
   // 判断是否可以发布了
   checkPublish: function() {
+    var canPublish = false
+    if (this.data.title.place // 必须有活动地点
+      &&
+      this.data.title.date // 必须有活动日期
+      &&
+      this.data.meets.length > 0 // 必须有集合地点
+      &&
+      this.data.leader.entryInfo &&
+      this.data.leader.entryInfo.meetsIndex >= 0 // 领队必须选择了集合地点
+      &&
+      this.data.leader.entryInfo.meetsIndex < this.data.meets.length // 领队集合地点必须在集合点范围内
+    ) {
+      canPublish = true
+    }
+    console.log(canPublish)
     this.setData({
-      canPublish: this.data.title.place // 必须有活动地点
-        &&
-        this.data.title.date // 必须有活动日期
-        &&
-        this.data.meets.length > 0 // 必须有集合地点
-        &&
-        this.data.leader.entryInfo.meetsIndex >= 0 // 领队必须选择了集合地点
-        &&
-        this.data.leader.entryInfo.meetsIndex < this.data.meets.length // 领队集合地点必须在集合点范围内
+      canPublish: canPublish
     })
   },
 
@@ -889,7 +922,7 @@ Page({
     })
   },
 
-  createCanvasFile() { 
+  createCanvasFile() {
     console.log("createCanvasFile")
     const self = this
     const canvas = wx.createCanvasContext('shareCanvas', self)

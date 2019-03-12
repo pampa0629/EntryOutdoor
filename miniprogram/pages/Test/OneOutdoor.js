@@ -46,9 +46,9 @@ Page({
       })
     }, 10000)
 
-    wx.startGyroscope({
-      interval: 'normal'
-    })
+    // wx.startGyroscope({
+    //   interval: 'normal'
+    // })
   },
 
   onUnload() {
@@ -471,5 +471,101 @@ Page({
     var time = outdoor.calcRemainTime("2019-02-11", {date: "不限",time: "21:00"}, false)
     console.log(time)
   },
+
+  tapMofangLogin() {
+    const self = this
+    // http://www.doyouhike.net/event/yueban
+    wx.request({
+      url: "http://www.doyouhike.net/user/login?url=%2F",
+      method: 'POST',
+      header: {
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      data: {
+        username: "50463253@qq.com",
+        password:"xx123zzm",
+      },
+      fail: function (error) {
+        console.log(error)
+      },
+      success: function (res) {
+        // console.log(res)
+        // console.log(res.data)
+        const c = res.cookies
+        console.log(c)
+        self.setData({
+          "mofang.PHPSESSID":c[0].value,
+          "mofang.dyh_lastactivity": c[1].value,
+        })
+        console.log(self.data.mofang)
+      }
+    })
+  }, 
+
+  tapMofangMain() {
+    const self = this
+    wx.request({
+      url: "http://www.doyouhike.net/mobile/forum/index/topic_list?slug=city&city_id=110000",
+      method: 'POST',
+      header: {
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      data: {
+        PHPSESSID: self.data.mofang.PHPSESSID,
+        dyh_lastactivity: self.data.mofang.dyh_lastactivity,
+      },
+      fail: function (error) {
+        console.log(error)
+      },
+      success: function (res) {
+        console.log(res)
+        console.log(res.data)
+      }
+    })
+  }, 
+
+  tapMofangOutdoor() {
+    const self = this
+    wx.request({
+      url: "http://www.doyouhike.net/event/yueban/detail/6414682",
+      method: 'POST',
+      header: {
+        "content-type": "application/x-www-form-urlencoded"
+      }, 
+      data: {
+        PHPSESSID: self.data.mofang.PHPSESSID,
+        dyh_lastactivity: self.data.mofang.dyh_lastactivity,
+      },
+      fail: function (error) {
+        console.log(error)
+      },
+      success: function (res) {
+        console.log(res)
+        console.log(res.data)
+      }
+    })
+  }, 
+
+  tapMofangPublish() {
+    const self = this
+    wx.request({
+      url: "http://www.doyouhike.net/event/yueban/publish",
+      method: 'POST',
+      header: {
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      data: {
+        PHPSESSID: self.data.mofang.PHPSESSID,
+        dyh_lastactivity: self.data.mofang.dyh_lastactivity,
+      },
+      fail: function (error) {
+        console.log(error)
+      },
+      success: function (res) {
+        console.log(res)
+        console.log(res.data)
+      }
+    })
+  }, 
 
 });

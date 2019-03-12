@@ -342,19 +342,29 @@ const buildCarInfo=(traffic)=>{
   if (traffic.mode == "公共交通") {
     carInfo = "无"
   } else if (traffic.car) {
-    if (traffic.car.brand) {
+    if (traffic.car.brand) { 
       carInfo += traffic.car.brand
     }
     if (traffic.car.color) {
       carInfo += "，" + traffic.car.color
     }
-    if (traffic.car.plate) {
-      carInfo += "，尾号" + traffic.car.plate
+    if (traffic.car.number) {
+      carInfo += "，车牌" + traffic.car.number
     }
   }
   console.log(carInfo)
   return carInfo
 } 
+
+// 构建费用信息 {{traffic.cost=='免费'?'免费':'大致费用：'+traffic.money+'元'}}
+const buildCostInfo = (traffic) => {
+  var costInfo = traffic.cost
+  if (costInfo != '免费') {
+    costInfo += "，大致费用：" + traffic.money + '元'
+  }
+  console.log(costInfo)
+  return costInfo
+}
 
 // 移除某个队员（自己退出，或者领队驳回报名），回调返回新成员名单
 const removeMember=(outdoorid, personid, selfQuit, callback)=>{
@@ -627,6 +637,13 @@ const setPayMine=(outdoorid, personid, mine)=>{
   })
 }
 
+const isEntriedStatus=(status)=>{
+  if (status == "占坑中" || status == "报名中" || status == "替补中" ) {
+    return true
+  }
+  return false
+}
+
 module.exports = {
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
@@ -634,6 +651,9 @@ module.exports = {
   getWeather: getWeather, // 获取天气预报
   loadEquipments: loadEquipments, // 推荐的装备
   buildCarInfo: buildCarInfo, // 构建车辆信息
+  buildCostInfo: buildCostInfo, // 构建费用信息
+
+  isEntriedStatus: isEntriedStatus, // 是否属于报名状态，包括报名中、占坑中和替补中
 
   buildRemainText: buildRemainText, // 构造剩余时间提示文字
   calcRemainTime:calcRemainTime, // 计算占坑或报名的剩余时间
@@ -651,4 +671,4 @@ module.exports = {
 
   // 绘制画布
   drawShareCanvas: drawShareCanvas, // 绘制分享的画布
-}
+} 

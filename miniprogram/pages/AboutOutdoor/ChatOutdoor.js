@@ -33,7 +33,7 @@ Page({
     tid: null, // lvyeorg上的帖子id
   },
 
-  onLoad: function(options) {
+  onLoad: function(options) { 
     console.log(options)
     const self = this
     self.data.outdoorid = options.outdoorid

@@ -2,9 +2,9 @@
 <van-dialog use-slot async-close show="{{cancelDlg.show}}" show-cancel-button  bind:close="closeCancelDlg" bind:confirm="confirmCancelDlg" title="是否确认取消活动" confirmButtonText="确认取消" cancelButtonText="我再想想">
   <van-panel title="请选择活动取消主要原因">
     <van-radio-group value="{{cancelDlg.reason}}" bind:change="changeCancelReason">
-      <van-radio  wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio> 
-    </van-radio-group> 
-  </van-panel>
+      <van-radio  wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio>  
+    </van-radio-group>  
+  </van-panel> 
 </van-dialog> 
   
 <!--弹出分享按钮-->
@@ -27,7 +27,7 @@
 <!--图标按钮-->
 <van-row>
   <!--报名截止/继续报名--> 
-  <van-col span="2" offset="3">
+  <van-col span="2" offset="1">
     <view wx:if="{{status=='已发布'||status=='已成行'}}" style="flex-direction:column">
       <van-icon name="stop" size="24px" color="#1aad19" bind:click="stopEntry"></van-icon>
       <view class="icon_tip">截止</view> 
@@ -85,6 +85,12 @@
       <view class="icon_tip">支付</view>
     </view>
   </van-col>
+  <van-col span="2" offset="1" wx:if="{{status != '拟定中'}}">
+    <view style="flex-direction:column">
+      <van-icon name="new-o" size="24px" color="#1aad19" bind:click="newOutdoor"></van-icon>
+      <view class="icon_tip">新建</view>
+    </view>
+  </van-col>
 </van-row>
 
 <!--活动标题信息-->
@@ -126,7 +132,8 @@
 </van-panel>
 
 <!--交通方式-->
-<van-cell title="交通方式" label="从集合地到出发地" value="点击设置交通方式" is-link url="EditTraffic" />
+<van-cell wx:if="{{traffic}}" title="交通方式" title-width="60%" label="{{traffic.mode}}；{{traffic.carInfo}}；{{traffic.costInfo}}" value="点击编辑交通方式" is-link url="EditTraffic" />
+<van-cell wx:else title="交通方式" label="从集合地到出发地" value="点击设置交通方式" is-link url="EditTraffic" />
 
 <!--活动路线-->
 <van-cell title="路线路线" label="{{route.wayPoints.length}}个途经点" value="点击编辑活动路线" is-link url="EditRoute" />
@@ -214,8 +221,8 @@
 
 <!--新建活动和保存修改按钮-->
 <block wx:if="{{status!='拟定中' || status=='已发布'}}">
-  <!--新建活动-->
-  <block wx:if="{{status!='拟定中'}}">
+  <!--新建活动：新建活动放到顶上图标--> 
+  <block wx:if="{{false || status!='拟定中'}}">
     <form bindsubmit="newOutdoor" report-submit="true">
       <button form-type="submit" class="no_btn"> 
         <form bindsubmit="newOutdoor" report-submit="true">

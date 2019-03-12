@@ -21,6 +21,12 @@
 <text class="tip">\n活动路线</text>
   <view wx:for="{{route.wayPoints}}" wx:key="place+time" data-pos='{{index}}'>途经点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
 
+<!--交通方式-->
+<block wx:if="{{traffic}}">
+  <text class="tip">\n交通方式</text>
+  <text>\n{{traffic.mode}}；{{traffic.carInfo}}；{{traffic.costInfo}}</text>
+</block>
+
 <!--集合地点-->
 <text class="tip">\n集合地点</text>
 <view wx:for="{{meets}}" wx:key="place" data-pos='{{index}}'>集合点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>

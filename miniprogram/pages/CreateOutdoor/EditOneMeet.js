@@ -51,6 +51,19 @@ Page({
     })
   },
 
+  pasteMeetPlace: function () {
+    const self = this
+    wx.getClipboardData({
+      success: function (res) {
+        console.log(res.data)
+        self.setData({
+          "meet.place": res.data,
+          hasModified: true,
+        })
+      }
+    })
+  },
+
   // 记录输入集合点的日期
   changMeetDate: function(e) {
     console.log(e)

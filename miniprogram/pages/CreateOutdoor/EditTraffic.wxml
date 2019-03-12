@@ -8,7 +8,7 @@
     </van-cell-group>
   </van-radio-group>
 </van-panel>
-
+ 
 <!--费用承担-->
 <van-panel title="费用承担：{{traffic.cost}}" >
   <van-radio-group value="{{traffic.cost}}" >
@@ -30,7 +30,7 @@
     <van-button slot="button" size="small" round plain type="primary" bind:click="onBrandPopup">选择</van-button>
   </van-field>
   <van-popup show="{{ showBrandPopup }}" position="bottom" custom-class="center" bind:close="closeBrandPopup">
-    <van-area title="选择车型" columns-num="{{2}}" area-list="{{ Brands }}"  bind:confirm="confirmBrand" bind:change="changeBrand" bind:cancel="closeBrandPopup"/>
+    <van-area title="选择车型" columns-num="{{2}}" area-list="{{ Brands }}"  bind:confirm="confirmBrand" bind:cancel="closeBrandPopup"/>
   </van-popup>
   
   <picker wx:if="{{traffic.mode=='自驾'}}" range="{{Colors}}" value="{{traffic.car.color}}" bindchange="changeColor">

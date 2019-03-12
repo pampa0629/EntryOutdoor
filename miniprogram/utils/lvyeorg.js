@@ -9,7 +9,7 @@ const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
 
 const LvyeOrgURL = 'https://www.lvye.net/panpa/'
-
+ 
 // 得到登录org网站所需要的token， 用callback传回
 const getToken = (callback) => {
   wx.login({
@@ -454,19 +454,29 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
   }
 
   // 报名须知：请微信扫描二维码，登录小程序报名； 贴上二维码
-  var qrcodeMsg = "[url=" + data.websites.lvyeorg.qrcodeUrl + "]活动二维码[/url]"
+  message += buildEntryNotice(data.websites.lvyeorg.qrcodeUrl, first, allowSiteEntry)
+
+  return message
+}
+
+// 构建报名须知
+// qrcode: 报名二维码
+// first：是否为活动首帖（发布帖）
+// allowSiteEntry：是否允许网站跟帖报名
+const buildEntryNotice = (qrcode, first, allowSiteEntry)=>{
+  var message = NL
+  var qrcodeMsg = "[url=" + qrcode + "]活动二维码[/url]"
   if (first) { // 发布活动时的报名信息
     message += NL + "报名须知：请到帖子末尾，用微信扫描二维码，登录小程序报名。" + NL
     message += "若看不到二维码图片，请点击这里查看并微信扫码：" + qrcodeMsg + NL
   } else { // 活动内容修改时的报名信息
-    message += NL + "报名须知：请点击这里：" + qrcodeMsg + "，用微信扫描二维码，登录小程序报名。" + NL
-    message += "或者回到帖子一楼扫描二维码图报名：" + NL
+    message += NL + "报名须知：请点击这里 " + qrcodeMsg + "，用微信扫描二维码，登录小程序报名。" + NL
+    message += "或者回到帖子一楼扫描二维码报名。" + NL
   }
 
   if (!allowSiteEntry) { // 用当前活动表的设置
-    message += "为方便领队汇总名单和提供微信服务消息通知，本活动不接受网站直接跟帖报名，敬请注意" + NL
+    message += "为方便领队汇总名单和微信消息通知，本活动不接受网站直接跟帖报名，敬请留意。" + NL
   }
-
   return message
 }
 
@@ -840,12 +850,12 @@ module.exports = {
   addThread: addThread, // 发帖
   buildOutdoorMesage: buildOutdoorMesage, // 构造活动信息
   buildEntryMessage: buildEntryMessage, // 构造报名信息
+  buildEntryNotice: buildEntryNotice, // 构造报名须知
   postMessage: postMessage, // 跟帖
   add2Waitings: add2Waitings, // 往waiting中增加一条信息
   postWaitings: postWaitings, // 把正在等待发布的信息发布出去
 
   loadPosts: loadPosts, // 从帖子中读取跟帖
-
   isTestForum: isTestForum, // 判断fid是否属于测试帖
 
   // 处理错误信息
@@ -853,4 +863,5 @@ module.exports = {
   logError: logError,
   showErrorModel: showErrorModel,
 
+  NL: NL, // const 
 }

@@ -23,7 +23,7 @@
   </van-cell-group>
 </view>
 
-<view wx:if="{{page.bottom}}"> 没有更多活动了，可以试试改变“设置”中的条件。
+<view wx:if="{{page.bottom && outdoors.length>0}}"> 没有更多活动了，可以试试改变“设置”中的条件。
 </view>
 
 <!--弹出设置按钮-->

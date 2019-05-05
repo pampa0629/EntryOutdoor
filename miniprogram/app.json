@@ -77,14 +77,9 @@
       "desc": "设定集合地点位置，方便队员找到"
     }
   },
-  "plugins": {
-    "WechatSI": {
-      "version": "0.2.2",
-      "provider": "wx069ba97219f66d99"
-    }
-  },
   "navigateToMiniProgramAppIdList": [
     "wx1599b7c8d1e2b4d4",
     "wxd45c635d754dbf59"
-  ]
+  ],
+  "sitemapLocation": "sitemap.json"
 }

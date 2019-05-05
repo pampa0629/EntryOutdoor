@@ -9,7 +9,8 @@
 </van-cell-group>
 
 <!--所有人设置-->
-<van-panel title="所有人选项设置">
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="所有人选项设置"></van-cell>
   <van-tag type="primary" plain>为符合绿野ORG网站要求其活动不得在其他网站重复发布的规定，对于领队设定同步到org网站的活动，将自动为您的报名同步到网站。</van-tag>
   <van-tag type="primary" plain>为保证网站上跟帖报名顺序不变，已登录org的队员，将为之前未登录队员代报名；活动责任由原队员自负。</van-tag>
   <van-tag type="primary" plain>若您不登录，其他已登录队员或领队将为您代报名。</van-tag>
@@ -20,7 +21,8 @@
 </van-panel>
 
 <!--领队设置-->
-<van-panel title="领队选项设置">
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="领队选项设置"></van-cell>
   <van-cell title="活动{{lvyeorgInfo.keepSame?'将自动同步':'不同步'}}到绿野ORG网站" label="{{lvyeorgInfo.keepSame?'':'建议同步'}}" clickable bind:click="checkKeepSame" border="{{lvyeorgInfo.keepSame}}">
     <van-checkbox value="{{lvyeorgInfo.keepSame}}" />
   </van-cell>
@@ -38,7 +40,7 @@
   <van-button size="large"  type="warning" bindtap='tapLvyeorgLogout' plain>退出登录</van-button>
 </block>
 
-<van-button size="large" bindtap='tapHall'>绿野活动大厅</van-button>
+<van-button size="large" bindtap='tapHall'>跳转：绿野ORG小程序</van-button>
 
 <!-- <van-panel title="查找绿野活动">
   <van-tag type="primary" plain>对于同步到org网站的活动，由于网站限制，在未登录时看不到报名二维码图片。可以在这里拷贝输入网站上显示的活动id，并直接定位到小程序中的活动报名页面</van-tag>

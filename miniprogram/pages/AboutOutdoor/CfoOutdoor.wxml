@@ -1,11 +1,13 @@
-<van-panel title="第一步：确定人均费用">
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="第一步：确定人均费用"></van-cell>
   <van-field label="活动总费用（元）" title-width="70%" value="{{pay.total}}" type="digit" bind:change="changeTotal"/>
   <van-field label="活动人数" title-width="70%" value="{{pay.count}}" type="number" bind:change="changeCount"/>
   <van-field label="人均费用（元）" title-width="70%" value="{{pay.average}}" type="digit" bind:change="changeAverage"/>
 </van-panel>
 
 <!--设置收款二维码-->
-<van-panel title="第二步：上传收款二维码，发送收款通知">
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="第二步：上传收款二维码，发送收款通知"></van-cell>
   <van-row>
     <van-col span="20" offset="2">
       <image mode="widthFix" src="{{pay.qrcode}}"></image>
@@ -15,7 +17,8 @@
 </van-panel>
 
 <!--统计收款状况-->
-<van-panel title="第三步：统计收款状况">
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="第三步：统计收款状况"></van-cell>
   <van-button size="large" plain type="primary" bind:click='statPay'>统计收款状况</van-button>
   <van-cell title="已交款名单" title-width="30%" value="已收款{{pay.alreadyCount}}份(共{{pay.count}}份)"/>
   <van-cell wx:for="{{pay.results}}" wx:key="*this" title="{{item.nickName}}，{{item.num}}份" title-width="50%" value="{{curScreen?'点击清除':'点击查看'}}" bind:click="clickOne{{index}}"/>

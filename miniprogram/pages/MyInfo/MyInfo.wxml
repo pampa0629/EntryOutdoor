@@ -21,7 +21,7 @@
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>0.8.6</view>
+      <view style='font-family:黑体;font-size:11pt'>0.8.8</view>
     </view>
   </van-col>
 </van-row>
@@ -61,7 +61,7 @@
   <van-col span="9" offset="2">
     <block wx:if="{{hasLoginLvyeorg}}">
       <van-button size="large" bind:click="lvyeorgLogin">{{lvyeOrgUsername}}已登录</van-button>
-    </block>
+    </block> 
     <block wx:else>
       <van-button size="large" bind:click="lvyeorgLogin">{{lvyeOrgButton}}</van-button>
     </block>

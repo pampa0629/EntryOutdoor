@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "编辑活动路线",
+  "navigationBarTitleText": "编辑路线与轨迹",
   "usingComponents": { 
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",

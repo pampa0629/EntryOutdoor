@@ -23,7 +23,7 @@
 
 <!--最好有的装备-->
 <van-panel>
-  <view class="tip" slot="header">必须有的装备</view>
+	<van-cell slot="header" title-class="redtitle" title="必须有的装备"></van-cell>
   <van-row wx:for="{{equipments.must}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.mustRes }}" bind:change="changeMust">
       <van-col span="12" offset="1">
@@ -44,7 +44,7 @@
 
 <!--可以有的装备-->
 <van-panel>
-  <view class="tip" slot="header">可以有的装备</view>
+  <van-cell slot="header" title-class="redtitle" title="可以有的装备"></van-cell>
   <van-row wx:for="{{equipments.can}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.canRes }}" bind:change="changeCan">
       <van-col span="12" offset="1">
@@ -65,7 +65,7 @@
 
 <!--不能有的装备-->
 <van-panel>
-  <view class="tip" slot="header">不能有的装备</view>
+  <van-cell slot="header" title-class="redtitle" title="不能有的装备"></van-cell>
   <van-row wx:for="{{equipments.no}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.noRes }}" bind:change="changeNo">
       <van-col span="12" offset="1">

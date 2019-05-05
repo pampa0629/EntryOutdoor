@@ -214,6 +214,11 @@ const buildPicSrc = (outdoorid, index) => { // index:0,1,2 图片顺序
   return "Outdoors/" + outdoorid + "/" + new Date().getTime() + ".jpg"
 }
 
+// 构建轨迹文件存储的路径
+const buildRouteSrc = (outdoorid, name) => { 
+  return "Outdoors/" + outdoorid + "/Route/" + name
+}
+
 // 构建活动二维码图片存储的路径
 const buildChatQrcode = (outdoorid) => { 
   // 没有办法，只能先用时间（毫秒）作为随时文件名，等待微信解决bug
@@ -401,6 +406,8 @@ module.exports = {
   parseChar: parseChar,
   // 图片在云存储上的位置
   buildPicSrc: buildPicSrc,
+  buildRouteSrc: buildRouteSrc, // 轨迹文件在云上的存储位置
+
   buildChatQrcode: buildChatQrcode, // 活动专用群二维码
   buildPayQrcode: buildPayQrcode, // 收款二维码
   buildPayResult: buildPayResult, // 付款截屏

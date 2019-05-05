@@ -5,7 +5,7 @@ const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 
-wx.cloud.init()
+wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -85,6 +85,8 @@ Page({
           title: item.title.whole,
           id: item._id,
           pic: (item.brief && item.brief.pics && item.brief.pics.length > 0) ? item.brief.pics[0].src : null,
+          memCount:item.members.length,
+          maxCount: item.limits.maxPerson ? item.limits.personCount:"∞",
           openid: item._openid,
           status:item.status,
         }

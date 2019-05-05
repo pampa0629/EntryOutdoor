@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "活动路线",
+  "navigationBarTitleText": "路线与轨迹",
   "usingComponents": {
     "van-radio": "/vant-weapp/radio/index",
     "van-radio-group": "/vant-weapp/radio-group/index",

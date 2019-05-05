@@ -10,7 +10,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
-
+ 
 Page({
 
   data: { 
@@ -134,6 +134,12 @@ Page({
           if (message.msg.indexOf("@" + app.globalData.userInfo.nickName) >= 0 || message.msg.indexOf("@所有人") >= 0) {
             message.atme = true
           }
+
+          // 增加函数，确定who
+          let index = i; // 还必须用let才行
+          this["tapWho" + index] = (e) => {
+            this.tapWho(index, e)
+          }
         }
       }
       if (addMessage) {
@@ -226,11 +232,12 @@ Page({
     this.flushChats(null, null)
   },
 
-  tapWho(e) {
+  tapWho(index, e) {
     const self = this
     console.log(e)
+    const who = self.data.chat.messages[index].who
     self.setData({
-      "message.msg": self.data.message.msg + "@" + e._relatedInfo.anchorTargetText + " ",
+      "message.msg": self.data.message.msg + "@" + who + " ",
     })
   },
 

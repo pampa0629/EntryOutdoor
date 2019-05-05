@@ -2,6 +2,9 @@
   padding: 20px;
 }
 
+.redtitle {
+  color:#F65959;
+}
 
 .no_btn{
   width: 1rpx;

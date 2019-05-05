@@ -8,7 +8,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
  
-Page({
+Page({ 
 
   data: {
     outdoorid: null,
@@ -86,7 +86,7 @@ Page({
         personid: s[i].personid,
       }
       self.data.members.push(member)
-
+ 
       // 增加函数
       let index = i; // 还必须用let才行
       this["onCheckPopup" + index] = () => {
@@ -400,6 +400,14 @@ Page({
     self.data.addMembers.splice(index, 1)
     self.data.hasModified = true
     self.flushAddMembers(self.data.addMembers)
+  },
+
+  changeOneMember(e) {
+    console.log(e)
+    const self = this
+    self.setData({
+      addMember:e.detail,
+    })
   },
 
   // 拷贝附加队员信息

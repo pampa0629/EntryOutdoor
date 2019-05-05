@@ -7,7 +7,7 @@ Page({
     route: {}, // 活动路线，由多个站点（stop）组成
     qrcodes:[], // 轨迹二维码
   },
-
+ 
   onLoad: function(options) {
     console.log("onLoad")
     const self = this;
@@ -36,6 +36,59 @@ Page({
         });
       }
     }
+
+    if (self.data.route && self.data.route.trackFiles) {
+      for (var i = 0; i < self.data.route.trackFiles.length; i++) {
+        let j = i; // 还必须用let才行
+        this["downloadTrackFile" + j] = () => {
+          this.downloadTrackFile(j)
+        }
+      }
+    }
+  },
+
+  downloadTrackFile(index) {
+    const self = this
+    console.log("downloadTrackFile(index):"+index)
+    const track = self.data.route.trackFiles[index]
+
+    wx.cloud.downloadFile({
+      fileID: track.src, // 文件 ID
+      success: res => {
+        // 返回临时文件路径
+        console.log(res.tempFilePath)
+        
+        const fs = wx.getFileSystemManager()
+        fs.saveFile({
+          tempFilePath: res.tempFilePath,
+          success: res => { // 变态的微信，限制太死
+            console.log("savedFilePath:", res.savedFilePath)
+            var newPath = wx.env.USER_DATA_PATH + "/" + track.name
+            console.log(newPath)
+            fs.rename({ // 这里只能先重命名，再提示队员从指定路径找到对应的轨迹文件了 
+              oldPath: res.savedFilePath,
+              newPath: newPath,
+              success:res=>{
+                console.log("rename result:")
+                console.log(res)
+                const path = "/tencent/MicroMsg/wxanewfiles/9fee8ed4ef44c9b804a4f3cdcbe733b0/" // 手机路径
+                wx.setClipboardData({
+                  data: path,
+                  success(res) {
+                    wx.showModal({
+                      title: '下载成功',
+                      content: '由于微信限制，文件只能下载到微信系统目录下，请到：' + path + " 目录下查找该轨迹文件。为方便定位，该目录已经复制到内存中。",
+                      showCancel: false,
+                    })
+                  }
+                })
+              },
+              fail: error => console.log(error),
+            })
+          }
+        })
+      }      
+    })
   },
 
   copyoutUrl(index) {

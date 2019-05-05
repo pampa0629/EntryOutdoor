@@ -6,7 +6,7 @@ const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
-   
+    
 wx.cloud.init()  
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')

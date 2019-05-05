@@ -1,13 +1,16 @@
+const util = require('../../utils/util.js')
+
 Page({
 
   data: {
+    outdoorid:null,
     //活动路线，可加多个途经点和轨迹文件
     route: {
       wayPoints: [], // 途经点
       trackFiles: [], // 轨迹文件 
       trackSites: [], // 轨迹网站
     }, 
- 
+  
     index: 0, // 当前要处理的index
     hasModified: false,
 
@@ -81,6 +84,7 @@ Page({
     self.setData({
       route: prevPage.data.route,
       hasModified: prevPage.data.hasModified,
+      outdoorid: prevPage.data.outdoorid,
     })
     if(!self.data.route.wayPoints) {
       self.setData({
@@ -109,6 +113,7 @@ Page({
     self.dealCompatibility()
     console.log(self.data.route.trackSites)
     self.rebuildSitesFun()
+    self.rebuildDelFileFuntion() // 
   },
 
   dealCompatibility(){
@@ -245,11 +250,85 @@ Page({
     })
   },
 
-  // todo
-  addTrackFile() {},
+  // 增加轨迹文件
+  addTrackFile() {
+    console.log("addTrackFile")
+    const self = this
+    wx.chooseMessageFile({
+      count: 5,
+      type: 'file',
+      extension: ["gpx", "kml", "xml", "xyz", "gdb", "plt", "pdf","doc","docx","txt","zip","rar"], //轨迹文件、文档文件、压缩文件
+      success(res) {
+        console.log(res)
+        // tempFilePath可以作为img标签的src属性显示图片
+        const tempFiles = res.tempFiles
+        console.log(tempFiles)
+        tempFiles.forEach((item, index) => {
+          if (item.size > 5000000) { // 控制每张图片不能超过5mb
+            wx.showToast({
+              title: '文件不能大于5mb',
+            })
+          } else {
+            wx.showLoading({
+              icon: "loading",
+              title: "正在上传文件"
+            })
+            console.log(item.path)
+            wx.cloud.uploadFile({
+              cloudPath: util.buildRouteSrc(self.data.outdoorid, item.name),
+              filePath: item.path, // 小程序临时文件路径
+            }).then(resUpload => {
+              self.data.route.trackFiles.push({
+                name:item.name,
+                src: resUpload.fileID,
+              })
+              self.setData({
+                "route.trackFiles": self.data.route.trackFiles,
+                hasModified: true,
+              })
+              self.rebuildDelFileFuntion()
 
-  // todo
-  deleteTrackFile(index) {},
+            })
+            wx.hideLoading()
+          }
+        })
+      }
+    })
+  },
+
+  rebuildDelFileFuntion() {
+    const self = this
+    // 构建删除函数
+    if (self.data.route && self.data.route.trackFiles) {
+      for(var i = 0; i<self.data.route.trackFiles.length; i++) {
+        let j = i; // 还必须用let才行
+        this["deleteTrackFile" + j] = (e) => {
+          this.deleteTrackFile(j, e)
+        }
+      }
+    }
+  },
+
+  deleteTrackFile(index) {
+    console.log("deleteTrackFile")
+    console.log(index)
+    const self = this
+    const file = self.data.route.trackFiles[index]
+
+    wx.cloud.deleteFile({
+      fileList: [file.src]
+    }).then(res => {
+      console.log("del track file ok: " + JSON.stringify(res, null, 2))
+    }).catch(err => {
+      console.log("del track file err: " + JSON.stringify(err, null, 2))
+    })
+
+    self.data.route.trackFiles.splice(index, 1)
+    this.setData({
+      "route.trackFiles": self.data.route.trackFiles,
+      hasModified: true,
+    })
+  },
 
   // 手台频率
   changeInterphone(e) {

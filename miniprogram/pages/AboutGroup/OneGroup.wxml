@@ -13,7 +13,7 @@
 
 <!--群主是谁-->
 <block wx:if="{{isOwner}}">
-  <van-cell title="我是群主"/>
+  <van-cell title="我是群主" title-class="redtitle"/>
   <van-row>
     <van-col span="9" offset="2">
       <van-button size="large" plain type="primary" bind:click="tapRank">刷新排行榜</van-button>
@@ -24,7 +24,7 @@
   </van-row>
 </block>
 <block wx:else>
-  <van-cell title="群主是：{{owner.userInfo.nickName}}"/>
+  <van-cell title="群主是：{{owner.userInfo.nickName}}" title-class="redtitle"/>
 </block>
 
 <van-cell title="排行榜最后更新时间" wx:if="{{rank.update}}" value="{{rank.update}}"/>

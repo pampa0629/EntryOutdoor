@@ -368,6 +368,8 @@ const buildCostInfo = (traffic) => {
 
 // 移除某个队员（自己退出，或者领队驳回报名），回调返回新成员名单
 const removeMember=(outdoorid, personid, selfQuit, callback)=>{
+  console.log("outdoor.js removeMember fun")
+
   // 先重新获取members，再删除personid，再调用云函数
   // 刷新一下队员列表
   dbOutdoors.doc(outdoorid).get()
@@ -388,10 +390,12 @@ const removeMember=(outdoorid, personid, selfQuit, callback)=>{
       }
 
       const self = res.data.members[selfIndex]
+      console.log(self)
       // 退出的时候应检查一下，如果自己不是替补，则把第一个替补改为“报名中”
       var changeStatus = false;
       if (self.entryInfo.status == "占坑中" || self.entryInfo.status == "报名中") {
         changeStatus = true;
+        console.log("changeStatus: " + changeStatus)
       }
       // 给自己发模板消息 
       var remark = ""

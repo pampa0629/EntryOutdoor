@@ -1,11 +1,23 @@
 <!--路线途经点-->
-<van-cell-group>
-  <van-cell title="途经点" value="预计到达时间"/>
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="途经点" label="预计到达时间"></van-cell>
   <van-cell wx:for="{{route.wayPoints}}" wx:key="place+time" title="{{index+1}}）{{item.place}}" value="{{item.date}}，{{item.time}}"/> 
-</van-cell-group>
+</van-panel>
 
+<!--手台频率-->
+<van-cell wx:if="{{route.interphone}}" title-class="redtitle" title="手台频率" value="{{route.interphone}}"></van-cell>
+
+<!--轨迹文件-->
+<van-panel wx:if="{{route.trackFiles.length>0}}" use-footer-slot>
+  <van-cell slot="header" title-class="redtitle" title="轨迹文件"></van-cell>
+  <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}" title-width="70%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
+    <van-button slot="button" size="small" type="primary" bind:click='downloadTrackFile{{index}}'>下载</van-button>
+  </van-field>
+</van-panel>
+ 
 <!--户外轨迹--> 
-<van-panel title="户外APP轨迹" wx:if="{{route.trackSites.length>0}}">
+<van-panel wx:if="{{route.trackSites.length>0}}">
+  <van-cell slot="header" title-class="redtitle" title="户外APP轨迹"></van-cell>
   <block wx:if="{{item.useit}}" wx:for="{{route.trackSites}}" wx:key="name">
     <van-panel title="{{item.name}}，编号：{{item.trackid}}" >
       <van-cell title="网址: {{item.url}}" value="" border="{{false}}"> 

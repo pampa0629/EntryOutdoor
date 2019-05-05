@@ -19,7 +19,13 @@
 <van-button size="large" bind:click="tapGroup">微信群</van-button>
 <open-data type="groupName" open-gid="GgNmG5ApyZgxkkbDndLPz_5Odl6U"></open-data>
 <van-button size="large" bind:click="tapEndTime">截止时间</van-button>
-<van-button size="large" bind:click="tapMofangLogin">磨房登录</van-button>
-<van-button size="large" bind:click="tapMofangMain">磨房首页</van-button>
-<van-button size="large" bind:click="tapMofangOutdoor">磨房活动</van-button>
-<van-button size="large" bind:click="tapMofangPublish">磨房发布</van-button>
+
+<van-panel >
+  <van-cell slot="header" title-class="redtitle" title="header标题"></van-cell>
+  <van-button size="large" bind:click="tapMofangLogin">磨房登录</van-button>
+  <van-button size="large" bind:click="tapMofangMain">磨房首页</van-button>
+  <van-button size="large" bind:click="tapMofangOutdoor">磨房活动</van-button>
+  <van-button size="large" bind:click="tapMofangPublish">磨房发布</van-button>
+</van-panel>
+
+<van-button size="large" bind:click="tapChooseFile">选择文件</van-button>

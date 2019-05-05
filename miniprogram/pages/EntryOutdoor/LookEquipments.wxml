@@ -14,19 +14,19 @@
 <van-notice-bar wx:if="{{leaderDo}}" text="领队推荐装备如下（仅供参考）"/>
 <van-notice-bar wx:else text="领队好像忘记推荐装备了，系统推荐如下（仅供参考）"/>
 <!--最好有的装备--> 
-<van-panel tit="tip" >
-  <view class="tip" slot="header">必须有的装备</view>
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="必须有的装备"></van-cell>
   <van-cell  wx:for="{{equipments.mustRes}}" wx:key="{{item}}" title="{{item}}" />
 </van-panel>
  
 <!--可以有的装备-->
 <van-panel>
-  <view class="tip" slot="header">可以有的装备</view>
+ 	<van-cell slot="header" title-class="redtitle" title="可以有的装备"></van-cell>
   <van-cell  wx:for="{{equipments.canRes}}" wx:key="{{item}}" title="{{item}}" />
 </van-panel>
 
 <!--不能有的装备-->
 <van-panel>
-  <view class="tip" slot="header">不能有的装备</view>
+ 	<van-cell slot="header" title-class="redtitle" title="不能有的装备"></van-cell>
   <van-cell  wx:for="{{equipments.noRes}}" wx:key="{{item}}" title="{{item}}" />
 </van-panel>

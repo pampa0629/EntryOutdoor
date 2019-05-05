@@ -1,5 +1,7 @@
 <!--我的信息-->
-<van-panel title="我的信息">
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="我的信息"></van-cell>
+
   <van-field value="{{userInfo.nickName}}" label="户外昵称：" placeholder="请输入户外昵称（好听易记非真名）"  bind:change="changeNickname" bind:blur="blurNickname" error-message="{{nickErrMsg}}"/>
 
   <van-field label="性别：" value="{{userInfo.gender}}" disabled/>
@@ -15,14 +17,17 @@
   <!--紧急联系信息-->
 <van-switch-cell title="紧急联系信息已{{showEmergency?'显示':'隐藏'}}" checked="{{showEmergency}}" bind:change="changeEmergency"/>
 <block wx:if="{{showEmergency}}">
-  <van-panel title="紧急联系人">
+  <van-tag plain type="primary">紧急联系信息已加密保存，敬请放心。</van-tag>
+  <van-panel>
+    <van-cell slot="header" title-class="redtitle" title="紧急联系人"></van-cell>
     <van-field label="姓名" placeholder="请输入真实姓名"  value="{{emergency.contact.name}}" bind:change="changeContactName"/>
-    <van-field label="电话1" placeholder="请输入有效电话" type="number" value="{{emergency.contact.phone1}}" bind:change="changeContactPhone1"/>
-    <van-field label="电话2" placeholder="请输入有效电话" type="number" value="{{emergency.contact.phone2}}" bind:change="changeContactPhone2"/>
+    <van-field label="电话1" placeholder="请输入有效电话号码" type="number" value="{{emergency.contact.phone1}}" bind:change="changeContactPhone1"/>
+    <van-field label="电话2" placeholder="请输入有效电话号码" type="number" value="{{emergency.contact.phone2}}" bind:change="changeContactPhone2"/>
   </van-panel>
 
   <!--个人真实信息-->
-  <van-panel title="个人真实信息">
+  <van-panel>
+    <van-cell slot="header" title-class="redtitle" title="个人真实信息"></van-cell>
     <van-field label="姓名" placeholder="请输入真实姓名"  value="{{emergency.self.trueName}}" bind:change="changeSelfName"/>
     <van-field label="身份证号码" placeholder="请输入身份证号码" type="idcard" value="{{emergency.self.id}}" bind:change="changeSelfID"/>
     <van-field label="个人高清照片（最多两张）" title-width="80%" disabled/>
@@ -45,14 +50,15 @@
 
   <!--委托给谁-->
   <van-switch-cell title="委托已{{emergency.entrust.open?'开启':'关闭'}}" checked="{{emergency.entrust.open}}" bind:change="changeEntrust"/>
-  <block wx:if="{{emergency.entrust.open}}">
+  <van-panel wx:if="{{emergency.entrust.open}}">
+    <van-cell slot="header" title-class="redtitle" title="委托信息"></van-cell>
     <picker mode="date" value="{{emergency.entrust.start}}" bindchange="changeStartDate">
-        <van-field label="生效日期" disabled required value="{{emergency.entrust.start}}" placeholder="请选择委托生效日期" />
+        <van-field label="委托生效日期" disabled required value="{{emergency.entrust.start}}" placeholder="请选择委托生效日期" />
     </picker>
     <picker mode="date" value="{{emergency.entrust.end}}" start="{{emergency.entrust.start}}" bindchange="changeEndDate">
-      <van-field label="截止日期" disabled required value="{{emergency.entrust.end}}" placeholder="请选择委托截止日期" />
+      <van-field label="委托截止日期" disabled required value="{{emergency.entrust.end}}" placeholder="请选择委托截止日期" />
     </picker>
-    <van-tag plain type="primary">紧急联系信息加密保存，个人信息更安全</van-tag>
+    <van-tag plain type="primary">设置委托密码，信息传输更安全。</van-tag>
     <van-field label="委托密码"  type="{{showPwd?'text':'password'}}" placeholder="请输入委托密码"  value="{{password}}" bind:change="changePassword" icon="{{showPwd?'closed-eye':'eye-o'}}" bind:click-icon="clickPwdIcon"/>
     
     <van-row>
@@ -60,5 +66,5 @@
         <van-button size="large" type="primary" open-type="share" bind:click="onShareAppMessage">委托给…</van-button>
       </van-col>
     </van-row>
-  </block>
+  </van-panel>
 </block>

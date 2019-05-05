@@ -1,6 +1,6 @@
 <!--pages/CreateOutdoor/EditMeets.wxml-->
-<van-tag plain type="danger" wx:if="{{status=='已发布'}}">活动集合点信息修改后将以微信消息方式通知全体队员，微信消息数量有限，请勿轻易修改。</van-tag>
-<van-cell title="已有集合点列表"/>
+<van-tag plain type="danger" wx:if="{{status=='已发布'}}">活动一旦发布，为及时通知到已报名队员，集合点的修改信息将以微信消息方式通知全体队员，微信消息数量有限，请勿轻易修改。</van-tag>
+<van-cell title="已有集合点列表" title-class="redtitle"/>
 <van-cell wx:for="{{meets}}" wx:key="place"  title="{{item.place}}" value="{{item.date}}，{{item.time}}" clickable bind:click="clickMeet{{index}}">
   <van-icon slot="right-icon" name="edit-data" class="van-cell__right-icon" />
 </van-cell>

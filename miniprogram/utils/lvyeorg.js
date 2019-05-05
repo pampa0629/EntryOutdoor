@@ -416,10 +416,16 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
       message += "本活动不允许空降" + NL
     }
     // 占坑/报名截止时间
-    if (data.limits && data.limits.ocuppy && data.limits.ocuppy.date != "不限") {
+    if (data.limits && data.limits.ocuppy) {
+      if (data.limits.ocuppy.date == "不限") {
+        data.limits.ocuppy.date = "当天"
+      }
       message += "占坑截止时间：活动" + data.limits.ocuppy.date + " " + data.limits.ocuppy.time + NL
     }
-    if (data.limits && data.limits.entry && data.limits.entry.date != "不限") {
+    if (data.limits && data.limits.entry) {
+      if (data.limits.entry.date == "不限") {
+        data.limits.entry.date = "当天"
+      }
       message += "报名截止时间：活动" + data.limits.entry.date + " " + data.limits.entry.time + NL
     }
     // 体力要求
@@ -482,6 +488,8 @@ const buildEntryNotice = (qrcode, first, allowSiteEntry)=>{
 
 // 构建网站报名信息; isQuit:是否为退出活动； isPrint：是否为集中打印名单时调用
 const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
+  console.log("lvyeorg.js buildEntryMessage")
+  console.log(userInfo)
   var message = ""
   var title = ""
   if (!isPrint) {

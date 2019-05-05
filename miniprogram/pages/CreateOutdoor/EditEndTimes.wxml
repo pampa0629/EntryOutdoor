@@ -1,5 +1,6 @@
 <!--占坑截止时间-->
-<van-panel title="占坑截止时间" >
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="占坑截止时间"></van-cell>
   <picker bindchange="changOcuppyDate" value="{{ocuppy.date}}" range="{{OcuppyDates}}">
       <van-field label="日期" disabled  value="{{ocuppy.date}}" placeholder="请选择占坑截止日期"/>
     </picker>
@@ -9,8 +10,9 @@
   </van-panel>
 
   <!--报名截止时间-->
-  <van-panel title="报名截止时间" >
-  <picker bindchange="changEntryDate" value="{{entry.date}}" range="{{EntryDates}}">
+  <van-panel >
+  	<van-cell slot="header" title-class="redtitle" title="报名截止时间"></van-cell>
+    <picker bindchange="changEntryDate" value="{{entry.date}}" range="{{EntryDates}}">
       <van-field label="日期" disabled  value="{{entry.date}}" placeholder="请选择报名截止日期"/>
     </picker>
   <picker mode="time" value="{{entry.time}}" start="00:00" end="24:00" bindchange="changEntryTime">

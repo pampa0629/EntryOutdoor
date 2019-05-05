@@ -13,13 +13,15 @@
 	"miniprogramRoot": "miniprogram/",
 	"cloudfunctionRoot": "cloud-functions/",
 	"compileType": "miniprogram",
-	"libVersion": "2.4.1",
+	"libVersion": "2.6.6",
 	"appid": "wx20edd5723fb67799",
 	"projectname": "%E6%88%B7%E5%A4%96%E6%8A%A5%E5%90%8D",
 	"debugOptions": {
 		"hidedInDevtools": []
 	},
 	"isGameTourist": false,
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
 	"condition": {
 		"search": {
 			"current": -1,

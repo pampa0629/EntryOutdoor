@@ -1,5 +1,6 @@
 <!--交通方式-->
-<van-panel title="交通方式：{{traffic.mode}}" >
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="交通方式：{{traffic.mode}}"></van-cell>
   <van-radio-group value="{{traffic.mode}}" >
     <van-cell-group>
       <van-cell wx:for="{{Modes}}" wx:key="{{item}}" data-value="{{item}}" title="{{item}}"  clickable bind:click="clickMode" border="{{index<Modes.length-1}}">
@@ -10,7 +11,8 @@
 </van-panel>
  
 <!--费用承担-->
-<van-panel title="费用承担：{{traffic.cost}}" >
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="费用承担：{{traffic.cost}}"></van-cell>
   <van-radio-group value="{{traffic.cost}}" >
     <van-cell-group>
       <van-cell wx:for="{{Costs}}" wx:key="{{item}}" data-value="{{item}}" title="{{item}}"  clickable bind:click="clickCost" border="{{index<Costs.length-1}}">
@@ -25,7 +27,8 @@
 </van-panel>
 
 <!--车辆信息-->
-<van-panel title="车辆信息" wx:if="{{traffic.mode!='公共交通'}}">
+<van-panel wx:if="{{traffic.mode!='公共交通'}}">
+	<van-cell slot="header" title-class="redtitle" title="车辆信息"></van-cell>
   <van-field label="品牌" bind:input="inputBrand" clearable value="{{traffic.car.brand}}" use-button-slot placeholder="请选择/输入车型">
     <van-button slot="button" size="small" round plain type="primary" bind:click="onBrandPopup">选择</van-button>
   </van-field>

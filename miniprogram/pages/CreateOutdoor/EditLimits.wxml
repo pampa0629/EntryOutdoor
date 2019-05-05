@@ -1,5 +1,6 @@
 <!--活动人数限制-->
-<van-panel title="活动人数限制" >
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="活动人数限制"></van-cell>
   <van-checkbox-group>
     <van-cell title="{{limits.maxPerson?'限制人数':'不限制人数'}}" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
       <van-checkbox value="{{limits.maxPerson}}" bind:change="checkMaxPerson"/>
@@ -29,7 +30,8 @@
 </van-panel>
 
 <!--活动性质选项-->
-<van-panel title="活动性质选项" >
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="活动性质选项"></van-cell>
 <!--活动大厅-->
   <van-cell title="{{limits.intoHall?'':'不'}}进入活动大厅" label="活动大厅能被所有人看到" clickable bind:click="checkIntoHall">
     <van-checkbox value="{{limits.intoHall}}" bind:change="checkIntoHall"/>
@@ -41,16 +43,17 @@
 </van-panel>
 
 <!--截止时间-->
-<van-cell title="占坑/报名截止时间" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{false}}"/>
+<van-cell title="占坑/报名截止时间" title-class="redtitle" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{false}}"/>
 
 <!--活动装备-->
-<van-cell title="活动装备要求" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{false}}"/>
+<van-cell title="活动装备要求" title-class="redtitle" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{false}}"/>
 
 <!--微信服务通知-->
-<van-cell title="微信服务通知" label="" value="点击设置微信通知" is-link url="EditWxnotice" border="{{false}}"/>
+<van-cell title="微信服务通知" title-class="redtitle" label="" value="点击设置微信通知" is-link url="EditWxnotice" border="{{false}}"/>
 
 <!--活动规则-->
-<van-panel title="活动规则" >
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="活动规则"></van-cell>
   <van-checkbox-group>
     <van-cell title="环保" title-width="80%" label="野外不得丢弃不可降解物品" clickable bind:click="checkEnvironment">
       <van-checkbox value="{{limits.isEnvironment}}" bind:change="checkEnvironment"/>

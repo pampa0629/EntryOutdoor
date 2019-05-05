@@ -2,13 +2,15 @@
 <van-button plain type="primary" size="large" open-type="share" bind:click="onShareAppMessage">嘚瑟一下</van-button>
 
 <!--户外评测-->
-<van-panel title="户外评测">
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="户外评测"></van-cell>
   <van-cell wx:if="{{!career.evaluation}}" title="新人户外评测"  value="点击进行户外评测" is-link url="MyEvaluate" border="{{false}}" />
   <van-cell wx:else title="户外评测" label="户外达人指数为：{{career.evaluation.level}}" value="点击再次评测" is-link url="MyEvaluate" border="{{false}}" />
 </van-panel>  
 
 <!--最近运动步数-->
-<van-panel title="最高运动步数" desc="最后更新时间：{{career.step.update}}">
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="最高运动步数" label="最后更新时间：{{career.step.update}}"></van-cell>
   <van-cell title="最近七天为：{{career.step.topLast7}}步，最近三十天为：{{career.step.topLast30}}步">
     <van-button plain type="primary" size="normal" bind:click="clickFetchWalk">获取</van-button>
   </van-cell>
@@ -16,7 +18,8 @@
 </van-panel>
 
 <!--活动统计-->
-<van-panel title="活动统计" use-footer-slot>
+<van-panel use-footer-slot>
+  <van-cell slot="header" title-class="redtitle" title="活动统计"></van-cell>
   <van-radio-group wx:for="{{StatisticsModes}}" wx:key="item.mode" value="{{career.statistics.mode}}" bind:change="changeStatMode">
     <van-radio name="{{item.mode}}">{{item.disc}}：{{career.statistics.mode==item.mode?career.statistics.option:""}}</van-radio>
   </van-radio-group>
@@ -33,12 +36,14 @@
 </van-popup>
 
 <!--Top N 活动-->
-<van-panel title="我的最佳战绩（Top 3）">
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="我的最佳战绩（Top 3）"></van-cell>
   <van-cell wx:for="{{career.topn}}" wx:key="item.title" title="Top{{index+1}}路线：{{item.title}}" label="说明：{{item.disc}}"  value="成绩：{{item.result}}" is-link url="EditTopN?n={{index}}" border="{{index<career.topn.length-1}}" />
 </van-panel>
 
 <!--文字描述-->
-<van-panel title="参加的其它户外活动" desc="非小程序报名">
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="参加的其它户外活动" label="非小程序报名"></van-cell>
   <van-row>
     <van-col span="22" offset="1">
       <view><text style="font-size:12pt">{{career.other}}</text></view>

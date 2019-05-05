@@ -23,7 +23,7 @@ const save2Album = (outdoorid, title, isLeader) => {
       fileID: qrCode
     }).then(res => {
       console.log(res.tempFilePath)
-      wx.saveImageToPhotosAlbum({ 
+      wx.saveImageToPhotosAlbum({  
         filePath: res.tempFilePath,
         fail(err) {
           console.log(err)

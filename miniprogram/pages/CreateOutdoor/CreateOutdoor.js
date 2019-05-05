@@ -679,10 +679,11 @@ Page({
     // 先把领队的信息从数据库中调出来
     var personid = app.globalData.personid; // util.loadPersonID();
     dbPersons.doc(personid).get()
-      .then(res => {
+      .then(res => { 
         self.data.leader.userInfo = res.data.userInfo;
         self.data.leader.personid = personid;
-        var members = [self.data.leader];
+        self.data.leader.entryInfo.status = "领队"
+        var members = [self.data.leader]; 
         // 处理免责条款内容
         if (res.data.disclaimer) {
           self.data.limits.disclaimer = res.data.disclaimer

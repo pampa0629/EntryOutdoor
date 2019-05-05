@@ -75,7 +75,8 @@ Page({
           evaluation: res.data.career.evaluation
         })
       }
-      if (!self.data.evaluation.level){ // 没有记录，则自动重新测评
+      console.log(self.data.evaluation)
+      if (!self.data.evaluation){ // 没有记录，则自动重新测评
         self.evaluateAgain()
       }
     })
@@ -145,7 +146,7 @@ Page({
       // 写到个人数据库中
       dbPersons.doc(app.globalData.personid).update({
         data:{
-          "career.evaluation": self.data.evaluation
+          "career.evaluation": _.set(self.data.evaluation)
         }
       })
     }

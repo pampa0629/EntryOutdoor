@@ -1,5 +1,6 @@
 <!--路线途经点-->
-<van-panel title="路线途经点" use-footer-slot>
+<van-panel use-footer-slot>
+	<van-cell slot="header" title-class="redtitle" title="路线途经点"></van-cell>
   <van-cell wx:for="{{route.wayPoints}}" wx:key="item"  title="{{item.place}}" value="{{item.date}}，{{item.time}}" clickable bind:click="clickStop{{index}}" border="{{index<route.wayPoints.length-1}}" >
     <van-icon slot="right-icon" name="edit-data" class="van-cell__right-icon" />
   </van-cell>
@@ -7,9 +8,9 @@
     <van-button size="large" type="primary" bindtap='addStop'>增加途经点</van-button>
   </view>
 </van-panel> 
- 
+  
 <!--弹出功能选项-->
-<van-action-sheet
+<van-action-sheet 
   show="{{ showAction }}"
   actions="{{ Actions }}"
   cancel-text="取消"
@@ -17,11 +18,29 @@
   bind:select="onSelectAction"
 />
 
+<!--户外手台频率--> 
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="手台频率"></van-cell>
+  <van-field label="手台频率" value="{{route.interphone}}" placeholder="请输入手台频率" clearable bind:change="changeInterphone" error-message="{{interphoneErrMsg}}" type="digit"/>
+</van-panel>
+
+<!--轨迹文件--> 
+<van-panel use-footer-slot>
+  <van-cell slot="header" title-class="redtitle" title="轨迹文件"></van-cell>
+  <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}"  disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
+    <van-button slot="button" size="small" type="warning" bind:click='deleteTrackFile{{index}}'>删除</van-button>
+  </van-field>
+  <view slot="footer">
+    <van-button size="large" type="primary" bind:click='addTrackFile'>增加轨迹文件</van-button>
+  </view>
+</van-panel>
+
 <!--六只脚、两步路等户外轨迹--> 
-<van-panel title="户外网站轨迹">
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="户外网站轨迹"></van-cell>
   <block wx:for="{{route.trackSites}}" wx:key="name">
     <van-cell title="{{item.name}}" clickable bind:click="checkTrackSites{{index}}" border="{{item.useit}}">
-      <van-checkbox value="{{item.useit}}" bind:change="checkTrackSites{{index}}"/>
+      <van-checkbox value="{{item.useit}}"/>
     </van-cell>
     <block wx:if="{{item.useit}}">
       <van-field  label="轨迹编号" type="number" value="{{item.trackid}}" placeholder="请输入{{item.name}}中对应的轨迹编号" bind:change="changeTrackid{{index}}"/>
@@ -37,16 +56,3 @@
     </block>
   </block>
 </van-panel>
-
-<!--轨迹文件 todo 等微信提供上传文件能力再开发--> 
-<van-panel wx:if="{{false}}" title="轨迹文件" status="等待微信开放上传非图片文件能力" use-footer-slot>
-  <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}"  disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
-    <van-button slot="button" size="small" type="primary" bind:click='deleteTrackFile{{index}}'>删除</van-button>
-  </van-field>
-  <view slot="footer">
-    <van-button size="large" type="primary" disabled bind:click='addTrackFile'>增加轨迹文件</van-button>
-  </view>
-</van-panel>
-
-<!--户外手台频率--> 
-<van-field label="手台频率" value="{{route.interphone}}" placeholder="请输入手台频率" clearable bind:change="changeInterphone" error-message="{{interphoneErrMsg}}" type="digit"/>

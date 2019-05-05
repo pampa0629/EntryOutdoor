@@ -7,10 +7,10 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
-
+ 
 Page({ 
  
-  data: {   
+  data: {    
     outdoorid: null, // 活动id
     title: {}, // 活动主题信息，内容从数据库中读取
     members: null, // 队员报名信息，包括:基本信息（userInfo)内容从Persons数据库中读取; 报名信息（entryInfo），报名时填写
@@ -151,17 +151,25 @@ Page({
     }
   },
 
-  // 不是领队，隐藏电话号码中间三位
+  isLeaderGroup(status) {
+    if(status == "领队" || status == "领队组") {
+      return true
+    }
+    return false 
+  },
+
+  // 隐藏电话号码中间三位
   hidePhone: function() {
     console.log("hidePhone")
     const self = this;
     // 遍历所有队员
     for (var i = 0; i < self.data.meetMembers.length; i++) {
       for(var j=0; j<self.data.meetMembers[i].length; j++) {
-        // 当前用户不是领队，则需要隐藏电话号码的中间四位；领队的电话号码不隐藏
-        if (self.data.meetMembers[i][j].entryInfo.status != "领队") {
-          var phone = self.data.meetMembers[i][j].userInfo.phone.toString();
-          self.data.meetMembers[i][j].userInfo.phone = util.hidePhone(phone)
+        // 当队员不是领队（含领队组），则需要隐藏电话号码的中间四位；领队的电话号码不隐藏
+        const member = self.data.meetMembers[i][j]
+        if (!self.isLeaderGroup(member.entryInfo.status)) { 
+          var phone = member.userInfo.phone.toString();
+          member.userInfo.phone = util.hidePhone(phone)
         }
       }
     }

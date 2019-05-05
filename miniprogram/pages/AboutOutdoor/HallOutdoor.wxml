@@ -14,7 +14,7 @@
 <!--活动列表--> 
 <view wx:for="{{outdoors}}" wx:key="id">
   <van-cell-group>
-    <van-cell title="{{item.title}}" title-width="80%" value="{{item.status}}" border="{{false}}" bindtap="intoOutdoor{{index}}"/>
+    <van-cell title="{{item.title}}（{{item.memCount}}/{{item.maxCount}}）" title-width="80%" value="{{item.status}}" border="{{false}}" bindtap="intoOutdoor{{index}}"/> 
     <van-row wx:if="{{item.pic}}">
       <van-col span="20" offset="2">
         <image mode="widthFix" src="{{item.pic}}" bindtap="intoOutdoor{{index}}"></image>

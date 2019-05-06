@@ -39,10 +39,10 @@ const createTitle = (title, nickName) => {
 /**强度计算公式，原则：按照鼓励爬升，弱化距离的原则；但超长距离的弱化程度会降低。
 先归一化：公里数/10，爬升米数/1000
 公式：求和（分段距离*距离系数）+爬升高度*爬升系数
-0-10公里部分，距离系数为0.6
-10-20公里部分，距离系数为0.7
-20-50公里部分，距离系数为0.8
-50-100公里部分，距离系数为0.9
+50-100公里部分，距离系数为0.4
+20-50公里部分，距离系数为0.5
+10-20公里部分，距离系数为0.6
+0-10公里部分，距离系数为0.7
 爬升系数为： 2-距离系数 */
 const calcLevel = (title) => {
   // 归一化
@@ -51,21 +51,26 @@ const calcLevel = (title) => {
   var lValue = 0; // 距离带来的强度值
   while (length > 0) {
     if (length > 5) {
-      lValue += (length - 5) * 0.9;
-      length -= 5;
+      lValue += (length - 5) * 0.4;
+      length = 5;
     } else if (length > 2) {
-      lValue += (length - 2) * 0.8;
-      length -= 2;
+      lValue += (length - 2) * 0.5;
+      length = 2;
     } else if (length > 1) {
-      lValue += (length - 1) * 0.7;
-      length -= 1;
+      lValue += (length - 1) * 0.6;
+      length = 1;
     } else { // length [0,1]
-      lValue += length * 0.6;
-      length -= 1;
+      lValue += length * 0.7;
+      length = 0;
     }
   }
   var uQuotiety = 2 - lValue / (title.addedLength / 10.0);
   var level = (up * uQuotiety + lValue) / 2;
+  console.log(title)
+  console.log("up:" + up)
+  console.log("value:" + lValue)
+  console.log("uQuotiety:" + uQuotiety)
+  console.log("level:" + level)
 
   // 重装 *1.5，休闲游（如景区）：*0.5
   if (title.loaded == "重装") {

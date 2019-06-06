@@ -23,7 +23,7 @@
 <!--刷新提示-->
 <van-tag wx:if="{{!hasPullFlush}}" size="large" type="success">下拉即时刷新留言</van-tag>
 
-<!--活动留言-->
+<!--活动留言--> 
 <van-row wx:for="{{chat.messages}}" wx:key="who+msg">
   <block wx:if="{{!item.self}}">
     <van-col span="4" offset=""> 

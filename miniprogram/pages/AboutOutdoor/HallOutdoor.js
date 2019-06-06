@@ -1,6 +1,5 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
@@ -116,17 +115,17 @@ Page({
   intoOutdoor(index, e){
     console.log(e)
     const self = this
-    const outdoor = self.data.outdoors[index]
-    if (outdoor.openid == app.globalData.openid) {
+    const oneOutdoor = self.data.outdoors[index]
+    if (oneOutdoor.openid == app.globalData.openid) {
       // 自己创建的活动，进入编辑
-      util.saveOutdoorID(outdoor.id)
+      util.saveOutdoorID(oneOutdoor.id)
       wx.switchTab({
         url: '../CreateOutdoor/CreateOutdoor',
       })
     } else {
       // 别人的活动，进入报名页面
       wx.navigateTo({
-        url: '../EntryOutdoor/EntryOutdoor?outdoorid=' + outdoor.id,
+        url: '../EntryOutdoor/EntryOutdoor?outdoorid=' + oneOutdoor.id,
       })
     }
   },

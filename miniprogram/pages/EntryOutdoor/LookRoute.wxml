@@ -11,7 +11,7 @@
 <van-panel wx:if="{{route.trackFiles.length>0}}" use-footer-slot>
   <van-cell slot="header" title-class="redtitle" title="轨迹文件"></van-cell>
   <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}" title-width="70%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
-    <van-button slot="button" size="small" type="primary" bind:click='downloadTrackFile{{index}}'>下载</van-button>
+    <van-button slot="button" size="small" type="primary" bind:click='downloadTrackFile{{index}}'>获取链接</van-button>
   </van-field>
 </van-panel>
  

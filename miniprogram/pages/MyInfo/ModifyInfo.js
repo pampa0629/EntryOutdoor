@@ -6,6 +6,7 @@ const dbPersons = db.collection('Persons')
 const _ = db.command
 
 const util = require('../../utils/util.js')
+const person = require('../../utils/person.js')
 const crypto = require('../../utils/crypto.js')
 
 Page({
@@ -84,39 +85,23 @@ Page({
       self.saveEmergency()
     }
   },
-
+ 
   changeNickname: function(e) {
     console.log(e)
     const self = this
-    self.setData({
-      hasModified: true,
-      "userInfo.nickName": e.detail,
-      nickErrMsg: "",
-    })
-  },
-
-  // 这里判断昵称的唯一性和不能为空
-  blurNickname(e) {
-    console.log(e)
-    const self = this
-    if (!self.data.userInfo.nickName) {
+    person.checkNickname(e.detail,app.globalData.personid, (errMsg,result)=>{
+      console.log("change name:" + result + ", " + errMsg)
+      if(!result) { // 不成功，强制回到最后一个合法的名字
+        e.detail = self.data.oldNickName
+      } 
       self.setData({
-        nickErrMsg: "昵称不能为空，已自动恢复旧名",
-        "userInfo.nickName": self.data.oldNickName
+        hasModified: true,
+        "userInfo.nickName": e.detail,
+        userInfo: self.data.userInfo,
+        nickErrMsg: errMsg,
       })
-    } else if (self.data.oldNickName != self.data.userInfo.nickName) {
-      dbPersons.where({
-        "userInfo.nickName": self.data.userInfo.nickName
-      }).get().then(res => {
-        console.log(res.data)
-        if (res.data.length > 0) {
-          self.setData({
-            nickErrMsg: "修改后的昵称已被占用不能使用，已自动恢复旧名",
-            "userInfo.nickName": self.data.oldNickName
-          })
-        }
-      })
-    }
+      console.log("old name:" + self.data.oldNickName)
+    })
   },
 
   changePhone: function(e) {
@@ -126,11 +111,9 @@ Page({
       hasModified: true,
       "userInfo.phone": e.detail.toString(), // 转为字符串
     })
-    if (self.data.userInfo.phone.length != 11) {
-      self.setData({
-        phoneErrMsg: "请输入11位手机号码"
-      })
-    }
+    self.setData({
+      phoneErrMsg: self.data.userInfo.phone.length==11? "":"请输入11位手机号码",
+    })
   },
 
   clickGender(e) {

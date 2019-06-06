@@ -5,8 +5,8 @@
       <van-radio  wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio>  
     </van-radio-group>  
   </van-panel> 
-</van-dialog> 
-  
+</van-dialog>  
+   
 <!--弹出分享按钮-->
 <van-popup show="{{ showPopup }}" overlay="{{false}}" position="bottom" custom-class="center" bind:close="closePopup">
   <van-row>
@@ -178,48 +178,16 @@
 <block wx:if="{{status=='拟定中'}}">
   <!--发布活动-->
   <form bindsubmit="publishOutdoor" report-submit="true">
-    <button form-type="submit" class="no_btn">
-      <form bindsubmit="publishOutdoor" report-submit="true">
-        <button form-type="submit" class="no_btn">
-          <form bindsubmit="publishOutdoor" report-submit="true">
-            <button form-type="submit" class="no_btn">
-              <form bindsubmit="publishOutdoor" report-submit="true">
-                <button form-type="submit" class="no_btn">
-                  <view class="fix" style="left:50rpx">
-                    <form bindsubmit="publishOutdoor" report-submit="true">
-                      <button style="color:#1aad19;background-color:#ffffff" disabled="{{!canPublish}}" size="large" plain>发布活动</button>
-                    </form>
-                  </view>
-                </button>
-              </form>
-            </button>
-          </form>
-        </button>
-      </form>
-    </button>
+    <view class="fix" style="left:50rpx">
+      <button form-type="submit" style="color:#1aad19;background-color:#ffffff" disabled="{{!canPublish}}" size="large" plain>发布活动</button>
+    </view>
   </form>
   <!--保存草稿-->
   <form bindsubmit="saveDraft" report-submit="true">
-    <button form-type="submit" class="no_btn">
-      <form bindsubmit="saveDraft" report-submit="true">
-        <button form-type="submit" class="no_btn">
-          <form bindsubmit="saveDraft" report-submit="true">
-            <button form-type="submit" class="no_btn">
-              <form bindsubmit="saveDraft" report-submit="true">
-                <button form-type="submit" class="no_btn">
-                  <view class="fix" style="left:400rpx">
-                    <form bindsubmit="saveDraft" report-submit="true">
-                      <button style="background-color:#ffffff" disabled="{{!hasModified}}" size="large" plain>保存草稿</button>
-                    </form>
-                  </view>
-                </button>
-              </form>
-            </button>
-          </form>
-        </button>
-      </form>
-    </button>
-  </form>
+    <view class="fix" style="left:400rpx">
+      <button form-type="submit" style="background-color:#ffffff" disabled="{{!hasModified}}" size="large" plain>保存草稿</button>
+    </view>
+    </form>
 </block>
 
 <!--新建活动和保存修改按钮-->
@@ -227,49 +195,17 @@
   <!--新建活动：新建活动放到顶上图标--> 
   <block wx:if="{{false || status!='拟定中'}}">
     <form bindsubmit="newOutdoor" report-submit="true">
-      <button form-type="submit" class="no_btn"> 
-        <form bindsubmit="newOutdoor" report-submit="true">
-          <button form-type="submit" class="no_btn">
-            <form bindsubmit="newOutdoor" report-submit="true">
-              <button form-type="submit" class="no_btn">
-                <form bindsubmit="newOutdoor" report-submit="true">
-                  <button form-type="submit" class="no_btn">
-                    <view class="fix" style="left:50rpx">
-                      <form bindsubmit="newOutdoor" report-submit="true">
-                        <button style="color:#1aad19;background-color:#ffffff" disabled="{{!canPublish}}" size="large" plain>新建活动</button>
-                      </form>
-                    </view>
-                  </button>
-                </form>
-              </button>
-            </form>
-          </button>
-        </form>
-      </button> 
-    </form>
+        <view class="fix" style="left:50rpx">
+          <button form-type="submit"  style="color:#1aad19;background-color:#ffffff" disabled="{{!canPublish}}" size="large" plain>新建活动</button>
+        </view>
+      </form>
   </block>
   <!--保存修改-->
   <block wx:if="{{status=='已发布'}}">
     <form bindsubmit="saveModified" report-submit="true">
-      <button form-type="submit" class="no_btn">
-        <form bindsubmit="saveModified" report-submit="true">
-          <button form-type="submit" class="no_btn">
-            <form bindsubmit="saveModified" report-submit="true">
-              <button form-type="submit" class="no_btn">
-                <form bindsubmit="saveModified" report-submit="true">
-                  <button form-type="submit" class="no_btn">
-                    <view class="fix" style="left:400rpx">
-                      <form bindsubmit="saveModified" report-submit="true">
-                        <button style="background-color:#ffffff" disabled="{{!hasModified}}" size="large" plain>保存修改</button>
-                      </form>
-                    </view>
-                  </button>
-                </form>
-              </button>
-            </form>
-          </button>
-        </form>
-      </button>
+      <view class="fix" style="left:400rpx">
+        <button form-type="submit" style="background-color:#ffffff" disabled="{{!hasModified}}" size="large" plain>保存修改</button>
+      </view>
     </form>
   </block>
 </block>

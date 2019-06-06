@@ -2,7 +2,7 @@ const app = getApp()
 const util = require('../../utils/util.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 const qrcode = require('../../utils/qrcode.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 
@@ -11,7 +11,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
-
+ 
 Page({
   data: {
     outdoorid: null, // 页面活动已经存储到数据库中的活动id
@@ -28,7 +28,7 @@ Page({
       disclaimer: false, // 免责条款
       status: false, // 活动状态变化
     },
-
+ 
     // 常量定义
     Loadeds: ["轻装", "重装", "休闲"], // 枚举型：轻装、重装、休闲装
     Durings: ["一日", "两日", "三日", "四日", "五日", "多日"], // 活动时长枚举
@@ -196,6 +196,7 @@ Page({
       })
       this.setDefault();
       this.data.leader = this.data.myself // 新创建活动，自己就是领队
+      this.data.memOutdoorid = null // 创建新活动，内存中的活动id就应该清空了，不然下次就无法进入原活动页面了
     }
   },
 
@@ -206,6 +207,7 @@ Page({
     // 设置myself 信息
     self.data.myself.userInfo = app.globalData.userInfo;
     self.data.myself.personid = app.globalData.personid;
+    self.data.myself.entryInfo = {} // 结构先定义出来
     console.log("self.data.myself: ")
     console.log(self.data.myself)
     self.setData({
@@ -291,8 +293,8 @@ Page({
     if (res.data.traffic) {
       self.setData({
         traffic: res.data.traffic,
-        "traffic.carInfo": outdoor.buildCarInfo(res.data.traffic),
-        "traffic.costInfo": outdoor.buildCostInfo(res.data.traffic),
+        "traffic.carInfo": odtools.buildCarInfo(res.data.traffic),
+        "traffic.costInfo": odtools.buildCostInfo(res.data.traffic),
       })
     }
     // 活动路线，增加轨迹文件
@@ -312,8 +314,8 @@ Page({
     self.setChat(res.data.chat)
 
     // 判断处理占坑过期的问题
-    if (outdoor.calcRemainTime(self.data.title.date, res.data.limits.ocuppy, true) < 0) {
-      outdoor.removeOcuppy(self.data.outdoorid, members => {
+    if (odtools.calcRemainTime(self.data.title.date, res.data.limits.ocuppy, true) < 0) {
+      odtools.removeOcuppy(self.data.outdoorid, members => {
         self.setData({
           members: members
         })
@@ -371,7 +373,7 @@ Page({
     console.log("createTitle")
     const self = this
     self.setData({
-      "title.whole": outdoor.createTitle(self.data.title, self.data.leader.userInfo.nickName),
+      "title.whole": odtools.createTitle(self.data.title, self.data.leader.userInfo.nickName),
     })
   },
 
@@ -446,7 +448,7 @@ Page({
   calcLevel: function() {
     const self = this
     this.setData({
-      "title.level": outdoor.calcLevel(self.data.title)
+      "title.level": odtools.calcLevel(self.data.title)
     })
   },
 
@@ -581,6 +583,7 @@ Page({
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
       console.log("saveDraft")
+      console.log(this.data.leader)
       this.saveOutdoor("拟定中", false)
     }
   },
@@ -680,6 +683,7 @@ Page({
     var personid = app.globalData.personid; // util.loadPersonID();
     dbPersons.doc(personid).get()
       .then(res => { 
+        console.log(self.data.leader)
         self.data.leader.userInfo = res.data.userInfo;
         self.data.leader.personid = personid;
         self.data.leader.entryInfo.status = "领队"
@@ -745,18 +749,23 @@ Page({
     const self = this;
     util.saveOutdoorID(self.data.outdoorid)
     self.data.memOutdoorid = self.data.outdoorid;
-    self.copyPics(); // 把照片中不是自己的，拷贝一份给自己用
-    if (isPublishing) { // 第一次发布，需要给订阅者发消息
-      self.post2Subscribe()
-    } else if (self.data.modifys.title || self.data.modifys.meets) {
-      // 非第一次发布，如果包括活动重要信息修改，则要给全体队员发送消息提示
-      self.data.members.forEach((item, index) => {
-        template.sendModifyMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole, self.data.myself.userInfo.nickName, self.data.modifys)
-      })
+    self.copyPics() // 把照片中不是自己的，拷贝一份给自己用
+    self.copyTrackFiles() // 把轨迹文件也复制一份给本活动
+
+    if(self.data.status != "拟定中") { // 正在草拟中的活动，这里面的事情就都可以省略了
+      if (isPublishing) { // 第一次发布，需要给订阅者发消息
+        self.post2Subscribe()
+      } else if (self.data.modifys.title || self.data.modifys.meets) {
+        // 非第一次发布，如果包括活动重要信息修改，则要给全体队员发送消息提示
+        self.data.members.forEach((item, index) => {
+          template.sendModifyMsg2Member(item.personid, self.data.outdoorid, self.data.title.whole, self.data.myself.userInfo.nickName, self.data.modifys)
+        })
+      }
+
+      self.createCanvasFile() // 把图片更新一下
+      // 这里处理和ORG网站同步的事情
+      self.keepSameWithWebsites()
     }
-    self.createCanvasFile() // 把图片更新一下
-    // 这里处理和ORG网站同步的事情
-    self.keepSameWithWebsites()
   },
 
   // 判断是否需要与网站同步
@@ -790,14 +799,14 @@ Page({
     } else { // 登录了直接发布信息就好
       self.post2Lvyeorg()
     }
-  },
+  }, 
 
   // 内部处理函数，避免重复代码
   post2Lvyeorg: function() {
     console.log("post2Lvyeorg:function")
     const self = this
     // 没有 tid，则先生成tid；再处理waitings
-    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && (self.data.status == "已发布" || self.data.status == "已成行")) { // 没有tid，则必须有keepSame，同时还必须是“已发布”或“已成行”状态的活动
+    if (!self.data.websites.lvyeorg.tid && self.data.websites.lvyeorg.keepSame && (self.data.status == "已发布" || self.data.status == "已成行")) { // 没有tid，则必须有keepSame，同时还必须是“已发布”或“已成行”状态的活动 
       lvyeorg.addThread(self.data.outdoorid, self.data, app.globalData.lvyeorgInfo.isTesting || self.data.limits.isTest, tid => {
         if (tid) {
           self.data.websites.lvyeorg.tid = tid
@@ -886,7 +895,7 @@ Page({
   // 判断是否有新留言
   setChat(chat) {
     const self = this
-    outdoor.getChatStatus(app.globalData.personid, app.globalData.userInfo.nickName, chat, status => {
+    odtools.getChatStatus(app.globalData.personid, app.globalData.userInfo.nickName, chat, status => {
       self.setData({
         chatStatus: status,
       })
@@ -928,7 +937,7 @@ Page({
     const self = this
     const canvas = wx.createCanvasContext('shareCanvas', self)
     // todo 分享到朋友圈的图片
-    outdoor.drawShareCanvas(canvas, self.data, shareCanvasFile => {
+    odtools.drawShareCanvas(canvas, self.data, shareCanvasFile => {
       self.setData({
         shareCanvasFile: shareCanvasFile,
       })
@@ -1017,7 +1026,7 @@ Page({
   },
 
   // 把照片中不是自己的，拷贝一份给自己用
-  copyPics: function() {
+  copyPics: function() { 
     const self = this;
     if (self.data.brief && self.data.brief.pics.length > 0) {
       self.data.brief.pics.forEach((item, index) => {
@@ -1032,8 +1041,43 @@ Page({
               item.src = res.fileID;
               self.setData({
                 "brief.pics": self.data.brief.pics,
-                hasModified: true,
+                // hasModified: true,
               })
+              cloudfun.updateOutdoorBriefPics(self.data.outdoorid, self.data.brief.pics)
+            }).catch(err => {
+              console.log(err)
+            })
+          }).catch(err => {
+            console.log(err)
+          })
+        }
+      })
+    }
+  },
+
+// 把轨迹文件也复制一份给本活动
+  copyTrackFiles() {
+    console.log("copyTrackFiles()")
+    const self = this;
+    const route = self.data.route
+    if (route && route.trackFiles && route.trackFiles.length > 0) {
+      route.trackFiles.forEach((item, index) => {
+        if (item.src.indexOf(self.data.outdoorid) == -1) { // -1 表示不是用当前活动id构建的，则需要下载，再上传图片
+          console.log("download src: " + item.src)
+          wx.cloud.downloadFile({ // 下载先
+            fileID: item.src
+          }).then(res => {
+            wx.cloud.uploadFile({ // 再上传到自己的活动目录下
+              cloudPath: util.buildRouteSrc(self.data.outdoorid, item.name),
+              filePath: res.tempFilePath, // 小程序临时文件路径
+            }).then(res => {
+              item.src = res.fileID;
+              console.log("upload src: " + item.src)
+              self.setData({
+                "route.trackFiles": route.trackFiles,
+                // hasModified: true,
+              })
+              cloudfun.updateOutdoorTrackFiles(self.data.outdoorid, route.trackFiles)
             }).catch(err => {
               console.log(err)
             })

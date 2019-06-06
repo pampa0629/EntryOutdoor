@@ -1,5 +1,5 @@
 const select = require('../../libs/select.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 
 Page({
  
@@ -47,8 +47,8 @@ Page({
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
       traffic: self.data.traffic,
-      "traffic.carInfo": outdoor.buildCarInfo(self.data.traffic),
-      "traffic.costInfo": outdoor.buildCostInfo(self.data.traffic),
+      "traffic.carInfo": odtools.buildCarInfo(self.data.traffic),
+      "traffic.costInfo": odtools.buildCostInfo(self.data.traffic),
       hasModified: self.data.hasModified,
       "modifys.traffic": self.data.hasModified,
     })

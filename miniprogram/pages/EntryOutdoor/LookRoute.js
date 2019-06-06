@@ -14,7 +14,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({
-      route: prevPage.data.route,
+      route: prevPage.data.od.route,
     })
 
     if (self.data.route.trackSites) {
@@ -51,43 +51,24 @@ Page({
     const self = this
     console.log("downloadTrackFile(index):"+index)
     const track = self.data.route.trackFiles[index]
+    console.log(track)
 
-    wx.cloud.downloadFile({
-      fileID: track.src, // 文件 ID
-      success: res => {
-        // 返回临时文件路径
-        console.log(res.tempFilePath)
-        
-        const fs = wx.getFileSystemManager()
-        fs.saveFile({
-          tempFilePath: res.tempFilePath,
-          success: res => { // 变态的微信，限制太死
-            console.log("savedFilePath:", res.savedFilePath)
-            var newPath = wx.env.USER_DATA_PATH + "/" + track.name
-            console.log(newPath)
-            fs.rename({ // 这里只能先重命名，再提示队员从指定路径找到对应的轨迹文件了 
-              oldPath: res.savedFilePath,
-              newPath: newPath,
-              success:res=>{
-                console.log("rename result:")
-                console.log(res)
-                const path = "/tencent/MicroMsg/wxanewfiles/9fee8ed4ef44c9b804a4f3cdcbe733b0/" // 手机路径
-                wx.setClipboardData({
-                  data: path,
-                  success(res) {
-                    wx.showModal({
-                      title: '下载成功',
-                      content: '由于微信限制，文件只能下载到微信系统目录下，请到：' + path + " 目录下查找该轨迹文件。为方便定位，该目录已经复制到内存中。",
-                      showCancel: false,
-                    })
-                  }
-                })
-              },
-              fail: error => console.log(error),
+    wx.cloud.getTempFileURL({
+      fileList: [track.src]
+    }).then(res => {
+      console.log(res.fileList)
+      if(res.fileList.length==1) {
+        wx.setClipboardData({
+          data: res.fileList[0].tempFileURL,
+          success(res) {
+            wx.showModal({
+              title: '获取链接成功',
+              content: "下载链接已经拷贝到内存中，请打开任意浏览器复制链接下载该轨迹文件",
+              showCancel: false,
             })
           }
         })
-      }      
+      }
     })
   },
 

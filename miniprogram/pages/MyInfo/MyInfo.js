@@ -9,14 +9,14 @@ const dbPersons = db.collection('Persons')
   
 Page({ 
 
-  data: {
-    isTesting: false, // for test， false true
+  data: { 
+    isTesting: true, // for test， false true
 
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
     userInfo: {
       nickName: "待定",
       gender: "GG",
-      phone: "136",
+      phone: "",
     }, 
  
     myOutdoors: [], // 活动id
@@ -33,7 +33,6 @@ Page({
     Calls: [{
         name: '坐标',
         subname: '',
-        disabled:true,
       },
       {
         name: '119',
@@ -342,7 +341,14 @@ Page({
 
   selectCalls(e) {
     console.log(e)
-    util.phoneCall(e.detail.name, true)
+    if (e.detail.name == "坐标") {
+      wx.setClipboardData({
+        data: "我的坐标位置："+e.detail.subname,
+      })
+    }
+    else {
+      util.phoneCall(e.detail.name, true)
+    }
   },
 
   bindCareer() {

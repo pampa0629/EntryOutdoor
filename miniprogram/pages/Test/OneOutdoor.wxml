@@ -10,7 +10,7 @@
 <van-button size="large" bind:click="sendTemplate">发模板消息</van-button>
 <van-button size="large" bind:click="tapWalk">读取步数</van-button>
 <van-button size="large" bind:click="dbRead">数据库读取</van-button>
-
+ 
 <van-button size="large" bindtouchstart="startRecord" bindtouchend="endRecord">语音识别</van-button>
 <van-button size="large" bind:click="uploadVoice">上传识别音频</van-button>
 <van-button size="large" bind:click="tapScan">扫描二维码</van-button>
@@ -29,3 +29,5 @@
 </van-panel>
 
 <van-button size="large" bind:click="tapChooseFile">选择文件</van-button>
+<van-button size="large" bind:click="tapOD">{{od.title.whole}}</van-button> 
+<van-button size="large" bind:click="tapCloud">云存储</van-button>

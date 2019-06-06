@@ -10,7 +10,7 @@
     <view style="flex-direction:column">
       <van-icon size='32px' name="phone-o" bind:click="bindEmergencyCall"/>
       <view style='font-family:黑体;font-size:11pt'>紧急</view>
-    </view>
+    </view> 
   </van-col>
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
@@ -21,7 +21,7 @@
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>0.8.8</view>
+      <view style='font-family:黑体;font-size:11pt'>0.9.3</view>
     </view>
   </van-col>
 </van-row>
@@ -69,6 +69,6 @@
 </van-row>
 
 <!--测试页面-->
-<block wx:if="{{isTesting}}">
+<block wx:if="{{isTesting}}"> 
   <van-button size="large" bind:click="bindTest">Test</van-button>
 </block>

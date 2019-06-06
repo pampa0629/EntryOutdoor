@@ -11,7 +11,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({
-      members: prevPage.data.members,
+      members: prevPage.data.od.members,
     })
     
     // 把认路与否的转化为文本
@@ -21,6 +21,7 @@ Page({
       } else {
         item.entryInfo.knowWay = "不认路"
       }
+      console.log(item.personid + " " + item.userInfo.nickName + " "  + item.userInfo.phone)
     })
     self.setData({
       members: self.data.members,

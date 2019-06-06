@@ -7,12 +7,13 @@ const template = require('../../utils/template.js')
 const crypto = require('../../utils/crypto.js')
 const group = require('../../utils/group.js')
 const person = require('../../utils/person.js')
+const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
 const CryptoJS = require('../../libs/cryptojs.js')
 
 // const plugin = requirePlugin("WechatSI") 
 // const manager = plugin.getRecordRecognitionManager()
- 
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const _ = db.command
@@ -25,9 +26,15 @@ Page({
   data: {
     home: false,
     formIds: [],
-  },
+    od: null, 
+    a:null,
+  }, 
 
   onLoad() {
+    this.setData({
+      od: new outdoor.OD()
+    })
+    
     this.initRecord()
 
     var time = new Date()
@@ -67,7 +74,7 @@ Page({
 
   },
 
-  onContact: function(e) {
+  onContact: function (e) {
     console.log(JSON.stringify(e, null, 2))
     wx.showModal({
       title: '客服消息',
@@ -75,7 +82,7 @@ Page({
     })
   },
 
-  onTest: function(e) {
+  onTest: function (e) {
 
     console.log(e.detail.errMsg)
     console.log(e.detail.iv)
@@ -102,7 +109,7 @@ Page({
         console.log(resLogin)
         util.authorize("werun", "授权后才能获取步数", cb => {
           wx.getWeRunData({
-            success(res) { 
+            success(res) {
               const encryptedData = res.encryptedData
               cloudfun.decrypt(res.encryptedData, res.iv, resLogin.code, run => {
                 console.log(run)
@@ -181,10 +188,10 @@ Page({
     qrcode.makeCode("test")
     wx.showActionSheet({
       itemList: ['保存图片'],
-      success: function(res) {
+      success: function (res) {
         console.log(res.tapIndex)
         if (res.tapIndex == 0) {
-          qrcode.exportImage(function(path) {
+          qrcode.exportImage(function (path) {
             wx.saveImageToPhotosAlbum({
               filePath: path,
             })
@@ -350,7 +357,7 @@ Page({
     //     title: '识别结果',
     //     content: text,
     //   })
-      
+
     //   // 得到完整识别内容就可以去翻译了
     //   // this.translateTextAction()
     // }
@@ -378,21 +385,21 @@ Page({
     // // 识别结束事件
     // manager.onStop = (res) => {
     //   console.log('manager.onStop')
-      // let text = res.result
-      // wx.showModal({
-      //   title: '识别结果',
-      //   content: text,
-      // })
+    // let text = res.result
+    // wx.showModal({
+    //   title: '识别结果',
+    //   content: text,
+    // })
 
     // }
 
     // // 识别错误事件
     // manager.onError = (res) => {
 
-      // this.setData({
-      //   recording: false,
-      //   bottomButtonDisabled: false,
-      // })
+    // this.setData({
+    //   recording: false,
+    //   bottomButtonDisabled: false,
+    // })
 
     // }
 
@@ -442,10 +449,10 @@ Page({
     })
   },
 
-  tapGroup(){
+  tapGroup() {
     const self = this
     // GgNmG5ApyZgxkkbDndLPz_5Odl6U GgNmG5ANDVP5iVBK1wu8nCvyp9g0
-    var groupID = "GgNmG5ApyZgxkkbDndLPz_5Odl6U" 
+    var groupID = "GgNmG5ApyZgxkkbDndLPz_5Odl6U"
     group.ensureMember(groupID, app.globalData.openid, app.globalData.personid, app.globalData.userInfo)
     person.adjustGroup(app.globalData.personid, groupID)
   },
@@ -455,20 +462,20 @@ Page({
     wx.onGyroscopeChange(function (res) {
       console.log(res)
       var t = Math.sqrt(Math.pow(res.x, 2) + Math.pow(res.y, 2) + Math.pow(res.z, 2))
-      var acc = {x:res.x, y:res.y, z:res.z, t:t}
+      var acc = { x: res.x, y: res.y, z: res.z, t: t }
       //if (t > 1.2) {
-        dbTemp.doc(app.globalData.personid).update({
-          data: {
-          accs:_.push(acc)
-          }
-        })
-        console.log(acc)
+      dbTemp.doc(app.globalData.personid).update({
+        data: {
+          accs: _.push(acc)
+        }
+      })
+      console.log(acc)
       // }
     })
   },
 
   tapEndTime() {
-    var time = outdoor.calcRemainTime("2019-02-11", {date: "不限",time: "21:00"}, false)
+    var time = odtools.calcRemainTime("2019-02-11", { date: "不限", time: "21:00" }, false)
     console.log(time)
   },
 
@@ -483,7 +490,7 @@ Page({
       },
       data: {
         username: "50463253@qq.com",
-        password:"xx123zzm",
+        password: "xx123zzm",
       },
       fail: function (error) {
         console.log(error)
@@ -494,13 +501,13 @@ Page({
         const c = res.cookies
         console.log(c)
         self.setData({
-          "mofang.PHPSESSID":c[0].value,
+          "mofang.PHPSESSID": c[0].value,
           "mofang.dyh_lastactivity": c[1].value,
         })
         console.log(self.data.mofang)
       }
     })
-  }, 
+  },
 
   tapMofangMain() {
     const self = this
@@ -522,7 +529,7 @@ Page({
         console.log(res.data)
       }
     })
-  }, 
+  },
 
   tapMofangOutdoor() {
     const self = this
@@ -531,7 +538,7 @@ Page({
       method: 'POST',
       header: {
         "content-type": "application/x-www-form-urlencoded"
-      }, 
+      },
       data: {
         PHPSESSID: self.data.mofang.PHPSESSID,
         dyh_lastactivity: self.data.mofang.dyh_lastactivity,
@@ -544,7 +551,7 @@ Page({
         console.log(res.data)
       }
     })
-  }, 
+  },
 
   tapMofangPublish() {
     const self = this
@@ -566,15 +573,45 @@ Page({
         console.log(res.data)
       }
     })
-  }, 
+  },
 
   tapChooseFile() {
     const fs = wx.getFileSystemManager()
     var newPath = wx.env.USER_DATA_PATH + "/abc"
-      fs.mkdir({
-      dirPath:newPath,
-      complete:res=>console.log(res)
+    fs.mkdir({
+      dirPath: newPath,
+      complete: res => console.log(res)
+    })
+  },
+
+  myFunction(a) {
+    console.log("arguments.length:" + arguments.length)
+    console.log("arguments0:" + arguments[0])
+    console.log("arguments:" )
+    console.log( JSON.stringify(arguments))
+    console.log("arguments type:" + typeof arguments)
+    var result = 1
+    for(var x in arguments) {
+      console.log("x:" + arguments[x])
+      result = arguments[x] * result
+    }
+    return result * arguments.length;
+  },
+
+  tapOD() {
+    this.data.od.load("57896b495cf64f1e0b873e3675d01598", callback => {
+      this.setData({
+        od: this.data.od
       })
+    })
+  },
+
+ 
+  tapCloud() {
+    var a = 1
+    a = a>2?3: void(0)
+    
+    console.log(a)
   },
 
 });

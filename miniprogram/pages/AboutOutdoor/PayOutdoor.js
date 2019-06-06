@@ -1,7 +1,7 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const qrcode = require('../../utils/qrcode.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 
@@ -111,7 +111,7 @@ Page({
               "mine.screen": resUpload.fileID,
             })
             // 写入mine到数据库中
-            outdoor.setPayMine(self.data.outdoorid, app.globalData.personid, self.data.mine)
+            odtools.setPayMine(self.data.outdoorid, app.globalData.personid, self.data.mine)
             if (oldpath) { // 删除原来的二维码文件
               wx.cloud.deleteFile({
                 fileList: [oldpath]

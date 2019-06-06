@@ -8,7 +8,7 @@ const _ = db.command
   
 const updateOutdoor=(outdoorid, data, callback)=>{
   console.log("updateOutdoor")
-  wx.cloud.callFunction({
+  wx.cloud.callFunction({ 
     name: 'updateOutdoor', // 云函数名
     data: { 
       outdoorid: outdoorid,
@@ -226,6 +226,36 @@ const updateOutdoorFormids=(outdoorid, formids)=>{
   })
 }
 
+const updateOutdoorBriefPics = (outdoorid, pics) => {
+  console.log("updateOutdoorBriefPics")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "brief.pics",
+      command: "",
+      value: pics,
+    }
+  })
+}
+
+const updateOutdoorTrackFiles = (outdoorid, trackFiles) => {
+  console.log("updateOutdoorTrackFiles")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "route.trackFiles",
+      command: "",
+      value: trackFiles,
+    }
+  })
+}
+
 const updateOutdoorPay=(outdoorid, pay)=>{
   console.log("updateOutdoorPay")
   wx.cloud.callFunction({
@@ -435,6 +465,9 @@ module.exports = {
 
   updateOutdoorPay: updateOutdoorPay, // 支付信息
   updateOutdoorPayQrcode: updateOutdoorPayQrcode, // 支付二维码
+
+  updateOutdoorBriefPics: updateOutdoorBriefPics, // 更新照片存储路径
+  updateOutdoorTrackFiles: updateOutdoorTrackFiles, // 更新轨迹文件路径
 
   // Persons
   unshiftPersonCared:unshiftPersonCared,

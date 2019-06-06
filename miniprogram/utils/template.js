@@ -325,7 +325,7 @@ const sendAppointMsg2CFO=(personid, outdoorid, title, nickName)=>{
     })
   })
 }
-
+ 
 // 给报名者发消息，询问情况
 const sendChatMsg2Member = (personid, title, outdoorid, nickName, phone, content) => {
   console.log("sendChatMsg2Member")

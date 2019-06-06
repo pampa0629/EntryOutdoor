@@ -2,7 +2,7 @@ const app = getApp()
 const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const template = require('../../utils/template.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -125,7 +125,7 @@ Page({
   onSetLeader() {
     const self = this
     dbOutdoors.doc(self.data.outdoorid).get().then(res=>{
-      outdoor.findPersonIndex(res.data.members, self.data.members[self.data.index].personid, index=>{
+      odtools.findPersonIndex(res.data.members, self.data.members[self.data.index].personid, index=>{
         console.log("person index: "+index)
         var temp = res.data.members[0]
         res.data.members[0] = res.data.members[index]
@@ -215,7 +215,7 @@ Page({
     const self = this
     const member = self.data.members[self.data.index]
     var cfo = {personid:member.personid, nickName:member.nickName}
-    outdoor.setCFO(self.data.outdoorid, cfo)
+    odtools.setCFO(self.data.outdoorid, cfo)
     self.setData({
       cfo:cfo, 
     })
@@ -260,11 +260,11 @@ Page({
       template.sendChatMsg2Member(item.personid, self.data.title, self.data.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, content)
 
       // 增加活动留言
-      // { "at": "papa", "msg": "加油", "personid": "W72p-92AWotkbObV", "self": true, "who": "PiPi" }
+      // { "msg": "加油 @papa", "personid": "W72p-92AWotkbObV", "self": true, "who": "PiPi" }
       var message = {
-        at: item.nickName,
+        // at: item.nickName,
         personid: app.globalData.personid,
-        msg: content,
+        msg: content + " @"+item.nickName,
         who: app.globalData.userInfo.nickName
       }
       cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
@@ -342,16 +342,16 @@ Page({
       // { "at": "papa", "msg": "加油", "personid": "W72p-92AWotkbObV", "self": true, "who": "PiPi" }
       content = "报名被驳回，理由是：" + content
       var message = {
-        at: item.nickName,
+        // at: item.nickName, 
         personid: app.globalData.personid,
-        msg: content,
+        msg: content + " @" + item.nickName,
         who: app.globalData.userInfo.nickName
       }
       cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
 
       // 从队员报名表中剔除
       var selfQuit = false
-      outdoor.removeMember(self.data.outdoorid, item.personid, selfQuit, members => {
+      odtools.removeMember(self.data.outdoorid, item.personid, selfQuit, members => {
         console.log(members)
         self.flushMembers(members)
       })

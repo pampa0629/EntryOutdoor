@@ -1,5 +1,5 @@
 const util = require('../../utils/util.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 const select = require('../../libs/select.js')
 
 Page({
@@ -30,18 +30,19 @@ Page({
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
+    let od = prevPage.data.od
 
     self.setData({
-      loaded: prevPage.data.title.loaded,
-      date: prevPage.data.title.date,
-      day: util.getDay(prevPage.data.title.date),
+      loaded: od.title.loaded,
+      date: od.title.date,
+      day: util.getDay(od.title.date),
       areaList: select.area, // 系统默认
     })
 
-    var hasEquipments = prevPage.data.limits && prevPage.data.limits.equipments && (prevPage.data.limits.equipments.must.length || prevPage.data.limits.equipments.can.length || prevPage.data.limits.equipments.no.length)
+    var hasEquipments = od.limits && od.limits.equipments && (od.limits.equipments.must.length || od.limits.equipments.can.length ||od.limits.equipments.no.length)
     if (hasEquipments) { // 有就直接读取
       self.setData({
-        equipments: prevPage.data.limits.equipments,
+        equipments: od.limits.equipments,
         leaderDo: true,
       })
     }
@@ -59,15 +60,15 @@ Page({
 
   loadEquipments(area, date, isLoadEquipments) {
     const self = this
-    outdoor.getWeather(area, date, weather => {
+    odtools.getWeather(area, date, weather => {
       if (weather.result) {
         self.setData({
           weather: weather.weather,
-          weatherText: outdoor.buildWeatherMessage(weather.weather),
+          weatherText: odtools.buildWeatherMessage(weather.weather),
         })
         if (isLoadEquipments){
           var area = self.data.equipments.area
-          outdoor.loadEquipments(self.data.loaded, self.data.date, weather.weather, equipments => {
+          odtools.loadEquipments(self.data.loaded, self.data.date, weather.weather, equipments => {
             self.setData({
               equipments: equipments,
               "equipments.area": area,

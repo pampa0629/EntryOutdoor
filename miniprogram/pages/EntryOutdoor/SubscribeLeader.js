@@ -74,7 +74,7 @@ Page({
   },
 
   addCount(e){
-    console.log("addCount")
+    console.log("addCount: " + e.detail.formId)
     const self = this
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     self.data.formids.push(e.detail.formId)

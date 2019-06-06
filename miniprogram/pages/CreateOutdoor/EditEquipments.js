@@ -1,5 +1,5 @@
 const util = require('../../utils/util.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 const select = require('../../libs/select.js')
 
 Page({
@@ -59,11 +59,11 @@ Page({
         weatherText: "活动过期，无法获取天气预报，系统也无法推荐装备",
       })
     } else if (self.data.equipments.area){ // 没过期，有活动地区，则查询天气预报
-      outdoor.getWeather(self.data.equipments.area, self.data.date, weather => {
+      odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
         if (weather.result) {
           self.setData({
             weather: weather.weather,
-            weatherText: outdoor.buildWeatherMessage(weather.weather),
+            weatherText: odtools.buildWeatherMessage(weather.weather),
           })
         } else {
           self.setData({
@@ -89,7 +89,7 @@ Page({
   loadEquipments(weather){
     const self = this
     var area = self.data.equipments.area
-    outdoor.loadEquipments(self.data.loaded, self.data.date, weather, equipments => {
+    odtools.loadEquipments(self.data.loaded, self.data.date, weather, equipments => {
       self.setData({
         equipments: equipments,
         "equipments.area": area,
@@ -104,11 +104,11 @@ Page({
     const self = this
     // 没有天气预报，又没有过期，就查询一下
     if (!self.data.isOutDate) { // 没过期，又没有给天气预报，则查询天气预报
-      outdoor.getWeather(self.data.equipments.area, self.data.date, weather => {
+      odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
         if (weather.result) {
           self.setData({
             weather: weather.weather,
-            weatherText: outdoor.buildWeatherMessage(weather.weather),
+            weatherText: odtools.buildWeatherMessage(weather.weather),
           })
           self.loadEquipments(self.data.weather)
         } else {

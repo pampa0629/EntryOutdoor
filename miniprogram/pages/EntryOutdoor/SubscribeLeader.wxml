@@ -5,37 +5,28 @@
 
 <!--订阅领队/取消订阅-->
 <form bindsubmit="SubscribeLeader" report-submit="true">
-  <button form-type="submit" class="no_btn">
-    <view class="fix" style="left:50rpx">
-      <button style="color:#1aad19;background-color:#ffffff" size="large" plain>
-        <view wx:if="{{!hasSubscribed}}">订阅领队</view>
-        <view wx:else>取消订阅</view>
-      </button>
-    </view>
-  </button>
+  <view class="fix" style="left:50rpx">
+    <button form-type="submit" style="color:#1aad19;background-color:#ffffff" size="large" plain>
+      <view wx:if="{{!hasSubscribed}}">订阅领队</view>
+      <view wx:else>取消订阅</view>
+    </button>
+  </view>
 </form>
 
-<!--通知数量上限-->
+<form bindsubmit="SubscribeLeader" report-submit="true">
+  <view class="fix" style="left:50rpx">
+    <button form-type="submit" style="color:#1aad19;background-color:#ffffff" size="large" plain>
+      <view wx:if="{{!hasSubscribed}}">订阅领队</view>
+      <view wx:else>取消订阅</view>
+    </button>
+  </view>
+</form>
+
+<!--增加通知数量-->
 <form bindsubmit="addCount" report-submit="true">
-  <button form-type="submit" class="no_btn">
-    <form bindsubmit="addCount" report-submit="true">
-      <button form-type="submit" class="no_btn">
-        <form bindsubmit="addCount" report-submit="true">
-          <button form-type="submit" class="no_btn">
-            <form bindsubmit="addCount" report-submit="true">
-              <button form-type="submit" class="no_btn">
-                <view class="fix" style="left:400rpx">
-                  <form bindsubmit="addCount" report-submit="true">
-                    <button style="color:#1aad19;background-color:#ffffff" size="large" plain>增加通知数量</button>
-                  </form>
-                </view>
-              </button>
-            </form>
-          </button>
-        </form>
-      </button>
-    </form>
-  </button>
+  <view class="fix" style="left:400rpx">
+    <button form-type="submit" style="color:#1aad19;background-color:#ffffff" size="large" plain>增加通知数量</button>
+  </view>
 </form>
 
 <!--文字提示-->

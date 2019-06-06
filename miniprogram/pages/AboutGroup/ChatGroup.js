@@ -1,6 +1,6 @@
 const cloudfun = require('../../utils/cloudfun.js')
 const util = require('../../utils/util.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 
 const app = getApp()
 wx.cloud.init()
@@ -73,7 +73,7 @@ Page({
               // 写入qrcode到数据库中
               cloudfun.updateOutdoorChatQrcode(self.data.outdoorid, self.data.chat.qrcode)
               // 构建留言信息
-              var message = outdoor.buildChatMessage("@所有人 领队设置了活动专用微信群，请在留言页面右上角点击查看并扫码入群。谢谢！")
+              var message = odtools.buildChatMessage("@所有人 领队设置了活动专用微信群，请在留言页面右上角点击查看并扫码入群。谢谢！")
               cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
               if (oldpath) { // 删除原来的二维码文件
                 wx.cloud.deleteFile({

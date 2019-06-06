@@ -1,7 +1,6 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const qrcode = require('../../utils/qrcode.js')
-const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 

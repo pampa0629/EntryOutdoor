@@ -1,6 +1,6 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -108,8 +108,8 @@ Page({
     if (res.data.traffic) {
       self.setData({
         traffic: res.data.traffic,
-        "traffic.carInfo": outdoor.buildCarInfo(res.data.traffic),
-        "traffic.costInfo": outdoor.buildCostInfo(res.data.traffic),
+        "traffic.carInfo": odtools.buildCarInfo(res.data.traffic),
+        "traffic.costInfo": odtools.buildCostInfo(res.data.traffic),
       })
     }
     

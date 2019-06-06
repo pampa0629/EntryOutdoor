@@ -1,8 +1,8 @@
 <!--我的信息-->
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="我的信息"></van-cell>
-
-  <van-field value="{{userInfo.nickName}}" label="户外昵称：" placeholder="请输入户外昵称（好听易记非真名）"  bind:change="changeNickname" bind:blur="blurNickname" error-message="{{nickErrMsg}}"/>
+ 
+  <van-field value="{{userInfo.nickName}}" label="户外昵称：" placeholder="请输入户外昵称（好听易记非真名）"  bind:change="changeNickname" error-message="{{nickErrMsg}}"/>
 
   <van-field label="性别：" value="{{userInfo.gender}}" disabled/>
   <van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">

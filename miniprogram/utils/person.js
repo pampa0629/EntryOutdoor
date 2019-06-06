@@ -35,7 +35,7 @@ const updateWalkStep=(personid, callback)=>{
               }
             })
           }
-        })
+        }) 
       })
     }
   })
@@ -98,7 +98,7 @@ const createRecord=(userInfo, openid, callback)=>{
             showCancel: false,
             confirmText: "马上就去",
           })
-        }
+        } 
       })
     }
   })
@@ -118,9 +118,35 @@ const adjustGroup=(personid, groupOpenid)=>{
   })
 }
 
+// 这里判断昵称的唯一性和不能为空
+const checkNickname = (nickName, personid, callback)=>{
+  var nickErrMsg=""
+  if (!nickName) {
+    nickErrMsg = "昵称不能为空，已自动恢复旧名"
+    if (callback) {
+      callback(nickErrMsg, false)
+    }
+  } else {
+    dbPersons.where({
+      "userInfo.nickName": nickName
+    }).get().then(res => {
+      console.log(res.data)
+      if (res.data.length > 1) {
+        nickErrMsg = "修改后的昵称已被占用不能使用，已自动恢复旧名"
+      } else if (res.data.length == 1 && res.data[0]._id != personid) {
+        nickErrMsg = "修改后的昵称已被占用不能使用，已自动恢复旧名"
+      } 
+      if (callback) {
+        callback(nickErrMsg, nickErrMsg=="")
+      }
+    })
+  }
+}
+
 module.exports = {
   updateWalkStep: updateWalkStep,  // 更新步数
   getUniqueNickname: getUniqueNickname, // 得到唯一的户外昵称（不重名）
   createRecord: createRecord, // 创建账号
   adjustGroup: adjustGroup, // 记录和调整加入的微信群的顺序
+  checkNickname: checkNickname, //  判断昵称的唯一性和不能为空
 }

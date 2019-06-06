@@ -3,7 +3,7 @@ Page({
   data: {
     top:{},
     index:-1,
-  },
+  }, 
 
   onLoad: function (options) {
     console.log(options)

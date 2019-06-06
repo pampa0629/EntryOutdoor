@@ -1,6 +1,6 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
@@ -18,7 +18,7 @@ Page({
     title: null,
     message: {
       who: "",
-      msg: "",
+      msg: "", 
       personid: "",
     },
     chat: {
@@ -197,7 +197,7 @@ Page({
     console.log("submitChat")
     const self = this
     if (self.data.message.msg) {
-      var message = outdoor.buildChatMessage(self.data.message.msg)
+      var message = odtools.buildChatMessage(self.data.message.msg)
       console.log(self.data.message)
       // load
       self.flushChats(message, null)

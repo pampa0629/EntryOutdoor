@@ -325,7 +325,7 @@ const buildMembersMessage = (meets, members) => {
   return message
 }
 
-// 构建活动信息，以便发布活动信息到网站
+// 构建活动信息，以便发布活动信息到网站 
 const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) => {
   var message = "（以下内容由“户外报名”小程序同步发出）" + NL2
   if (addMessage && addMessage.length > 0) {
@@ -539,7 +539,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
       data.websites.lvyeorg.qrcodeUrl = resQrCode.url // 记录下来
 
       var fid = chooseForum(data.title, isTesting) // 要发帖的版面
-      var message = buildOutdoorMesage(data, true, data.modifys, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
+      var message = buildOutdoorMesage(data, true, null, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
       // console.log(message)
       var token = wx.getStorageSync("LvyeOrgToken")
       console.log(token)

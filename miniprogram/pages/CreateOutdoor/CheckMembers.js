@@ -45,19 +45,19 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.data.outdoorid = prevPage.data.outdoorid
-    self.data.title = prevPage.data.title.whole
+    self.data.title = prevPage.data.od.title.whole
     if(prevPage.data.leader.personid == app.globalData.personid) {
       self.setData({ // 判断是否为总领队
         isLeader:true,
       })
     }
-    if (prevPage.data.pay && prevPage.data.pay.cfo){
+    if (prevPage.data.od.pay && prevPage.data.od.pay.cfo){
       self.setData({
-        cfo: prevPage.data.pay.cfo, 
+        cfo: prevPage.data.od.pay.cfo, 
       })
     }
     // 构建正式队员列表
-    self.flushMembers(prevPage.data.members)
+    self.flushMembers(prevPage.data.od.members)
     // 处理附加队员
     self.loadAddMembers(self.data.outdoorid)
   },
@@ -110,7 +110,7 @@ Page({
     let prevPage = pages[pages.length - 2];
     dbOutdoors.doc(self.data.outdoorid).get().then(res => {
       prevPage.setData({
-        members: res.data.members,
+        "od.member": res.data.members,
       })
     })
     if (self.data.hasModified) {

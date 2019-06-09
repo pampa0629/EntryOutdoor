@@ -1,16 +1,17 @@
 const odtools = require('./odtools.js')
+const util = require('./util.js')
 const template = require('./template.js')
+const cloudfun = require('./cloudfun.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const _ = db.command
- 
-// const obja = require('./testa.js')
-
+  
 // 创建函数，使用者必须： var od = new outdoor.OD() 来获得活动对象，并设置默认值
 // 内存中的对象，为最新格式，和界面表现内容； 从数据库中load时，应注意做兼容性处理
 function OD() {
+  this.outdoorid=""
   this.title = { // 活动标题，通过下面子项随时自动生成；
     whole: "", // 自动生成，也存起来
     place: "", // String; 地点描述。必填
@@ -41,52 +42,63 @@ function OD() {
   this.status = "拟定中" // 活动本身的状态，分为：拟定中，已发布，已成行，报名截止，已取消
 
   // 同步到网站的信息
-  this.websites = {
-    lvyeorg: {
-      //fid: null, // 版块id
-      tid: null, // 帖子id
-      keepSame: false, // 是否保持同步
-      waitings: [], // 要同步但尚未同步的信息列表
-    }
-  }
+  this.websites = odtools.getDefaultWebsites()
 }
 
+// 根据id从数据库中装载活动内容
 OD.prototype.load = function(outdoorid, callback) {
   dbOutdoors.doc(outdoorid).get()
     .then(res => {
+      res.data.outdoorid = res.data._id
       this.copy(res.data) // 处理Outdoors表中数据的兼容性
 
-      // checkOcuppyLimitDate() // 处理占坑截止时间过了得退坑的问题
-      console.log(this)
-      if(callback) {
-        callback(this)
-      }
+      // 移除占坑过期队员
+      this.removeOcuppy(()=>{
+        console.log(this)
+        if (callback) {
+          callback(this)
+        }
+      }) 
     })
 }
 
-// 通过
+OD.prototype.removeOcuppy = function (callback) {
+// 判断处理占坑过期的问题
+if (this.title.date && odtools.calcRemainTime(this.title.date, this.limits.ocuppy, true) < 0) {
+  odtools.removeOcuppy(this.outdoorid, members => {
+    this.members = members
+    if(callback) {
+      callback()
+    }
+  })
+  } else if(callback) {
+    callback()
+  }
+}
+
+// 拷贝内容
 OD.prototype.copy = function(od) {
-  this.outdoorid = od._id
+  this.outdoorid = od.outdoorid
   this.title = od.title
+  this.title.adjustLevel = this.title.adjustLevel ? this.title.adjustLevel : 100
   this.meets = od.meets
   this.members = od.members
-  this.leader = od.members.length > 0 ? od.members[0] : this.leader
+  // 设置领队，顺序：od中保存的、第一个队员、默认的（null）
+  this.leader = od.leader ? od.leader : od.members[0] 
   this.status = od.status
 
   // brief 文字加图片 
   this.brief = od.brief ? od.brief : this.brief
+  
   //limits
   console.log("limits: ")
   console.log(od.limits)
   this.limits = od.limits ? od.limits : this.limits
   // 微信服务通知，没有的话需要取默认值
-  if ( !this.limits.wxnotice){
+  if (!this.limits.wxnotice) {
     this.limits.wxnotice = template.getDefaultNotice() 
   }
-  // 占坑和报名截止时间
-  // this.limits.occppy = !this.limits.occppy ? null : this.limits.occppy
-  // this.limits.entry = !this.limits.entry ? null : void (0)
-  
+
   // 几日活动，老存储：durings duringIndex
   if (!od.title.during && od.title.durings && od.title.duringIndex) {
     this.title.during = od.title.durings[od.title.duringIndex]
@@ -118,12 +130,139 @@ OD.prototype.copy = function(od) {
 
 }
 
-OD.prototype.getName = function() {
-  return "this.a.getName()"
+// 把当前活动设置为可供后续创建新活动的样子，即把活动id、活动日期、队员列表、网站同步信息、活动状态等信息置空
+OD.prototype.setDefault4New = function () {
+  this.outdoorid = null
+  this.title.date = null
+  this.members = []
+  this.websites = odtools.getDefaultWebsites()
+  this.status = "拟定中"
+}
+
+// 保存（更新）od到数据库中，若之前没有保存过，则新建一条记录
+// myself：自己的报名信息
+// callback: 返回活动本身
+OD.prototype.save = function (myself, callback) {
+  const self = this
+  if (self.outdoorid) {
+    // 必须先刷新一下成员，不然容易覆盖
+    dbOutdoors.doc(self.outdoorid).get().then(res => {
+      self.members = res.data.members
+      // 找到自己的index，并更新信息
+      self.members.forEach((item, index) => {
+        if (item.personid == myself.personid) {
+          item = myself
+        }
+      })
+
+      cloudfun.updateOutdoor(self.outdoorid, self, res=>{
+        if(callback) {
+          callback(self)
+        }
+      })
+    })
+  } else { // 若之前没有保存过，则创建活动记录
+    self.create(myself, id=>{
+      if(callback) {
+        callback(self)
+      }
+    })
+  }
+}
+
+// 以原有活动od为模板，创建新活动；leader是领队信息 
+// callback 返回活动id
+OD.prototype.create = function(leader, callback) {
+  dbPersons.doc(leader.personid).get()
+    .then(res => {
+      leader.entryInfo.status = "领队"
+      // 领队有免责条款时，则用领队自己的
+      if (res.data.disclaimer) {
+        this.limits.disclaimer = res.data.disclaimer
+      }
+      var members = [leader]; // 把领队作为第一个队员
+      dbOutdoors.add({ // 没有outdoor id,则新加一条记录
+        data: {
+          title: this.title,
+          route: this.route,
+          meets: this.meets,
+          traffic: this.traffic,
+          leader: this.leader, // 写入领队信息 
+          members: members, 
+          status: this.status, 
+          brief: this.brief,
+          limits: this.limits,
+          websites: this.websites,
+        }
+      }).then(res=>{
+        this.outdoorid = res._id
+    
+        // 把照片和轨迹文件也复制一份给本活动
+        this.copyPics()
+        this.copyTrackFiles()
+          
+        if(callback) {
+          callback(this.outdoorid)
+        }
+      })
+    })
+}
+
+// 复制照片
+OD.prototype.copyPics = function() {
+  console.log("OD.prototype.copyPics()")
+  this.brief.pics.forEach((item, index)=>{
+    // 没找到当前id，说明图片是之前活动的，则需要下载，再上传图片
+    if (!item.src.match(this.outdoorid)) { 
+      wx.cloud.downloadFile({ // 下载先
+        fileID: item.src
+      }).then(res => {
+        wx.cloud.uploadFile({ // 再上传到自己的活动目录下
+          cloudPath: util.buildPicSrc(this.outdoorid, index),
+          filePath: res.tempFilePath, // 小程序临时文件路径
+        }).then(res => {
+          item.src = res.fileID;
+          console.log("copyPics")
+          console.log(this.brief.pics)
+          cloudfun.updateOutdoorBriefPics(this.outdoorid, this.brief.pics)
+        })
+      })
+    }
+  })
+}
+
+// 复制轨迹文件
+OD.prototype.copyTrackFiles = function () {
+  this.route.trackFiles.forEach((item, index) => {
+    // 没找到当前id，说明文件是之前活动的，则需要下载，再上传
+    if (!item.src.match(this.outdoorid)) { 
+      console.log("download src: " + item.src)
+      wx.cloud.downloadFile({ // 下载先
+        fileID: item.src
+      }).then(res => {
+        wx.cloud.uploadFile({ // 再上传到自己的活动目录下
+          cloudPath: util.buildRouteSrc(this.outdoorid, item.name),
+          filePath: res.tempFilePath, // 小程序临时文件路径
+        }).then(res => {
+          item.src = res.fileID;
+          console.log("copyTrackFiles")
+          console.log(this.route.trackFiles)
+          cloudfun.updateOutdoorTrackFiles(this.outdoorid, this.route.trackFiles)
+        })
+      })
+    }
+  })
 }
 
 module.exports = {
   OD: OD,
   load: OD.prototype.load,
-  // getName: OD.prototype.getName,
+  create: OD.prototype.create,
+  save: OD.prototype.save,
+
+  // 以下为内部函数，外面不得调用
+  // removeOcuppy:OD.prototype.removeOcuppy,
+  // setDefault4New:OD.prototype.setDefault4New,
+  // copyPics:OD.prototype.copyPics,
+  // copyTrackFiles:OD.prototype.copyTrackFiles,
 }

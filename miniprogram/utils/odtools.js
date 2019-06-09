@@ -3,8 +3,8 @@ const util = require('./util.js')
 var bmap = require('../libs/bmap-wx.min.js')
 const cloudfun = require('./cloudfun.js')
 const template = require('./template.js')
- 
-wx.cloud.init()  
+
+wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 
@@ -113,7 +113,7 @@ const getLocation = (callback) => {
             console.log('scope.userLocationv OK')
             wx.getLocation({
               type: 'wgs84',
-              success: function(res) {
+              success: function (res) {
                 if (callback) {
                   callback(res)
                 }
@@ -130,7 +130,7 @@ const getLocation = (callback) => {
       } else {
         wx.getLocation({
           type: 'wgs84',
-          success: function(res) {
+          success: function (res) {
             if (callback) {
               callback(res)
             }
@@ -146,7 +146,7 @@ const getWeather = (area, date, callback) => {
   var ak = "zGuNHdYow4wGhrC1IytHDweHPWGxdbaX"
   wx.request({ // 通过area得到经纬度
     url: "https://api.map.baidu.com/geocoder/v2/?address=" + area + "&output=json&ak=" + ak,
-    fail: function(error) {
+    fail: function (error) {
       console.log(error)
       if (callback) {
         callback({
@@ -155,14 +155,14 @@ const getWeather = (area, date, callback) => {
         })
       }
     },
-    success: function(res) {
+    success: function (res) {
       console.log(res);
       var latitude = res.data.result.location.lat //维度
       var longitude = res.data.result.location.lng //经度
-      var BMap = new bmap.BMapWX({ak: ak});
+      var BMap = new bmap.BMapWX({ ak: ak });
       BMap.weather({
         location: longitude + "," + latitude,
-        fail: function(error) {
+        fail: function (error) {
           console.log(error)
           if (callback) {
             callback({
@@ -171,7 +171,7 @@ const getWeather = (area, date, callback) => {
             })
           }
         },
-        success: function(res) {
+        success: function (res) {
           console.log(res)
           let forecast = res.originalData.results[0].weather_data
           console.log(forecast)
@@ -301,18 +301,18 @@ const loadEquipments = (loaded, date, weather, callback) => {
 
     // 看天气情况推荐：刮风
     if (weather.wind == "big") {
-      e.mustRes.push("冲锋衣") 
-      e.must.push("冲锋衣") 
+      e.mustRes.push("冲锋衣")
+      e.must.push("冲锋衣")
     }
 
     // 看天气情况推荐：天晴下雨
     if (weather.weather == "sunny") {
-      e.canRes.push("遮阳帽") 
-      e.can.push("遮阳帽", "防晒霜") 
+      e.canRes.push("遮阳帽")
+      e.can.push("遮阳帽", "防晒霜")
       water *= 1.2
     } else if (weather.weather == "rain") {
-      e.mustRes.push("雨披") 
-      e.must.push("雨披") 
+      e.mustRes.push("雨披")
+      e.must.push("雨披")
       water *= 0.8
     }
 
@@ -342,12 +342,12 @@ const loadEquipments = (loaded, date, weather, callback) => {
 }
 
 // 把车辆信息输出为一个短语
-const buildCarInfo=(traffic)=>{
+const buildCarInfo = (traffic) => {
   var carInfo = ""
   if (traffic.mode == "公共交通") {
     carInfo = "无"
   } else if (traffic.car) {
-    if (traffic.car.brand) { 
+    if (traffic.car.brand) {
       carInfo += traffic.car.brand
     }
     if (traffic.car.color) {
@@ -359,7 +359,7 @@ const buildCarInfo=(traffic)=>{
   }
   console.log(carInfo)
   return carInfo
-} 
+}
 
 // 构建费用信息 {{traffic.cost=='免费'?'免费':'大致费用：'+traffic.money+'元'}}
 const buildCostInfo = (traffic) => {
@@ -372,7 +372,7 @@ const buildCostInfo = (traffic) => {
 }
 
 // 移除某个队员（自己退出，或者领队驳回报名），回调返回新成员名单
-const removeMember=(outdoorid, personid, selfQuit, callback)=>{
+const removeMember = (outdoorid, personid, selfQuit, callback) => {
   console.log("odtools.js removeMember fun")
 
   // 先重新获取members，再删除personid，再调用云函数
@@ -381,17 +381,17 @@ const removeMember=(outdoorid, personid, selfQuit, callback)=>{
     .then(res => {
       // 先找到personid
       var selfIndex = -1
-      for(var i=0; i<res.data.members.length; i++){
-        if (res.data.members[i].personid == personid){
+      for (var i = 0; i < res.data.members.length; i++) {
+        if (res.data.members[i].personid == personid) {
           selfIndex = i
-          break 
+          break
         }
       }
-      if(selfIndex == -1){ // 找不到就直接返回
-        if (callback){
+      if (selfIndex == -1) { // 找不到就直接返回
+        if (callback) {
           callback(res.data.members)
         }
-        return 
+        return
       }
 
       const self = res.data.members[selfIndex]
@@ -401,16 +401,16 @@ const removeMember=(outdoorid, personid, selfQuit, callback)=>{
       if (self.entryInfo.status == "占坑中" || self.entryInfo.status == "报名中") {
         changeStatus = true;
         // 这里要判断一下，若超过人数后面第一个队员不是替补，则不能change
-        if (res.data.limits && res.data.limits.maxPerson 
-          && res.data.members.length > res.data.limits.personCount 
-          && res.data.members[res.data.limits.personCount].entryInfo.status != "替补中" ) {
+        if (res.data.limits && res.data.limits.maxPerson
+          && res.data.members.length > res.data.limits.personCount
+          && res.data.members[res.data.limits.personCount].entryInfo.status != "替补中") {
           changeStatus = false;
         }
         console.log("changeStatus: " + changeStatus)
       }
       // 给自己发模板消息 
       var remark = ""
-      if(selfQuit) {
+      if (selfQuit) {
         remark = "您已自行退出本次活动。您仍可以点击进入小程序继续报名。"
       } else {
         remark = "您已被领队驳回报名。若仍有意参加，请参考领队驳回理由，并联系领队确认情况。"
@@ -418,7 +418,7 @@ const removeMember=(outdoorid, personid, selfQuit, callback)=>{
       template.sendQuitMsg2Self(personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, self.userInfo.nickName, remark)
       // 删除自己的
       res.data.members.splice(selfIndex, 1)
-      
+
       // 把第一个替补改为“报名中”
       if (changeStatus) {
         res.data.members.forEach((item, index) => {
@@ -433,7 +433,7 @@ const removeMember=(outdoorid, personid, selfQuit, callback)=>{
       console.log(res.data.members)
       // 云函数
       cloudfun.updateOutdoorMembers(outdoorid, res.data.members, nouse => {
-        if(callback){
+        if (callback) {
           callback(res.data.members)
         }
       })
@@ -441,23 +441,23 @@ const removeMember=(outdoorid, personid, selfQuit, callback)=>{
 }
 
 // 超过占坑截止时间（外部判断），则清退所有占坑队员，后续替补
-const removeOcuppy=(outdoorid, callback)=>{
-  dbOutdoors.doc(outdoorid).get().then(res=>{
-    const members = res.data.members 
+const removeOcuppy = (outdoorid, callback) => {
+  dbOutdoors.doc(outdoorid).get().then(res => {
+    const members = res.data.members
     var count = 0
     // 第一遍循环，找到所有占坑者
-    for (var i = 0; i < members.length; i++){
-      if (members[i].entryInfo.status=="占坑中") {
-        count ++
+    for (var i = 0; i < members.length; i++) {
+      if (members[i].entryInfo.status == "占坑中") {
+        count++
         // 给被强制退坑者发模板消息
         template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
-        members.splice(i,1)
+        members.splice(i, 1)
         i-- // i 要回退一格
       }
     }
 
     // 第二遍循环，对应的替补队员改为报名
-    for (var i = 0; i < members.length && count>0; i++) {
+    for (var i = 0; i < members.length && count > 0; i++) {
       if (members[i].entryInfo.status == "替补中") {
         count--
         members[i].entryInfo.status == "报名中"
@@ -469,14 +469,14 @@ const removeOcuppy=(outdoorid, callback)=>{
     // 删完了还得存到数据库中，调用云函数写入
     cloudfun.updateOutdoorMembers(outdoorid, members, null)
 
-    if (callback){
+    if (callback) {
       callback(members)
     }
   })
 }
 
 // 构建剩余时间的文本提示信息
-const buildRemainText=(remainMinute) =>{
+const buildRemainText = (remainMinute) => {
   var remainText = "";
   if (remainMinute > 0) {
     var remainDay = Math.trunc(remainMinute / 24.0 / 60.0)
@@ -490,16 +490,16 @@ const buildRemainText=(remainMinute) =>{
 
 // 计算当前距离截止时间还剩余的时间（单位：分钟）
 // 若 limitItem 为空，则占坑为前两天22:00；报名为前一天22:00
-const calcRemainTime=(outdoorDate, limitItem, isOccupy)=> {
+const calcRemainTime = (outdoorDate, limitItem, isOccupy) => {
   // console.log(limitItem)
-  if (!limitItem) { 
-    if(isOccupy){
+  if (!limitItem) {
+    if (isOccupy) {
       limitItem = {
         date: "前两天",
         time: "22:00"
       }
     } else {
-      limitItem = { 
+      limitItem = {
         date: "前一天",
         time: "22:00"
       }
@@ -529,11 +529,11 @@ const calcRemainTime=(outdoorDate, limitItem, isOccupy)=> {
   return remainMinute
 }
 
-const getChatStatus=(personid, nickName, chat, callback)=>{
+const getChatStatus = (personid, nickName, chat, callback) => {
   if (chat && chat.messages) {
     var count = 0
     if (chat.seen && chat.seen[personid]) {
-      count = chat.seen[personid] 
+      count = chat.seen[personid]
     }
 
     var status = ""
@@ -547,7 +547,7 @@ const getChatStatus=(personid, nickName, chat, callback)=>{
           status = "atme"
         }
       }
-      if(status == "") {
+      if (status == "") {
         status = "new"
       }
     }
@@ -557,7 +557,7 @@ const getChatStatus=(personid, nickName, chat, callback)=>{
   }
 }
 
-const buildChatMessage=(msg)=>{
+const buildChatMessage = (msg) => {
   var message = {}
   //  { who: "", msg: "", personid:"", self: false},
   message.who = app.globalData.userInfo.nickName
@@ -567,40 +567,40 @@ const buildChatMessage=(msg)=>{
   return message
 }
 
-const findPersonIndex=(members, personid, callback)=>{
-  members.forEach((item, index)=>{
-    if(item.personid == personid) {
-      if(callback) {
+const findPersonIndex = (members, personid, callback) => {
+  members.forEach((item, index) => {
+    if (item.personid == personid) {
+      if (callback) {
         callback(index)
       }
     }
   })
 }
 
-const drawText=(canvas, text, x, y, size, dy, color)=>{
+const drawText = (canvas, text, x, y, size, dy, color) => {
   canvas.setFontSize(size)
   canvas.setFillStyle(color)
   canvas.fillText(text, x, y)
-  return {x:x,y:y+size+dy}
+  return { x: x, y: y + size + dy }
 }
 
-const drawShareCanvas=(canvas, od, callback)=>{
+const drawShareCanvas = (canvas, od, callback) => {
   console.log("odtools.drawShareCanvas")
 
   var green = "#1aad19", pos = { x: 10, y: 35 }, dx = 35
   // 领队
-  pos = drawText(canvas, "领队："+od.leader.userInfo.nickName, pos.x, pos.y, 30, 15, green)
+  pos = drawText(canvas, "领队：" + od.leader.userInfo.nickName, pos.x, pos.y, 30, 15, green)
 
   // 集合地点
   pos = drawText(canvas, "集合时间及地点", pos.x, pos.y, 30, 10, green)
   od.meets.forEach((item, index) => {
-    var message =  + (index + 1) + "）" + (item.date ? item.date : '当天') + " " + (item.time ? item.time : ' ')
+    var message = + (index + 1) + "）" + (item.date ? item.date : '当天') + " " + (item.time ? item.time : ' ')
     pos = drawText(canvas, message, pos.x, pos.y, 24, 5, green)
     pos = drawText(canvas, item.place, pos.x + dx, pos.y, 24, 10, green)
     pos.x -= dx
   })
 
-   // 人数
+  // 人数
   var countText = "已报名人数：" + od.members.length
   if (od.limits.maxPerson) {
     countText += "，本活动限" + od.limits.personCount + "人"
@@ -608,20 +608,20 @@ const drawShareCanvas=(canvas, od, callback)=>{
     countText += "，本活动不限人数"
   }
   pos = drawText(canvas, countText, pos.x, pos.y + 5, 30, 10, green)
-  
-   // 活动状态
-  pos = drawText(canvas, "活动状态：" + od.status, pos.x, pos.y+5, 30, 15, green)
+
+  // 活动状态
+  pos = drawText(canvas, "活动状态：" + od.status, pos.x, pos.y + 5, 30, 15, green)
 
   canvas.draw(false, function (res) {
     console.log('canvas.draw done...')
     wx.canvasToTempFilePath({
       canvasId: 'shareCanvas',
-      width: 500, 
+      width: 500,
       height: 400,
       destWidth: 500,
       destHeight: 400,
       success: res => {
-        if(callback) {
+        if (callback) {
           callback(res.tempFilePath)
         }
       }
@@ -629,24 +629,24 @@ const drawShareCanvas=(canvas, od, callback)=>{
   })
 }
 
-const setCFO=(outdoorid, cfo)=>{
-  dbOutdoors.doc(outdoorid).get().then(res=>{
+const setCFO = (outdoorid, cfo) => {
+  dbOutdoors.doc(outdoorid).get().then(res => {
     var pay = {}
-    if(res.data.pay) {
+    if (res.data.pay) {
       pay = res.data.pay
     }
     pay.cfo = cfo
     cloudfun.updateOutdoorPay(outdoorid, pay)
     // 发模板消息
-    template.sendAppointMsg2CFO(cfo.personid, outdoorid, res.data.title.whole, cfo.nickName)    
+    template.sendAppointMsg2CFO(cfo.personid, outdoorid, res.data.title.whole, cfo.nickName)
   })
 }
 
 // 设置我的活动费用支付结果
-const setPayMine=(outdoorid, personid, mine)=>{
+const setPayMine = (outdoorid, personid, mine) => {
   dbOutdoors.doc(outdoorid).get().then(res => {
     const pay = res.data.pay
-    if(!pay.results) {
+    if (!pay.results) {
       pay.results = {}
     }
     pay.results[personid] = mine
@@ -654,12 +654,24 @@ const setPayMine=(outdoorid, personid, mine)=>{
   })
 }
 
-const isEntriedStatus=(status)=>{
-  if (status == "占坑中" || status == "报名中" || status == "替补中" ) {
+const isEntriedStatus = (status) => {
+  if (status == "占坑中" || status == "报名中" || status == "替补中") {
     return true
   }
   return false
 }
+
+const getDefaultWebsites = () => {
+  return {
+    lvyeorg: {
+      //fid: null, // 版块id
+      tid: null, // 帖子id
+      keepSame: false, // 是否保持同步
+      waitings: [], // 要同步但尚未同步的信息列表
+    }
+  }
+}
+
 
 module.exports = {
   createTitle: createTitle, // 生成活动标题
@@ -673,7 +685,7 @@ module.exports = {
   isEntriedStatus: isEntriedStatus, // 是否属于报名状态，包括报名中、占坑中和替补中
 
   buildRemainText: buildRemainText, // 构造剩余时间提示文字
-  calcRemainTime:calcRemainTime, // 计算占坑或报名的剩余时间
+  calcRemainTime: calcRemainTime, // 计算占坑或报名的剩余时间
 
   removeMember: removeMember, // 移除某个队员（自己退出，或者领队驳回报名）
   removeOcuppy: removeOcuppy, // 清退占坑队员
@@ -688,4 +700,7 @@ module.exports = {
 
   // 绘制画布
   drawShareCanvas: drawShareCanvas, // 绘制分享的画布
+
+  // 得到默认的websites信息
+  getDefaultWebsites: getDefaultWebsites,
 } 

@@ -6,13 +6,13 @@ const dbPersons = db.collection('Persons')
 const dbOutdoors = db.collection('Outdoors')
 const _ = db.command
   
-const updateOutdoor=(outdoorid, data, callback)=>{
+const updateOutdoor=(outdoorid, od, callback)=>{
   console.log("updateOutdoor")
   wx.cloud.callFunction({ 
     name: 'updateOutdoor', // 云函数名
     data: { 
-      outdoorid: outdoorid,
-      data: data
+      outdoorid: outdoorid, 
+      data: od
     }
   }).then(res=>{
     if(callback) {
@@ -82,7 +82,7 @@ const updateOutdoorChatQrcode = (outdoorid, qrcode) => {
       command: "",
       value: qrcode
     }
-  })
+  }) 
 }
 
 const updateOutdoorAddMembers = (outdoorid, addMembers, callback) => {
@@ -252,6 +252,21 @@ const updateOutdoorTrackFiles = (outdoorid, trackFiles) => {
       item: "route.trackFiles",
       command: "",
       value: trackFiles,
+    }
+  })
+}
+
+const updateOutdoorDisclaimer = (outdoorid, disclaimer)=>{
+  console.log("updateOutdoorDisclaimer()")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "limits.disclaimer",
+      command: "",
+      value: disclaimer,
     }
   })
 }
@@ -468,6 +483,8 @@ module.exports = {
 
   updateOutdoorBriefPics: updateOutdoorBriefPics, // 更新照片存储路径
   updateOutdoorTrackFiles: updateOutdoorTrackFiles, // 更新轨迹文件路径
+
+  updateOutdoorDisclaimer: updateOutdoorDisclaimer, // 更新免责条款
 
   // Persons
   unshiftPersonCared:unshiftPersonCared,

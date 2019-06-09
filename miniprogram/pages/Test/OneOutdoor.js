@@ -32,7 +32,7 @@ Page({
 
   onLoad() {
     this.setData({
-      od: new outdoor.OD()
+      // od: new outdoor.OD()
     })
     
     this.initRecord()
@@ -606,12 +606,45 @@ Page({
     })
   },
 
+  find(objs, name, id) {
+    console.log("name:" + name)
+    console.log("id:" + id)
+    objs.forEach((item, index)=>{
+      console.log(item)
+      // self["editMust" + index] = () => {
+      let temp = item[name]
+      // console.log(item[name])
+      // console.log(item[name.toString()])
+      
+      // console.log(item["id"])
+      // console.log(item.id)
+      console.log(temp)
+      var res = temp == id?true:false
+      console.log(res)
+
+      if (res) {
+        return item
+      }
+    })
+  },
+
+  find(objs, name, id) {
+    console.log("name:" + name)
+    console.log("id:" + id)
+
+    for(var index in objs) {
+      console.log(index)
+      if (objs[index][name] == id) {
+        return objs[index]
+      }
+    }
+    return null
+  },
  
   tapCloud() {
-    var a = 1
-    a = a>2?3: void(0)
-    
-    console.log(a)
+    var objs = [{ id: "a" }, { id: "b" }, { id: "c" }]
+    var obj = this.find(objs, "id", "d")
+    console.log(obj)
   },
 
 });

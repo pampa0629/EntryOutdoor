@@ -35,25 +35,26 @@ Page({
     const self = this
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
-    let data = pages[pages.length - 3].data
+    let limits = prevPage.data.limits
+    let od = pages[pages.length - 3].data.od
 
     self.setData({
-      loaded: data.title.loaded,
-      date: data.title.date,
-      day: util.getDay(data.title.date),
+      loaded: od.title.loaded,
+      date: od.title.date,
+      day: util.getDay(od.title.date),
       areaList: select.area, // 系统默认
     })
 
-    console.log(prevPage.data.limits)
-    if (prevPage.data.limits.equipments && prevPage.data.limits.equipments.area) { // 没过期，有活动地区，则查询天气预报
+    console.log(limits)
+    if (limits.equipments && limits.equipments.area) { // 没过期，有活动地区，则查询天气预报
       self.setData({
-        "equipments.area": prevPage.data.limits.equipments.area,
+        "equipments.area": limits.equipments.area,
       })
     }
 
     console.log(self.data.equipments.area)
     // 处理过期活动
-    if ((new Date()) > new Date(data.title.date)){ // 过期活动，不能用天气预报，也就无法推荐装备了
+    if ((new Date()) > new Date(od.title.date)){ // 过期活动，不能用天气预报，也就无法推荐装备了
       self.setData({
         isOutDate:true,
         weatherText: "活动过期，无法获取天气预报，系统也无法推荐装备",
@@ -73,11 +74,11 @@ Page({
       })
     }
     
-    var hasEquipments = prevPage.data.limits && prevPage.data.limits.equipments && (prevPage.data.limits.equipments.must.length || prevPage.data.limits.equipments.can.length || prevPage.data.limits.equipments.no.length)
+    var hasEquipments = limits && limits.equipments && (limits.equipments.must.length || limits.equipments.can.length || limits.equipments.no.length)
     if (hasEquipments) { // 有就直接读取
-      console.log(prevPage.data.limits.equipments)
+      console.log(limits.equipments)
       self.setData({
-        equipments: prevPage.data.limits.equipments,
+        equipments: limits.equipments,
         hasModified: prevPage.data.hasModified,
       })
       self.createButtonFun()

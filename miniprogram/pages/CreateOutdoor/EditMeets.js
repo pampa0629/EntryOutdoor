@@ -74,9 +74,10 @@ Page({
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
+    let od = prevPage.data.od
     self.setData({
-      status: prevPage.data.status,
-      meets: prevPage.data.meets,
+      status: od.status,
+      meets: od.meets,
       hasModified: prevPage.data.hasModified,
     })
     self.rebuildClickMeetFun()
@@ -99,7 +100,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
-      meets: self.data.meets,
+      "od.meets": self.data.meets,
       hasModified: self.data.hasModified,
       "modifys.meets": self.data.hasModified,
     })

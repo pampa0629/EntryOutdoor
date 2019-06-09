@@ -15,7 +15,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({
-      disclaimer: prevPage.data.limits.disclaimer,
+      disclaimer: prevPage.data.od.limits.disclaimer,
       hasModified: prevPage.data.hasModified,
     })
   },
@@ -25,7 +25,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
-      "limits.disclaimer": self.data.disclaimer,
+      "od.limits.disclaimer": self.data.disclaimer,
       hasModified: self.data.hasModified,
       "modifys.disclaimer": self.data.hasModified,
     })

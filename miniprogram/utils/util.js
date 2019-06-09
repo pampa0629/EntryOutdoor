@@ -374,6 +374,15 @@ const stepsTopNs=(steps, tops)=>{
   return maxes
 }
 
+const findObj=(objs, name, id)=>{
+  for (var index in objs) {
+    if (objs[index][name] == id) {
+      return objs[index]
+    }
+  }
+  return null
+}
+
 module.exports = {
   formatTime: formatTime,
   Ymd2Mdy: Ymd2Mdy,
@@ -412,6 +421,7 @@ module.exports = {
   buildPayQrcode: buildPayQrcode, // 收款二维码
   buildPayResult: buildPayResult, // 付款截屏
   buildPersonPhotoSrc: buildPersonPhotoSrc,
+
   // 截止日期数组和字符串的相互转化
   getLimitDates: getLimitDates,
   getLimitDateIndex: getLimitDateIndex,
@@ -425,4 +435,7 @@ module.exports = {
   authorize: authorize,
   // 得到最近步数的top值
   stepsTopNs: stepsTopNs,
+
+  // 在对象数组中查找指定属性为某个值的对象；找到返回该对象，没找到返回null
+  findObj: findObj,
 }

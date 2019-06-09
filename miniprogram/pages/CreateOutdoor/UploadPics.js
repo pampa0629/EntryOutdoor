@@ -21,7 +21,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     this.setData({
-      pics: prevPage.data.brief.pics,
+      pics: prevPage.data.od.brief.pics,
       hasModified: prevPage.data.hasModified,
     })
 
@@ -34,7 +34,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
-      "brief.pics": self.data.pics,
+      "od.brief.pics": self.data.pics,
       hasModified: self.data.hasModified,
     })
   },

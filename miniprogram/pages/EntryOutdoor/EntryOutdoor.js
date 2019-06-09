@@ -17,7 +17,6 @@ const _ = db.command
 Page({
 
   data: {
-    outdoorid: null, // 活动id
     od: null,
 
     entryInfo: { //报名信息
@@ -26,7 +25,6 @@ Page({
       agreedDisclaimer: false, // 认同免责条款
       knowWay: false, // 是否认路
     },
-
 
     remains: {
       occupy: { // 距离占坑截止还剩余的时间（单位：分钟）
@@ -94,7 +92,7 @@ Page({
     if (app.globalData.hasUserInfo && app.globalData.userInfo != null) {
       this.setData({
         userInfo: app.globalData.userInfo,
-      });
+      })
       this.loadOutdoor(outdoorid);
     } else {
       app.personidCallback = (personid, userInfo) => {
@@ -112,60 +110,54 @@ Page({
   loadOutdoor: function(outdoorid) {
     console.log("loadOutdoor, id is: " + outdoorid)
     const self = this;
-    // 这里得到活动id，读取数据库，加载各类信息
-    self.data.outdoorid = outdoorid
+    // 这里读取数据库，加载各类信息
     this.data.od.load(outdoorid, od => {
-      // 设置自己
+      // 设置活动信息
       self.setData({
         od:od
       })
-
       // 处理剩余时间
-      self.setData({
-        "remains.occupy.time": odtools.calcRemainTime(od.title.date, od.limits.ocuppy, true),
-        "remains.entry.time": odtools.calcRemainTime(od.title.date, od.limits.entry, false)
-      })
-      self.setData({
-        "remains.occupy.text": odtools.buildRemainText(self.data.remains.occupy.time),
-        "remains.entry.text": odtools.buildRemainText(self.data.remains.entry.time)
-      })
-      self.checkOcuppyLimitDate() // 处理占坑截止时间过了得退坑的问题
-
+      self.dealRemainTime()
+      // 处理报名信息
+      self.dealEntryInfo() 
       // 加载后就要构建画布生成分享图片文件
       self.createCanvasFile()
-
-      if (od.meets.length <= 1) { // 若只有一个集合地点，默认设置就好了
-        self.setData({
-          "entryInfo.meetsIndex": 0,
-        })
-      }
-      // 从数据库中得到自己已经报名的状态
-      var index = self.findFromMembers(app.globalData.personid, od.members)
-      if (index >= 0) {
-        self.setData({
-          entryInfo: od.members[index].entryInfo,
-        })
-        self.dealEntryInfoCompatibility() // 处理报名信息的兼容性
-      }
+      // 判断本活动是否已经被关注
+      self.dealCared() 
+      // 最后帮助把之前积累的信息同步到网站上 todo 
+      self.postWaitings()
     })
+  },
 
+  // 判断本活动是否已经被关注
+  dealCared() {
+    const self = this
     // 从Person表中找到自己的信息
-    if (app.globalData.personid) {
+    if(app.globalData.personid) {
       dbPersons.doc(app.globalData.personid).get().then(res => {
         self.data.userInfo = res.data.userInfo
         self.data.entriedOutdoors = res.data.entriedOutdoors
         self.data.caredOutdoors = res.data.caredOutdoors
         self.data.caredOutdoors.forEach((item, index) => {
-          if (item.id == self.data.outdoorid)
+          if (item.id == self.data.od.outdoorid)
             self.setData({
               hasCared: true, // 该活动已经加了关注
             })
         })
       })
     }
+  },
 
-    // 最后帮助把之前积累的信息同步到网站上
-    self.postWaitings()
+  // 处理剩余时间
+  dealRemainTime() {
+    this.setData({
+      "remains.occupy.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.ocuppy, true),
+      "remains.entry.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.entry, false)
+    })
+    this.setData({
+      "remains.occupy.text": odtools.buildRemainText(this.data.remains.occupy.time),
+      "remains.entry.text": odtools.buildRemainText(this.data.remains.entry.time)
+    })
   },
 
   // 判断是否需要与网站同步
@@ -178,39 +170,42 @@ Page({
       if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
         app.callbackLoginLvyeorg = (res) => {
           if (res.username) {
-            lvyeorg.postWaitings(self.data.outdoorid, od.websites.lvyeorg.tid)
+            lvyeorg.postWaitings(self.data.od.outdoorid, od.websites.lvyeorg.tid)
           }
         }
         app.loginLvyeOrg() // 登录一下
       } else { // 登录了直接设置就好
-        lvyeorg.postWaitings(self.data.outdoorid, od.websites.lvyeorg.tid)
+        lvyeorg.postWaitings(self.data.od.outdoorid, od.websites.lvyeorg.tid)
       }
     }
   },
 
-  // 处理占坑截止时间过了得退坑的问题
-  checkOcuppyLimitDate: function() {
-    const self = this
-    console.log("remainOccupyTime:" + self.data.remains.occupy.time)
-    if (self.data.remains.occupy.time < 0) { // 占坑时间已过
-      odtools.removeOcuppy(self.data.outdoorid, members => {
-        self.setData({
-          members: members
-        })
+  // 处理报名信息
+  dealEntryInfo: function() {
+    // 若只有一个集合地点，默认设置就好了
+    if (this.data.od.meets.length <= 1) { 
+      this.setData({
+        "entryInfo.meetsIndex": 0,
       })
     }
-  },
+    // 从数据库中得到自己已经报名的状态
+    var myself = util.findObj(this.data.od.members, "personid", app.globalData.personid)
+    // var index = this.findFromMembers(app.globalData.personid, this.data.od.members)
+    if (myself) {
+      this.setData({
+        entryInfo: myself.entryInfo,
+      })
+    }
 
-  // 处理报名信息的兼容性
-  dealEntryInfoCompatibility: function() {
-    const self = this
-    if (!self.data.entryInfo.agreedDisclaimer) { // 是否同意免责条款
-      self.setData({
+    // 做兼容性处理：是否同意免责条款
+    if (!this.data.entryInfo.agreedDisclaimer) { 
+      this.setData({
         "entryInfo.agreedDisclaimer": false,
       })
     }
-    if (!self.data.entryInfo.knowWay) { // 是否认路
-      self.setData({
+    // 做兼容性处理：是否认路
+    if (!this.data.entryInfo.knowWay) { 
+      this.setData({
         "entryInfo.knowWay": false,
       })
     }
@@ -229,12 +224,12 @@ Page({
     return result;
   },
 
-  // 从members找到personid，并返回 index，找不到，返回-1
+  // 从members找到personid，并返回member
+  // 没找到返回当前报名状态
   findFromMembers: function(personid, members) {
-    // 这里要判断一下自己当前的报名状态
     var result = -1;
-    members.forEach(function(item, index) {
-      if (item != null && item.personid != null && item.personid == personid) {
+    members.forEach((item, index)=>{
+      if (item.personid == personid) {
         result = index
       }
     })
@@ -276,12 +271,12 @@ Page({
   onShareAppMessage: function() {
     const self = this;
     this.closePopup()
-    if (self.data.outdoorid) { // 数据库里面有，才能分享出去
+    if (self.data.od.outdoorid) { // 数据库里面有，才能分享出去
       return {
         title: self.data.od.title.whole,
         desc: '分享活动',
         imageUrl: self.data.shareCanvasFile,
-        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.outdoorid
+        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.od.outdoorid
       }
     }
   },
@@ -289,7 +284,7 @@ Page({
   // 分享到朋友圈
   onShare2Circle: function() {
     const self = this;
-    qrcode.share2Circle(self.data.outdoorid, self.data.od.title.whole, false)
+    qrcode.share2Circle(self.data.od.outdoorid, self.data.od.title.whole, false)
     this.closePopup()
   },
 
@@ -298,7 +293,7 @@ Page({
     const self = this
     // 先保证把当前活动清除掉
     for (var i = self.data.entriedOutdoors.length - 1; i >= 0; i--) {
-      if (self.data.entriedOutdoors[i].id == self.data.outdoorid) {
+      if (self.data.entriedOutdoors[i].id == self.data.od.outdoorid) {
         self.data.entriedOutdoors.splice(i, 1)
       }
     }
@@ -306,7 +301,7 @@ Page({
     // 若非退出，则加到第一条
     if (!isQuit) {
       self.data.entriedOutdoors.unshift({
-        id: self.data.outdoorid,
+        id: self.data.od.outdoorid,
         title: self.data.od.title.whole
       })
     }
@@ -331,7 +326,7 @@ Page({
       })
 
       // 还是先刷新一下members
-      dbOutdoors.doc(self.data.outdoorid).get()
+      dbOutdoors.doc(self.data.od.outdoorid).get()
         .then(res => {
           // 修改members中personid位置的报名信息
           for (var i = 0; i < res.data.members.length; i++) {
@@ -340,10 +335,10 @@ Page({
             }
           }
           self.setData({
-            members: res.data.members,
+            "od.members": res.data.members,
           })
           // 再调用云函数写入
-          cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.od.members, null)
+          cloudfun.updateOutdoorMembers(self.data.od.outdoorid, self.data.od.members, null)
           self.updateEntriedOutdoors(false)
         })
     } else { // 新报名，增加一条记录
@@ -356,18 +351,17 @@ Page({
       console.log(self.data.entryInfo)
 
       var member = util.createMember(app.globalData.personid, self.data.userInfo, self.data.entryInfo)
-      cloudfun.pushOutdoorMember(self.data.outdoorid, member, nouse => {
+      cloudfun.pushOutdoorMember(self.data.od.outdoorid, member, nouse => {
         // 刷新一下队员列表
-        dbOutdoors.doc(self.data.outdoorid).get()
+        dbOutdoors.doc(self.data.od.outdoorid).get()
           .then(res => {
             self.setData({
-              members: res.data.members
+              "od.members": res.data.members
             })
 
             // 为了避免两人同时报名，超过最大人数限额，故而需要再判断一下，是自己导致超员的，则自己的状态需要改为“替补”
             const od = self.data.od
-            if (od.limits.maxPerson &&
-              od.members.length > od.limits.personCount) {
+            if (od.limits.maxPerson && od.members.length > od.limits.personCount) {
               var index = -1 // 判断是否要修改为“替补”
               for (var i = od.limits.personCount; i <od.members.length; i++) {
                 if (od.members[i].personid == app.globalData.personid) {
@@ -385,7 +379,7 @@ Page({
                 })
 
                 // 再更新一下数据库
-                cloudfun.updateOutdoorMembers(self.data.outdoorid, od.members, null)
+                cloudfun.updateOutdoorMembers(self.data.od.outdoorid, od.members, null)
               }
             }
           })
@@ -410,23 +404,23 @@ Page({
     // 给自己发微信消息
     if (formid) {
       // 活动主题，领队联系方式，自己的昵称，报名状态，
-      template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.outdoorid, formid)
+      template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.od.outdoorid, formid)
     }
 
     console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
       if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && (od.limit.maxPerson && od.members.length == od.limit.personCount))) { // 前几个报名，或者接收最后一个报名，才发送微信消息
-        var key = this.data.outdoorid + "." + this.data.entryInfo.personid
+        var key = this.data.od.outdoorid + "." + this.data.entryInfo.personid
         var count = parseInt(wx.getStorageSync(key))
         if (!count) {
           count = 0
         }
         console.log("count:" + count)
         if (count < 1) { // 每个人只发送一次
-          template.sendEntryMsg2Leader(od.leader.personid, this.data.userInfo, this.data.entryInfo, od.title.whole, this.data.outdoorid)
+          template.sendEntryMsg2Leader(od.leader.personid, this.data.userInfo, this.data.entryInfo, od.title.whole, this.data.od.outdoorid)
           wx.setStorageSync(key, parseInt(count) + 1)
           // 发送结束，得往数据库里面加一条；还必须调用云函数
-          cloudfun.addOutdoorNoticeCount(self.data.outdoorid, 1)
+          cloudfun.addOutdoorNoticeCount(self.data.od.outdoorid, 1)
         }
       }
     }
@@ -446,23 +440,23 @@ Page({
       console.log(entryMessage)
       console.log(app.globalData.lvyeorgLogin)
       if (app.globalData.lvyeorgLogin && od.websites.lvyeorg.tid) { // 登录了就直接发
-        lvyeorg.postWaitings(self.data.outdoorid, od.websites.lvyeorg.tid, callback => {
-          lvyeorg.postMessage(self.data.outdoorid, od.websites.lvyeorg.tid, entryMessage.title, entryMessage.message)
+        lvyeorg.postWaitings(self.data.od.outdoorid, od.websites.lvyeorg.tid, callback => {
+          lvyeorg.postMessage(self.data.od.outdoorid, od.websites.lvyeorg.tid, entryMessage.title, entryMessage.message)
         })
       } else if (app.globalData.lvyeorgInfo && !app.globalData.lvyeorgLogin && od.websites.lvyeorg.tid) { // 注册了没登录，就登录一下
         app.callbackLoginLvyeorg = (res) => { // 设置回调
           if (res.username) {
             console.log("app.callbackLoginLvyeorg")
-            lvyeorg.postWaitings(self.data.outdoorid, od.websites.lvyeorg.tid, callback => {
-              lvyeorg.postMessage(self.data.outdoorid, od.websites.lvyeorg.tid, entryMessage.title, entryMessage.messageentryMessage.title, entryMessage.message)
+            lvyeorg.postWaitings(self.data.od.outdoorid, od.websites.lvyeorg.tid, callback => {
+              lvyeorg.postMessage(self.data.od.outdoorid, od.websites.lvyeorg.tid, entryMessage.title, entryMessage.messageentryMessage.title, entryMessage.message)
             })
           } else if (res.error) { // 登录失败也记录到waitings中 
-            lvyeorg.add2Waitings(self.data.outdoorid, entryMessage.message)
+            lvyeorg.add2Waitings(self.data.od.outdoorid, entryMessage.message)
           }
         }
         app.loginLvyeOrg() // 登录
       } else { // 没注册就记录到waitings中
-        lvyeorg.add2Waitings(self.data.outdoorid, entryMessage.message)
+        lvyeorg.add2Waitings(self.data.od.outdoorid, entryMessage.message)
       }
     }
   },
@@ -684,8 +678,9 @@ Page({
 
   // 替补、占坑、报名，用同一个函数，减少重复代码
   doEntry(status, formid) {
+    console.log("doEntry(): " + status)
     const self = this
-    console.log("doEntry: " + status)
+    template.savePersonFormid(this.data.personid, formid, null)
     if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg) {
       self.data.entryTemp = {
         status: status,
@@ -698,24 +693,22 @@ Page({
       if (check1 && check2) {
         this.entryOutdoorInner(status, formid)
       }
-    } else {
-      template.savePersonFormid(this.data.personid, formid, null)
     }
   },
 
   // 退出
   tapQuit: function(e) {
-    console.log("tapQuit")
+    console.log("tapQuit()")
     template.savePersonFormid(this.data.personid, e.detail.formId, null)
     const self = this;
     var selfQuit = true
-    odtools.removeMember(self.data.outdoorid, app.globalData.personid, selfQuit, members => {
+    odtools.removeMember(self.data.od.outdoorid, app.globalData.personid, selfQuit, members => {
       // 删除Persons表中的entriedOutdoors中的对应id的item
       self.updateEntriedOutdoors(true)
       // 退出后还可以继续再报名
       self.setData({
         "entryInfo.status": "浏览中",
-        members: members,
+        "od.members": members,
       })
     })
     // 退出信息也要同步到网站
@@ -731,14 +724,14 @@ Page({
       isLeader = "&isLeader=" + true
     }
     wx.navigateTo({
-      url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.outdoorid + isLeader
+      url: "../AboutOutdoor/PrintOutdoor?outdoorid=" + self.data.od.outdoorid + isLeader
     })
   },
 
   chatOutdoor() {
     const self = this;
     wx.navigateTo({
-      url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.outdoorid + "&isLeader=" + false,
+      url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.od.outdoorid + "&isLeader=" + false,
       complete(res) {
         self.setData({
           chatStatus: "",
@@ -749,13 +742,13 @@ Page({
 
   editOutdoor() {
     const self = this
-    util.saveOutdoorID(self.data.outdoorid)
+    util.saveOutdoorID(self.data.od.outdoorid)
     wx.switchTab({
       url: "../CreateOutdoor/CreateOutdoor"
     })
   },
 
-  newOutdoor() {
+  newOutdoor() { 
     // 这里给 app 设置一下，知道是要新创建活动了
     app.globalData.newOutdoor = true
     this.editOutdoor()
@@ -767,9 +760,9 @@ Page({
     const self = this
     wx.showNavigationBarLoading();
     // 主要就刷新队员和留言信息
-    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       self.setData({
-        members: res.data.members,
+        "od.members": res.data.members,
       })
       self.setChat(res.data.chat)
       wx.hideNavigationBarLoading();
@@ -856,7 +849,7 @@ Page({
     const self = this;
     if (!self.data.hasCared) {
       self.data.caredOutdoors.unshift({
-        id: self.data.outdoorid,
+        id: self.data.od.outdoorid,
         title: self.data.od.title.whole
       })
       dbPersons.doc(app.globalData.personid).update({
@@ -876,7 +869,7 @@ Page({
     const self = this;
     if (self.data.hasCared) {
       self.data.caredOutdoors.forEach((item, index) => {
-        if (item.id == self.data.outdoorid) {
+        if (item.id == self.data.od.outdoorid) {
           self.data.caredOutdoors.splice(index, 1)
         }
       })
@@ -902,7 +895,7 @@ Page({
   clickPay() {
     const self = this
     wx.navigateTo({
-      url: '../AboutOutdoor/PayOutdoor?outdoorid=' + self.data.outdoorid,
+      url: '../AboutOutdoor/PayOutdoor?outdoorid=' + self.data.od.outdoorid,
     })
   },
 

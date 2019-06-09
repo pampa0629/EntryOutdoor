@@ -188,7 +188,7 @@ App({
       })
     }
   }, 
-
+ 
   checkLogin(title, content) {
     const self = this
     if (!self.globalData.hasUserInfo) { // 判断是否登录先
@@ -203,10 +203,7 @@ App({
           })
         }
       })
-      return false
-    } else {
-      return true
-    }
+    } 
   },
 
   // 登录绿野网站，用callback得到登录结果

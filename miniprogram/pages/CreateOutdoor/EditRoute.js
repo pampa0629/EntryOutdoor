@@ -82,7 +82,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({
-      route: prevPage.data.route,
+      route: prevPage.data.od.route,
       hasModified: prevPage.data.hasModified,
       outdoorid: prevPage.data.outdoorid,
     })
@@ -169,7 +169,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
-      route: self.data.route,
+      "od.route": self.data.route,
       hasModified: self.data.hasModified,
       "modifys.route": self.data.hasModified,
     })

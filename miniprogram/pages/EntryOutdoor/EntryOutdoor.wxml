@@ -53,7 +53,7 @@
   </van-col>
   <!--领队、打印详情与回到首页-->
   <van-col wx:if="{{entryInfo.status=='领队组'}}" span="2" offset="1">
-    <view style="flex-direction:column">
+    <view style="flex-direction:column"> 
       <van-icon name="flag-o" size="24px" color="#1aad19" bind:click="editOutdoor"></van-icon>
       <view class="icon_tip">领队</view>
     </view>

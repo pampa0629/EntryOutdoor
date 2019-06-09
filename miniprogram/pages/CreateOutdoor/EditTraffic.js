@@ -28,9 +28,9 @@ Page({
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
-    if (prevPage.data.traffic) {
+    if (prevPage.data.od.traffic) {
       self.setData({
-        traffic: prevPage.data.traffic,
+        traffic: prevPage.data.od.traffic,
       })
     }
     self.flashByMode()
@@ -46,9 +46,9 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
-      traffic: self.data.traffic,
-      "traffic.carInfo": odtools.buildCarInfo(self.data.traffic),
-      "traffic.costInfo": odtools.buildCostInfo(self.data.traffic),
+      "od.traffic": self.data.traffic,
+      "od.traffic.carInfo": odtools.buildCarInfo(self.data.traffic),
+      "od.traffic.costInfo": odtools.buildCostInfo(self.data.traffic),
       hasModified: self.data.hasModified,
       "modifys.traffic": self.data.hasModified,
     })

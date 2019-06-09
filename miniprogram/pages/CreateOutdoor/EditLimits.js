@@ -31,12 +31,13 @@ Page({
     
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
+    let od = prevPage.data.od
     self.setData({
-      outdoorid: prevPage.data.outdoorid, 
-      title: prevPage.data.title.whole,
-      limits: prevPage.data.limits,
-      members: prevPage.data.members, // 当前已报名队员
-      oldPersonCount: prevPage.data.limits.personCount, 
+      outdoorid: od.outdoorid, 
+      title: od.title.whole,
+      limits: od.limits,
+      members: od.members, // 当前已报名队员
+      oldPersonCount: od.limits.personCount, 
       hasModified: prevPage.data.hasModified,
     })
     console.log(self.data)
@@ -67,7 +68,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
-      limits: self.data.limits,
+      "od.limits": self.data.limits,
       hasModified: self.data.hasModified,
       "modifys.limits": self.data.hasModified,
     })

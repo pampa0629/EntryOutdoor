@@ -34,24 +34,24 @@ Page({
     console.log("MyOutdoors.js in onLoad fun, screenHeight is:" + this.data.screenHeight)
   },
 
-  checkLogin() {
+  checkLogin() { 
     var title = "查看“我的活动”需先登录"
     var content = "小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录"
-    return app.checkLogin(title, content)
+    app.checkLogin(title, content)
   },
 
   onShow: function() {
     const self = this;
-    if (self.checkLogin()) {
+    self.checkLogin()
+    
       // 从Persons表中取出数据
-      dbPersons.doc(app.globalData.personid).get().then(res => {
-        self.setData({
-          myOutdoors: res.data.myOutdoors,
-          entriedOutdoors: res.data.entriedOutdoors,
-          caredOutdoors: res.data.caredOutdoors,
-        })
+    dbPersons.doc(app.globalData.personid).get().then(res => {
+      self.setData({
+        myOutdoors: res.data.myOutdoors,
+        entriedOutdoors: res.data.entriedOutdoors,
+        caredOutdoors: res.data.caredOutdoors,
       })
-    }
+    })
   },
 
   // 隐藏，则需要把列表内容写回去

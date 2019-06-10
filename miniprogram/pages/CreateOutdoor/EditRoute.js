@@ -172,7 +172,7 @@ Page({
       "od.route": self.data.route,
       hasModified: self.data.hasModified,
       "modifys.route": self.data.hasModified,
-    })
+    }) 
   },
 
   // 调出新页面，增加途经点

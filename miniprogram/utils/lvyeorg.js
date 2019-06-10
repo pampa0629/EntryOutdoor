@@ -688,26 +688,15 @@ const add2Waitings = (outdoorid, message) => {
 }
 
 // 同步绿野org网站等待要发送的信息
-const postWaitings = (outdoorid, tid, callback) => {
-  console.log("const postWaitings")
-  dbOutdoors.doc(outdoorid).get().then(res => {
-    if (res.data.websites && res.data.websites.lvyeorg.waitings) {
-      postWaitingsInner(outdoorid, tid, res.data.websites.lvyeorg.waitings, callback)
-    }
-  })
-}
-
-// 增加一个内部函数，减少数据库访问
-const postWaitingsInner = (outdoorid, tid, waitings, callback) => {
-  console.log("const postWaitingsInner")
-  console.log(outdoorid)
+const postWaitings = (tid, waitings, callback) => {
+  console.log("postWaitings()")
   console.log(tid)
   console.log(waitings.length)
   if (waitings.length > 0) {
     var waiting = waitings.shift()
-    postOneWaiting(outdoorid, tid, waiting, () => {
+    postOneWaiting( tid, waiting, () => {
       console.log(waitings.length)
-      postWaitingsInner(outdoorid, tid, waitings, callback) // 这么来保证顺序
+      postWaitings(tid, waitings, callback) // 这么来保证顺序
     })
   } else if (waitings.length == 0) {
     if (callback) {
@@ -717,9 +706,8 @@ const postWaitingsInner = (outdoorid, tid, waitings, callback) => {
 }
 
 // 发一条等待发布的信息，成功后用callback返回
-const postOneWaiting = (outdoorid, tid, waiting, callback) => {
-  console.log("const postFirstWaiting")
-  console.log(outdoorid)
+const postOneWaiting = (tid, waiting, callback) => {
+  console.log("postOneWaiting()")
   console.log(tid)
   console.log(waiting)
   var token = wx.getStorageSync("LvyeOrgToken")
@@ -740,11 +728,9 @@ const postOneWaiting = (outdoorid, tid, waiting, callback) => {
       var resp_dict = resp.data;
       console.log(resp_dict)
       if (resp_dict.err_code == 0) {
-        cloudfun.shiftOutdoorLvyeWaitings(outdoorid, res => {
           if (callback) { // 回调
             callback()
           }
-        })
       } else {
         logError(resp)
       }

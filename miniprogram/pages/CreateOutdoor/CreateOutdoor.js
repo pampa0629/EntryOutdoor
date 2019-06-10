@@ -145,11 +145,6 @@ Page({
 
       // 这里要判断从本地缓存中读取到的outdoorid是自己创建的，还是用来当模板的
       // 依据是 从数据库读取的leader是否为自己
-      console.log("self.data.myself.personid: " + self.data.myself.personid)
-      console.log("self.data.leader.personid: " + self.data.leader.personid)
-      console.log("app.globalData.personid: " + app.globalData.personid)
-      console.log("self.data.isLeaderGroup: " + self.data.isLeaderGroup)
-      console.log("app.globalData.newOutdoor: " + app.globalData.newOutdoor)
       // 不是自己的，也不是领队组成员，就等于要新建活动
       // 如果是用户主动发起的模板创建，也需要新建活动
       if (((self.data.leader.personid != app.globalData.personid) && !self.data.isLeaderGroup) || app.globalData.newOutdoor) {
@@ -158,7 +153,6 @@ Page({
       }
       self.createAutoInfo();
       self.checkPublish(); // 判断一下是否能发布活动
-      self.keepSameWithWebsites() // 网站同步
     })
   },
 
@@ -426,8 +420,6 @@ Page({
   // 在活动还没有发布的时候，保存活动草稿
   saveDraft: function(e) {
     console.log("saveDraft()")
-    console.log(this.data.od.outdoorid)
-    console.log(e.detail.formId)
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
       console.log(this.data.leader)
@@ -470,7 +462,7 @@ Page({
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
       console.log("saveModified")
-      this.saveOutdoor("已发布", false)
+      this.saveOutdoor(this.data.od.status, false)
     }
   },
 
@@ -557,67 +549,15 @@ Page({
     const self = this
     console.log("keepSameWithWebsites")
     console.log(self.data.od.websites)
-    if (self.data.od.websites && self.data.od.websites.lvyeorg &&
-      (self.data.od.websites.lvyeorg.keepSame || self.data.od.websites.lvyeorg.tid) // 设置要同步或已同步过
-      &&
-      self.data.od.outdoorid // 活动id必须有了
-    ) {
-      this.keepSameWithLvyeorg() // 同步到org上
-    } else { // 不同步也要把修改信息给抹掉
-      this.setModifys(false)
-    }
-  },
-
-  // 这里处理和ORG网站同步的事情
-  keepSameWithLvyeorg: function() {
-    const self = this
-    console.log(self.data.od.websites)
-    console.log(app.globalData.lvyeorgInfo)
-    if (!app.globalData.lvyeorgLogin) { // 尚未登录，则等待登录
-      app.callbackLoginLvyeorg = (res) => {
-        if (res.username) {
-          self.post2Lvyeorg()
-        }
+    if (this.data.od.websites.lvyeorg.tid) {
+      if (this.anyModify(this.data.modifys)) { // 有修改，才有必要跟帖发布
+        var addedMessage = "领队对以下内容作了更新，请报名者留意！"
+        var message = lvyeorg.buildOutdoorMesage(this.data.od, false, this.data.modifys, addedMessage, this.data.od.websites.lvyeorg.allowSiteEntry) // 构建活动信息
+        lvyeorg.postMessage(this.data.od.outdoorid, this.data.od.websites.lvyeorg.tid, addedMessage, message)
+        // 用完了得把modifys都设置为false
+        this.setModifys(false)
+        console.log(this.data.modifys)
       }
-      app.loginLvyeOrg()
-    } else { // 登录了直接发布信息就好
-      self.post2Lvyeorg()
-    }
-  },
-
-  // 内部处理函数，避免重复代码
-  post2Lvyeorg: function() {
-    console.log("post2Lvyeorg:function")
-    const self = this
-    // 没有 tid，则先生成tid；再处理waitings
-    if (!self.data.od.websites.lvyeorg.tid && self.data.od.websites.lvyeorg.keepSame && (self.data.od.status == "已发布" || self.data.od.status == "已成行")) { // 没有tid，则必须有keepSame，同时还必须是“已发布”或“已成行”状态的活动 
-      lvyeorg.addThread(self.data.od.outdoorid, self.data.od, app.globalData.lvyeorgInfo.isTesting || self.data.od.limits.isTest, tid => {
-        if (tid) {
-          self.data.od.websites.lvyeorg.tid = tid
-          lvyeorg.postWaitings(self.data.od.outdoorid, tid, null)
-        } else { // 发帖失败，则以后再发；这里似乎没有什么好干的事情
-        }
-      })
-    } else if (self.data.od.websites.lvyeorg.tid) {
-      // 有tid，则先把waitings发出去
-      lvyeorg.postWaitings(self.data.od.outdoorid, self.data.od.websites.lvyeorg.tid, callback => {
-        // 最后 发布更新信息
-        self.postModifys()
-      })
-    }
-  },
-
-  // 保存修改时，在org网站跟帖发布信息
-  postModifys: function() {
-    console.log("postModifys:function")
-    console.log(this.data.modifys)
-    if (this.anyModify(this.data.modifys)) { // 有修改，才有必要跟帖发布
-      var addedMessage = "领队对以下内容作了更新，请报名者留意！"
-      var message = lvyeorg.buildOutdoorMesage(this.data.od, false, this.data.modifys, addedMessage, this.data.od.websites.lvyeorg.allowSiteEntry) // 构建活动信息
-      lvyeorg.postMessage(this.data.od.outdoorid, this.data.od.websites.lvyeorg.tid, addedMessage, message)
-      // 用完了得把modifys都设置为false
-      this.setModifys(false)
-      console.log(this.data.modifys)
     }
   },
 

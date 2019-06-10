@@ -192,8 +192,8 @@ const pushOutdoorLvyeWaiting=(outdoorid, message)=>{
   })
 }
 
-const shiftOutdoorLvyeWaitings=(outdoorid, callback)=>{
-  console.log("shiftOutdoorWaitings")
+const clearOutdoorLvyeWaitings=(outdoorid, callback)=>{
+  console.log("updateOutdoorLvyeWaitings")
   wx.cloud.callFunction({
     name: 'dbSimpleUpdate', // 云函数名称
     // table,id,item,command(push,pop,shift,unshift,""),value
@@ -201,8 +201,8 @@ const shiftOutdoorLvyeWaitings=(outdoorid, callback)=>{
       table: "Outdoors",
       id: outdoorid,
       item: "websites.lvyeorg.waitings",
-      command: "shift",
-      value: null,
+      command: "",
+      value: [],
     }
   }).then(res=>{
     if(callback) {
@@ -474,7 +474,7 @@ module.exports = {
 
   updateOutdoorWebsites: updateOutdoorWebsites,
   pushOutdoorLvyeWaiting: pushOutdoorLvyeWaiting,
-  shiftOutdoorLvyeWaitings: shiftOutdoorLvyeWaitings,
+  clearOutdoorLvyeWaitings: clearOutdoorLvyeWaitings,
 
   updateOutdoorFormids: updateOutdoorFormids,
 

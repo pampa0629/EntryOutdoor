@@ -666,7 +666,8 @@ const getDefaultWebsites = () => {
     lvyeorg: {
       //fid: null, // 版块id
       tid: null, // 帖子id
-      keepSame: false, // 是否保持同步
+      keepSame: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame : false),
+      isTesting: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.isTesting : false),
       waitings: [], // 要同步但尚未同步的信息列表
     }
   }

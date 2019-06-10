@@ -631,7 +631,6 @@ Page({
   find(objs, name, id) {
     console.log("name:" + name)
     console.log("id:" + id)
-
     for(var index in objs) {
       console.log(index)
       if (objs[index][name] == id) {

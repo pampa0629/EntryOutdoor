@@ -235,7 +235,7 @@ const buildPage2 = (page1, page2, outdoorid) => {
 }
 
 // 给自己发报名消息
-const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid, formid) => {
+const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid) => {
   console.log("sendEntryMsg2Self")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
@@ -255,15 +255,9 @@ const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid, 
       }
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-    console.log(formid)
-    if (formid.indexOf("mock") >= 0) { // 模拟的不能用
-      fetchPersonFormid(personid, res.data.formids, formid => {
-        console.log(formid)
-        sendMessage(openid, tempid, formid, page, data)
-      })
-    } else {
+    fetchPersonFormid(personid, res.data.formids, formid => {
       sendMessage(openid, tempid, formid, page, data)
-    }
+    })
   })
 }
 

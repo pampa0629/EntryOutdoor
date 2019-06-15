@@ -109,7 +109,7 @@ const sendCancelMsg2Member = (personid, title, outdoorid, leader, reason) => {
 
 // 给全体队员发送活动重要内容修改通知
 const sendModifyMsg2Member = (personid, outdoorid, title, leader, modifys) => {
-  console.log("sendModifyMsg2Member")
+  console.log("sendModifyMsg2Member") 
   var info = "您报名的户外活动"
   var tip = ""
   console.log(modifys)

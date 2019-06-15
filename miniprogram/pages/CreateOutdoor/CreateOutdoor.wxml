@@ -4,7 +4,7 @@
     <van-radio-group value="{{cancelDlg.reason}}" bind:change="changeCancelReason">
       <van-radio  wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio>  
     </van-radio-group>  
-  </van-panel> 
+  </van-panel>  
 </van-dialog>  
     
 <!--弹出分享按钮-->
@@ -174,41 +174,26 @@
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
-<!--发布活动和保存草稿按钮 -->
-<block wx:if="{{od.status=='拟定中'}}">
-  <!--发布活动-->
-  <form bindsubmit="publishOutdoor" report-submit="true">
-    <view class="fix" style="left:50rpx">
-      <button form-type="submit" style="color:#1aad19;background-color:#ffffff" disabled="{{!canPublish}}" size="large" plain>发布活动</button>
-    </view>
-  </form>
-  <!--保存草稿-->
-  <form bindsubmit="saveDraft" report-submit="true">
-    <view class="fix" style="left:400rpx">
-      <button form-type="submit" style="background-color:#ffffff" disabled="{{!hasModified}}" size="large" plain>保存草稿</button>
-    </view>
+<van-row class="fix">
+  <!-- 发布活动或者新建活动 -->
+  <van-col span="9" offset="2">
+    <form bindsubmit="publishOutdoor" report-submit="true" wx:if="{{od.status=='拟定中'}}">
+      <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布活动</button>
     </form>
-</block>
-
-<!--新建活动和保存修改按钮-->
-<block wx:if="{{od.status!='拟定中' || od.status=='已发布'}}">
-  <!--新建活动：新建活动放到顶上图标--> 
-  <block wx:if="{{false || od.status!='拟定中'}}">
-    <form bindsubmit="newOutdoor" report-submit="true">
-        <view class="fix" style="left:50rpx">
-          <button form-type="submit"  style="color:#1aad19;background-color:#ffffff" disabled="{{!canPublish}}" size="large" plain>新建活动</button>
-        </view>
+    <form bindsubmit="newOutdoor" report-submit="true" wx:else>
+      <button form-type="submit" disabled="{{!canPublish}}" size="large">新建活动</button>
+    </form>
+  </van-col>
+  <!-- 保存草稿或者保存修改 -->
+  <van-col span="9" offset="2">
+    <form bindsubmit="saveDraft" report-submit="true" wx:if="{{od.status=='拟定中'}}">
+      <button form-type="submit"  disabled="{{!hasModified}}" type="primary">保存草稿</button>
+    </form>
+    <form bindsubmit="saveModified" report-submit="true" wx:if="{{od.status=='已发布'}}">
+        <button form-type="submit" disabled="{{!hasModified}}" type="primary">保存修改</button>
       </form>
-  </block>
-  <!--保存修改-->
-  <block wx:if="{{od.status=='已发布'}}">
-    <form bindsubmit="saveModified" report-submit="true">
-      <view class="fix" style="left:400rpx">
-        <button form-type="submit" style="background-color:#ffffff" disabled="{{!hasModified}}" size="large" plain>保存修改</button>
-      </view>
-    </form>
-  </block>
-</block>
+  </van-col>
+</van-row>
 
 <!--画布-->
 <!-- <view style="width:0px;height:0px;overflow:hidden;">

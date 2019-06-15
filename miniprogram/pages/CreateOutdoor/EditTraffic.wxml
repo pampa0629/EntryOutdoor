@@ -8,7 +8,7 @@
       </van-cell>
     </van-cell-group>
   </van-radio-group>
-</van-panel>
+</van-panel> 
  
 <!--费用承担-->
 <van-panel>
@@ -41,3 +41,23 @@
   </picker>
   <van-field value="{{traffic.car.number}}" label="车牌号码" maxlength="4" placeholder="请输入车牌号码后四位"  bind:change="changeNumber"/>
 </van-panel>
+
+
+<!--故意空白，防止遮挡-->
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+
+<!-- 保存和返回按钮 -->
+<van-row class="fix">
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" size="large" type="warn">放弃</button>
+    </form>
+  </van-col>
+</van-row>

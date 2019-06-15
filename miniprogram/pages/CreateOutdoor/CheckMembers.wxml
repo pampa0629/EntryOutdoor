@@ -6,7 +6,7 @@
     </van-checkbox-group>
     <van-field wx:if="{{chatDlg.Options[chatDlg.selects[chatDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体留言内容" border="{{false}}" bind:change="changeChatContent" value="{{ chatDlg.content }}"/>
   </van-panel>
-</van-dialog>  
+</van-dialog>   
 
 <!--驳回报名对话框-->
 <van-dialog use-slot async-close show="{{rejectDlg.show}}" show-cancel-button  bind:close="closeRejectDlg" bind:confirm="confirmRejectDlg" title="驳回报名" confirmButtonText="确定驳回" cancelButtonText="取消">
@@ -57,7 +57,7 @@
     <van-col span="6" offset="8" >
       <block wx:if="{{isLeader}}">
         <van-button wx:if="{{members[index].status=='领队组'}}" plain size="large" bind:click="onSetLeader">转让领队</van-button>
-      </block>
+      </block> 
     </van-col>
   </van-row>
   <van-row>
@@ -72,7 +72,8 @@
 
 <!--审核与授权-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="正式成员列表（共{{members.length}}人）"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="正式队员列表（共{{members.length}}人）"></van-cell>
+  <van-tag type="primary" plain>正式队员审核与授权结果即时生效，无需保存</van-tag> 
   <van-cell wx:if="{{cfo.nickName}}" title="当前财务官（CFO）为：{{cfo.nickName}}" title-width="90%" />
   <van-field wx:for="{{members}}" title-width="60%" wx:key="item.personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot>
     <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onCheckPopup{{index}}">审核</van-button>
@@ -82,7 +83,7 @@
 
 <!--领队编辑附加队员-->
 <van-switch-cell title="开启附加队员" wx:if="{{addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
-<block wx:if="{{openAdd || addMembers.length>0}}">
+<block wx:if="{{openAdd || addMembers.length>0 || hasModified}}">
   <van-panel>
   	<van-cell slot="header" title-class="redtitle" title="附加队员（共{{addMembers.length}}人）" label="领队可增删非小程序报名队员"></van-cell>
     <van-field wx:for="{{addMembers}}" wx:key="*this" value="{{item}}" readonly use-button-slot>
@@ -94,3 +95,20 @@
     <van-button slot="button" disabled="{{!addMember}}" plain size="small" type="primary" bind:click="addOneMember">增加</van-button>
   </van-field> 
 </block>
+
+<block wx:if="{{openAdd || addMembers.length>0 || hasModified}}">
+  <!-- 保存和返回按钮 -->
+  <van-row>
+    <van-col span="9" offset="2">
+      <form bindsubmit="save" report-submit="true">
+        <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
+      </form>
+    </van-col>
+    <van-col span="9" offset="2">
+      <form bindsubmit="giveup" report-submit="true">
+        <button form-type="submit" size="large" type="warn">放弃</button>
+      </form>
+    </van-col>
+  </van-row>
+</block>
+

@@ -26,15 +26,22 @@ Page({
   data: {
     home: false,
     formIds: [],
-    od: null, 
-    a:null,
-  }, 
+    od: null,
+    a: null,
+    objs: {
+      id: "a",
+      id2: {
+        etc: "b"
+      },
+      id3: "c"
+    }
+  },
 
   onLoad() {
     this.setData({
       // od: new outdoor.OD()
     })
-    
+
     this.initRecord()
 
     var time = new Date()
@@ -74,7 +81,7 @@ Page({
 
   },
 
-  onContact: function (e) {
+  onContact: function(e) {
     console.log(JSON.stringify(e, null, 2))
     wx.showModal({
       title: '客服消息',
@@ -82,7 +89,7 @@ Page({
     })
   },
 
-  onTest: function (e) {
+  onTest: function(e) {
 
     console.log(e.detail.errMsg)
     console.log(e.detail.iv)
@@ -188,10 +195,10 @@ Page({
     qrcode.makeCode("test")
     wx.showActionSheet({
       itemList: ['保存图片'],
-      success: function (res) {
+      success: function(res) {
         console.log(res.tapIndex)
         if (res.tapIndex == 0) {
-          qrcode.exportImage(function (path) {
+          qrcode.exportImage(function(path) {
             wx.saveImageToPhotosAlbum({
               filePath: path,
             })
@@ -368,7 +375,7 @@ Page({
     // manager.stop()
   },
 
-  initRecord: function () {
+  initRecord: function() {
     console.log('initRecord')
     // //有新的识别内容返回，则会调用此事件
     // manager.onRecognize = (res) => {
@@ -459,10 +466,15 @@ Page({
 
   tapAcc() {
     console.log("tapAcc")
-    wx.onGyroscopeChange(function (res) {
+    wx.onGyroscopeChange(function(res) {
       console.log(res)
       var t = Math.sqrt(Math.pow(res.x, 2) + Math.pow(res.y, 2) + Math.pow(res.z, 2))
-      var acc = { x: res.x, y: res.y, z: res.z, t: t }
+      var acc = {
+        x: res.x,
+        y: res.y,
+        z: res.z,
+        t: t
+      }
       //if (t > 1.2) {
       dbTemp.doc(app.globalData.personid).update({
         data: {
@@ -475,7 +487,10 @@ Page({
   },
 
   tapEndTime() {
-    var time = odtools.calcRemainTime("2019-02-11", { date: "不限", time: "21:00" }, false)
+    var time = odtools.calcRemainTime("2019-02-11", {
+      date: "不限",
+      time: "21:00"
+    }, false)
     console.log(time)
   },
 
@@ -492,10 +507,10 @@ Page({
         username: "50463253@qq.com",
         password: "xx123zzm",
       },
-      fail: function (error) {
+      fail: function(error) {
         console.log(error)
       },
-      success: function (res) {
+      success: function(res) {
         // console.log(res)
         // console.log(res.data)
         const c = res.cookies
@@ -521,10 +536,10 @@ Page({
         PHPSESSID: self.data.mofang.PHPSESSID,
         dyh_lastactivity: self.data.mofang.dyh_lastactivity,
       },
-      fail: function (error) {
+      fail: function(error) {
         console.log(error)
       },
-      success: function (res) {
+      success: function(res) {
         console.log(res)
         console.log(res.data)
       }
@@ -543,10 +558,10 @@ Page({
         PHPSESSID: self.data.mofang.PHPSESSID,
         dyh_lastactivity: self.data.mofang.dyh_lastactivity,
       },
-      fail: function (error) {
+      fail: function(error) {
         console.log(error)
       },
-      success: function (res) {
+      success: function(res) {
         console.log(res)
         console.log(res.data)
       }
@@ -565,10 +580,10 @@ Page({
         PHPSESSID: self.data.mofang.PHPSESSID,
         dyh_lastactivity: self.data.mofang.dyh_lastactivity,
       },
-      fail: function (error) {
+      fail: function(error) {
         console.log(error)
       },
-      success: function (res) {
+      success: function(res) {
         console.log(res)
         console.log(res.data)
       }
@@ -587,11 +602,11 @@ Page({
   myFunction(a) {
     console.log("arguments.length:" + arguments.length)
     console.log("arguments0:" + arguments[0])
-    console.log("arguments:" )
-    console.log( JSON.stringify(arguments))
+    console.log("arguments:")
+    console.log(JSON.stringify(arguments))
     console.log("arguments type:" + typeof arguments)
     var result = 1
-    for(var x in arguments) {
+    for (var x in arguments) {
       console.log("x:" + arguments[x])
       result = arguments[x] * result
     }
@@ -609,17 +624,17 @@ Page({
   find(objs, name, id) {
     console.log("name:" + name)
     console.log("id:" + id)
-    objs.forEach((item, index)=>{
+    objs.forEach((item, index) => {
       console.log(item)
       // self["editMust" + index] = () => {
       let temp = item[name]
       // console.log(item[name])
       // console.log(item[name.toString()])
-      
+
       // console.log(item["id"])
       // console.log(item.id)
       console.log(temp)
-      var res = temp == id?true:false
+      var res = temp == id ? true : false
       console.log(res)
 
       if (res) {
@@ -631,7 +646,7 @@ Page({
   find(objs, name, id) {
     console.log("name:" + name)
     console.log("id:" + id)
-    for(var index in objs) {
+    for (var index in objs) {
       console.log(index)
       if (objs[index][name] == id) {
         return objs[index]
@@ -639,11 +654,33 @@ Page({
     }
     return null
   },
- 
-  tapCloud() {
-    var objs = [{ id: "a" }, { id: "b" }, { id: "c" }]
-    var obj = this.find(objs, "id", "d")
+
+  getValue(obj, name) {
     console.log(obj)
+    console.log(name)
+    var items = name.split(".")
+    var result = obj
+    for (var x in items) {
+      result = result[items[x]]
+    }
+    console.log(result)
+    return result
+  },
+
+  tapCloud() {
+    // objs: {
+    //   id: "a",
+    //     id2: {
+      //     etc: {
+      //       test: "b"
+      //     }
+    //   },
+    //   id3: "c"
+    // }
+    var a = this.data.objs.id2
+    a.etc = "d" 
+    console.log(this.data.objs)
+
   },
 
 });

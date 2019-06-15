@@ -5,10 +5,22 @@
 <picker bindchange="changStopDate" range="{{RouteDates}}">
     <van-field label="预计日期" disabled  value="{{stop.date}}" placeholder="请选择预计到达日期"/>
   </picker>
-
+ 
 <!--时间点：8:00-->
 <picker mode="time" value="{{stop.time}}" start="00:00" end="24:00" bindchange="changStopTime">
   <van-field label="预计时间" disabled  value="{{stop.time}}" placeholder="请选择预计到达时间"/>
 </picker>
 
-<van-button size="large" type="primary"   disabled="{{!stop.place}}" bind:click='clickSaveAndBack'>保存并返回</van-button>
+<!-- 保存和返回按钮 -->
+<van-row>
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified||!stop.place}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" type="warn" >放弃</button>
+    </form>
+  </van-col>
+</van-row>

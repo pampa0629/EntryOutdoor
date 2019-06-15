@@ -6,7 +6,7 @@ const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
-
+ 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -276,11 +276,11 @@ Page({
     console.log(self.data.entryInfo)
 
     var member = util.createMember(app.globalData.personid, self.data.userInfo, self.data.entryInfo)
-    this.od.entry(member, res=>{
+    this.data.od.entry(member, res=>{
       self.setData({ // 刷新队员信息
         "od.members": self.data.od.members,
       })
-      if (staus != "替补中" && res.status == "替补中") { // 被迫替补，则要给与弹窗提示
+      if (status != "替补中" && res.status == "替补中") { // 被迫替补，则要给与弹窗提示
         self.setData({
           "entryInfo.status": res.status,
         })
@@ -570,15 +570,26 @@ Page({
     console.log("tapQuit()")
     template.savePersonFormid(this.data.personid, e.detail.formId, null)
     const self = this;
-    var selfQuit = true
-    this.data.od.quit(app.globalData.personid, selfQuit, members => {
-      // 删除Persons表中的entriedOutdoors中的对应id的item
-      self.updateEntriedOutdoors(true)
-      // 退出后还可以继续再报名
-      self.setData({
-        "entryInfo.status": "浏览中",
-        "od.members": members,
-      })
+    wx.showModal({
+      title: '确定退出？',
+      content: '您已经点击“退出”按钮，是否确定退出？',
+      success(res) {
+        if (res.confirm) {
+          console.log('用户点击确定')
+          var selfQuit = true
+          self.data.od.quit(app.globalData.personid, selfQuit, members => {
+            // 删除Persons表中的entriedOutdoors中的对应id的item
+            self.updateEntriedOutdoors(true)
+            // 退出后还可以继续再报名
+            self.setData({
+              "entryInfo.status": "浏览中",
+              "od.members": members,
+            })
+          })
+        } else if (res.cancel) {
+          console.log('用户点击取消')
+        }
+      }
     })
   },
 

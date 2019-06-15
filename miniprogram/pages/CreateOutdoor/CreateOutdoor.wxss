@@ -60,9 +60,3 @@
   background-color:transparent;
 }
 
-.fix{
-  height:80rpx;
-  width:300rpx;
-  position:fixed;
-  bottom: 10rpx;
-}

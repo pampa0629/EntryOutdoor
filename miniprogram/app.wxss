@@ -12,3 +12,10 @@
 .redtitle {
   color:#F65959;
 }
+
+.fix{
+  height:80rpx;
+  width:100%;
+  position:fixed;
+  bottom: 10rpx;
+}

@@ -15,5 +15,17 @@
 <picker mode="time" value="{{meet.time}}" start="06:00" end="23:00" bindchange="changMeetTime">
   <van-field label="集合时间" disabled required value="{{meet.time}}" placeholder="请选择集合时间"/>
 </picker>
-
-<van-button size="large" type="primary"   disabled="{{!meet.place||!meet.date||!meet.time}}" bind:click='clickSaveAndBack'>保存并返回</van-button>
+ 
+<!-- 保存和返回按钮 -->
+<van-row>
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified||!meet.place||!meet.date||!meet.time}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" type="warn" >放弃</button>
+    </form>
+  </van-col>
+</van-row>

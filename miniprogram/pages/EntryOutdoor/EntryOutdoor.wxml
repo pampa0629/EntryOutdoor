@@ -4,7 +4,7 @@
     <van-col span="20" offset="2">
       <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button> 
     </van-col>
-  </van-row>      
+  </van-row>       
   <van-row>
     <van-col span="9" offset="2">
       <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
@@ -149,11 +149,9 @@
 
 <!--免责条款与是否认路-->
 <van-cell title="免责条款与活动规则" title-class="redtitle" value="点击查看详细内容" clickable is-link url="LookDisclaimer" />
-<van-checkbox-group>
-  <van-cell required title="我已阅读并同意条款和规则内容" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
-    <van-checkbox value="{{entryInfo.agreedDisclaimer}}" bind:change="checkDisclaimer" />
-  </van-cell>
-</van-checkbox-group>
+<van-cell required title="我已阅读并同意条款和规则内容" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
+  <van-checkbox value="{{entryInfo.agreedDisclaimer}}"/>
+</van-cell>
 
 <van-cell title="是否认路" title-class="redtitle" label="{{entryInfo.knowWay?'认路':'不认路'}}" clickable bind:click="checkKnowWay" border="{{false}}">
   <van-checkbox value="{{entryInfo.knowWay}}" bind:change="checkKnowWay" />
@@ -178,41 +176,34 @@
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
-<!--报名按钮-->
-<block wx:if="{{od.status=='已发布'||od.status=='已成行'}}">
+<!--报名按钮--> 
+<van-row class="fix" wx:if="{{od.status=='已发布'||od.status=='已成行'}}">
   <!--替补-->
-  <block wx:if="{{(od.limits.maxPerson && od.members.length>=od.limits.personCount) && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
-    <form bindsubmit="tapBench" report-submit="true">
-      <view class="fix" style="left:30rpx">
-        <button form-type="submit" style="color:#1aad19;background-color:#ffffff"  size="large" plain>替补</button>
-      </view>
+  <van-col span="9" offset="2">
+    <form bindsubmit="tapBench" report-submit="true" wx:if="{{(od.limits.maxPerson && od.members.length>=od.limits.personCount) && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
+      <button form-type="submit">替补</button>
     </form>
-  </block>
+  </van-col>
   <!--占坑-->
-  <block wx:if="{{(!od.limits.maxPerson || od.members.length<od.limits.personCount) && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
-    <form bindsubmit="tapOcuppy" report-submit="true">
-      <view class="fix" style="left:200rpx">
-        <button form-type="submit" style="color:#1aad19;background-color:#ffffff" form-type="submit" size="large" plain>占坑</button>
-      </view>
+  <van-col span="9" offset="2">
+    <form bindsubmit="tapOcuppy" report-submit="true"  wx:if="{{(!od.limits.maxPerson || od.members.length<od.limits.personCount) && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
+      <button form-type="submit" >占坑</button>
     </form>
-  </block>
+  </van-col>
   <!--报名-->
-  <block wx:if="{{( (entryInfo.status=='浏览中' && (!od.limits.maxPerson || od.members.length<limits.personCount)) ||entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">
-    <form bindsubmit="tapEntry" report-submit="true">
-      <view class="fix" style="left:370rpx">
-        <button form-type="submit" style="color:#1aad19;background-color:#ffffff" size="large" plain>报名</button>
-      </view>
+  <van-col span="9" offset="2">
+    <form bindsubmit="tapEntry" report-submit="true" wx:if="{{( (entryInfo.status=='浏览中' && (!od.limits.maxPerson || od.members.length<limits.personCount)) ||entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">
+      <button form-type="submit" type="primary">报名</button>
     </form>
-  </block>
+  </van-col>
   <!--退出-->
-  <block wx:if="{{(entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中'||entryInfo.status=='领队组') && remains.entry.time>=0}}">
-    <form bindsubmit="tapQuit" report-submit="true">
-      <view class="fix" style="left:540rpx">
-        <button form-type="submit" style="color:#F65959;background-color:#ffffff" plain size="large" >退出</button>
-      </view>
+  <van-col span="9" offset="2">
+    <form bindsubmit="tapQuit" report-submit="true" wx:if="{{(entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中'||entryInfo.status=='领队组') && remains.entry.time>=0}}">
+        <button form-type="submit" type="warn">退出</button>
     </form>
-  </block>
-</block>
+  </van-col>
+</van-row>
+  
 
 <!--快速注册对话框-->
 <van-dialog use-slot show="{{showLoginDlg}}" show-cancel-button  bind:cancel="cancelLoginDlg" bind:confirm="confirmLoginDlg" title="请填写个人信息" confirmButtonText="确定" cancelButtonText="取消">

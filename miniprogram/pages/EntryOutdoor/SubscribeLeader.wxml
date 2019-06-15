@@ -40,7 +40,7 @@
 <van-panel wx:if="{{hasSubscribed}}">
 	<van-cell slot="header" title-class="redtitle" title="微信服务通知"></van-cell>
   <van-cell title="{{mine.acceptNotice?'接收通知':'不接收通知'}}" clickable bind:click="checkAccept" border="{{false}}">
-    <van-checkbox value="{{mine.acceptNotice}}" bind:change="checkAccept" />
+    <van-checkbox value="{{mine.acceptNotice}}"/>
   </van-cell>
 </van-panel>
 

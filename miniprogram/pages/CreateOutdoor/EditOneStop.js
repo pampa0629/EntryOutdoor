@@ -1,3 +1,6 @@
+const app = getApp()
+const template = require('../../utils/template.js')
+
 Page({
 
   data: {
@@ -8,7 +11,7 @@ Page({
       place: "",
       date: "当天",
       time: "",
-    },
+    }, 
     index: -1,
     hasModified:false,
 
@@ -16,6 +19,7 @@ Page({
   },
 
   onLoad: function (options) {
+    console.log("EditOneStop, onLoad()")
     console.log(options)
     const self = this
     if (options.index) {
@@ -35,6 +39,55 @@ Page({
         })
       }
     }
+  },
+
+  save: function (e) {
+    console.log("save()")
+    if (e)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+
+    if (this.data.hasModified && this.data.stop.place) {
+      const self = this
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2]
+      let od = pages[pages.length - 3].data.od
+      console.log(self.data.action)
+      if (self.data.action == "edit") {
+        prevPage.setData({
+          ['route.wayPoints[' + self.data.index + ']']: self.data.stop,
+        })
+      } else {
+        if (self.data.action == "addLast") {
+          // 往最后追加一个途经点
+          prevPage.data.route.wayPoints.push(self.data.stop)
+        } else if (self.data.action == "addBefore") {
+          prevPage.data.route.wayPoints.splice(self.data.index, 0, self.data.stop)
+        } else if (self.data.action == "addAfter") {
+          prevPage.data.route.wayPoints.splice(self.data.index + 1, 0, self.data.stop)
+        }
+        prevPage.setData({
+          "route.wayPoints": prevPage.data.route.wayPoints,
+        })
+        prevPage.rebuildClickStopFun()
+      }
+      
+      od.saveItem("route.wayPoints")
+      this.setData({
+        hasModified: false
+      })
+    }
+  },
+
+  onUnload: function () {
+    console.log("onUnload()")
+    this.save() // 自动保存
+  },
+
+  giveup(e) {
+    console.log("giveup()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.hasModified = false
+    wx.navigateBack({})
   },
 
   // 记录输入地点
@@ -63,34 +116,6 @@ Page({
       "stop.time": e.detail.value,
       hasModified: true,
     })
-  },
-
-  clickSaveAndBack: function () {
-    const self = this
-    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    let prevPage = pages[pages.length - 2];
-    console.log(self.data.action)
-    if (self.data.action == "edit") {
-      prevPage.setData({
-        ['route.wayPoints[' + self.data.index + ']']: self.data.stop,
-        hasModified: self.data.hasModified,
-      })
-    } else {
-      if (self.data.action == "addLast") {
-        // 往最后追加一个途经点
-        prevPage.data.route.wayPoints.push(self.data.stop)
-      } else if (self.data.action == "addBefore") {
-        prevPage.data.route.wayPoints.splice(self.data.index, 0, self.data.stop)
-      } else if (self.data.action == "addAfter") {
-        prevPage.data.route.wayPoints.splice(self.data.index + 1, 0, self.data.stop)
-      }
-      prevPage.setData({
-        "route.wayPoints": prevPage.data.route.wayPoints,
-        hasModified: true,
-      })
-      prevPage.rebuildClickStopFun()
-    }
-    wx.navigateBack({})
   },
 
 })

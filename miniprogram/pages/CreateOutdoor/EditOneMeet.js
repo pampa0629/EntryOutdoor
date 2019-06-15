@@ -1,3 +1,5 @@
+const app = getApp()
+const template = require('../../utils/template.js')
 const util = require('../..//utils/util.js')
 
 Page({
@@ -8,8 +10,8 @@ Page({
 
     meet: {
       place: "", // 人输入的位置描述
-      date: "当天",
-      time: "",
+      date: "当天", 
+      time: "", 
       name: "", // 地图上选择的地名描述 
       latitude: null, // 维度
       longitude: null, // 经度
@@ -111,33 +113,52 @@ Page({
     })
   },
 
-  clickSaveAndBack: function() {
-    const self = this
-    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    let prevPage = pages[pages.length - 2];
-    console.log(self.data.action)
-    console.log(self.data.meet)
-    if (self.data.action == "edit") {
-      prevPage.setData({
-        ['meets[' + self.data.index + ']']: self.data.meet,
-        hasModified: self.data.hasModified,
-      })
-    } else {
-      if (self.data.action == "addLast") {
-        // 往最后追加一个集合点
-        prevPage.data.meets.push(self.data.meet)
-      } else if (self.data.action == "addBefore") {
-        prevPage.data.meets.splice(self.data.index, 0, self.data.meet)
-      } else if (self.data.action == "addAfter") {
-        prevPage.data.meets.splice(self.data.index + 1, 0, self.data.meet)
+  save: function (e) {
+    console.log("save()")
+    if (e)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    console.log(this.data.meet)
+    if (this.data.hasModified && this.data.meet.place && this.data.meet.date && this.data.meet.time) {
+      const self = this
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2];
+      let od = pages[pages.length - 3].data.od
+      console.log(self.data.action)
+      console.log(self.data.meet)
+      if (self.data.action == "edit") {
+        prevPage.setData({
+          ['meets[' + self.data.index + ']']: self.data.meet,
+        })
+      } else {
+        if (self.data.action == "addLast") {
+          // 往最后追加一个集合点
+          prevPage.data.meets.push(self.data.meet)
+        } else if (self.data.action == "addBefore") {
+          prevPage.data.meets.splice(self.data.index, 0, self.data.meet)
+        } else if (self.data.action == "addAfter") {
+          prevPage.data.meets.splice(self.data.index + 1, 0, self.data.meet)
+        }
+        prevPage.setData({
+          meets: prevPage.data.meets,
+        })
+        prevPage.rebuildClickMeetFun()
       }
-      prevPage.setData({
-        meets: prevPage.data.meets,
-        hasModified: true,
+      
+      od.saveItem("meets")
+      this.setData({
+        hasModified: false
       })
-      prevPage.rebuildClickMeetFun()
     }
+  },
 
+  onUnload: function () {
+    console.log("onUnload()")
+    this.save() // 自动保存
+  },
+
+  giveup(e) {
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.hasModified = false
     wx.navigateBack({})
   },
 

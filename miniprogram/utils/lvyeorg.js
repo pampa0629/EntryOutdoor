@@ -12,7 +12,7 @@ const LvyeOrgURL = 'https://www.lvye.net/panpa/'
  
 // 得到登录org网站所需要的token， 用callback传回
 const getToken = (callback) => {
-  wx.login({
+  wx.login({ 
     success: function(res) {
       if (res.code) {
         var token = wx.getStorageSync("LvyeOrgToken")
@@ -593,7 +593,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
                 content: '原因是：' + error + "。\r\n点击“再试一次”则再次尝试同步，点击“以后再发”则在您“保存修改”或再次进入本活动页面时重发。",
                 confirmText: "再试一次",
                 cancelText: "以后再发",
-                success(res) {
+                success(res) { 
                   if (res.confirm) {
                     console.log('用户点击确定')
                     addThread(outdoorid, data, isTesting, callback) // 立刻重发

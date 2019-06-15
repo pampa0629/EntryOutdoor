@@ -44,7 +44,7 @@ Page({
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
-    self.data.outdoorid = prevPage.data.outdoorid
+    self.data.outdoorid = prevPage.data.od.outdoorid
     self.data.title = prevPage.data.od.title.whole
     if(prevPage.data.leader.personid == app.globalData.personid) {
       self.setData({ // 判断是否为总领队
@@ -97,25 +97,47 @@ Page({
       }
       this["longPressMember" + index] = () => {
         this.longPressMember(index)
-      }
+      } 
     }
     self.setData({
       members: self.data.members,
     })
   },
 
+  save(e) {
+    const self = this;
+    console.log("CheckMembers save()")
+    console.log("this.data.hasModified：" + this.data.hasModified)
+    if (e)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+
+    if (this.data.hasModified) {
+      // 是否用 od.saveItem 取代，再考虑
+      cloudfun.updateOutdoorAddMembers(self.data.outdoorid, self.data.addMembers)
+      this.setData({
+        hasModified: false,
+      })
+    }
+  },
+
   onUnload: function() {
+    console.log("onUnload()")
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     dbOutdoors.doc(self.data.outdoorid).get().then(res => {
-      prevPage.setData({
+      prevPage.setData({ // 刷新一下队员
         "od.member": res.data.members,
       })
     })
-    if (self.data.hasModified) {
-      cloudfun.updateOutdoorAddMembers(self.data.outdoorid, self.data.addMembers)
-    }
+    this.save() // 自动保存
+  },
+
+  giveup(e) {
+    console.log("giveup()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.hasModified = false
+    wx.navigateBack({})
   },
 
   longPressMember(index) {
@@ -396,16 +418,16 @@ Page({
 
   // 删除 index位置的附加队员
   delAddMembers(index) {
-    const self = this
-    self.data.addMembers.splice(index, 1)
-    self.data.hasModified = true
-    self.flushAddMembers(self.data.addMembers)
+    this.data.addMembers.splice(index, 1)
+    this.setData({
+      hasModified:true
+    })
+    this.flushAddMembers(this.data.addMembers)
   },
 
   changeOneMember(e) {
     console.log(e)
-    const self = this
-    self.setData({
+    this.setData({
       addMember:e.detail,
     })
   },
@@ -425,11 +447,12 @@ Page({
 
   // 增加附加队员到列表中
   addOneMember() {
-    const self = this
-    self.data.addMembers.push(self.data.addMember)
-    self.data.hasModified = true
-    self.flushAddMembers(self.data.addMembers)
-    self.setData({
+    this.data.addMembers.push(this.data.addMember)
+    this.setData({
+      hasModified: true
+    })
+    this.flushAddMembers(this.data.addMembers)
+    this.setData({
       addMember: "" // 清空
     })
   },

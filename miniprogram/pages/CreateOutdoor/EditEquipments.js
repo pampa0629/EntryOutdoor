@@ -1,33 +1,36 @@
+const app = getApp()
+
+const template = require('../../utils/template.js')
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
 const select = require('../../libs/select.js')
 
 Page({
- 
+
   data: {
     equipments: {
-      mustRes: [], 
+      mustRes: [],
       canRes: [],
-      noRes: [], 
-      must: [], 
+      noRes: [],
+      must: [],
       can: [],
       no: [],
       area: "北京市", // 选中的地区
     },
     loaded: null, // 负重情况
     weatherText: "", // 天气预报文本
-    date:null, // 活动日期
-    day:null, // 活动是周几
-    isOutDate:false, // 活动是否过期
+    date: null, // 活动日期
+    day: null, // 活动是周几
+    isOutDate: false, // 活动是否过期
     hasModified: false,
 
     areaList: null, // 地区列表
-    showPopup:false, // 是否显示弹窗
-    
-    dialog:{
-      show:false,
-      oldName:"", // 原来的装备名称
-      newName:"", // 新的装备名称
+    showPopup: false, // 是否显示弹窗
+
+    dialog: {
+      show: false,
+      oldName: "", // 原来的装备名称
+      newName: "", // 新的装备名称
     }
   },
 
@@ -54,12 +57,12 @@ Page({
 
     console.log(self.data.equipments.area)
     // 处理过期活动
-    if ((new Date()) > new Date(od.title.date)){ // 过期活动，不能用天气预报，也就无法推荐装备了
+    if ((new Date()) > new Date(od.title.date)) { // 过期活动，不能用天气预报，也就无法推荐装备了
       self.setData({
-        isOutDate:true,
+        isOutDate: true,
         weatherText: "活动过期，无法获取天气预报，系统也无法推荐装备",
       })
-    } else if (self.data.equipments.area){ // 没过期，有活动地区，则查询天气预报
+    } else if (self.data.equipments.area) { // 没过期，有活动地区，则查询天气预报
       odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
         if (weather.result) {
           self.setData({
@@ -73,21 +76,20 @@ Page({
         }
       })
     }
-    
+
     var hasEquipments = limits && limits.equipments && (limits.equipments.must.length || limits.equipments.can.length || limits.equipments.no.length)
     if (hasEquipments) { // 有就直接读取
       console.log(limits.equipments)
       self.setData({
         equipments: limits.equipments,
-        hasModified: prevPage.data.hasModified,
       })
       self.createButtonFun()
-    } else if(self.data.weather){ // 没有装备，有天气预报，就默认推荐一下
+    } else if (self.data.weather) { // 没有装备，有天气预报，就默认推荐一下
       self.loadEquipments(self.data.weather)
     }
   },
 
-  loadEquipments(weather){
+  loadEquipments(weather) {
     const self = this
     var area = self.data.equipments.area
     odtools.loadEquipments(self.data.loaded, self.data.date, weather, equipments => {
@@ -101,7 +103,7 @@ Page({
   },
 
   // 恢复默认装备推荐
-  loadDefault: function () {
+  loadDefault: function() {
     const self = this
     // 没有天气预报，又没有过期，就查询一下
     if (!self.data.isOutDate) { // 没过期，又没有给天气预报，则查询天气预报
@@ -121,34 +123,34 @@ Page({
     }
   },
 
-  inputArea(e){
+  inputArea(e) {
     console.log(e)
     this.setData({
-      "equipments.area":e.detail,
+      "equipments.area": e.detail,
       hasModified: true,
     })
   },
 
-  onPopup(){
+  onPopup() {
     console.log("onPopup")
     this.setData({
-      showPopup:true,
+      showPopup: true,
     })
-  }, 
+  },
 
-  closePopup(){
+  closePopup() {
     console.log("closePopup")
     this.setData({
       showPopup: false,
     })
   },
 
-  confirmArea(e){
+  confirmArea(e) {
     console.log("confirmArea")
     console.log(e)
     var area = ""
     e.detail.values.forEach((item, index) => {
-      if(index != 0 ){ // 省份就不要了
+      if (index != 0) { // 省份就不要了
         area += item.name
       }
     })
@@ -159,7 +161,7 @@ Page({
     })
   },
 
-  cancelArea(){
+  cancelArea() {
     console.log("cancelArea")
     this.setData({
       showPopup: false,
@@ -167,9 +169,9 @@ Page({
   },
 
   // 创建编辑/删除按钮对应的函数
-  createButtonFun:function(){
+  createButtonFun: function() {
     const self = this
-    self.data.equipments.must.forEach((item, index)=>{
+    self.data.equipments.must.forEach((item, index) => {
       self["editMust" + index] = () => {
         self.editMust(index)
       }
@@ -195,24 +197,46 @@ Page({
         self.deleteNo(index)
       }
     })
-  }, 
+  },
 
-  onShow(){
+  onShow() {
     const self = this
     self.setData({
       equipments: self.data.equipments,
     })
   },
 
+  save: function(e) {
+    console.log("save()")
+    if (e)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+
+    if (this.data.hasModified) {
+      const self = this;
+      console.log(self.data)
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2];
+      prevPage.setData({
+        "limits.equipments": self.data.equipments,
+      })
+      let od = pages[pages.length - 3].data.od
+      od.saveItem("limits.equipments")
+      this.setData({
+        hasModified: false
+      })
+    }
+  },
+
   onUnload: function() {
-    const self = this;
-    console.log(self.data)
-    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    let prevPage = pages[pages.length - 2];
-    prevPage.setData({
-      "limits.equipments": self.data.equipments,
-      hasModified: self.data.hasModified,
-    })
+    console.log("onUnload()")
+    this.save() // 自动保存
+  },
+
+  giveup(e) {
+    console.log("giveup()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.hasModified = false
+    wx.navigateBack({})
   },
 
   changeMust: function(e) {
@@ -239,7 +263,7 @@ Page({
     })
   },
 
-  deleteMust: function (index) {
+  deleteMust: function(index) {
     console.log(index)
     const self = this
     self.deleteOne(self.data.equipments.must, self.data.equipments.mustRes, index)
@@ -251,7 +275,7 @@ Page({
     self.onShow()
   },
 
-  deleteCan: function (index) {
+  deleteCan: function(index) {
     console.log(index)
     const self = this
     self.deleteOne(self.data.equipments.can, self.data.equipments.canRes, index)
@@ -263,7 +287,7 @@ Page({
     self.onShow()
   },
 
-  deleteNo: function (index) {
+  deleteNo: function(index) {
     console.log(index)
     const self = this
     self.deleteOne(self.data.equipments.no, self.data.equipments.noRes, index)
@@ -275,14 +299,14 @@ Page({
     self.onShow()
   },
 
-  deleteOne:function(arr, arrRes, index){
+  deleteOne: function(arr, arrRes, index) {
     console.log(index)
     console.log(arr)
     console.log(arrRes)
-    
+
     var del = arr.splice(index, 1)
-    arrRes.forEach((item, index)=>{
-      if(item == del){
+    arrRes.forEach((item, index) => {
+      if (item == del) {
         arrRes.splice(index, 1)
       }
     })
@@ -291,19 +315,19 @@ Page({
   },
 
 
-  editMust: function (index) {
+  editMust: function(index) {
     console.log(index)
     const self = this
     self.setData({
       "dialog.oldName": self.data.equipments.must[index],
       "dialog.newName": self.data.equipments.must[index],
-      "dialog.which":"must",
+      "dialog.which": "must",
       "dialog.index": index,
       "dialog.show": true,
     })
   },
 
-  editCan: function (index) {
+  editCan: function(index) {
     console.log(index)
     const self = this
     self.setData({
@@ -315,7 +339,7 @@ Page({
     })
   },
 
-  editNo: function (index) {
+  editNo: function(index) {
     console.log(index)
     const self = this
     self.setData({
@@ -327,9 +351,9 @@ Page({
     })
   },
 
-  inputNewName(e){
+  inputNewName(e) {
     this.setData({
-      "dialog.newName":e.detail,
+      "dialog.newName": e.detail,
     })
   },
 
@@ -339,12 +363,12 @@ Page({
     if (event.detail === 'confirm') {
       // 异步关闭弹窗
       console.log(self.data.dialog)
-      if(self.data.dialog.which=="must"){
+      if (self.data.dialog.which == "must") {
         self.setData({
           ['equipments.must[' + self.data.dialog.index + ']']: self.data.dialog.newName,
           ['equipments.mustRes[' + self.data.dialog.index + ']']: self.data.dialog.newName,
         })
-      } else if(self.data.dialog.which=="can"){
+      } else if (self.data.dialog.which == "can") {
         self.setData({
           ['equipments.can[' + self.data.dialog.index + ']']: self.data.dialog.newName,
           ['equipments.canRes[' + self.data.dialog.index + ']']: self.data.dialog.newName,
@@ -370,23 +394,23 @@ Page({
     }
   },
 
-  inputMust(e){
+  inputMust(e) {
     console.log(e)
     this.setData({
-      addMust:e.detail,
+      addMust: e.detail,
     })
   },
 
-  addMust(){
+  addMust() {
     const self = this
     console.log(self.data.addMust)
-    if(self.data.addMust){
+    if (self.data.addMust) {
       self.data.equipments.must.push(self.data.addMust)
       self.data.equipments.mustRes.push(self.data.addMust)
       self.setData({
         "equipments.must": self.data.equipments.must,
         "equipments.mustRes": self.data.equipments.mustRes,
-        addMust:"",
+        addMust: "",
         hasModified: true,
       })
       self.createButtonFun()

@@ -18,4 +18,18 @@
   <picker mode="time" value="{{entry.time}}" start="00:00" end="24:00" bindchange="changEntryTime">
     <van-field label="时间" disabled  value="{{entry.time}}" placeholder="请选择报名截止时间" border="{{false}}"/>
   </picker>
-</van-panel>
+</van-panel> 
+
+<!-- 保存和返回按钮 -->
+<van-row>
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" type="warn" >放弃</button>
+    </form>
+  </van-col>
+</van-row>

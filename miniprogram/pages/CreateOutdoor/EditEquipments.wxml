@@ -4,7 +4,7 @@
 <van-notice-bar wx:else text="天气预报：{{weatherText}}"/>
  
 <!--选择地区--> 
-<block wx:if="{{!isOutDate}}">
+<block wx:if="{{!isOutDate}}"> 
   <van-tag wx:if="{{!equipments.area}}" type="primary" plain>只有选择活动地区，才能通过天气预报推荐合适的装备</van-tag> 
   <van-field value="{{equipments.area}}" center required clearable label="活动所在地区" placeholder="请选择/输入城市或区县" border="{{ false }}" use-button-slot bind:input="inputArea">
     <van-button slot="button" size="small" round plain type="primary" bind:click="onPopup">选择地区</van-button>
@@ -83,6 +83,25 @@
 <van-field value="{{addNo}}" center clearable label="还不能有" placeholder="请输入要添加的装备名称" border="{{ false }}" use-button-slot bind:input="inputNo">
  <van-button slot="button" size="small" round type="primary" plain bind:click="addNo">添加</van-button>
 </van-field>
+
+<!--故意空白，防止遮挡-->
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+
+<!-- 保存和返回按钮 -->
+<van-row class="fix">
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" size="large" type="warn">放弃</button>
+    </form>
+  </van-col>
+</van-row>
 
 <!--装备编辑对话框-->
 <van-dialog

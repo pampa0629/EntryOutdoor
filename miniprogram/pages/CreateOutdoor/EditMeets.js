@@ -1,4 +1,6 @@
-// pages/CreateOutdoor/EditMeets.js
+const app = getApp()
+const template = require('../../utils/template.js')
+
 Page({
 
   data: {
@@ -6,7 +8,7 @@ Page({
     meets: [], //集合点，可加多个
     index: 0, // 当前要处理的index
     hasModified: false,
-
+  
     showAction: false, 
     Actions: [{
         name: '编辑',
@@ -78,7 +80,6 @@ Page({
     self.setData({
       status: od.status,
       meets: od.meets,
-      hasModified: prevPage.data.hasModified,
     })
     self.rebuildClickMeetFun()
   },
@@ -93,29 +94,51 @@ Page({
     }
   },
 
-  onUnload: function() {
-    console.log("onUnload")
+  onUnload: function () {
+    console.log("onUnload()")
+    this.save()
+  },
+
+  save: function(e) {
+    console.log("save")
+    if(e)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+
     // 这里把数据写回去
-    const self = this;
-    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    let prevPage = pages[pages.length - 2];
-    prevPage.setData({
-      "od.meets": self.data.meets,
-      hasModified: self.data.hasModified,
-      "modifys.meets": self.data.hasModified,
-    })
-    // 如果只有一个集合地点，则默认这个了
-    if (self.data.meets.length == 1) {
+    if(this.data.hasModified) {
+      const self = this;
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2];
       prevPage.setData({
-        "leader.entryInfo.meetsIndex": 0,
+        "od.meets": self.data.meets,
       })
+      prevPage.data.od.saveItem("meets")
+
+      this.setData({
+        hasModified:false
+      })
+      
+      // 如果只有一个集合地点，则默认这个了
+      if (self.data.meets.length == 1) {
+        prevPage.setData({
+          "leader.entryInfo.meetsIndex": 0,
+        })
+      }
+      // 检查一下可否发布
+      prevPage.checkPublish()
     }
-    // 检查一下可否发布
-    prevPage.checkPublish()
+  },
+
+  giveup(e) {
+    console.log("giveup()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.hasModified = false
+    wx.navigateBack({})
   },
 
   // 把输入的点，加到meets中
-  addMeet: function() {
+  addMeet: function(e) {
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     wx.navigateTo({
       url: "EditOneMeet?action=addLast",
     })

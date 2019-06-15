@@ -1,8 +1,11 @@
+const app = getApp()
+
+const template = require('../../utils/template.js')
 const select = require('../../libs/select.js')
 const odtools = require('../../utils/odtools.js')
 
 Page({
- 
+
   data: {
     Modes: ["公共交通", "包车", "自驾"],
     traffic: {
@@ -42,16 +45,36 @@ Page({
   },
 
   onUnload: function() {
-    const self = this;
-    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    let prevPage = pages[pages.length - 2];
-    prevPage.setData({
-      "od.traffic": self.data.traffic,
-      "od.traffic.carInfo": odtools.buildCarInfo(self.data.traffic),
-      "od.traffic.costInfo": odtools.buildCostInfo(self.data.traffic),
-      hasModified: self.data.hasModified,
-      "modifys.traffic": self.data.hasModified,
-    })
+    console.log("onUnload()")
+    this.save() // 自动保存
+  },
+
+  save(e) {
+    console.log("save()")
+    if (e)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+
+    if (this.data.hasModified) {
+      const self = this;
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2];
+      prevPage.setData({
+        "od.traffic": self.data.traffic,
+        "od.traffic.carInfo": odtools.buildCarInfo(self.data.traffic),
+        "od.traffic.costInfo": odtools.buildCostInfo(self.data.traffic),
+      })
+      prevPage.data.od.saveItem("traffic")
+      this.setData({
+        hasModified: false,
+      })
+    }
+  },
+
+  giveup(e) {
+    console.log("giveup()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.hasModified = false
+    wx.navigateBack({})
   },
 
   clickMode(e) {
@@ -68,7 +91,7 @@ Page({
     const self = this
     if (this.data.traffic.mode == "公共交通") {
       this.setData({
-        Costs: ["费用自理"], 
+        Costs: ["费用自理"],
         "traffic.cost": "费用自理",
       })
     } else if (this.data.traffic.mode == "包车") {

@@ -1,4 +1,6 @@
+const app = getApp()
 const util = require('../../utils/util.js')
+const template = require('../../utils/template.js')
 
 Page({
 
@@ -83,8 +85,7 @@ Page({
     let prevPage = pages[pages.length - 2];
     self.setData({
       route: prevPage.data.od.route,
-      hasModified: prevPage.data.hasModified,
-      outdoorid: prevPage.data.outdoorid,
+      outdoorid: prevPage.data.od.outdoorid,
     })
     if(!self.data.route.wayPoints) {
       self.setData({
@@ -163,20 +164,40 @@ Page({
   },
 
   onUnload: function() {
-    console.log("onUnload")
-    // 这里把数据写回去
-    const self = this;
-    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    let prevPage = pages[pages.length - 2];
-    prevPage.setData({
-      "od.route": self.data.route,
-      hasModified: self.data.hasModified,
-      "modifys.route": self.data.hasModified,
-    }) 
+    console.log("onUnload()")
+    this.save() // 自动保存
+  },
+
+  save(e) {
+    console.log("save()")
+    if(e)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    if(this.data.hasModified) {
+      const self = this;
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2];
+
+      prevPage.setData({
+        "od.route": self.data.route,
+      })
+      prevPage.data.od.saveItem("route")
+
+      this.setData({
+        hasModified:false,
+      })
+    }
+  },
+
+  giveup(e) {
+    console.log("giveup()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.hasModified = false
+    wx.navigateBack({})
   },
 
   // 调出新页面，增加途经点
-  addStop: function() {
+  addStop: function(e) {
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     wx.navigateTo({
       url: "EditOneStop?action=addLast",
     })

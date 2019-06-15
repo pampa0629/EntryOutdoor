@@ -374,13 +374,29 @@ const stepsTopNs=(steps, tops)=>{
   return maxes
 }
 
-const findObj=(objs, name, id)=>{
+// 在对象数组中查找指定属性为某个值的对象；找到返回该对象，没找到返回null
+// objs:对象数组
+// name：要查找的属性
+// value: 指定的值
+const findObj=(objs, name, value)=>{
   for (var index in objs) {
-    if (objs[index][name] == id) {
+    if (objs[index][name] == value) {
       return objs[index]
     }
   }
   return null
+}
+
+// 从对象中得到指定属性的值
+// obj：对象
+// name：指定的属性，支持 obj.a.b 的用法
+const getValue=(obj, name) =>{
+  var items = name.split(".")
+  var result = obj
+  for (var x in items) {
+    result = result[items[x]]
+  }
+  return result
 }
 
 module.exports = {
@@ -438,4 +454,6 @@ module.exports = {
 
   // 在对象数组中查找指定属性为某个值的对象；找到返回该对象，没找到返回null
   findObj: findObj,
+  // 从对象中得到指定属性的值
+  getValue: getValue,
 }

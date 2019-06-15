@@ -5,7 +5,9 @@
     <van-icon slot="right-icon" name="edit-data" class="van-cell__right-icon" />
   </van-cell>
   <view slot="footer">
-    <van-button size="large" type="primary" bindtap='addStop'>增加途经点</van-button>
+    <form bindsubmit="addStop" report-submit="true">
+      <button form-type="submit" plain type="primary" >增加途经点</button>
+    </form>
   </view>
 </van-panel> 
   
@@ -28,10 +30,10 @@
 <van-panel use-footer-slot>
   <van-cell slot="header" title-class="redtitle" title="轨迹文件"></van-cell>
   <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}"  title-width="60%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
-    <van-button slot="button" size="small" type="warning" bind:click='deleteTrackFile{{index}}'>删除</van-button>
+    <van-button slot="button" size="small" plain type="warning" bind:click='deleteTrackFile{{index}}'>删除</van-button>
   </van-field>
   <view slot="footer">
-    <van-button size="large" type="primary" bind:click='addTrackFile'>增加轨迹文件</van-button>
+    <van-button size="large" type="primary" plain  bind:click='addTrackFile'>增加轨迹文件</van-button>
   </view>
 </van-panel>
 
@@ -47,12 +49,31 @@
       <van-field  label="轨迹网址" value="{{item.url}}" placeholder="请拷入{{item.name}}中对应轨迹的网址" disabled use-button-slot border="{{false}}"/>
       <van-row>
         <van-col span="4" offset="14">
-          <van-button size="small" type="primary" bind:click='copyinUrl{{index}}'>拷入</van-button>
+          <van-button size="small" plain bind:click='copyinUrl{{index}}'>拷入</van-button>
         </van-col>
         <van-col span="4" offset="1">
-          <van-button size="small" bind:click='copyoutUrl{{index}}'>拷出</van-button>
+          <van-button size="small" plain bind:click='copyoutUrl{{index}}'>拷出</van-button>
         </van-col>
       </van-row>
     </block>
   </block>
 </van-panel>
+
+<!--故意空白，防止遮挡-->
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+
+<!-- 保存和返回按钮 -->
+<van-row class="fix">
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" size="large" type="warn">放弃</button>
+    </form>
+  </van-col>
+</van-row>

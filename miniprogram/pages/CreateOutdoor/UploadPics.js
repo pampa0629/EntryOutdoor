@@ -6,8 +6,7 @@ Page({
  
   data: {
     pics: [], // {src:string} 云存储路径
-    outdoorid:null, // 活动id
-    hasModified: false,
+    outdoorid:null, // 活动id 
   },
 
   onLoad: function (options) {
@@ -22,21 +21,24 @@ Page({
     let prevPage = pages[pages.length - 2];
     this.setData({
       pics: prevPage.data.od.brief.pics,
-      hasModified: prevPage.data.hasModified,
     })
 
     console.log(this.data.outdoorid)
     console.log(this.data.pics)
   },
 
-  onUnload: function () {
+  save: function () {
     const self = this
+    this.setData({
+      pics: this.data.pics,
+    })
+
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
       "od.brief.pics": self.data.pics,
-      hasModified: self.data.hasModified,
     })
+    prevPage.data.od.saveItem("brief.pics")
   },
 
   // 增加照片
@@ -68,8 +70,8 @@ Page({
               })
               self.setData({
                 "pics": self.data.pics,
-                hasModified: true,
               })
+              self.save()
             })
             wx.hideLoading()
           }
@@ -92,10 +94,7 @@ Page({
     })
 
     this.data.pics.pop(); // 去掉最后一个
-    this.setData({
-      pics: this.data.pics,
-      hasModified: true,
-    })
+    this.save()
   },
 
 })

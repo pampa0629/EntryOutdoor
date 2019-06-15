@@ -50,9 +50,9 @@
   background-color:transparent;
 }
 
-.fix{
+/* .fix{
   height:80rpx;
   width:150rpx;
   position:fixed;
   bottom: 10rpx;
-}
+} */

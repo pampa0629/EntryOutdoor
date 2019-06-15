@@ -7,6 +7,8 @@
     "van-checkbox": "/vant-weapp/checkbox/index",
     "van-checkbox-group": "/vant-weapp/checkbox-group/index",
     "van-tag": "/vant-weapp/tag/index",
+    "van-row": "/vant-weapp/row/index",
+    "van-col": "/vant-weapp/col/index",
     "van-panel": "/vant-weapp/panel/index",
     "van-action-sheet": "/vant-weapp/action-sheet/index"
   }

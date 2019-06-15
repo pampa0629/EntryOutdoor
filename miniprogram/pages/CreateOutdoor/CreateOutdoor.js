@@ -6,7 +6,7 @@ const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
-
+ 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -22,10 +22,6 @@ Page({
       title: false, // 主题类消息
       brief: false, // 文字介绍，图片暂时不管
       meets: false, // 集合地点
-      traffic: false, // 交通方式
-      route: false, // 活动路线
-      limits: false, // 各类限制条件
-      disclaimer: false, // 免责条款
       status: false, // 活动状态变化
     },
 
@@ -72,22 +68,16 @@ Page({
     this.data.modifys = { // 到底更新了哪些条目，这里做一个临时记录
       title: result,
       brief: result,
-      meets: result,
-      traffic: result,
-      route: result,
-      limits: result,
-      disclaimer: result,
-      status: result,
     }
   },
 
   // 判断是否有任一被修改了
   anyModify(modifys) {
-    return modifys.title || modifys.brief || modifys.meets || modifys.traffic || modifys.route || modifys.limits || modifys.disclaimer || modifys.status
+    return modifys.title || modifys.brief
   },
 
   onLoad: function() {
-    console.log("onload()")
+    console.log("CreateOutdoor.js onload()")
     this.data.od = new outdoor.OD()
 
     this.checkLogin()
@@ -232,10 +222,10 @@ Page({
       &&
       this.data.od.meets.length > 0 // 必须有集合地点
       &&
-      this.data.leader.entryInfo &&
-      this.data.leader.entryInfo.meetsIndex >= 0 // 领队必须选择了集合地点
+      this.data.myself.entryInfo &&
+      this.data.myself.entryInfo.meetsIndex >= 0 // 领队必须选择了集合地点
       &&
-      this.data.leader.entryInfo.meetsIndex < this.data.od.meets.length // 领队集合地点必须在集合点范围内
+      this.data.myself.entryInfo.meetsIndex < this.data.od.meets.length // 领队集合地点必须在集合点范围内
     ) {
       canPublish = true
     }
@@ -423,18 +413,25 @@ Page({
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
       console.log(this.data.leader)
-      this.saveOutdoor("拟定中", false)
+      this.saveOutdoor()
     }
   },
 
   // 发布活动
   publishOutdoor: function(e) {
-    console.log(e.detail.formId)
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    if (this.data.od.status != "已发布") {
-      console.log("publishOutdoor")
-      this.saveOutdoor("已发布", true)
-    }
+    const self = this
+    // 第一步：修改status
+    this.setData({
+      status:"已发布"
+    })
+    // 第二步：调用 od 的publish
+    this.data.od.publish(res=>{
+      // 第三步：更新到persons表
+      self.updatePersonMyoutdoors()
+      // 第四步：给自己的订阅者发通知
+      self.post2Subscribe()
+    })
   },
 
   // 给自己的订阅者发消息
@@ -462,25 +459,49 @@ Page({
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
       console.log("saveModified")
-      this.saveOutdoor(this.data.od.status, false)
+      this.saveOutdoor()
     }
   },
 
   // 几个相关操作，都是更新一下 Outdoors表中的活动状态而已
   updateStatus: function(status) {
-    const self = this;
-    self.setData({
+    this.setData({
       "od.status": status
     })
-    cloudfun.updateOutdoorStatus(self.data.od.outdoorid, self.data.od.status, res => {
-      // 同步到网站
-      self.data.modifys.status = true // 标记一下：活动状态改变了
-      self.keepSameWithWebsites()
+    this.data.od.saveItem("status")
+  },
+
+  saveOutdoor: function() {
+    const self = this;
+    
+    // 活动记录是否已经创建了
+    var isCreated = self.data.od.outdoorid? true : false 
+
+    // od.save 内部会判断处理是update还是create
+    this.data.od.save(self.data.myself, this.data.modifys, od => {
+      self.setData({
+        "od.members": od.members, // 队员信息要设置一下
+        hasModified: false,
+      })
+      self.setModifys(false)
+      util.saveOutdoorID(self.data.od.outdoorid)
+      
+      // 在成功保存outdoor之后，相应的一些处理
+      if (self.data.od.status != "拟定中") { // 正在草拟中的活动，这里面的事情就都可以省略了
+        self.createCanvasFile() // 把图片更新一下
+      }
+
+      // 这里处理 Person表中对应的MyOutdoors
+      if (isCreated) {
+        self.updatePersonMyoutdoors()
+      } else {
+        self.addPersonMyoutdoors()
+      }
     })
   },
 
   // 发布成功，就需要往person表中追加活动id
-  addPersonMyoutdoors: function() {
+  addPersonMyoutdoors: function () {
     const self = this
     dbPersons.doc(app.globalData.personid).get()
       .then(res => { // 先取出原来
@@ -495,70 +516,6 @@ Page({
           }
         })
       })
-  },
-
-  saveOutdoor: function(status, isPublishing) {
-    const self = this;
-    self.setData({
-      "od.status": status,
-    })
-
-    // 活动记录是否已经创建了
-    var isCreated = self.data.od.outdoorid?true:false 
-
-    // od.save 内部会判断处理是update还是create
-    this.data.od.save(self.data.myself, od => {
-      self.setData({
-        "od.members": od.members, // 队员信息要设置一下
-        hasModified: false,
-      })
-      util.saveOutdoorID(self.data.od.outdoorid)
-      self.afterSaveOutdoor(isPublishing)
-
-      if (isCreated) {
-        // 这里还应该把 Person表中对应的MyOutdoors中的title更新一下
-        self.updatePersonMyoutdoors()
-      } else {
-        self.addPersonMyoutdoors()
-      }
-    })
-  },
-
-  // 在成功保存outdoor之后，相应的一些处理
-  afterSaveOutdoor: function(isPublishing) {
-    const self = this;
-    
-    if (self.data.od.status != "拟定中") { // 正在草拟中的活动，这里面的事情就都可以省略了
-      if (isPublishing) { // 第一次发布，需要给订阅者发消息
-        self.post2Subscribe()
-      } else if (self.data.modifys.title || self.data.modifys.meets) {
-        // 非第一次发布，如果包括活动重要信息修改，则要给全体队员发送消息提示
-        self.data.od.members.forEach((item, index) => {
-          template.sendModifyMsg2Member(item.personid, self.data.od.outdoorid, self.data.od.title.whole, self.data.myself.userInfo.nickName, self.data.modifys)
-        })
-      }
-
-      self.createCanvasFile() // 把图片更新一下
-      // 这里处理和ORG网站同步的事情
-      self.keepSameWithWebsites()
-    }
-  },
-
-  // 判断是否需要与网站同步
-  keepSameWithWebsites: function() {
-    const self = this
-    console.log("keepSameWithWebsites")
-    console.log(self.data.od.websites)
-    if (this.data.od.websites.lvyeorg.tid) {
-      if (this.anyModify(this.data.modifys)) { // 有修改，才有必要跟帖发布
-        var addedMessage = "领队对以下内容作了更新，请报名者留意！"
-        var message = lvyeorg.buildOutdoorMesage(this.data.od, false, this.data.modifys, addedMessage, this.data.od.websites.lvyeorg.allowSiteEntry) // 构建活动信息
-        lvyeorg.postMessage(this.data.od.outdoorid, this.data.od.websites.lvyeorg.tid, addedMessage, message)
-        // 用完了得把modifys都设置为false
-        this.setModifys(false)
-        console.log(this.data.modifys)
-      }
-    }
   },
 
   // 这里还应该把 Person表中对应的MyOutdoors中的title更新一下
@@ -602,7 +559,6 @@ Page({
   // 页面相关事件处理函数--监听用户下拉动作  
   onPullDownRefresh: function() {
     console.log("onPullDownRefresh()")
-    console.log(self.data.od.outdoorid)
     const self = this
     wx.showNavigationBarLoading();
     // 主要就刷新队员和留言信息

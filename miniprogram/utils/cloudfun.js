@@ -26,7 +26,7 @@ const updateOutdoorChatSeen = (outdoorid, personid, count) => {
   console.log("updateOutdoorChatSeen")
   wx.cloud.callFunction({
     name: 'dbSimpleUpdate', // 云函数名称
-    // table,id,item,command(push,pop,shift,unshift,""),value
+    // table,id,item,command(push,pop,shift,unshift,""),value 
     data: {
       table: "Outdoors",
       id: outdoorid,

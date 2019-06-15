@@ -261,6 +261,7 @@ Page({
   // 要是不是自己创建的，则转到“参加活动”页面
   gotoLastOutdoor: function() {
     var outdoorid = util.loadOutdoorID();
+   // outdoorid = "cbdb4c165cff05af0362c70c3c1bac02" // todo del
     // onShow那里做了判断，这里就默认肯定有了
     dbOutdoors.doc(outdoorid).get()
       .then(res => {

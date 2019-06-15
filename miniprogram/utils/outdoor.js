@@ -9,6 +9,7 @@ const lvyeorg = require('./lvyeorg.js')
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
+const dbPersons = db.collection('Persons')
 const _ = db.command
 
 // 创建函数，使用者必须： var od = new outdoor.OD() 来获得活动对象，并设置默认值
@@ -57,7 +58,7 @@ OD.prototype.load = function(outdoorid, callback) {
       this.copy(res.data) // 处理Outdoors表中数据的兼容性
 
       // 判断处理websites中的信息
-      this.dealWebsites()
+      this.postWaitings()
 
       // 移除占坑过期队员
       this.removeOcuppy(() => {
@@ -67,30 +68,6 @@ OD.prototype.load = function(outdoorid, callback) {
         }
       })
     })
-}
-
-// 判断处理websites中的信息，主要就是把信息同步到网站
-OD.prototype.dealWebsites = function () {
-  const lvyeorg = this.websites.lvyeorg // 当前只对接了lvye org网址
-  // 第一步，得有要求同步才行，并且还得登录网址了
-  if (lvyeorg.keepSame && app.globalData.lvyeorgLogin) {
-    // 第二步，判断是否已经发帖; 已发布和已成行的活动，尚未发帖，则应立即发帖
-    if (!lvyeorg.tid && (this.status == "已发布" || this.status == "已成行")) { 
-      lvyeorg.addThread(this.outdoorid, this, lvyeorg.isTesting || this.limits.isTest, tid => {
-        lvyeorg.tid = tid
-      })
-    } 
-    // 第三步，已经发帖的，则看看是否有waitings需要推送
-    else if (lvyeorg.tid && lvyeorg.waitings.length > 0) { 
-      lvyeorg.postWaitings(lvyeorg.tid, lvyeorg.waitings, callback => {
-        cloudfun.clearOutdoorLvyeWaitings(this.outdoorid, callback => {
-          lvyeorg.waitings = []
-        })
-      })
-    }
-    // save时，若非首次发帖，则要把更新信息跟帖 
-    // todo 这个放到后面实现：活动内容每一项即时保存
-  }
 }
 
 OD.prototype.removeOcuppy = function(callback) {
@@ -172,8 +149,9 @@ OD.prototype.setDefault4New = function() {
 
 // 保存（更新）od到数据库中，若之前没有保存过，则新建一条记录
 // myself：自己的报名信息
+// modifys: 修改了哪些项目
 // callback: 返回活动本身
-OD.prototype.save = function(myself, callback) {
+OD.prototype.save = function (myself, modifys, callback) {
   const self = this
   if (self.outdoorid) {
     // 必须先刷新一下成员，不然容易覆盖
@@ -200,7 +178,24 @@ OD.prototype.save = function(myself, callback) {
     })
   }
   // 如果设置了与网站同步，则需要即时处理
-  this.dealWebsites()
+  this.postWaitings()
+  // 修改的内容同步到网站上
+  this.postModify2Websites(modifys)
+  this.sendModify2Members(modifys)
+}
+
+// 发布活动
+// 返回活动本身
+OD.prototype.publish = function(callback) {
+  const self = this
+  // 保存到数据库中
+  this.save(this.leader, res => {
+    // 对于需要同步网站的，生成 tid
+    self.publish2Websites()
+    if (callback) {
+      callback(res)
+    }
+  })
 }
 
 // 以当前活动od为模板，创建新活动；leader是领队信息 
@@ -233,7 +228,7 @@ OD.prototype.create = function(leader, callback) {
         // 把照片和轨迹文件也复制一份给本活动
         this.copyPics()
         this.copyTrackFiles()
-        
+
         if (callback) {
           callback(this.outdoorid)
         }
@@ -287,6 +282,57 @@ OD.prototype.copyTrackFiles = function() {
   })
 }
 
+// 保存某个子项
+// name：子项的名字，内部自动匹配
+OD.prototype.saveItem = function(name, callback) {
+  console.log("OD.prototype.saveItem()" + name)
+  var value = util.getValue(this, name)
+  // 存储到数据库中
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: this.outdoorid,
+      item: name,
+      command: "",
+      value: value
+    }
+  }).then(res => {
+    console.log(res)
+
+    var modifys = {} // 提取修改的第一级子项的名字
+    modifys[name.split(".")[0]] = true
+    console.log(modifys)
+    // 一些重要的基本信息被修改，需要通知到所有已报名队员
+    this.sendModify2Members(modifys)
+    // 同步到网站
+    this.postModify2Websites(modifys)
+
+    wx.showToast({
+      title: '保存成功',
+    })
+    if (callback) {
+      callback()
+    }
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+// 一些重要的基本信息被修改，需要通知到所有已报名队员
+OD.prototype.sendModify2Members = function(modifys) {
+  console.log("OD.prototype.sendModify2Members()：" + modifys)
+  // 只有活动标题和集合地点内容修改，才发通知给队员
+  if (modifys.title || modifys.meets) {
+    if (this.status == "已发布" || this.status == "已成行") {
+      this.members.forEach((item, index) => {
+        template.sendModifyMsg2Member(item.personid, this.outdoorid, this.title.whole, this.leader.userInfo.nickName, modifys)
+      })
+    }
+  }
+}
+
 // 报名。若已经存在，则更新状态；若不存在，则添加到最后
 // callback 返回报名状态 status，以及是否属于新增加报名
 OD.prototype.entry = function(member, callback) {
@@ -326,7 +372,7 @@ OD.prototype.entry = function(member, callback) {
 // 退出报名
 // personid: 退出者id， selfQuit：是否为自行退出（false则为领队强制退出）
 // callback 返回 剩余的队员数组
-OD.prototype.quit = function (personid, selfQuit, callback) {
+OD.prototype.quit = function(personid, selfQuit, callback) {
   var member = util.findObj(this.members, "personid", personid)
   odtools.removeMember(this.outdoorid, personid, selfQuit, members => {
     this.members = members
@@ -337,37 +383,89 @@ OD.prototype.quit = function (personid, selfQuit, callback) {
   })
 }
 
+//////////////////  户外网站处理 start  /////////////////////////////////////////////
+
+// 发布活动到网站
+OD.prototype.publish2Websites = function() {
+  console.log("OD.prototype.publish2Websites()")
+  const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
+  console.log(lvyeobj)
+  // 第一步，得有要求同步才行，并且还得登录网址了
+  if (lvyeobj.keepSame && app.globalData.lvyeorgLogin) {
+    // 第二步，判断是否已经发帖; 已发布和已成行的活动，尚未发帖，则应立即发帖
+    if (!lvyeobj.tid && (this.status == "已发布" || this.status == "已成行")) {
+      lvyeorg.addThread(this.outdoorid, this, lvyeobj.isTesting || this.limits.isTest, tid => {
+        lvyeobj.tid = tid
+      })
+    }
+  }
+}
+
+// 判断处理websites中的信息，主要就是把信息同步到网站
+OD.prototype.postWaitings = function() {
+  console.log("OD.prototype.postWaitings()")
+  const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
+  console.log(lvyeobj)
+  // 得有要求同步才行，并且还得登录网址了
+  if (lvyeobj.keepSame && app.globalData.lvyeorgLogin) {
+    // 必须已经发帖，再看看是否有waitings需要推送
+    if (lvyeobj.tid && lvyeobj.waitings && lvyeobj.waitings.length > 0) {
+      lvyeorg.postWaitings(lvyeobj.tid, lvyeobj.waitings, callback => {
+        cloudfun.clearOutdoorLvyeWaitings(this.outdoorid, callback => {
+          lvyeobj.waitings = []
+        })
+      })
+    }
+  }
+}
+
+// 把修改信息同步到网站
+OD.prototype.postModify2Websites = function(modifys) {
+  console.log("OD.prototype.postModify2Websites()：" + modifys)
+  if (this.websites.lvyeorg.tid) {
+    var addedMessage = "领队对以下内容作了更新，请报名者留意！"
+    var message = lvyeorg.buildOutdoorMesage(this, false, modifys, addedMessage, this.websites.lvyeorg.allowSiteEntry) // 构建活动信息
+    lvyeorg.postMessage(this.outdoorid, this.websites.lvyeorg.tid, addedMessage, message)
+  }
+}
+
 // 报名信息同步到网站
 // member：要报名的队员信息，isQuit：是否为退出
-OD.prototype.postEntry2Websites = function (member, isQuit) {
-  const lvyeorg = this.websites.lvyeorg
+OD.prototype.postEntry2Websites = function(member, isQuit) {
+  const lvyeobj = this.websites.lvyeorg
   // 先确定是否要同步
-  if(lvyeorg.keepSame) { 
+  if (lvyeobj.keepSame) {
     // 构建报名信息
-    var entryMessage = lvyeorg.buildEntryMessage(member.userInfo, member.entryInfo, isQuit, false) 
-    var entryNotice = lvyeorg.buildEntryNotice(lvyeorg.qrcodeUrl, false, lvyeorg.allowSiteEntry)
+    var entryMessage = lvyeorg.buildEntryMessage(member.userInfo, member.entryInfo, isQuit, false)
+    var entryNotice = lvyeorg.buildEntryNotice(lvyeobj.qrcodeUrl, false, lvyeobj.allowSiteEntry)
     entryMessage.message += entryNotice
 
     // 登录了，且有tid了，就直接跟帖报名
-    if (lvyeorg.tid && app.globalData.lvyeorgLogin) {
-      lvyeorg.postMessage(this.outdoorid, lvyeorg.tid, entryMessage.title, entryMessage.message)
+    if (lvyeobj.tid && app.globalData.lvyeorgLogin) {
+      lvyeorg.postMessage(this.outdoorid, lvyeobj.tid, entryMessage.title, entryMessage.message)
     } else { // 没有登录，或者tid还没有，则记录到waitings中
       lvyeorg.add2Waitings(this.outdoorid, entryMessage.message)
     }
   }
 }
 
+
+//////////////////  户外网站处理 end  /////////////////////////////////////////////
+
+
 module.exports = {
   OD: OD,
   load: OD.prototype.load,
-  create: OD.prototype.create,
   save: OD.prototype.save,
+  publish: OD.prototype.publish,
+  saveItem: OD.prototype.saveItem,
   setDefault4New: OD.prototype.setDefault4New,
   entry: OD.prototype.entry,
-  quit:OD.prototype.quit,
-  
+  quit: OD.prototype.quit,
+
   // 以下为内部函数，外面不得调用
-  // dealWebsites: OD.prototype.dealWebsites,
+  // create: OD.prototype.create, // save内部判断处理
+  // postWaitings: OD.prototype.postWaitings,
   // removeOcuppy:OD.prototype.removeOcuppy,
   // copyPics:OD.prototype.copyPics,
   // copyTrackFiles:OD.prototype.copyTrackFiles,

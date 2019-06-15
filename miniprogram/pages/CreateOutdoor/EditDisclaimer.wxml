@@ -1,22 +1,51 @@
 <van-panel use-footer-slot>
-	<van-cell slot="header" title-class="redtitle" title="免责条款" label="请拷贝后这里粘贴生成"></van-cell>
-  <view><text style="font-size:12pt">{{disclaimer}}</text></view>
-  <van-row>
-    <van-col span="9" offset="2">
-      <van-button plain type="primary" size="large" bind:click="pasteDisclaimer">粘贴生成条款</van-button>
-    </van-col>
-    <van-col span="9" offset="2">
-      <van-button plain size="large" bind:click="copyDisclaimer">拷贝到剪切板</van-button>
-    </van-col>
-  </van-row>
-
-  <van-row>
-    <van-col span="9" offset="2">
-      <van-button plain size="large" bind:click="loadMyDisclaimer">加载我的条款</van-button>
-    </van-col>
-    <van-col span="9" offset="2">
-      <van-button plain size="large" bind:click="saveMyDisclaimer">存为我的条款</van-button>
-    </van-col>
-  </van-row>
+	<van-cell slot="header" title-class="redtitle" title="免责条款" value="请拷贝后这里粘贴生成"></van-cell>
+  <view>
+    <text style="font-size:12pt">{{disclaimer}}</text>
+  </view>
 </van-panel>
 
+<!-- 两排按钮 -->
+<van-row>
+  <van-col span="9" offset="2">
+    <form bindsubmit="pasteDisclaimer" report-submit="true">
+      <button form-type="submit" plain type="primary">粘贴生成条款</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="copyDisclaimer" report-submit="true">
+      <button form-type="submit" plain>拷贝到剪切板</button>
+    </form>
+  </van-col> 
+</van-row>
+<van-row>
+  <van-col span="9" offset="2">
+    <form bindsubmit="loadMyDisclaimer" report-submit="true">
+      <button form-type="submit" plain>加载我的条款</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="saveMyDisclaimer" report-submit="true">
+      <button form-type="submit" plain>存为我的条款</button>
+    </form>
+  </van-col>
+</van-row>
+
+<!--故意空白，防止遮挡-->
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+
+<van-row class="fix">
+  <!-- 保存和返回按钮 -->
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" size="large" type="warn">放弃</button>
+    </form>
+  </van-col>
+</van-row>

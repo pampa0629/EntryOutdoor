@@ -1,12 +1,38 @@
 <!--pages/CreateOutdoor/EditMeets.wxml-->
-<van-tag plain type="danger" wx:if="{{status=='已发布'}}">活动一旦发布，为及时通知到已报名队员，集合点的修改信息将以微信消息方式通知全体队员，微信消息数量有限，请勿轻易修改。</van-tag>
+<van-tag plain type="danger" wx:if="{{status=='已发布'||status=='已成行'}}">活动一旦发布，为及时通知到已报名队员，集合点的修改信息将以微信消息方式通知全体队员，微信消息数量有限，请勿轻易修改。</van-tag>
+
 <van-cell title="已有集合点列表" title-class="redtitle"/>
 <van-cell wx:for="{{meets}}" wx:key="place"  title="{{item.place}}" value="{{item.date}}，{{item.time}}" clickable bind:click="clickMeet{{index}}">
   <van-icon slot="right-icon" name="edit-data" class="van-cell__right-icon" />
 </van-cell>
- 
-<van-button size="large" type="primary" bindtap='addMeet'>增加集合点</van-button>
-     
+  
+ <van-row>
+  <van-col span="20" offset="2">
+    <form bindsubmit="addMeet" report-submit="true">
+      <button form-type="submit" plain type="primary">增加集合点</button>
+    </form>
+  </van-col>
+</van-row>
+
+<!--故意空白，防止遮挡-->
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+
+<!-- 保存和返回按钮 -->
+<van-row class="fix">
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" size="large" type="warn">放弃</button>
+    </form>
+  </van-col>
+</van-row>
+
 <!--弹出功能选项-->
 <van-action-sheet
   show="{{ showAction }}"

@@ -21,8 +21,6 @@ Page({
     modifys: { // 到底更新了哪些条目，这里做一个临时记录
       title: false, // 主题类消息
       brief: false, // 文字介绍，图片暂时不管
-      meets: false, // 集合地点
-      status: false, // 活动状态变化
     },
 
     // 常量定义
@@ -34,16 +32,7 @@ Page({
 
     myself: {}, // 自己的报名信息
     isLeaderGroup: false, // 自己是否为领队组成员
-    leader: { // 领队的信息也要记录起来
-      personid: null,
-      userInfo: null,
-      entryInfo: {
-        meetsIndex: -1,
-        knowWay: true, // 领队默认为认路
-        status: "领队"
-      },
-    },
-   
+    
     showPopup: false, // 分享弹出菜单
     cancelDlg: { // 活动取消对话框
       show: false,
@@ -106,10 +95,8 @@ Page({
     this.data.od.load(outdoorid, od => {
       self.setData({
         od: od,
-        leader: od.leader,
         startDate: util.formatDate(new Date()), // 起始日期，只能从今天开始
         endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，不能发半年之后的活动
-        "leader.entryInfo.knowWay": true, // 领队默认认路
         hasModified:false, // 刚load，没有修改
       })
 
@@ -137,7 +124,7 @@ Page({
       // 依据是 从数据库读取的leader是否为自己
       // 不是自己的，也不是领队组成员，就等于要新建活动
       // 如果是用户主动发起的模板创建，也需要新建活动
-      if (((self.data.leader.personid != app.globalData.personid) && !self.data.isLeaderGroup) || app.globalData.newOutdoor) {
+      if (((self.data.od.leader.personid != app.globalData.personid) && !self.data.isLeaderGroup) || app.globalData.newOutdoor) {
         self.newOutdoor(null);
         app.globalData.newOutdoor = false // 即时清空
       }
@@ -146,16 +133,25 @@ Page({
     })
   },
 
+  // 全新创建活动，内容置空
+  totalNewOutdoor(e) {
+    console.log("totalNewOutdoor()")
+    if (e)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+
+    this.setData({
+      od: new outdoor.OD(),
+      canPublish: false, // 判断是否可发布
+      hasModified: true, // 新建之后，马上可以保存
+    })
+    util.saveOutdoorID(null)
+    this.createAutoInfo(); // 做必要的自动计算
+  },
+
   // 新建活动就是把 outdoor id清空，把关键信息删除
   newOutdoor: function(e) {
-    console.log("newOutdoor: function(e)")
-    console.log(e)
-    if (e && e.detail && e.detail.formId) {
-      console.log(e.detail)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    }
+    console.log("newOutdoor()")
     
-    this.data.leader = this.data.myself // 新创建活动，自己就是领队
     this.data.od.setDefault4New() // 把活动的几个关键信息删除
     this.setData({
       od: this.data.od,
@@ -209,7 +205,7 @@ Page({
     console.log("createTitle")
     const self = this
     self.setData({
-      "od.title.whole": odtools.createTitle(self.data.od.title, self.data.leader.userInfo.nickName),
+      "od.title.whole": odtools.createTitle(self.data.od.title, self.data.myself.userInfo.nickName),
     })
   },
 
@@ -412,7 +408,6 @@ Page({
     console.log("saveDraft()")
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
-      console.log(this.data.leader)
       this.saveOutdoor()
     }
   },

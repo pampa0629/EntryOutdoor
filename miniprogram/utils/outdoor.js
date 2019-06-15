@@ -43,6 +43,7 @@ function OD() {
     allowPopup: false, // 是否允许空降
     maxPerson: false, // 是否限制人数
   }
+  this.leader={ } // 领队，save时确定，或者领队转让时修改
   this.status = "拟定中" // 活动本身的状态，分为：拟定中，已发布，已成行，报名截止，已取消
 
   // 同步到网站的信息
@@ -286,6 +287,7 @@ OD.prototype.copyTrackFiles = function() {
 // name：子项的名字，内部自动匹配
 OD.prototype.saveItem = function(name, callback) {
   console.log("OD.prototype.saveItem()" + name)
+  console.log("outdoorid: " + this.outdoorid)
   var value = util.getValue(this, name)
   // 存储到数据库中
   wx.cloud.callFunction({
@@ -322,7 +324,8 @@ OD.prototype.saveItem = function(name, callback) {
 
 // 一些重要的基本信息被修改，需要通知到所有已报名队员
 OD.prototype.sendModify2Members = function(modifys) {
-  console.log("OD.prototype.sendModify2Members()：" + modifys)
+  console.log("OD.prototype.sendModify2Members()")
+  console.log(modifys)
   // 只有活动标题和集合地点内容修改，才发通知给队员
   if (modifys.title || modifys.meets) {
     if (this.status == "已发布" || this.status == "已成行") {
@@ -421,7 +424,8 @@ OD.prototype.postWaitings = function() {
 
 // 把修改信息同步到网站
 OD.prototype.postModify2Websites = function(modifys) {
-  console.log("OD.prototype.postModify2Websites()：" + modifys)
+  console.log("OD.prototype.postModify2Websites()")
+  console.log(modifys)
   if (this.websites.lvyeorg.tid) {
     var addedMessage = "领队对以下内容作了更新，请报名者留意！"
     var message = lvyeorg.buildOutdoorMesage(this, false, modifys, addedMessage, this.websites.lvyeorg.allowSiteEntry) // 构建活动信息

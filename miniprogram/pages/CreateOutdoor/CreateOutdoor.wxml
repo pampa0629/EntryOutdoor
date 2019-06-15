@@ -180,8 +180,8 @@
     <form bindsubmit="publishOutdoor" report-submit="true" wx:if="{{od.status=='拟定中'}}">
       <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布活动</button>
     </form>
-    <form bindsubmit="newOutdoor" report-submit="true" wx:else>
-      <button form-type="submit" disabled="{{!canPublish}}" size="large">新建活动</button>
+    <form bindsubmit="totalNewOutdoor" report-submit="true" wx:else>
+      <button form-type="submit" disabled="{{!canPublish}}" size="large">全新创建</button>
     </form>
   </van-col>
   <!-- 保存草稿或者保存修改 -->

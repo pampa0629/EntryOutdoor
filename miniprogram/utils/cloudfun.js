@@ -124,6 +124,26 @@ const updateOutdoorMembers = (outdoorid, members, callback)=>{
   })
 }
 
+// 更换领队
+const updateOutdoorLeader = (outdoorid, leader, callback) => {
+  console.log("updateOutdoorLeader")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: "leader",
+      command: "",
+      value: leader
+    }
+  }).then(res => {
+    if (callback) {
+      callback(res)
+    }
+  })
+}
+
 const pushOutdoorMember=(outdoorid, member, callback)=>{
   console.log("pushOutdoorMember")
   wx.cloud.callFunction({
@@ -466,6 +486,7 @@ module.exports = {
   pushOutdoorChatMsg: pushOutdoorChatMsg,
 
   updateOutdoorMembers: updateOutdoorMembers,
+  updateOutdoorLeader: updateOutdoorLeader,
   pushOutdoorMember: pushOutdoorMember,
   updateOutdoorAddMembers: updateOutdoorAddMembers, // 更新附加队员
   

@@ -625,7 +625,7 @@ Page({
       url: "../CreateOutdoor/CreateOutdoor"
     })
   },
-
+ 
   newOutdoor() { 
     // 这里给 app 设置一下，知道是要新创建活动了
     app.globalData.newOutdoor = true

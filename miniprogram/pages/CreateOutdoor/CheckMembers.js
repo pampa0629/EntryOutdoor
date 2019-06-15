@@ -46,7 +46,7 @@ Page({
     let prevPage = pages[pages.length - 2];
     self.data.outdoorid = prevPage.data.od.outdoorid
     self.data.title = prevPage.data.od.title.whole
-    if(prevPage.data.leader.personid == app.globalData.personid) {
+    if(prevPage.data.od.leader.personid == app.globalData.personid) {
       self.setData({ // 判断是否为总领队
         isLeader:true,
       })
@@ -155,6 +155,7 @@ Page({
         res.data.members[index] = temp
         res.data.members[index].entryInfo.status = "领队组"
         cloudfun.updateOutdoorMembers(self.data.outdoorid, res.data.members)
+        cloudfun.updateOutdoorLeader(self.data.outdoorid, res.data.members[0])
         // 刷新当前列表
         self.flushMembers(res.data.members)
         // 给所有队员发通知

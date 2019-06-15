@@ -44,7 +44,7 @@ Page({
       title: od.title.whole,
       limits: od.limits,
       members: od.members, // 当前已报名队员
-      oldPersonCount: od.limits.personCount,
+      oldPersonCount: od.limits.personCount ? od.limits.personCount: 0,
     })
     console.log(self.data)
 

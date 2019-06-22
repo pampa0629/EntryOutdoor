@@ -9,7 +9,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
- 
+  
 Page({
 
   data: {
@@ -80,11 +80,12 @@ Page({
     
       res.data.forEach((item, index) => {
         console.log(item)
+        item.addMmembers = item.addMmembers ? item.addMmembers:[]
         var outdoor = {
           title: item.title.whole,
           id: item._id,
           pic: (item.brief && item.brief.pics && item.brief.pics.length > 0) ? item.brief.pics[0].src : null,
-          memCount:item.members.length,
+          memCount:item.members.length+item.addMmembers.length,
           maxCount: item.limits.maxPerson ? item.limits.personCount:"∞",
           openid: item._openid,
           status:item.status,

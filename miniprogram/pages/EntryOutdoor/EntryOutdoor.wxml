@@ -2,15 +2,19 @@
 <van-popup show="{{ showPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closePopup">
   <van-row>
     <van-col span="20" offset="2">
-      <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button> 
+      <button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</button> 
     </van-col>
   </van-row>       
   <van-row>
     <van-col span="9" offset="2">
-      <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
+      <form bindsubmit="onShare2Circle" report-submit="true">
+        <button form-type="submit" plain size="large">分享到朋友圈</button>
+      </form>
     </van-col>
     <van-col span="9" offset="2">
-      <van-button plain size="large" bind:click="onCancelShare">取消</van-button>
+      <form bindsubmit="onCancelShare" report-submit="true">
+        <button form-type="submit" plain size="large">取消</button>
+      </form>
     </van-col>
   </van-row>
 </van-popup> 
@@ -120,8 +124,8 @@
 
 <!--队员列表-->
 <van-cell-group>
-  <van-cell wx:if="{{od.limits.maxPerson}}" title="队员列表" title-class="redtitle" label="已报名{{od.members.length}}人（限{{od.limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
-  <van-cell wx:else title="队员列表" title-class="redtitle" label="已报名{{od.members.length}}人（不限人数）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
+  <van-cell wx:if="{{od.limits.maxPerson}}" title="队员列表" title-class="redtitle" label="已报名{{od.members.length+od.addMembers.length}}人（限{{od.limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
+  <van-cell wx:else title="队员列表" title-class="redtitle" label="已报名{{od.members.length+od.addMembers.length}}人（不限人数）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
 </van-cell-group>
 
 <!--集合地点-->
@@ -149,7 +153,7 @@
 
 <!--免责条款与是否认路-->
 <van-cell title="免责条款与活动规则" title-class="redtitle" value="点击查看详细内容" clickable is-link url="LookDisclaimer" />
-<van-cell required title="我已阅读并同意条款和规则内容" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
+<van-cell required title="我已阅读并同意条款和规则内容" title-width="70%" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
   <van-checkbox value="{{entryInfo.agreedDisclaimer}}"/>
 </van-cell>
 
@@ -167,8 +171,8 @@
 <van-tag wx:else plain type="primary">\n距离占坑截止时间还剩：{{remains.occupy.text}}</van-tag>
 <van-tag wx:if="{{remains.entry.time<0}}" plain type="danger">\n已过报名截止时间</van-tag>
 <van-tag wx:else plain type="primary">\n距离报名截止时间还剩：{{remains.entry.text}}</van-tag>
-<van-tag wx:if="{{od.limits.maxPerson && od.members.length>=limits.personCount}}" plain type="danger">\n报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
-<van-tag wx:if="{{remains.entry.time<0&&limits.allowPopup}}" plain type="primary">\n该活动允许空降</van-tag>
+<van-tag wx:if="{{entryFull}}" plain type="danger">\n报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
+<van-tag wx:if="{{remains.entry.time<0 && limits.allowPopup}}" plain type="primary">\n该活动允许空降</van-tag>
 <van-tag wx:if="{{od.websites.lvyeorg.tid}}" plain type="danger">\n该活动已被设置为与绿野ORG网站同步，您的报名信息将自动同步到网站！</van-tag>
 
 <!--故意空白，防止遮挡-->
@@ -180,19 +184,19 @@
 <van-row class="fix" wx:if="{{od.status=='已发布'||od.status=='已成行'}}">
   <!--替补-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapBench" report-submit="true" wx:if="{{(od.limits.maxPerson && od.members.length>=od.limits.personCount) && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
+    <form bindsubmit="tapBench" report-submit="true" wx:if="{{entryFull && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
       <button form-type="submit">替补</button>
     </form>
   </van-col>
   <!--占坑-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapOcuppy" report-submit="true"  wx:if="{{(!od.limits.maxPerson || od.members.length<od.limits.personCount) && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
+    <form bindsubmit="tapOcuppy" report-submit="true"  wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
       <button form-type="submit" >占坑</button>
     </form>
   </van-col>
   <!--报名-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapEntry" report-submit="true" wx:if="{{( (entryInfo.status=='浏览中' && (!od.limits.maxPerson || od.members.length<limits.personCount)) ||entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">
+    <form bindsubmit="tapEntry" report-submit="true" wx:if="{{!entryFull && (entryInfo.status=='浏览中' || entryInfo.status=='占坑中') && remains.entry.time>=0}}">
       <button form-type="submit" type="primary">报名</button>
     </form>
   </van-col>
@@ -224,10 +228,6 @@
 </van-dialog>
 
 <!--画布-->
-<!--<view style='width:0px;height:0px;overflow:hidden;'>
-  <canvas style="width: 500px; height: 400px;" canvas-id="shareCanvas"/>
-   todo <canvas style="width: 720px; height: 1280px;" canvas-id="circleCanvas"/> 
-</view> -->
 <view style="position:fixed;top:9999rpx;">
   <canvas style="width:500px;height:400px;" canvas-id="shareCanvas"></canvas>
 </view>

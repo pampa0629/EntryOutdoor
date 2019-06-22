@@ -3,6 +3,10 @@ const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const template = require('../../utils/template.js')
 
+wx.cloud.init()
+const db = wx.cloud.database({})
+const dbOutdoors = db.collection('Outdoors')
+
 Page({
 
   data: {
@@ -29,6 +33,7 @@ Page({
     outdoorid: null,
     title: null,
     members: null, // 当前已报名队员
+    addMembers: null, // 附加队员
     //newPersonCount:null, // 变化后的人数
     oldPersonCount: null,
   },
@@ -44,7 +49,8 @@ Page({
       title: od.title.whole,
       limits: od.limits,
       members: od.members, // 当前已报名队员
-      oldPersonCount: od.limits.personCount ? od.limits.personCount: 0,
+      addMembers: od.addMembers, // 附加队员
+      oldPersonCount: od.limits.personCount ? od.limits.personCount : 0,
     })
     console.log(self.data)
 
@@ -135,39 +141,52 @@ Page({
   // 扩编：允许人数增加，且已经有替补队员时--> 把对应的替补队员改为正式队员，并发微信通知
   tapEnlarge() {
     const self = this
-    const members = self.data.members
-    var begin = self.data.oldPersonCount // 起点index
-    var end = Math.min(members.length, self.data.limits.personCount)
-    for (var i = begin; i < end; i++) {
-      members[i].entryInfo.status = "报名中"
-      template.sendEntryMsg2Bench(members[i].personid, self.data.outdoorid, self.data.title, members[i].userInfo.nickName)
-    }
-    cloudfun.updateOutdoorMembers(self.data.outdoorid, members, res => {
-      self.savePersonCount()
+    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+      const members = res.data.members
+      var begin = self.data.oldPersonCount - self.data.addMembers.length // 起点index
+      begin = Math.max(0, begin) // 不能比0小
+      var end = Math.min(members.length, self.data.limits.personCount - self.data.addMembers.length)
+      for (var i = begin; i < end; i++) {
+        if (members[i].entryInfo.status == "替补中") {
+          members[i].entryInfo.status = "报名中"
+          template.sendEntryMsg2Bench(members[i].personid, self.data.outdoorid, self.data.title, members[i].userInfo.nickName)
+        }
+      }
+      self.afterAdjust(members)
     })
   },
 
   // 缩编：允许人数减少，且需要把队员转为替补时-- >把对应的正式队员改为替补队员，并发微信通知
   tapReduce() {
     const self = this
-    const members = self.data.members
-    var begin = self.data.limits.personCount // 起点index
-    var end = Math.min(members.length, self.data.oldPersonCount)
-    for (var i = begin; i < end; i++) {
-      template.sendBenchMsg2Member(members[i].personid, self.data.outdoorid, self.data.title, members[i].entryInfo.status, members[i].userInfo.nickName)
-      members[i].entryInfo.status = "替补中"
-    }
-    cloudfun.updateOutdoorMembers(self.data.outdoorid, self.data.members, res => {
-      self.savePersonCount()
+    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+      const members = res.data.members
+      var begin = self.data.limits.personCount - self.data.addMembers.length // 起点index
+      begin = Math.max(0, begin) // 不能比0小
+      var end = Math.min(members.length, self.data.oldPersonCount - self.data.addMembers.length)
+      for (var i = begin; i < end; i++) {
+        if (members[i].entryInfo.status != "替补中") {
+          template.sendBenchMsg2Member(members[i].personid, self.data.outdoorid, self.data.title, members[i].entryInfo.status, members[i].userInfo.nickName)
+          members[i].entryInfo.status = "替补中"
+        }
+      }
+      self.afterAdjust(members)
     })
   },
 
-  // 把人数限制的变化保存起来 
-  savePersonCount() {
-    const self = this
-    self.setData({
-      oldPersonCount: self.data.limits.personCount,
+  // 扩编或者缩编后的共同事务
+  afterAdjust(members) {
+    this.setData({
+      oldPersonCount: this.data.limits.personCount, // 把人数限制的变化保存起来 
+      members: members,
+    }) 
+
+    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+    let prevPage = pages[pages.length - 2];
+    prevPage.setData({
+      "od.members": members,
     })
+    prevPage.data.od.saveItem("members")
   },
 
   // 勾选是否允许空降

@@ -1,4 +1,6 @@
 const app = getApp()
+const template = require('../../utils/template.js')
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
@@ -26,21 +28,23 @@ Page({
         isEnvironment: prevPage.data.od.limits.isEnvironment,
       })
     }
-    if (prevPage.data.limits.od.isKeepTime) {
+    if (prevPage.data.od.limits.isKeepTime) {
       self.setData({
         isKeepTime: prevPage.data.od.limits.isKeepTime,
       })
     }
   },
 
-  copyDisclaimer: function () {
+  copyDisclaimer: function (e) {
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this
     wx.setClipboardData({
       data: self.data.disclaimer,
     })
   },
 
-  saveMyDisclaimer: function () {
+  saveMyDisclaimer: function (e) {
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this;
     dbPersons.doc(app.globalData.personid).update({
       data: {

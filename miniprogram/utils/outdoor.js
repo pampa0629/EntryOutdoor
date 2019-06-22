@@ -10,7 +10,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
-const _ = db.command
+const _ = db.command 
 
 // 创建函数，使用者必须： var od = new outdoor.OD() 来获得活动对象，并设置默认值
 // 内存中的对象，为最新格式，和界面表现内容； 从数据库中load时，应注意做兼容性处理
@@ -29,11 +29,13 @@ function OD() {
     adjustLevel: 100, // 活动强度调节系数 100%意味着不调节
   }
   this.route = { // 活动路线，包括途经点和轨迹文件
-    wayPoints: []
+    wayPoints: [],
+    trackFiles: [],
   }
   this.meets = [] //集合点，可加多个
   this.traffic = {} // 交通方式
   this.members = [] // 已报名成员（含领队）
+  this.addMembers=[] // 未通过小程序报名，领队添加的“附加队员”
   this.brief = { // 活动简要介绍，分为文字和图片（多张）
     disc: "领队有点懒，什么也没介绍",
     pics: [], // {src:string} 云存储路径
@@ -43,7 +45,7 @@ function OD() {
     allowPopup: false, // 是否允许空降
     maxPerson: false, // 是否限制人数
   }
-  this.leader={ } // 领队，save时确定，或者领队转让时修改
+  this.leader = {} // 领队，save时确定，或者领队转让时修改
   this.status = "拟定中" // 活动本身的状态，分为：拟定中，已发布，已成行，报名截止，已取消
 
   // 同步到网站的信息
@@ -94,6 +96,7 @@ OD.prototype.copy = function(od) {
   this.members = od.members
   // 设置领队，顺序：od中保存的、第一个队员、默认的（null）
   this.leader = od.leader ? od.leader : od.members[0]
+  this.addMembers = od.addMembers ? od.addMembers : this.addMembers 
   this.status = od.status
 
   // brief 文字加图片 
@@ -141,6 +144,7 @@ OD.prototype.copy = function(od) {
 
 // 把当前活动设置为可供后续创建新活动的样子，即把活动id、活动日期、队员列表、网站同步信息、活动状态等信息置空
 OD.prototype.setDefault4New = function() {
+  console.log("OD.prototype.setDefault4New()")
   this.outdoorid = null
   this.title.date = null
   this.members = []
@@ -152,7 +156,9 @@ OD.prototype.setDefault4New = function() {
 // myself：自己的报名信息
 // modifys: 修改了哪些项目
 // callback: 返回活动本身
-OD.prototype.save = function (myself, modifys, callback) {
+OD.prototype.save = function(myself, modifys, callback) {
+  console.log("OD.prototype.save()")
+  console.log("outdoorid:"+this.outdoorid)
   const self = this
   if (self.outdoorid) {
     // 必须先刷新一下成员，不然容易覆盖
@@ -190,7 +196,7 @@ OD.prototype.save = function (myself, modifys, callback) {
 OD.prototype.publish = function(callback) {
   const self = this
   // 保存到数据库中
-  this.save(this.leader, res => {
+  this.save(this.leader, {}, res => {
     // 对于需要同步网站的，生成 tid
     self.publish2Websites()
     if (callback) {
@@ -199,9 +205,59 @@ OD.prototype.publish = function(callback) {
   })
 }
 
+// 删除活动，删除后不得再调用任何内容
+// 返回被清空后的活动内容
+OD.prototype.del = function(callback) {
+  console.log("OD.prototype.del()")
+  console.log("outdoorid:" + this.outdoorid)
+  const self = this
+  dbOutdoors.doc(this.outdoorid).remove()
+    .then(res => {
+      self.clear() // 清空内容
+      self.outdoorid = null // id设置为null
+      if (callback) {
+        callback(self)
+      }
+    })
+}
+
+// 清空活动内容
+OD.prototype.clear = function (callback) {
+  console.log("OD.prototype.clear()")
+  console.log("outdoorid:" + this.outdoorid)
+  this.deleteClouds() // 删除云存储上的内容
+  var temp = this.outdoorid
+  var empty = new OD()
+  for (var key in empty) { // 彻底清空内存
+    this[key] = empty[key]
+  }
+  this.outdoorid = temp
+}
+
+// 删除云存储上的内容，主要是照片和轨迹文件
+OD.prototype.deleteClouds = function () {
+  console.log("OD.prototype.deleteClouds()")
+  var dels = []
+  for (var i in this.brief.pics) {
+    dels.push(this.brief.pics[i].src)
+  }
+  for (var i in this.brief.trackFiles) {
+    dels.push(this.brief.trackFiles[i].src)
+  }
+  
+  wx.cloud.deleteFile({
+    fileList: dels
+  }).then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
 // 以当前活动od为模板，创建新活动；leader是领队信息 
 // callback 返回活动id
 OD.prototype.create = function(leader, callback) {
+  console.log("OD.prototype.create()")
   dbPersons.doc(leader.personid).get()
     .then(res => {
       leader.entryInfo.status = "领队"
@@ -213,7 +269,7 @@ OD.prototype.create = function(leader, callback) {
       dbOutdoors.add({ // 没有outdoor id,则新加一条记录
         data: {
           brief: this.brief,
-          leader: this.leader, // 写入领队信息 
+          leader: leader, // 写入领队信息 
           limits: this.limits,
           meets: this.meets,
           members: members,
@@ -240,6 +296,7 @@ OD.prototype.create = function(leader, callback) {
 // 复制照片
 OD.prototype.copyPics = function() {
   console.log("OD.prototype.copyPics()")
+  console.log(this.brief.pics)
   this.brief.pics.forEach((item, index) => {
     // 没找到当前id，说明图片是之前活动的，则需要下载，再上传图片
     if (!item.src.match(this.outdoorid)) {
@@ -254,7 +311,11 @@ OD.prototype.copyPics = function() {
           console.log("copyPics")
           console.log(this.brief.pics)
           cloudfun.updateOutdoorBriefPics(this.outdoorid, this.brief.pics)
-        })
+          }).catch(err => {
+            console.log(err)
+          })
+      }).catch(err => {
+          console.log(err)
       })
     }
   })
@@ -262,25 +323,33 @@ OD.prototype.copyPics = function() {
 
 // 复制轨迹文件
 OD.prototype.copyTrackFiles = function() {
-  this.route.trackFiles.forEach((item, index) => {
-    // 没找到当前id，说明文件是之前活动的，则需要下载，再上传
-    if (!item.src.match(this.outdoorid)) {
-      console.log("download src: " + item.src)
-      wx.cloud.downloadFile({ // 下载先
-        fileID: item.src
-      }).then(res => {
-        wx.cloud.uploadFile({ // 再上传到自己的活动目录下
-          cloudPath: util.buildRouteSrc(this.outdoorid, item.name),
-          filePath: res.tempFilePath, // 小程序临时文件路径
+  console.log("OD.prototype.copyTrackFiles()")
+  console.log(this.route.trackFiles)
+  if (this.route.trackFiles) {
+    this.route.trackFiles.forEach((item, index) => {
+      // 没找到当前id，说明文件是之前活动的，则需要下载，再上传
+      if (!item.src.match(this.outdoorid)) {
+        console.log("download src: " + item.src)
+        wx.cloud.downloadFile({ // 下载先
+          fileID: item.src
         }).then(res => {
-          item.src = res.fileID;
-          console.log("copyTrackFiles")
-          console.log(this.route.trackFiles)
-          cloudfun.updateOutdoorTrackFiles(this.outdoorid, this.route.trackFiles)
+          wx.cloud.uploadFile({ // 再上传到自己的活动目录下
+            cloudPath: util.buildRouteSrc(this.outdoorid, item.name),
+            filePath: res.tempFilePath, // 小程序临时文件路径
+          }).then(res => {
+            item.src = res.fileID;
+            console.log("copyTrackFiles")
+            console.log(this.route.trackFiles)
+            cloudfun.updateOutdoorTrackFiles(this.outdoorid, this.route.trackFiles)
+            }).catch(err => {
+              console.log(err)
+            })
+        }).catch(err=>{
+          console.log(err)
         })
-      })
-    }
-  })
+      }
+    })
+  }
 }
 
 // 保存某个子项
@@ -339,30 +408,34 @@ OD.prototype.sendModify2Members = function(modifys) {
 // 报名。若已经存在，则更新状态；若不存在，则添加到最后
 // callback 返回报名状态 status，以及是否属于新增加报名
 OD.prototype.entry = function(member, callback) {
+  console.log("OD.prototype.entry()")
   const self = this
   // 第一步，刷新members，防止之前已经有人报名了
   dbOutdoors.doc(self.outdoorid).get().then(res => {
     self.members = res.data.members
+    self.addMembers = res.data.addMembers ? res.data.addMembers:[] // 防止为null
+
     // 第二步，判断是更新报名信息，还是新报名
-    // 找到自己的index，就更新信息
     var findSelf = false
     self.members.forEach((item, index) => {
       if (item.personid == member.personid) {
-        item = member
+        item = member // 找到自己的index，就更新信息
         findSelf = true
       }
     })
+
+  // 第三步，新报名，则需要判断是否属于替补
     if (!findSelf) {
-      // 第三步，新报名，则需要判断是否属于替补
-      if (self.limits.maxPerson && self.members.length > self.limits.personCount) {
+      if (self.limits.maxPerson && (self.members.length + self.addMembers.length >= self.limits.personCount)) {
         member.entryInfo.status = "替补中"
       }
       self.members.push(member)
     }
+
     // 更新Outdoors数据库
-    cloudfun.updateOutdoorMembers(self.outdoorid, self.members, null)
+    cloudfun.updateOutdoorItem(self.outdoorid, "members", self.members)
     // 报名信息同步到网站
-    this.postEntry2Websites(member, false)
+    this.postEntry2Websites(member, false, false)
     if (callback) { // 即时返回，无需等到写入数据库中
       callback({
         status: member.entryInfo.status,
@@ -372,16 +445,55 @@ OD.prototype.entry = function(member, callback) {
   })
 }
 
-// 退出报名
-// personid: 退出者id， selfQuit：是否为自行退出（false则为领队强制退出）
+// 退出报名（正式队员）
+// personid: 退出者id
+// selfQuit：是否为自行退出（false则为领队强制退出）
 // callback 返回 剩余的队员数组
 OD.prototype.quit = function(personid, selfQuit, callback) {
-  var member = util.findObj(this.members, "personid", personid)
-  odtools.removeMember(this.outdoorid, personid, selfQuit, members => {
-    this.members = members
-    this.postEntry2Websites(member, true)
-    if (callback) {
-      callback(members)
+  console.log("OD.prototype.quit()")
+  // 第一步：刷新重要信息
+  dbOutdoors.doc(this.outdoorid).get().then(res=>{
+    this.members = res.data.members
+    this.addMembers = res.data.addMembers ? res.data.addMembers:[]
+    this.limits = res.data.limits
+
+    // 第二步：找到自己
+    var index = util.findIndex(this.members, "personid", personid)
+    if (index>=0) {
+      var member = this.members[index]
+      
+      // 第三步：判断是否能让替补上；原则：我不是替补，我退出，就让第一个替补顶上
+      if(member.status != "替补中" && this.limits.maxPerson && (this.members.length+this.addMembers.length>this.limits.personCount)) {
+        for(var i in this.members) {
+          if (this.members[i].status == "替补中") {
+            this.members[i].entryInfo.status = "报名中"
+            // 给退出者发消息
+            template.sendEntryMsg2Bench(this.members[i].personid, this.outdoorid, this.title.whole, this.members[i].userInfo.nickName)
+            break // 仅限一位
+          }
+        }
+      }
+
+      this.members.splice(index, 1) // 别忘了删除自己
+      // 第四步：新成员列表写入数据库
+      cloudfun.updateOutdoorItem(this.outdoorid, "members", this.members)
+
+      // 第五步：给退出者发消息
+      if (selfQuit) {
+        var remark = "您已自行退出本次活动。您仍可以点击进入小程序继续报名。"
+        template.sendQuitMsg2Self(member.personid, this.outdoorid, this.title.whole, this.title.date, this.leader.userInfo.nickName, member.userInfo.nickName, remark)
+      } else {
+        var remark = "您已被领队驳回报名，可点击回到活动的“留言”页面中查看原因。若仍有意参加，可在留言中@领队或电话等方式联系领队确认情况。"
+        // 发模板消息
+        template.sendRejectMsg2Member(member.personid, this.title.whole, this.outdoorid, this.leader.userInfo.nickName, this.leader.userInfo.phone, remark)
+      }
+      
+      // 第六步：同步到网站
+      this.postEntry2Websites(member, true, selfQuit)
+      // 第七步：回调
+      if (callback) {
+        callback(this.members)
+      }
     }
   })
 }
@@ -434,13 +546,15 @@ OD.prototype.postModify2Websites = function(modifys) {
 }
 
 // 报名信息同步到网站
-// member：要报名的队员信息，isQuit：是否为退出
-OD.prototype.postEntry2Websites = function(member, isQuit) {
+// member：要报名的队员信息，
+// isQuit：是否为退出；
+// selfQuit ：是否为自行退出；false时为领队强制清退
+OD.prototype.postEntry2Websites = function (member, isQuit, selfQuit) {
   const lvyeobj = this.websites.lvyeorg
   // 先确定是否要同步
   if (lvyeobj.keepSame) {
     // 构建报名信息
-    var entryMessage = lvyeorg.buildEntryMessage(member.userInfo, member.entryInfo, isQuit, false)
+    var entryMessage = lvyeorg.buildEntryMessage(member.userInfo, member.entryInfo, isQuit, selfQuit, false)
     var entryNotice = lvyeorg.buildEntryNotice(lvyeobj.qrcodeUrl, false, lvyeobj.allowSiteEntry)
     entryMessage.message += entryNotice
 
@@ -453,7 +567,6 @@ OD.prototype.postEntry2Websites = function(member, isQuit) {
   }
 }
 
-
 //////////////////  户外网站处理 end  /////////////////////////////////////////////
 
 
@@ -462,6 +575,8 @@ module.exports = {
   load: OD.prototype.load,
   save: OD.prototype.save,
   publish: OD.prototype.publish,
+  del: OD.prototype.del,
+  clear: OD.prototype.clear,
   saveItem: OD.prototype.saveItem,
   setDefault4New: OD.prototype.setDefault4New,
   entry: OD.prototype.entry,

@@ -104,11 +104,12 @@ Page({
     if(e)
       template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
 
+    const self = this;
+    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+    let prevPage = pages[pages.length - 2];
+
     // 这里把数据写回去
     if(this.data.hasModified) {
-      const self = this;
-      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-      let prevPage = pages[pages.length - 2];
       prevPage.setData({
         "od.meets": self.data.meets,
       })
@@ -117,16 +118,16 @@ Page({
       this.setData({
         hasModified:false
       })
-      
-      // 如果只有一个集合地点，则默认这个了
-      if (self.data.meets.length == 1) {
-        prevPage.setData({
-          "leader.entryInfo.meetsIndex": 0,
-        })
-      }
-      // 检查一下可否发布
-      prevPage.checkPublish()
     }
+
+    // 如果只有一个集合地点，则默认这个了
+    if (self.data.meets.length == 1) {
+      prevPage.setData({
+        "myself.entryInfo.meetsIndex": 0,
+      })
+    }
+    // 检查一下可否发布
+    prevPage.checkPublish()
   },
 
   giveup(e) {

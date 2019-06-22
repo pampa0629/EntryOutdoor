@@ -4,37 +4,37 @@
 <!--活动基本情况-->
 <view>
   <van-tag type="primary" plain>请截长屏保存</van-tag>
-  <text>\n{{title.whole}}\n</text>
+  <text>\n{{od.title.whole}}\n</text>
   <text class="tip">地点：</text>
-  <text>{{title.place}}\n</text>  
+  <text>{{od.title.place}}\n</text>  
   <text class="tip">活动日期：</text> 
-  <text>{{title.date}}\n</text> 
+  <text>{{od.title.date}}\n</text> 
   <text class="tip">活动强度：</text>
-  <text>{{title.level}}（累积距离{{title.addedLength}}公里，累积上升{{title.addedUp}}00米）\n</text>
-  <block wx:if="{{interphone}}">
+  <text>{{od.title.level}}（累积距离{{od.title.addedLength}}公里，累积上升{{od.title.addedUp}}00米）\n</text>
+  <block wx:if="{{interphone}}"> 
     <text class="tip">手台频率：</text>
-    <text>{{interphone}}\n</text> 
+    <text>{{od.route.interphone}}\n</text> 
   </block>
 </view>
 
 <!--活动路线-->
 <text class="tip">\n活动路线</text>
-  <view wx:for="{{route.wayPoints}}" wx:key="place+time" data-pos='{{index}}'>途经点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
+  <view wx:for="{{od.route.wayPoints}}" wx:key="place+time" data-pos='{{index}}'>途经点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
 
 <!--交通方式-->
 <block wx:if="{{traffic}}">
   <text class="tip">\n交通方式</text>
-  <text>\n{{traffic.mode}}；{{traffic.carInfo}}；{{traffic.costInfo}}</text>
+  <text>\n{{od.traffic.mode}}；{{od.traffic.carInfo}}；{{od.traffic.costInfo}}</text>
 </block>
 
 <!--集合地点-->
 <text class="tip">\n集合地点</text>
-<view wx:for="{{meets}}" wx:key="place" data-pos='{{index}}'>集合点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
+<view wx:for="{{od.meets}}" wx:key="place" data-pos='{{index}}'>集合点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
 
 <!--队员列表-->
 <view> 
-  <van-tag type="primary" plain>\n活动状态：{{status}}</van-tag>
-  <text class="tip">\n队员列表（共{{members.length}}人）\n</text>
+  <van-tag type="primary" plain>\n活动状态：{{od.status}}</van-tag>
+  <text class="tip">\n正式队员列表（共{{od.members.length}}人）\n</text>
 </view>
 
 <!--要按照集合地点排列名单--> 
@@ -54,9 +54,9 @@
 </block>
 
 <!--附加队员列表-->
-<view wx:if="{{addMembers.length>0}}"> 
-  <text class="tip">\n附加队员列表（共{{addMembers.length}}人）\n</text>
-  <view wx:for="{{addMembers}}" wx:key="*this">{{item}}</view>
+<view wx:if="{{od.addMembers.length>0}}"> 
+  <text class="tip">\n附加队员列表（共{{od.addMembers.length}}人）\n</text>
+  <view wx:for="{{od.addMembers}}" wx:key="*this">{{item}}</view>
 </view>
 
 </view>

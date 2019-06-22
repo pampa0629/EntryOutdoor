@@ -9,10 +9,10 @@ const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
 
 const LvyeOrgURL = 'https://www.lvye.net/panpa/'
- 
+
 // 得到登录org网站所需要的token， 用callback传回
 const getToken = (callback) => {
-  wx.login({ 
+  wx.login({
     success: function(res) {
       if (res.code) {
         var token = wx.getStorageSync("LvyeOrgToken")
@@ -285,12 +285,12 @@ const chooseForum = (title, isTesting) => {
       fid = 67
     }
   }
-  return fid 
+  return fid
 }
 
 // 判断版面id是否为测试类活动
-const isTestForum=(fid)=>{
-  return fid == 93?true:false
+const isTestForum = (fid) => {
+  return fid == 93 ? true : false
 }
 
 const NL = "\r\n"
@@ -302,7 +302,7 @@ const groupMembersByMeets = (meets, members) => {
   for (var i = 0; i < meets.length; i++) {
     meetMembers[i] = new Array();
   }
-  // 遍历所有队员
+  // 遍历所有队员 
   for (var j = 0; j < members.length; j++) {
     meetMembers[members[j].entryInfo.meetsIndex].push(members[j])
   }
@@ -316,7 +316,7 @@ const buildMembersMessage = (meets, members) => {
   meetMembers.forEach((item, index) => {
     message += "第" + (index + 1) + "）集合地点：" + meets[index].place + "，活动" + meets[index].date + " " + meets[index].time + NL
     meetMembers[index].forEach((citem, cindex) => {
-      var result = buildEntryMessage(meetMembers[index][cindex].userInfo, meetMembers[index][cindex].entryInfo, false, true)
+      var result = buildEntryMessage(meetMembers[index][cindex].userInfo, meetMembers[index][cindex].entryInfo, false, false, true)
       message += result.message + NL
     })
     message += NL
@@ -339,7 +339,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
       // 活动人数限制xx人，现有多少人
       if (data.limits && data.limits.maxPerson) {
         message += "活动人数：限" + data.limits.personCount + "人" + NL
-        message += "已报名：" + data.members.length + "人"
+        message += "已报名：" + (data.members.length+data.addMembers.length) + "人"
       } else {
         message += "活动人数不限人数" + NL
       }
@@ -382,6 +382,15 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     data.route.wayPoints.forEach((item, index) => {
       message += (index + 1) + "） " + (item.date ? item.date : '当天') + " " + (item.time ? item.time : ' ') + " " + item.place + NL
     })
+    message += NL
+  }
+
+  // 附加队员
+  if ((first || modifys.addMembers) && data.addMembers.length > 0) {
+    message += NL + "为以下队员代报名如下（责任由队员自负）：" + NL
+    for (var i in data.addMembers) {
+      message += NL + data.addMembers[i] + NL
+    }
     message += NL
   }
 
@@ -432,6 +441,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     if (data.title.level >= 1.0) {
       message += NL + "体力要求：要求报名人员近期应参加过强度值不小于" + data.title.level + "的活动，体力能满足本活动要求。" + NL
     }
+
     // 装备要求
     if (data.limits && data.limits.equipments) {
       message += NL + "活动装备要求"
@@ -469,7 +479,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
 // qrcode: 报名二维码
 // first：是否为活动首帖（发布帖）
 // allowSiteEntry：是否允许网站跟帖报名
-const buildEntryNotice = (qrcode, first, allowSiteEntry)=>{
+const buildEntryNotice = (qrcode, first, allowSiteEntry) => {
   var message = NL
   var qrcodeMsg = "[url=" + qrcode + "]活动二维码[/url]"
   if (first) { // 发布活动时的报名信息
@@ -487,7 +497,7 @@ const buildEntryNotice = (qrcode, first, allowSiteEntry)=>{
 }
 
 // 构建网站报名信息; isQuit:是否为退出活动； isPrint：是否为集中打印名单时调用
-const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
+const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
   console.log("lvyeorg.js buildEntryMessage")
   console.log(userInfo)
   var message = ""
@@ -497,6 +507,9 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
   }
   if (isQuit) {
     var temp = userInfo.nickName + " 因故退出活动，抱歉！"
+    if (!selfQuit) {
+      temp = userInfo.nickName + " 因故被领队清退"
+    } 
     message += temp
     title += temp
   } else {
@@ -526,7 +539,7 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, isPrint) => {
 
 // 发布活动
 const addThread = function(outdoorid, data, isTesting, callback) {
-  console.log("addThread fun") 
+  console.log("addThread fun")
   var temp = []
   uploadImages(outdoorid, data.brief.pics, temp, resAids => {
     console.log("resAids is:")
@@ -593,7 +606,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
                 content: '原因是：' + error + "。\r\n点击“再试一次”则再次尝试同步，点击“以后再发”则在您“保存修改”或再次进入本活动页面时重发。",
                 confirmText: "再试一次",
                 cancelText: "以后再发",
-                success(res) { 
+                success(res) {
                   if (res.confirm) {
                     console.log('用户点击确定')
                     addThread(outdoorid, data, isTesting, callback) // 立刻重发
@@ -694,7 +707,7 @@ const postWaitings = (tid, waitings, callback) => {
   console.log(waitings.length)
   if (waitings.length > 0) {
     var waiting = waitings.shift()
-    postOneWaiting( tid, waiting, () => {
+    postOneWaiting(tid, waiting, () => {
       console.log(waitings.length)
       postWaitings(tid, waitings, callback) // 这么来保证顺序
     })
@@ -728,9 +741,9 @@ const postOneWaiting = (tid, waiting, callback) => {
       var resp_dict = resp.data;
       console.log(resp_dict)
       if (resp_dict.err_code == 0) {
-          if (callback) { // 回调
-            callback()
-          }
+        if (callback) { // 回调
+          callback()
+        }
       } else {
         logError(resp)
       }

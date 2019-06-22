@@ -4,49 +4,60 @@ const odtools = require('../../utils/odtools.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
- 
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
- 
+
 Page({
 
-  data: { 
+  data: {
     outdoorid: null,
     title: null,
     message: {
       who: "",
-      msg: "", 
+      msg: "",
       personid: "",
     },
     chat: {
       messages: []
     },
+    sendWxnotice: false, // 发送留言时，是否自动发送微信消息
 
     hasPullFlush: false, // 本页面是否下拉刷新过
     showMembers: false, // 是否显示队员名单， @时出来
     members: [], // 全体队员名单
+    personids: [], // 全队队员的id
     isLeader: false, // 是否为领队，领队可以 @所有人 
 
     tid: null, // lvyeorg上的帖子id
   },
 
-  onLoad: function(options) { 
+  onLoad: function(options) {
     console.log(options)
     const self = this
     self.data.outdoorid = options.outdoorid
     if (options.isLeader == "true") {
       self.setData({
-        isLeader:true,
+        isLeader: true,
       })
-      self.data.members.push("所有人")
+      self.data.members.push("所有人") // 领队可以给@所有人
+      self.data.personids.push("")
     }
     console.log("options.isLeader: " + options.isLeader)
+    if (options.sendWxnotice) { // 通过点击别人发送的微信消息进入留言页面时，自动@对方
+      self.setData({
+        sendWxnotice: true,
+        "message.msg": "@" + options.nickName + " ",
+      })
+    }
+
     self.flushChats(null, res => {
       res.data.members.forEach((item, index) => {
         self.data.members.push(item.userInfo.nickName)
+        self.data.personids.push(item.personid)
       })
       self.setData({
         members: self.data.members,
@@ -105,8 +116,8 @@ Page({
   // 退出时，把当前留言有几条记录下来
   onUnload() {
     console.log("onUnload")
-    const self = this 
-    cloudfun.updateOutdoorChatSeen(self.data.outdoorid, app.globalData.personid, self.data.chat.messages.length)
+    const self = this
+    cloudfun.updateOutdoorItem(self.data.outdoorid, "chat.seen." + app.globalData.personid, self.data.chat.messages.length)
   },
 
   flushChats(addMessage, callback) {
@@ -193,22 +204,72 @@ Page({
     })
   },
 
-  submitChat() {
-    console.log("submitChat")
+  changeSendWxnotice(e) {
+    console.log("changeSendWxnotice()")
+    const self = this
+    if (!this.data.sendWxnotice) {
+      wx.showModal({
+        title: '请确认开启',
+        content: '开启该选项将导致@成员的留言同时也发送微信消息，可能给对方造成打扰，也不能保证一定送达。请慎重开启！',
+        success(res) {
+          if (res.confirm) {
+            self.setData({
+              sendWxnotice: !self.data.sendWxnotice
+            })
+          }
+        }
+      })
+    } else {
+      self.setData({
+        sendWxnotice: !self.data.sendWxnotice
+      })
+    }
+  },
+
+  submitChat(e) {
+    console.log("submitChat()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+
     const self = this
     if (self.data.message.msg) {
       var message = odtools.buildChatMessage(self.data.message.msg)
-      console.log(self.data.message)
+      console.log(message)
       // load
       self.flushChats(message, null)
+      // 发送微信消息
+      if (this.data.sendWxnotice) {
+        this.sendWxnotice(message.msg)
+      }
       // push 到数据库中
-      cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
+      cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", message, "push")
       // 输入框清空
       self.setData({
         "message.msg": "",
       })
       console.log(self.data.messages)
     }
+  },
+
+  sendWxnotice(msg) {
+    var personids = this.findPersonids(msg)
+    personids.forEach((item, index) => {
+      template.sendChatMsg2Member(item, this.data.title, this.data.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, msg)
+    })
+  },
+
+  // msg: xxx @name xxx@name xxx
+  findPersonids(msg) {
+    var personids = []
+    const self = this
+    if (msg.match("@所有人")) {
+      return self.data.personids
+    }
+    this.data.members.forEach((item, index) => {
+      if (msg.match("@" + item)) {
+        personids.push(self.data.personids[index])
+      }
+    })
+    return personids
   },
 
   // 页面相关事件处理函数--监听用户下拉动作  
@@ -247,11 +308,11 @@ Page({
       data: self.data.chat.messages[index].msg,
     })
   },
- 
-  onEnterGroup(){
+
+  onEnterGroup() {
     const self = this;
     wx.navigateTo({
-      url: "../AboutGroup/ChatGroup?outdoorid=" + self.data.outdoorid + "&isLeader="+self.data.isLeader
+      url: "../AboutGroup/ChatGroup?outdoorid=" + self.data.outdoorid + "&isLeader=" + self.data.isLeader
     })
   },
 

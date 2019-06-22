@@ -13,9 +13,20 @@
   color:#F65959;
 }
 
+.fix2{
+  height:80rpx;
+  width:100%;
+  position:fixed;
+  bottom: 100rpx;
+}
+
 .fix{
   height:80rpx;
   width:100%;
   position:fixed;
   bottom: 10rpx;
+}
+
+.bnt_font{
+  font-size:30rpx;
 }

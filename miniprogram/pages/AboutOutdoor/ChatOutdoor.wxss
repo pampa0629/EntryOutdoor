@@ -15,31 +15,26 @@
 
 .resp-input {
   height: 60rpx;
-  padding-left: 20rpx;
-  margin: 15rpx 0 15rpx 25rpx;
+  padding-left: 10rpx;
+  margin: 5rpx 0 5rpx 5rpx;
   /* width: 100%; */
   border:1px solid #ccc;
-  border-radius: 30rpx;
-}
-
-.resp-at-cell {
-  width: 14%;
-  margin-right: 20rpx;
+  border-radius: 20rpx;
 }
 
 .resp-input-cell {
-  width: 85%;
+  width: 82%;
   margin-right: 20rpx;
 }
-
+ 
 .resp-btn {
   height: 60rpx;
-  width: 16%;
+  width: 18%;
   line-height: 60rpx;
   text-align: center;
   margin-right:8rpx;   
   color: #4b0;
-  font-size: 30rpx;
+  font-size: 20rpx;
 }
 
 .icon_tip{

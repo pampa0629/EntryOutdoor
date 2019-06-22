@@ -155,7 +155,7 @@ Page({
       console.log("MyOutdoor.js in tapOneOutdoor fun, outdoorid is:" + outdoorid)
       dbOutdoors.doc(outdoorid).get()
         .then(res => {
-          util.saveOutdoorID(outdoorid)
+          util.saveOutdoorID(outdoorid) 
           if (name == "myOutdoors") {
             wx.switchTab({ // 我发起的活动，要切换到“发起活动”页面
               url: "../CreateOutdoor/CreateOutdoor"

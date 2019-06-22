@@ -8,12 +8,13 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
  
-Page({ 
+Page({  
 
   data: {
     outdoorid: null,
     title: "",
     members: [],
+    limits:null, 
     index: null, // 当前正在处理的index
     isLeader:false, // 判断自己是不是总领队
 
@@ -36,6 +37,7 @@ Page({
 
     addMembers: [], // 领队外挂
     addMember: "",
+    entryFull:false, // 是否报名已满，防止领队添加过多附加队员
     hasModified: false, // 
     openAdd: false, // 是否开启附加队员
   },
@@ -44,31 +46,28 @@ Page({
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
-    self.data.outdoorid = prevPage.data.od.outdoorid
-    self.data.title = prevPage.data.od.title.whole
-    if(prevPage.data.od.leader.personid == app.globalData.personid) {
+    let od = pages[pages.length - 2].data.od;
+    self.data.outdoorid = od.outdoorid
+    self.data.title = od.title.whole
+    self.data.limits = od.limits
+    self.setData({
+      entryFull:odtools.entryFull(od.limits, od.members, od.addMembers)
+    })
+
+    if(od.leader.personid == app.globalData.personid) {
       self.setData({ // 判断是否为总领队
         isLeader:true,
       })
     }
-    if (prevPage.data.od.pay && prevPage.data.od.pay.cfo){
+    if (od.pay && od.pay.cfo){
       self.setData({
-        cfo: prevPage.data.od.pay.cfo, 
+        cfo: od.pay.cfo, 
       })
     }
     // 构建正式队员列表
-    self.flushMembers(prevPage.data.od.members)
+    self.flushMembers(od.members)
     // 处理附加队员
-    self.loadAddMembers(self.data.outdoorid)
-  },
-
-  loadAddMembers(outdoorid) {
-    const self = this
-    dbOutdoors.doc(outdoorid).get().then(res => {
-      if (res.data.addMembers) {
-        self.flushAddMembers(res.data.addMembers)
-      }
-    })
+    self.flushAddMembers(od.addMembers)
   },
 
   flushMembers(members) {
@@ -101,6 +100,7 @@ Page({
     }
     self.setData({
       members: self.data.members,
+      entryFull:odtools.entryFull(self.data.limits, self.data.members, self.data.addMembers)
     })
   },
 
@@ -112,8 +112,12 @@ Page({
       template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
 
     if (this.data.hasModified) {
-      // 是否用 od.saveItem 取代，再考虑
-      cloudfun.updateOutdoorAddMembers(self.data.outdoorid, self.data.addMembers)
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2];
+      prevPage.setData({
+        "od.addMembers": self.data.addMembers,
+      })
+      prevPage.data.od.saveItem("addMembers")
       this.setData({
         hasModified: false,
       })
@@ -122,14 +126,6 @@ Page({
 
   onUnload: function() {
     console.log("onUnload()")
-    const self = this;
-    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    let prevPage = pages[pages.length - 2];
-    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
-      prevPage.setData({ // 刷新一下队员
-        "od.member": res.data.members,
-      })
-    })
     this.save() // 自动保存
   },
 
@@ -201,8 +197,9 @@ Page({
     })
   },
 
-  onLookCareer() {
+  onLookCareer(e) {
     console.log("onLookCareer")
+    console.log(e)
     const self = this
     wx.navigateTo({
       url: '../MyInfo/LookCareer?personid=' + self.data.members[self.data.index].personid,
@@ -290,10 +287,11 @@ Page({
         msg: content + " @"+item.nickName,
         who: app.globalData.userInfo.nickName
       }
-      cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
+      // cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
+      cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", message, "push")
 
       this.setData({
-        "chatDlg.show": false
+        "chatDlg.show": false 
       })
     } else {
       this.setData({
@@ -358,14 +356,11 @@ Page({
     if (content) {
       // 发送留言和微信消息
       const item = self.data.members[self.data.index]
-      // 发模板消息
-      template.sendRejectMsg2Member(item.personid, self.data.title, self.data.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, content)
-
+      
       // 增加活动留言
-      // { "at": "papa", "msg": "加油", "personid": "W72p-92AWotkbObV", "self": true, "who": "PiPi" }
+      // { "msg": "xxx @nickName", "personid": "W72p-92AWotkbObV", "who": "领队" }
       content = "报名被驳回，理由是：" + content
       var message = {
-        // at: item.nickName, 
         personid: app.globalData.personid,
         msg: content + " @" + item.nickName,
         who: app.globalData.userInfo.nickName
@@ -374,7 +369,12 @@ Page({
 
       // 从队员报名表中剔除
       var selfQuit = false
-      odtools.removeMember(self.data.outdoorid, item.personid, selfQuit, members => {
+      let prevPage = pages[pages.length - 2];
+      let od = pages[pages.length - 2].data.od;
+      od.quit(item.personid, selfQuit, members=>{ // 这里面会发送微信消息
+        prevPage.setData({
+          "od.members":od.members
+        })
         console.log(members)
         self.flushMembers(members)
       })
@@ -417,15 +417,6 @@ Page({
     })
   },
 
-  // 删除 index位置的附加队员
-  delAddMembers(index) {
-    this.data.addMembers.splice(index, 1)
-    this.setData({
-      hasModified:true
-    })
-    this.flushAddMembers(this.data.addMembers)
-  },
-
   changeOneMember(e) {
     console.log(e)
     this.setData({
@@ -458,12 +449,23 @@ Page({
     })
   },
 
+  // 删除 index位置的附加队员
+  delAddMembers(index) {
+    this.data.addMembers.splice(index, 1)
+    this.setData({
+      hasModified: true
+    })
+    this.flushAddMembers(this.data.addMembers)
+  },
+
   // 创建 删除附加队员按钮
   flushAddMembers(addMembers) {
     const self = this
     self.setData({
-      addMembers: addMembers
+      addMembers: addMembers,
+      entryFull: odtools.entryFull(self.data.limits, self.data.members, self.data.addMembers)
     })
+    
     for (var i = 0; i < self.data.addMembers.length; i++) {
       let index = i // 还必须用let才行
       this["delAddMembers" + index] = () => {

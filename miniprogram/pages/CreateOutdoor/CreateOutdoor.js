@@ -6,7 +6,7 @@ const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
- 
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -26,13 +26,13 @@ Page({
     // 常量定义
     Loadeds: ["轻装", "重装", "休闲"], // 枚举型：轻装、重装、休闲装
     Durings: ["一日", "两日", "三日", "四日", "五日", "多日"], // 活动时长枚举
-    
+
     startDate: util.formatDate(new Date()), // 起始日期，格式化为字符串；只能从今天开始
     endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，格式化为字符串，不保存；不能发半年之后的活动
 
     myself: {}, // 自己的报名信息
     isLeaderGroup: false, // 自己是否为领队组成员
-    
+
     showPopup: false, // 分享弹出菜单
     cancelDlg: { // 活动取消对话框
       show: false,
@@ -80,24 +80,31 @@ Page({
     var content = "小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录；然后再回来创建活动"
     app.checkLogin(title, content)
 
+    this.setMyselfDefault()
+  },
+
+  setMyselfDefault() {
     // 设置myself 信息
     this.data.myself.userInfo = app.globalData.userInfo;
     this.data.myself.personid = app.globalData.personid;
-    this.data.myself.entryInfo = {} // 结构先定义出来
-    console.log("self.data.myself: ")
+    this.setData({
+      "myself.entryInfo": {} // 结构先定义出来
+    })
+    console.log("this.data.myself: ")
     console.log(this.data.myself)
   },
 
-  loadOutdoorInTable: function(outdoorid) {
-    console.log("loadOutdoorInTable，id is: " + outdoorid)
+  loadOutdoor: function(outdoorid) {
+    console.log("loadOutdoor()")
+    console.log("outdoorid: " + outdoorid)
+
     const self = this
-    
     this.data.od.load(outdoorid, od => {
       self.setData({
         od: od,
         startDate: util.formatDate(new Date()), // 起始日期，只能从今天开始
         endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，不能发半年之后的活动
-        hasModified:false, // 刚load，没有修改
+        hasModified: false, // 刚load，没有修改
       })
 
       self.setChat(od.chat) // 判断留言
@@ -120,12 +127,9 @@ Page({
       // 加载后就要构建画布生成分享图片文件
       self.createCanvasFile()
 
-      // 这里要判断从本地缓存中读取到的outdoorid是自己创建的，还是用来当模板的
-      // 依据是 从数据库读取的leader是否为自己
-      // 不是自己的，也不是领队组成员，就等于要新建活动
-      // 如果是用户主动发起的模板创建，也需要新建活动
+      // 队员以本活动为模板来创建活动
       if (((self.data.od.leader.personid != app.globalData.personid) && !self.data.isLeaderGroup) || app.globalData.newOutdoor) {
-        self.newOutdoor(null);
+        self.newOutdoor()
         app.globalData.newOutdoor = false // 即时清空
       }
       self.createAutoInfo();
@@ -133,32 +137,75 @@ Page({
     })
   },
 
-  // 全新创建活动，内容置空
-  totalNewOutdoor(e) {
-    console.log("totalNewOutdoor()")
-    if (e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+  // 清空活动内容
+  clearOutdoor(e) {
+    console.log("clearOutdoor()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
 
-    this.setData({
-      od: new outdoor.OD(),
-      canPublish: false, // 判断是否可发布
-      hasModified: true, // 新建之后，马上可以保存
+    const self = this
+    wx.showModal({
+      title: '确定清空？',
+      content: '清空将导致活动全部内容恢复为默认值。是否确定清空？',
+      success(res) {
+        if (res.confirm) {
+          console.log('用户点击确定')
+          self.data.od.clear()
+          self.setData({
+            od: self.data.od,
+            canPublish: false, // 判断是否可发布
+            hasModified: true,
+          })
+          self.createAutoInfo(); // 做必要的自动计算
+        } else if (res.cancel) {
+          console.log('用户点击取消')
+        }
+      }
     })
-    util.saveOutdoorID(null)
-    this.createAutoInfo(); // 做必要的自动计算
+  },
+
+  // 删除活动，记得清空缓存中的活动id
+  deleteOutdoor(e) {
+    console.log("deleteOutdoor()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    const self = this
+    wx.showModal({
+      title: '确定删除？',
+      content: '删除将从数据库中彻底活动信息，不可恢复。是否确定删除？',
+      success(res) {
+        if (res.confirm) {
+          console.log('用户点击确定')
+          var outdoorid = self.data.od.outdoorid
+          self.data.od.del(empty => {
+            self.setData({
+              od: empty
+            })
+            util.clearOutdoorID()
+            self.clearPersonMyoutdoors(outdoorid)
+            wx.switchTab({
+              url: "../MyInfo/MyInfo"
+            })
+          })
+
+        } else if (res.cancel) {
+          console.log('用户点击取消')
+        }
+      }
+    })
   },
 
   // 新建活动就是把 outdoor id清空，把关键信息删除
-  newOutdoor: function(e) {
+  newOutdoor: function() {
     console.log("newOutdoor()")
-    
+
     this.data.od.setDefault4New() // 把活动的几个关键信息删除
     this.setData({
       od: this.data.od,
       canPublish: false, // 判断是否可发布
       hasModified: true, // 新建之后，马上可以保存
     })
+    this.setMyselfDefault() // 自己也要重新恢复默认
     this.createAutoInfo(); // 做必要的自动计算
+    this.saveOutdoor() // 必须存起来，修改才不会丢失
   },
 
   onShow: function() {
@@ -166,13 +213,13 @@ Page({
     const self = this;
     var outdoorid = util.loadOutdoorID()
     self.checkLogin()
-    
+
     console.log("outdoorid: " + outdoorid)
-    if (outdoorid != null && outdoorid != self.data.od.outdoorid) {
+    if (outdoorid && outdoorid != self.data.od.outdoorid) {
       // 缓存中有id，且还和od中加载的outdoorid不一样，则说明要重新加载
-      self.loadOutdoorInTable(outdoorid);
-    } else if (outdoorid == null) { // id为空，则新创建活动
-      self.newOutdoor(null);
+      self.loadOutdoor(outdoorid);
+    } else if (!outdoorid) { // id为空，则新创建活动
+      self.newOutdoor();
     }
   },
 
@@ -211,6 +258,10 @@ Page({
 
   // 判断是否可以发布了
   checkPublish: function() {
+    console.log("checkPublish()")
+    console.log(this.data.od.title)
+    console.log(this.data.od.meets)
+    console.log(this.data.myself.entryInfo)
     var canPublish = false
     if (this.data.od.title.place // 必须有活动地点
       &&
@@ -372,8 +423,8 @@ Page({
   confirmOutdoor: function() {
     const self = this
     wx.showModal({
-      title: '活动成行确认',
-      content: '请确认活动成行。您可以再点击“截止”来截止报名',
+      title: '成行确认',
+      content: '确认活动成行将给所有队员发送微信消息提醒',
       success(res) {
         if (res.confirm) {
           self.updateStatus("已成行")
@@ -394,66 +445,85 @@ Page({
     })
   },
 
-  stopEntry() {
-    this.updateStatus("报名截止")
-  },
+  // stopEntry() {
+  //   this.updateStatus("报名截止")
+  // },
 
-  // 恢复报名
-  continueEntry: function() {
-    this.updateStatus("已发布")
-  },
-
-  // 在活动还没有发布的时候，保存活动草稿
-  saveDraft: function(e) {
-    console.log("saveDraft()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    if (this.data.hasModified) {
-      this.saveOutdoor()
-    }
-  },
+  // // 恢复报名
+  // continueEntry: function() {
+  //   this.updateStatus("已发布")
+  // },
 
   // 发布活动
   publishOutdoor: function(e) {
+    console.log("publishOutdoor()")
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this
     // 第一步：修改status
     this.setData({
-      status:"已发布"
+      "od.status": "已发布"
     })
     // 第二步：调用 od 的publish
-    this.data.od.publish(res=>{
+    this.data.od.publish(res => {
       // 第三步：更新到persons表
       self.updatePersonMyoutdoors()
       // 第四步：给自己的订阅者发通知
-      self.post2Subscribe()
+      self.post2Subscriber()
     })
   },
 
   // 给自己的订阅者发消息
-  post2Subscribe() {
+  post2Subscriber() {
+    console.log("post2Subscriber()");
     const self = this
-    console.log("outdoorid: " + self.data.od.outdoorid)
-    dbPersons.doc(app.globalData.personid).get().then(res => {
-      for (var key in res.data.subscribers) {
-        console.log("key: " + key);
-        console.log(res.data.subscribers[key]);
-        // 加到cared列表中
-        cloudfun.unshiftPersonCared(key, self.data.od.outdoorid, self.data.od.title.whole)
+    if (!this.data.od.limits.isTest) { // 测试帖就不发消息了
+      console.log("outdoorid: " + self.data.od.outdoorid)
+      dbPersons.doc(app.globalData.personid).get().then(res => {
+        console.log(res.data.subscribers);
+        self.postRemainSubscribers(res.data.subscribers)
+      })
+    }
+  },
 
-        // 发微信消息
-        if (res.data.subscribers[key].acceptNotice) {
-          template.sendCreateMsg2Subscriber(key, self.data.od.title.whole, self.data.od.outdoorid, app.globalData.userInfo.phone)
-        }
+  // 按照顺序来对订阅者发送消息
+  postRemainSubscribers(subscribers) {
+    console.log("postRemainSubscribers()")
+    console.log(subscribers)
+    const self = this
+    var arr = Object.getOwnPropertyNames(subscribers)
+    console.log("arr.length: " + arr.length)
+    if (arr.length > 0) {
+      var personid = arr[0]
+      var acceptNotice = subscribers[personid].acceptNotice
+      delete subscribers[personid]
+      self.postOneSubscriber(personid, acceptNotice, res => {
+        self.postRemainSubscribers(subscribers)
+      })
+    }
+  },
+
+  // 按照一个订阅者发送消息
+  postOneSubscriber(personid, acceptNotice, callback) {
+    console.log("postOneSubscriber()")
+    cloudfun.unshiftPersonCared(personid, this.data.od.outdoorid, this.data.od.title.whole, res => {
+      // 发微信消息
+      if (acceptNotice) {
+        template.sendCreateMsg2Subscriber(personid, this.data.od.title.whole, this.data.od.outdoorid, app.globalData.userInfo.phone, res => {
+          if (callback) {
+            callback()
+          }
+        })
+      } else if (callback) {
+        callback()
       }
     })
   },
 
   // 保存 活动的更新信息
   saveModified: function(e) {
-    console.log(e.detail.formId)
+    console.log("saveModified()")
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
-      console.log("saveModified")
       this.saveOutdoor()
     }
   },
@@ -467,10 +537,11 @@ Page({
   },
 
   saveOutdoor: function() {
+    console.log("saveOutdoor()")
     const self = this;
-    
+
     // 活动记录是否已经创建了
-    var isCreated = self.data.od.outdoorid? true : false 
+    var isCreated = self.data.od.outdoorid ? true : false
 
     // od.save 内部会判断处理是update还是create
     this.data.od.save(self.data.myself, this.data.modifys, od => {
@@ -480,7 +551,7 @@ Page({
       })
       self.setModifys(false)
       util.saveOutdoorID(self.data.od.outdoorid)
-      
+
       // 在成功保存outdoor之后，相应的一些处理
       if (self.data.od.status != "拟定中") { // 正在草拟中的活动，这里面的事情就都可以省略了
         self.createCanvasFile() // 把图片更新一下
@@ -496,7 +567,7 @@ Page({
   },
 
   // 发布成功，就需要往person表中追加活动id
-  addPersonMyoutdoors: function () {
+  addPersonMyoutdoors: function() {
     const self = this
     dbPersons.doc(app.globalData.personid).get()
       .then(res => { // 先取出原来
@@ -526,6 +597,25 @@ Page({
         dbPersons.doc(app.globalData.personid).update({
           data: {
             myOutdoors: res.data.myOutdoors
+          }
+        })
+      })
+  },
+
+  // 删除活动后，需要把活动记录，在person表中删除
+  clearPersonMyoutdoors(outdoorid) {
+    dbPersons.doc(app.globalData.personid).get()
+      .then(res => {
+        let myOutdoors = res.data.myOutdoors
+        for (var i in myOutdoors) {
+          if (myOutdoors[i].id == outdoorid) {
+            myOutdoors.splice(i, 1)
+            break
+          }
+        }
+        dbPersons.doc(app.globalData.personid).update({
+          data: {
+            myOutdoors: myOutdoors
           }
         })
       })
@@ -606,7 +696,7 @@ Page({
       showPopup: false,
     })
   },
-
+ 
   createCanvasFile() {
     console.log("createCanvasFile")
     const self = this
@@ -630,7 +720,7 @@ Page({
         title: self.data.od.title.whole,
         desc: '分享活动',
         imageUrl: self.data.shareCanvasFile,
-        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.od.outdoorid,
+        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.od.outdoorid + "&leaderid=" + self.data.od.leader.personid
       }
     }
   },
@@ -656,6 +746,7 @@ Page({
       "myself.entryInfo.meetsIndex": parseInt(e.target.dataset.name),
       hasModified: true,
     })
+    this.checkPublish()
   },
 
   // 选择或改变集合地点选择
@@ -665,6 +756,7 @@ Page({
       "myself.entryInfo.meetsIndex": parseInt(e.detail),
       hasModified: true,
     })
+    this.checkPublish()
   },
 
   // 修改文字

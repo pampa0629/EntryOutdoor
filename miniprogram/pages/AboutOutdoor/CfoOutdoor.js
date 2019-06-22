@@ -46,9 +46,10 @@ Page({
         }
       }
         
+      res.data.addMembers = res.data.addMembers ? res.data.addMembers:[]
       if(!self.data.pay.count) {
         self.setData({
-          "pay.count": res.data.members.length
+          "pay.count": res.data.members.length + res.data.addMember.length
         })
       }
       if (callback) {

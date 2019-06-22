@@ -1,4 +1,4 @@
-const app = getApp()
+const app = getApp() 
 const util = require('../../utils/util.js')
 const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
@@ -35,6 +35,7 @@ Page({
         text: ""
       },
     },
+    entryFull:false, // 是否报名已满
 
     // 还是把userinfo和outdoors信息都保存下来方便使用
     userInfo: {},
@@ -55,22 +56,32 @@ Page({
   },
 
   onLoad: function(options) {
+    console.log("EntryOutdoor.js onLoad()")
     this.setData({
       od: new outdoor.OD()
     })
 
     console.log(options)
-    var outdoorid = null;
-    if (options.outdoorid) {
-      outdoorid = options.outdoorid
-    } else if (options.scene) {
-      console.log(options.scene)
-      const scene = decodeURIComponent(options.scene)
-      console.log(scene)
-      outdoorid = options.scene
-    }
+    var outdoorid = options.outdoorid ? options.outdoorid : decodeURIComponent(options.scene)
+    console.log(outdoorid)
+    var leaderid = options.leaderid ? options.leaderid : null
+    console.log(leaderid)
+    // if (options.outdoorid) {
+    //   outdoorid = options.outdoorid
+    // } else if (options.scene) {
+    //   console.log(options.scene)
+    //   const scene = decodeURIComponent(options.scene)
+    //   console.log(scene) 
+    //   outdoorid = options.scene
+    // }
     // 存起来，以便其他地方能回到该活动
     util.saveOutdoorID(outdoorid);
+    // 发现是领队是自己，则自动切换到发起活动页面
+    if(leaderid && leaderid == app.globalData.personid) { 
+      wx.switchTab({
+        url: '../CreateOutdoor/CreateOutdoor',
+      })
+    }
 
     if (app.globalData.openid == null || app.globalData.openid.length == 0) {
       app.openidCallback = (openid) => {
@@ -113,7 +124,8 @@ Page({
     this.data.od.load(outdoorid, od => {
       // 设置活动信息
       self.setData({
-        od:od
+        od:od,
+        entryFull: odtools.entryFull(od.limits, od.members, od.addMembers)
       })
       // 处理剩余时间
       self.dealRemainTime()
@@ -201,7 +213,10 @@ Page({
     })
   },
 
-  onCancelShare() {
+  onCancelShare(e) {
+    console.log("onCancelShare")
+    console.log(e)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.setData({
       showPopup: false,
     })
@@ -219,7 +234,7 @@ Page({
     })
   },
 
-  onShareAppMessage: function() {
+  onShareAppMessage: function(e) {
     const self = this;
     this.closePopup()
     if (self.data.od.outdoorid) { // 数据库里面有，才能分享出去
@@ -227,13 +242,14 @@ Page({
         title: self.data.od.title.whole,
         desc: '分享活动',
         imageUrl: self.data.shareCanvasFile,
-        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.od.outdoorid
+        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.od.outdoorid +"&leaderid=" + self.data.od.leader.personid
       }
     }
   },
 
   // 分享到朋友圈
-  onShare2Circle: function() {
+  onShare2Circle: function(e) {
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this;
     qrcode.share2Circle(self.data.od.outdoorid, self.data.od.title.whole, false)
     this.closePopup()
@@ -295,17 +311,18 @@ Page({
       
       // 首次报名，则给领队发个微信模板消息
       if (res.entry) {
-        self.postEntry2Template()
+        self.postEntryMsg()
       }
     })
   },
 
   // 把报名消息给领队发个微信模板消息
-  postEntry2Template() {
+  postEntryMsg() {
+    console.log("postEntryMsg")
     const self = this
     const od = this.data.od
     let notice = self.data.od.limits.wxnotice
-    console.log("postEntry2Template")
+    
     // 给自己发微信消息
     if (true) {
       // 活动主题，领队联系方式，自己的昵称，报名状态，
@@ -314,7 +331,7 @@ Page({
 
     console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
-      if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && (od.limit.maxPerson && od.members.length == od.limit.personCount))) { // 前几个报名，或者接收最后一个报名，才发送微信消息
+      if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && this.data.od.entryFull())) { // 前几个报名，或者接收最后一个报名，才发送微信消息
         var key = this.data.od.outdoorid + "." + this.data.entryInfo.personid
         var count = parseInt(wx.getStorageSync(key))
         if (!count) {
@@ -641,6 +658,9 @@ Page({
     dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       self.setData({
         "od.members": res.data.members,
+        "od.addMembers": res.data.addMembers,
+        "od.limits": res.data.limits,
+        entryFull:odtools.entryFull(self.data.limits, self.data.member, self.data.addMembers),
       })
       self.setChat(res.data.chat)
       wx.hideNavigationBarLoading();

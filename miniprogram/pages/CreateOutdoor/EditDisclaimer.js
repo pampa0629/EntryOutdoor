@@ -17,7 +17,7 @@ Page({
     let prevPage = pages[pages.length - 2];
     self.setData({
       disclaimer: prevPage.data.od.limits.disclaimer,
-    })
+    }) 
   },
 
   save(e) {
@@ -40,13 +40,13 @@ Page({
 
   onUnload: function() {
     console.log("onUnload()")
-    this.data.hasModified = false
     this.save() // 自动保存
   },
 
   giveup(e) {
     console.log("giveup()")
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.hasModified = false
     wx.navigateBack({})
   },
 

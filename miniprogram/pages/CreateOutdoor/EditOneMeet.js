@@ -10,7 +10,7 @@ Page({
 
     meet: {
       place: "", // 人输入的位置描述
-      date: "当天", 
+      date: "当天",  
       time: "", 
       name: "", // 地图上选择的地名描述 
       latitude: null, // 维度
@@ -122,7 +122,8 @@ Page({
       const self = this
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
       let prevPage = pages[pages.length - 2];
-      let od = pages[pages.length - 3].data.od
+      let prevprevPage = pages[pages.length - 3];
+      let od = prevprevPage.data.od
       console.log(self.data.action)
       console.log(self.data.meet)
       if (self.data.action == "edit") {
@@ -143,6 +144,10 @@ Page({
         })
         prevPage.rebuildClickMeetFun()
       }
+      // 最上面也要记得设置，以便刷新主界面
+      prevprevPage.setData({
+        "od.meets":od.meets
+      })
       
       od.saveItem("meets")
       this.setData({

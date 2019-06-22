@@ -18,40 +18,88 @@ const updateOutdoor=(outdoorid, od, callback)=>{
     if(callback) {
       callback(res)
     }
+  }).catch(err=>{
+    console.log(err)
   })
 }
 
-// 更新Outdoors表中，chat.seen.personid的值
-const updateOutdoorChatSeen = (outdoorid, personid, count) => {
-  console.log("updateOutdoorChatSeen")
+const updateOutdoorItem = (outdoorid, item, value, callback) => {
+  console.log("updateOutdoorItem")
   wx.cloud.callFunction({
     name: 'dbSimpleUpdate', // 云函数名称
     // table,id,item,command(push,pop,shift,unshift,""),value 
     data: {
       table: "Outdoors",
       id: outdoorid,
-      item: "chat.seen." + personid,
+      item: item,
       command: "",
-      value: count
+      value: value
     }
+  }).then(res => {
+    console.log(res)
+    if (callback) {
+      callback(res)
+    }
+  }).catch(err => {
+    console.log(err)
   })
 }
 
-// 在Outdoors表的chat.messages中，追加一条留言
-const pushOutdoorChatMsg = (outdoorid, message)=>{
-  console.log("pushOutdoorChatMsg")
+// 操作Outdoors表中的某个子项
+const opOutdoorItem = (outdoorid, item, value, op, callback) => {
+  console.log("opOutdoorItem")
+  op = op ? op : "" // 默认的""为更新; push,pop,shift,unshift,""
   wx.cloud.callFunction({
     name: 'dbSimpleUpdate', // 云函数名称
-    // table,id,item,command(push,pop,shift,unshift,""),value
+    // table,id,item,command(push,pop,shift,unshift,""),value 
     data: {
       table: "Outdoors",
       id: outdoorid,
-      item: "chat.messages",
-      command: "push",
-      value: message
+      item: item,
+      command: op,
+      value: value
     }
+  }).then(res => {
+    console.log(res)
+    if (callback) {
+      callback(res)
+    }
+  }).catch(err => {
+    console.log(err)
   })
 }
+
+// 更新Outdoors表中，chat.seen.personid的值
+// const updateOutdoorChatSeen = (outdoorid, personid, count) => {
+//   console.log("updateOutdoorChatSeen")
+//   wx.cloud.callFunction({
+//     name: 'dbSimpleUpdate', // 云函数名称
+//     // table,id,item,command(push,pop,shift,unshift,""),value 
+//     data: { 
+//       table: "Outdoors",
+//       id: outdoorid,
+//       item: "chat.seen." + personid,
+//       command: "",
+//       value: count
+//     }
+//   })
+// }
+
+// 在Outdoors表的chat.messages中，追加一条留言
+// const pushOutdoorChatMsg = (outdoorid, message)=>{
+//   console.log("pushOutdoorChatMsg")
+//   wx.cloud.callFunction({
+//     name: 'dbSimpleUpdate', // 云函数名称
+//     // table,id,item,command(push,pop,shift,unshift,""),value
+//     data: {
+//       table: "Outdoors",
+//       id: outdoorid,
+//       item: "chat.messages",
+//       command: "push",
+//       value: message
+//     }
+//   })
+// }
 
 // 更新在Outdoors表的chat
 const updateOutdoorChat = (outdoorid, chat) => {
@@ -339,7 +387,7 @@ const updateOutdoorWebsites=(outdoorid, websites)=>{
 
 ////===========  Persons ===========/////
 // 在Persons表的 caredOutdoors, 最前面追加一条户外活动信息
-const unshiftPersonCared = (personid, outdoorid, title)=>{
+const unshiftPersonCared = (personid, outdoorid, title, callback)=>{
   console.log("unshiftPersonCared")
   wx.cloud.callFunction({
     name: 'dbSimpleUpdate', // 云函数名称
@@ -350,6 +398,14 @@ const unshiftPersonCared = (personid, outdoorid, title)=>{
       item: "caredOutdoors",
       command: "unshift",
       value: { id: outdoorid, title: title }
+    }
+  }).then(res=>{
+    if (callback) {
+      callback()
+    }
+  }).catch(err=>{
+    if (callback) {
+      callback()
     }
   })
 }
@@ -366,6 +422,8 @@ const updatePersonFormids=(personid, formids)=>{
       command: "",
       value: formids
     }
+  }).catch(err=>{
+    console.log(err)
   })
 }
 
@@ -480,10 +538,13 @@ const getServerDate=(callback)=>{
 module.exports = {
   // Outdoors
   updateOutdoor: updateOutdoor, 
+  updateOutdoorItem: updateOutdoorItem, // 更新某个子项
+  opOutdoorItem: opOutdoorItem, // 操作某个子项，op为""时，操作命令为“更新”
+
   updateOutdoorChat: updateOutdoorChat,
-  updateOutdoorChatSeen: updateOutdoorChatSeen,
+  // updateOutdoorChatSeen: updateOutdoorChatSeen,
   updateOutdoorChatQrcode: updateOutdoorChatQrcode,
-  pushOutdoorChatMsg: pushOutdoorChatMsg,
+  // pushOutdoorChatMsg: pushOutdoorChatMsg,
 
   updateOutdoorMembers: updateOutdoorMembers,
   updateOutdoorLeader: updateOutdoorLeader,

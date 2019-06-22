@@ -16,10 +16,14 @@
 
   <van-row>
     <van-col span="9" offset="2">
-      <van-button plain size="large" bind:click="copyDisclaimer">拷贝到剪切板</van-button>
+      <form bindsubmit="copyDisclaimer" report-submit="true">
+        <button form-type="submit" plain size="large" >拷贝到剪切板</button>
+      </form>
     </van-col>
     <van-col span="9" offset="2">
-      <van-button plain size="large" bind:click="saveMyDisclaimer">存为我的条款</van-button>
+      <form bindsubmit="saveMyDisclaimer" report-submit="true">
+        <button form-type="submit" plain size="large" >存为我的条款</button>
+      </form>
     </van-col>
   </van-row>
 </van-panel>

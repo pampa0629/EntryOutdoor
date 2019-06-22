@@ -59,10 +59,11 @@ const personid2openid = (personid, callback) => {
   })
 }
 
-// 给订阅者发“新活动”消息
-const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone) => {
+// 给订阅者发“新活动”消息 
+const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone, callback) => {
   console.log("sendCreateMsg2Subscriber")
-  dbPersons.doc(personid).get().then(res => {
+  dbPersons.doc(personid).get()
+  .then(res => {
     var openid = res.data._openid
     var tempid = "TpeH_K6s2zQSk49oJT3koMSlaSXQIoZjatxB4Wd_dBE"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -75,11 +76,20 @@ const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone) => {
       "keyword3": { // 联系电话
         "value": phone
       },
-    }
+    } 
     var page = buildPage("EntryOutdoor", outdoorid)
     fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
+      sendMessage(openid, tempid, formid, page, data, res=>{
+        if (callback) {
+          callback(res)
+        }
+      })
     })
+  }).catch(err=>{
+    console.log(err)
+    if (callback) {
+      callback(err)
+    }
   })
 }
 
@@ -229,8 +239,12 @@ const buildPage = (page, outdoorid) => {
   return result
 }
 
-const buildPage2 = (page1, page2, outdoorid) => {
+const buildPage2 = (page1, page2, outdoorid, items) => {
   var result = "pages/" + page1 + "/" + page2 + "?outdoorid=" + outdoorid
+  items = items ? items:[]
+  for (var i in items) {
+    result += "&" + items[i].key + "=" + items[i].value
+  }
   return result
 }
 
@@ -339,8 +353,8 @@ const sendChatMsg2Member = (personid, title, outdoorid, nickName, phone, content
       "keyword4": { // 电话
         "value": phone
       }
-    }
-    var page = buildPage("EntryOutdoor", outdoorid)
+    } 
+    var page = buildPage2("AboutOutdoor", "ChatOutdoor", outdoorid, [{key:"sendWxnotice",value:"true"},{key:"nickName",value:nickName}] )
 
     fetchPersonFormid(personid, res.data.formids, formid => {
       console.log(formid)
@@ -369,7 +383,8 @@ const sendRejectMsg2Member = (personid, title, outdoorid, nickName, phone, conte
         "value": phone
       }
     }
-    var page = buildPage("EntryOutdoor", outdoorid)
+    //var page = buildPage("EntryOutdoor", outdoorid)
+    var page = buildPage2("AboutOutdoor", "ChatOutdoor", outdoorid, [{ key: "sendWxnotice", value: "true" }])
 
     fetchPersonFormid(personid, res.data.formids, formid => {
       console.log(formid)
@@ -378,89 +393,64 @@ const sendRejectMsg2Member = (personid, title, outdoorid, nickName, phone, conte
   })
 }
 
-/* 得到活动的form id
-const fetchOutdoorFormid = (outdoorid, callback) => {
-  // 得到formids
-  loadOutdoorFormids(outdoorid, formids => {
-    // 找到第一个能用的formid，把前面没用的删掉
-    findFirstFormid(formids, true, result => {
-      // 最后调用云函数写回去 
-      cloudfun.updateOutdoorFormids(outdoorid, result.formids)
-      if (callback) {
-        callback(result.formid)
-      }
-    })
-  })
-}*/
-
 // 清理过期的formids，回调返回可用的formids
 const clearPersonFormids = (personid, callback) => {
   dbPersons.doc(personid).get().then(res => {
     var oldCount = res.data.formids
-    findFirstFormid(res.data.formids, false, resFormids => {
-      if (oldCount > resFormids.formids.length) {
-        cloudfun.updatePersonFormids(personid, resFormids.formids)
-      }
-      if (callback) {
-        callback(resFormids.formids)
-      }
-    })
+    var resFormids = findFirstFormid(res.data.formids, false)
+    if (oldCount > resFormids.formids.length) {
+      cloudfun.updatePersonFormids(personid, resFormids.formids)
+    }
+    if (callback) {
+      callback(resFormids.formids)
+    }
   })
 }
 
-// 找到第一个能用的formid， 把前面没用的删掉（isDelFind表示是否删除找到的id）
-const findFirstFormid = (formids, isDelFind, callback) => {
+// 找到第一个能用的formid， 把前面没用的删掉
+// isDelFind： 是否删除找到的id
+const findFirstFormid = (formids, isDelFind) => {
   console.log("findFirstFormid")
+
+  var formid = null
   if (formids) {
-    var formid = ""
-    var hasFind = false
-    var findIndex = -1
     console.log("before find, formids are: ")
     console.log(formids)
-    formids.forEach((item, index) => {
-      if (!hasFind && item.expire > (new Date()).getTime()) {
-        formid = item.formid
-        hasFind = true
-        findIndex = index
+    for(var i in formids) {
+      if (formids[i].expire > (new Date()).getTime()) {
+        formid = formids[i].formid
         console.log("find formid, is: " + formid)
-        var delCount = isDelFind ? (findIndex + 1) : findIndex
+        var delCount = isDelFind ? (i + 1) : i
         formids.splice(0, delCount)
-        if (callback) {
-          callback({
-            "formid": formid,
-            "formids": formids
-          })
-          return // 返回
-        }
-      } else if (!hasFind && index == formids.length - 1) { // 到最后仍然没找到
-        formids = [] // 清空
-        if (callback) {
-          callback({
-            "formid": "no find formid",
-            "formids": []
-          })
-          return // 返回
-        }
+        break 
       }
-    })
+    }
   }
+
+  if (!formid) { // 没找到，则返回空
+    formids = [] // 清空
+  }
+  return { formid: formid, formids: formids}
 }
 
 // 得到某人的form id
 const fetchPersonFormid = (personid, formids, callback) => {
   console.log("fetchPersonFormid")
+  var formid = null 
   // 这里得调用云函数才行了，拿到第一个合格的formid，不合格的全部删掉 
-  findFirstFormid(formids, true, result => {
+  if (formids && formids.length>0) {
+    var result = findFirstFormid(formids, true)
+    formid = result.formid
     console.log("find result:")
     console.log(result)
-
     // 最后调用云函数写回去
     cloudfun.updatePersonFormids(personid, result.formids)
-    if (callback) {
-      callback(result.formid)
-    }
-  })
-}
+  }
+
+  if (callback) {
+    callback(formid)
+  }
+ }
 
 // 给自己发报名退出消息
 const sendQuitMsg2Self = (personid, outdoorid, title, date, leader, nickName, remark) => {
@@ -544,7 +534,7 @@ const sendStatusChangeMsg2Member = (personid, outdoorid, title, nickName, status
 }
 
 // 给特定openid发特定id的模板消息
-const sendMessage = (openid, tempid, formid, page, data) => {
+const sendMessage = (openid, tempid, formid, page, data, callback) => {
   console.log("sendMessage")
   console.log("openid: " + openid)
   console.log("tempid: " + tempid)
@@ -568,8 +558,17 @@ const sendMessage = (openid, tempid, formid, page, data) => {
         },
       }).then(res => {
         console.log(res)
+        if (callback) {
+          callback(res)
+        }
+      }).catch(err=>{
+        if (callback) {
+          callback(err)
+        }
       })
     })
+  } else if (callback) {
+    callback()
   }
 }
 

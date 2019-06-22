@@ -668,18 +668,23 @@ Page({
   },
 
   tapCloud() {
-    // objs: {
-    //   id: "a",
-    //     id2: {
-      //     etc: {
-      //       test: "b"
-      //     }
-    //   },
-    //   id3: "c"
-    // }
-    var a = this.data.objs.id2
-    a.etc = "d" 
-    console.log(this.data.objs)
+    var oldobjs= {
+      id1: { a: "a" },
+      id2: { a: "a" },
+      id3: { a: "a" },
+      id4: { a: "a" },
+    }
+    var objs = Object.getOwnPropertyNames(oldobjs)
+    console.log(objs)
+
+    console.log(objs.length)
+    console.log(objs[0])
+    console.log(objs.id2)
+    console.log(objs["id4"])
+    delete oldobjs[objs[2]]
+    console.log(oldobjs)
+    console.log(objs.length)
+    console.log(objs)
 
   },
 

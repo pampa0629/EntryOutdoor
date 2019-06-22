@@ -5,7 +5,7 @@ const person = require('../../utils/person.js')
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
-const dbPersons = db.collection('Persons')
+const dbPersons = db.collection('Persons') 
   
 Page({ 
 

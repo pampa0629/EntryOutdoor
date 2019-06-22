@@ -12,7 +12,7 @@ const dbOutdoors = db.collection('Outdoors')
 const createTitle = (title, nickName) => {
   var result = "" // 2018.09.16（周日）大觉寺一日轻装1.0强度休闲游； 
   // 日期 
-  if (title.date) {
+  if (title.date) { 
     result += title.date
     result += "(" + util.getDay(title.date) + ")"
   } else {
@@ -372,73 +372,74 @@ const buildCostInfo = (traffic) => {
 }
 
 // 移除某个队员（自己退出，或者领队驳回报名），回调返回新成员名单
-const removeMember = (outdoorid, personid, selfQuit, callback) => {
-  console.log("odtools.js removeMember fun")
+// const removeMember = (outdoorid, personid, selfQuit, callback) => {
+//   console.log("odtools.js removeMember fun")
 
-  // 先重新获取members，再删除personid，再调用云函数
-  // 刷新一下队员列表
-  dbOutdoors.doc(outdoorid).get()
-    .then(res => {
-      // 先找到personid
-      var selfIndex = -1
-      for (var i = 0; i < res.data.members.length; i++) {
-        if (res.data.members[i].personid == personid) {
-          selfIndex = i
-          break
-        }
-      }
-      if (selfIndex == -1) { // 找不到就直接返回
-        if (callback) {
-          callback(res.data.members)
-        }
-        return
-      }
+//   // 先重新获取members，再删除personid，再调用云函数
+//   // 刷新一下队员列表
+//   dbOutdoors.doc(outdoorid).get()
+//     .then(res => {
+//       // 先找到personid
+//       var selfIndex = -1
+//       for (var i = 0; i < res.data.members.length; i++) {
+//         if (res.data.members[i].personid == personid) {
+//           selfIndex = i
+//           break
+//         }
+//       }
+//       if (selfIndex == -1) { // 找不到就直接返回
+//         if (callback) {
+//           callback(res.data.members)
+//         }
+//         return
+//       }
 
-      const self = res.data.members[selfIndex]
-      console.log(self)
-      // 退出的时候应检查一下，如果自己不是替补，则把第一个替补改为“报名中”
-      var changeStatus = false;
-      if (self.entryInfo.status == "占坑中" || self.entryInfo.status == "报名中") {
-        changeStatus = true;
-        // 这里要判断一下，若超过人数后面第一个队员不是替补，则不能change
-        if (res.data.limits && res.data.limits.maxPerson
-          && res.data.members.length > res.data.limits.personCount
-          && res.data.members[res.data.limits.personCount].entryInfo.status != "替补中") {
-          changeStatus = false;
-        }
-        console.log("changeStatus: " + changeStatus)
-      }
-      // 给自己发模板消息 
-      var remark = ""
-      if (selfQuit) {
-        remark = "您已自行退出本次活动。您仍可以点击进入小程序继续报名。"
-      } else {
-        remark = "您已被领队驳回报名。若仍有意参加，请参考领队驳回理由，并联系领队确认情况。"
-      }
-      template.sendQuitMsg2Self(personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, self.userInfo.nickName, remark)
-      // 删除自己的
-      res.data.members.splice(selfIndex, 1)
+//       const self = res.data.members[selfIndex]
+//       console.log(self)
+//       // 退出的时候应检查一下，如果自己不是替补，则把第一个替补改为“报名中”
+//       var changeStatus = false;
+//       if (self.entryInfo.status == "占坑中" || self.entryInfo.status == "报名中") {
+//         changeStatus = true;
+//         // 这里要判断一下，若超过人数后面第一个队员不是替补，则不能change
+//         // todo 考虑附加队员的影响
+//         if (res.data.limits && res.data.limits.maxPerson
+//           && res.data.members.length > res.data.limits.personCount
+//           && res.data.members[res.data.limits.personCount].entryInfo.status != "替补中") {
+//           changeStatus = false;
+//         }
+//         console.log("changeStatus: " + changeStatus)
+//       }
+//       // 给自己发模板消息 
+//       var remark = ""
+//       if (selfQuit) {
+//         remark = "您已自行退出本次活动。您仍可以点击进入小程序继续报名。"
+//       } else {
+//         remark = "您已被领队驳回报名。若仍有意参加，请参考领队驳回理由，并联系领队确认情况。"
+//       }
+//       template.sendQuitMsg2Self(personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, self.userInfo.nickName, remark)
+//       // 删除自己的
+//       res.data.members.splice(selfIndex, 1)
 
-      // 把第一个替补改为“报名中”
-      if (changeStatus) {
-        res.data.members.forEach((item, index) => {
-          if (changeStatus && item.entryInfo.status == "替补中") {
-            item.entryInfo.status = "报名中"
-            changeStatus = false // 自己退出，只能补上排在最前面的替补
-            // 给替补上的队员发模板消息
-            template.sendEntryMsg2Bench(item.personid, outdoorid, res.data.title.whole, item.userInfo.nickName)
-          }
-        })
-      }
-      console.log(res.data.members)
-      // 云函数
-      cloudfun.updateOutdoorMembers(outdoorid, res.data.members, nouse => {
-        if (callback) {
-          callback(res.data.members)
-        }
-      })
-    })
-}
+//       // 把第一个替补改为“报名中”
+//       if (changeStatus) {
+//         res.data.members.forEach((item, index) => {
+//           if (changeStatus && item.entryInfo.status == "替补中") {
+//             item.entryInfo.status = "报名中"
+//             changeStatus = false // 自己退出，只能补上排在最前面的替补
+//             // 给替补上的队员发模板消息
+//             template.sendEntryMsg2Bench(item.personid, outdoorid, res.data.title.whole, item.userInfo.nickName)
+//           }
+//         })
+//       }
+//       console.log(res.data.members)
+//       // 云函数
+//       cloudfun.updateOutdoorMembers(outdoorid, res.data.members, nouse => {
+//         if (callback) {
+//           callback(res.data.members)
+//         }
+//       })
+//     })
+// }
 
 // 超过占坑截止时间（外部判断），则清退所有占坑队员，后续替补
 const removeOcuppy = (outdoorid, callback) => {
@@ -555,7 +556,7 @@ const getChatStatus = (personid, nickName, chat, callback) => {
       callback(status)
     }
   }
-}
+} 
 
 const buildChatMessage = (msg) => {
   var message = {}
@@ -601,7 +602,7 @@ const drawShareCanvas = (canvas, od, callback) => {
   })
 
   // 人数
-  var countText = "已报名人数：" + od.members.length
+  var countText = "已参加人数：" + (od.members.length+od.addMembers.length)
   if (od.limits.maxPerson) {
     countText += "，本活动限" + od.limits.personCount + "人"
   } else {
@@ -673,6 +674,15 @@ const getDefaultWebsites = () => {
   }
 }
 
+// 是否报名已满员；满员后就只能替补，不能报名/占坑
+const entryFull =  (limits, members, addMembers)=> {
+  var full = false
+  if (limits.maxPerson && (members.length + addMembers.length) >= limits.personCount) {
+    full = true
+  }
+  return full
+}
+
 
 module.exports = {
   createTitle: createTitle, // 生成活动标题
@@ -682,13 +692,14 @@ module.exports = {
   loadEquipments: loadEquipments, // 推荐的装备
   buildCarInfo: buildCarInfo, // 构建车辆信息
   buildCostInfo: buildCostInfo, // 构建费用信息
+  entryFull: entryFull, // 是否已经满员
 
   isEntriedStatus: isEntriedStatus, // 是否属于报名状态，包括报名中、占坑中和替补中
 
   buildRemainText: buildRemainText, // 构造剩余时间提示文字
   calcRemainTime: calcRemainTime, // 计算占坑或报名的剩余时间
 
-  removeMember: removeMember, // 移除某个队员（自己退出，或者领队驳回报名）
+  // removeMember: removeMember, // 移除某个队员（自己退出，或者领队驳回报名）
   removeOcuppy: removeOcuppy, // 清退占坑队员
 
   getChatStatus: getChatStatus, // 判断留言的状态：self、new等

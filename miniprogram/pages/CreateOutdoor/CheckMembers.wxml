@@ -24,21 +24,31 @@
 />
   <van-row>
     <van-col span="6" offset="1">
-      <van-button plain size="large" bind:click="onLookCareer">查看履历</van-button>
+      <form bindsubmit="onLookCareer" report-submit="true" >
+        <button form-type="submit" plain class="bnt_font">查看履历</button>
+      </form>
+    </van-col> 
+    <van-col span="6" offset="1">
+      <form bindsubmit="onChatMessage" report-submit="true" >
+        <button form-type="submit" plain class="bnt_font">留言询问</button>
+      </form>
     </van-col>
     <van-col span="6" offset="1">
-      <van-button plain size="large" bind:click="onChatMessage">留言询问</van-button>
-    </van-col>
-    <van-col span="6" offset="1">
-      <van-button plain size="large" bind:click="onCallPhone">拨打电话</van-button>
+      <form bindsubmit="onCallPhone" report-submit="true" >
+        <button form-type="submit" plain class="bnt_font">拨打电话</button>
+      </form>
     </van-col>
   </van-row>
   <van-row>
     <van-col span="6" offset="1">
-      <van-button plain size="large" type="danger" bind:click="onReject">驳回报名</van-button>
+      <form bindsubmit="onReject" report-submit="true" >
+        <button form-type="submit" plain type='warn' class="bnt_font">驳回报名</button>
+      </form>
     </van-col>
     <van-col span="6" offset="8">
-      <van-button plain size="large" bind:click="closeCheckPopup">取消</van-button>
+      <form bindsubmit="closeCheckPopup" report-submit="true" >
+        <button form-type="submit" plain class="bnt_font">取消</button>
+      </form>
     </van-col>
   </van-row>
 </van-popup>
@@ -85,17 +95,18 @@
 <van-switch-cell title="开启附加队员" wx:if="{{addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
 <block wx:if="{{openAdd || addMembers.length>0 || hasModified}}">
   <van-panel>
-  	<van-cell slot="header" title-class="redtitle" title="附加队员（共{{addMembers.length}}人）" label="领队可增删非小程序报名队员"></van-cell>
+  	<van-cell slot="header" title-class="redtitle" title="附加队员列表（共{{addMembers.length}}人）" label="领队可增删非小程序报名队员"></van-cell>
     <van-field wx:for="{{addMembers}}" wx:key="*this" value="{{item}}" readonly use-button-slot>
       <van-button slot="button" plain size="small" type="warning" bind:click="delAddMembers{{index}}">删除</van-button>
     </van-field>
   </van-panel>
 
+  <van-tag type="danger" plain wx:if="{{entryFull}}">活动人数已满，领队可放宽人数限制来添加新队员</van-tag>
   <van-field label="队员信息" placeholder="请输入要增加的队员信息" value="{{addMember}}" clearable bind:change="changeOneMember" use-button-slot icon="arrow-left" bind:click-icon="copyAddMember">
-    <van-button slot="button" disabled="{{!addMember}}" plain size="small" type="primary" bind:click="addOneMember">增加</van-button>
+    <van-button slot="button" disabled="{{!addMember || entryFull}}" plain size="small" type="primary" bind:click="addOneMember">增加</van-button>
   </van-field> 
 </block>
-
+ 
 <block wx:if="{{openAdd || addMembers.length>0 || hasModified}}">
   <!-- 保存和返回按钮 -->
   <van-row>

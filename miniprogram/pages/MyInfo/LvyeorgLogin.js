@@ -138,10 +138,10 @@ Page({
   // 修改MyInfo中的按钮中的username名称
   setMyInfoUsername:function(res){
     console.log(res)
-    const self = this;
+    const self = this
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
-    if (prevPage.setLoginLvyeorg){ // 判断是否为MyInfo页面
+    if (prevPage && prevPage.setLoginLvyeorg){ // 判断是否为MyInfo页面
       prevPage.setLoginLvyeorg(res)
     }
   },

@@ -26,27 +26,16 @@
 
 <!--图标按钮-->
 <van-row>
-  <!--报名截止/继续报名--> 
-  <van-col span="2" offset="1">
-    <view wx:if="{{od.status=='已发布'||od.status=='已成行'}}" style="flex-direction:column">
-      <van-icon name="stop" size="24px" color="#1aad19" bind:click="stopEntry"></van-icon>
-      <view class="icon_tip">截止</view> 
-    </view>
-    <view wx:if="{{od.status=='报名截止'}}" style="flex-direction:column">
-      <van-icon name="play" size="24px" color="#1aad19" bind:click="continueEntry"></van-icon>
-      <view class="icon_tip">继续</view>
-    </view>
-  </van-col>
   <!--成行-->
   <van-col span="2" offset="1">
-    <view wx:if="{{od.status=='已发布'||od.status=='报名截止'||od.status=='已成行'}}" style="flex-direction:column">
+    <view wx:if="{{od.status=='已发布'}}" style="flex-direction:column">
       <van-icon name="passed" size="24px" color="#1aad19" bind:click="confirmOutdoor"></van-icon>
       <view class="icon_tip">成行</view>
     </view>
   </van-col>
   <!--活动取消/活动恢复-->
   <van-col span="2" offset="1">
-    <view wx:if="{{od.status=='已发布'||od.status=='报名截止'||od.status=='已成行'}}" style="flex-direction:column">
+    <view wx:if="{{od.status=='已发布'||od.status=='已成行'}}" style="flex-direction:column">
       <van-icon name="close" size="24px" color="#1aad19" bind:click="cancelOutdoor"></van-icon>
       <view class="icon_tip">取消</view>
     </view>
@@ -162,44 +151,58 @@
 <van-cell title="免责条款" title-class="redtitle" label="户外有风险" value="点击编辑免责条款" is-link url="EditDisclaimer" border="{{false}}" />
 
 <!--审核和授权队员-->
-<van-cell title="审核队员和授权职务" title-class="redtitle" label="已报名正式队员{{od.members.length-1}}人" value="点击审核与授权" is-link url="CheckMembers" border="{{false}}" />
+<van-cell title="审核队员和授权职务" title-class="redtitle" label="已有队员{{od.members.length+od.addMembers.length}}人" value="点击审核与授权" is-link url="CheckMembers" border="{{false}}" />
 
 <!--活动报名状态-->
 <van-tag type="primary" plain>活动状态：{{od.status}}</van-tag>
-<van-tag wx:if="{{od.status!='拟定中'}}" type="primary" plain>参加活动人数：{{od.members.length}}</van-tag>
-<van-tag wx:if="{{!canPublish&&status=='拟定中'}}" plain type="danger">\n必须设定带(*)号的内容才能发布活动</van-tag>
+<block wx:if="{{!canPublish&&od.status=='拟定中'}}">
+  <van-tag plain type="danger">\n必须设置带(*)号的内容才能发布活动</van-tag>
+  <van-tag plain type="danger" wx:if="{{!od.title.place}}">\n您还未设置活动地点</van-tag>
+  <van-tag plain type="danger" wx:if="{{!od.title.date}}">\n您还未设置活动日期</van-tag>
+  <van-tag plain type="danger" wx:if="{{!od.meets.length}}">\n您还未设置集合地点</van-tag>
+  <van-tag plain type="danger" wx:if="{{!(myself.entryInfo.meetsIndex>=0)}}">\n您还未选择集合地点</van-tag>
+</block>
 
 <!--故意空白，防止遮挡-->
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
-<van-row class="fix">
-  <!-- 发布活动或者新建活动 -->
-  <van-col span="9" offset="2">
-    <form bindsubmit="publishOutdoor" report-submit="true" wx:if="{{od.status=='拟定中'}}">
-      <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布活动</button>
-    </form>
-    <form bindsubmit="totalNewOutdoor" report-submit="true" wx:else>
-      <button form-type="submit" disabled="{{!canPublish}}" size="large">全新创建</button>
-    </form>
-  </van-col>
-  <!-- 保存草稿或者保存修改 -->
-  <van-col span="9" offset="2">
-    <form bindsubmit="saveDraft" report-submit="true" wx:if="{{od.status=='拟定中'}}">
-      <button form-type="submit"  disabled="{{!hasModified}}" type="primary">保存草稿</button>
-    </form>
-    <form bindsubmit="saveModified" report-submit="true" wx:if="{{od.status=='已发布'}}">
-        <button form-type="submit" disabled="{{!hasModified}}" type="primary">保存修改</button>
+<block wx:if="{{od.status=='拟定中'}}">
+<!--故意空白，防止遮挡-->
+  <van-cell title="  " border="{{false}}" />
+  <van-cell title="  " border="{{false}}" />
+  <van-cell title="  " border="{{false}}" />
+
+  <van-row class="fix2" >
+    <van-col span="6" offset="1">
+      <form bindsubmit="publishOutdoor" report-submit="true" >
+        <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布</button>
       </form>
+    </van-col>
+    <van-col span="6" offset="2">
+      <form bindsubmit="clearOutdoor" report-submit="true" >
+        <button form-type="submit" type="warn">清空</button>
+      </form>
+    </van-col>
+    <van-col span="6" offset="2">
+      <form bindsubmit="deleteOutdoor" report-submit="true" >
+        <button form-type="submit" type="warn">删除</button>
+      </form>
+    </van-col>
+  </van-row>
+</block>
+
+  <!-- 保存修改 -->
+<van-row class="fix">
+  <van-col span="22" offset="1">
+    <form bindsubmit="saveModified" report-submit="true">
+      <button form-type="submit" disabled="{{!hasModified}}" type="primary">保存修改</button>
+    </form>
   </van-col>
 </van-row>
 
 <!--画布-->
-<!-- <view style="width:0px;height:0px;overflow:hidden;">
-  <canvas style="width: 500px; height: 400px;" canvas-id="shareCanvas"/>
-  todo <canvas style="width: 720px; height: 1280px;" canvas-id="circleCanvas"/>
-</view> --> 
 <view style="position:fixed;top:9999rpx;">
   <canvas style="width:500px;height:400px;" canvas-id="shareCanvas"></canvas>
 </view>

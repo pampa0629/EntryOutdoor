@@ -3,7 +3,7 @@
   <van-picker columns="{{ members }}" show-toolbar title="选择要留言的队员"  bind:cancel="onCancelMembers" bind:confirm="onConfirmMembers"/>
 </van-popup> 
  
-<!--活动标题-->
+<!--活动标题--> 
 <van-row>
   <van-col span="20"> 
     <van-notice-bar scrollable="{{true}}" text="{{title}}" />
@@ -19,6 +19,14 @@
     </view>
   </van-col>
 </van-row>
+
+<!-- <!-- <van-cell title="{{limits.maxPerson?'限制人数':'不限制人数'}}" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
+    <van-checkbox value="{{limits.maxPerson}}"/>
+  </van-cell>     -->
+
+<van-cell title="@人 的留言{{sendWxnotice?'同时':'不'}}发送微信服务消息" title-width="80%" clickable  bind:click="changeSendWxnotice">
+  <van-checkbox value="{{sendWxnotice}}"/>
+</van-cell>
 
 <!--刷新提示-->
 <van-tag wx:if="{{!hasPullFlush}}" size="large" type="success">下拉即时刷新留言</van-tag>
@@ -50,10 +58,25 @@
 <van-cell title="  " border="{{false}}" />
 
 <!--回复留言-->
-<view class="page-tail">
+<!-- <view class="page-tail">
   <view class="resp-input-cell">
     <input class="resp-input" type="text" placeholder="说点什么吧..." value="{{message.msg}}" bindinput="inputChat" focus />
-  </view>
+  </view> 
   <view class="resp-btn" bindtap="submitChat">留言</view>
+</view> -->
+
+<view class="page-tail">
+  <view class="resp-input-cell">
+    <input class="resp-input" type="text" placeholder="试试输入@..." value="{{message.msg}}" bindinput="inputChat" focus />
+  </view> 
+  <!-- <view > -->
+    <form bindsubmit="submitChat" class="resp-btn" report-submit="true" >
+      <button form-type="submit" type="primary" size='mini'>留言</button>
+    </form>
+  <!-- </view> -->
 </view>
 
+
+<!-- <form bindsubmit="deleteOutdoor" report-submit="true" >
+  <button form-type="submit" type="warn">删除</button>
+</form> -->

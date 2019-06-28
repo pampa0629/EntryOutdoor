@@ -628,7 +628,7 @@ const drawShareCanvas = (canvas, od, callback) => {
       }
     })
   })
-}
+} 
 
 const setCFO = (outdoorid, cfo) => {
   dbOutdoors.doc(outdoorid).get().then(res => {

@@ -8,7 +8,7 @@ Page({
     MeetDates: ["前三天", "前两天", "前一天", "当天"],
     meetDatesIndex: 3, // 默认是当天集合
 
-    meet: {
+    meet: { 
       place: "", // 人输入的位置描述
       date: "当天",  
       time: "", 

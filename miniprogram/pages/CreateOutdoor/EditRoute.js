@@ -79,7 +79,7 @@ Page({
   },
 
   onLoad: function(options) {
-    console.log("onLoad")
+    console.log("onLoad()")
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
@@ -93,6 +93,8 @@ Page({
         hasModified: true,
       })
     }
+    console.log("route: ")
+    console.log(self.data.route)
     self.rebuildClickStopFun()
 
     if (!self.data.route.trackSites) {

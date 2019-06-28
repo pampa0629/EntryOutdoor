@@ -498,7 +498,7 @@ const buildEntryNotice = (qrcode, first, allowSiteEntry) => {
 
 // 构建网站报名信息; isQuit:是否为退出活动； isPrint：是否为集中打印名单时调用
 const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
-  console.log("lvyeorg.js buildEntryMessage")
+  console.log("lvyeorg.js buildEntryMessage") 
   console.log(userInfo)
   var message = ""
   var title = ""
@@ -539,7 +539,8 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
 
 // 发布活动
 const addThread = function(outdoorid, data, isTesting, callback) {
-  console.log("addThread fun")
+  console.log("addThread()")
+  console.log("isTesting:" + isTesting)
   var temp = []
   uploadImages(outdoorid, data.brief.pics, temp, resAids => {
     console.log("resAids is:")

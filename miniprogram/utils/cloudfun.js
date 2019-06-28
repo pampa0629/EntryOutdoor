@@ -7,7 +7,7 @@ const dbOutdoors = db.collection('Outdoors')
 const _ = db.command
   
 const updateOutdoor=(outdoorid, od, callback)=>{
-  console.log("updateOutdoor")
+  console.log("updateOutdoor") 
   wx.cloud.callFunction({ 
     name: 'updateOutdoor', // 云函数名
     data: { 

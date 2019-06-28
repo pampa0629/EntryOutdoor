@@ -65,7 +65,7 @@
   <view class="resp-btn" bindtap="submitChat">留言</view>
 </view> -->
 
-<view class="page-tail">
+<view class="page-tail"> 
   <view class="resp-input-cell">
     <input class="resp-input" type="text" placeholder="试试输入@..." value="{{message.msg}}" bindinput="inputChat" focus />
   </view> 

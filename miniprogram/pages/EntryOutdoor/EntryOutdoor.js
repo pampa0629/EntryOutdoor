@@ -567,7 +567,8 @@ Page({
   doEntry(status, formid) {
     console.log("doEntry(): " + status)
     const self = this
-    template.savePersonFormid(this.data.personid, formid, null)
+    console.log("personid: " + app.globalData.personid)
+    template.savePersonFormid(app.globalData.personid, formid, null)
     if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg) {
       self.data.entryTemp = {
         status: status,
@@ -585,7 +586,7 @@ Page({
   // 退出
   tapQuit: function(e) {
     console.log("tapQuit()")
-    template.savePersonFormid(this.data.personid, e.detail.formId, null)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this;
     wx.showModal({
       title: '确定退出？',
@@ -658,9 +659,9 @@ Page({
     dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       self.setData({
         "od.members": res.data.members,
-        "od.addMembers": res.data.addMembers,
+        "od.addMembers": res.data.addMembers ? res.data.addMembers:[],
         "od.limits": res.data.limits,
-        entryFull:odtools.entryFull(self.data.limits, self.data.member, self.data.addMembers),
+        entryFull:odtools.entryFull(self.data.od.limits, self.data.od.members, self.data.od.addMembers),
       })
       self.setChat(res.data.chat)
       wx.hideNavigationBarLoading();

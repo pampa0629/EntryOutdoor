@@ -31,3 +31,4 @@
 <van-button size="large" bind:click="tapChooseFile">选择文件</van-button>
 <van-button size="large" bind:click="tapOD">{{od.title.whole}}</van-button> 
 <van-button size="large" bind:click="tapCloud">云存储</van-button>
+<van-button size="large" bind:click="tapDBArray">数据库数组</van-button>

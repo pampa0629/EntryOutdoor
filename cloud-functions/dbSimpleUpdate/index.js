@@ -14,7 +14,7 @@ exports.main = async (event, context) => {
     if (!event.command) {
       return await doc.update({
         data: {
-          [item]: event.value //更新
+          [item]: event.value //更新 
         }
       })
     } else if(event.command == "push") {

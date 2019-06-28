@@ -688,4 +688,31 @@ Page({
 
   },
 
+  tapDBArray() {
+    console.log("tapDBArray()")
+
+    var route= {
+      wayPoints: [{ id: "1" }], // 途经点
+      trackFiles: [], // 轨迹文件 
+      trackSites: [{ id: "2" }], // 轨迹网站
+    }
+
+    var name = "route"
+
+    var test = { arrs: [{ id: "1" }, { id: "2" }], arrs2: [{ id: "1" }, { id: "2" }]}
+    console.log(test)
+
+
+    wx.cloud.callFunction({
+      name: 'dbSimpleUpdate', // 云函数名称
+      data: {
+        table: "Temp",
+        id: app.globalData.personid,
+        item: name,
+        command: "",
+        value: route
+      }
+    })
+  },
+
 });

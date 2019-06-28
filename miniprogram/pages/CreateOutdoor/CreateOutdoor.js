@@ -464,7 +464,10 @@ Page({
       "od.status": "已发布"
     })
     // 第二步：调用 od 的publish
-    this.data.od.publish(res => {
+    console.log("this.data.myself:")
+    console.log(this.data.myself)
+    this.data.od.publish(this.data.myself, res => { 
+      console.log(this.data.od)
       // 第三步：更新到persons表
       self.updatePersonMyoutdoors()
       // 第四步：给自己的订阅者发通知

@@ -45,6 +45,8 @@ const savePersonFormid = (personid, formid, callback) => {
       if (callback) {
         callback(result)
       }
+    }).catch(err=>{
+      console.log(err)
     })
   }
 }
@@ -183,7 +185,7 @@ const sendConfirmMsg2Member = (personid, outdoorid, title, count, leader) => {
 
 // 给队员发换领队的消息
 const sendResetMsg2Member=(outdoorid, personid, title, oldLeader, newLeader)=>{
-  console.log("sendResetMsg2Member")
+  console.log("sendResetMsg2Member") 
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
     var tempid = "gE0pItk53ho16bMoJdjuuPPua-Ev2THvtiVe8KksEMU"

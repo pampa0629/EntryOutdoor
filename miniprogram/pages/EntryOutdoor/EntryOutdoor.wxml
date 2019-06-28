@@ -124,8 +124,8 @@
 
 <!--队员列表-->
 <van-cell-group>
-  <van-cell wx:if="{{od.limits.maxPerson}}" title="队员列表" title-class="redtitle" label="已报名{{od.members.length+od.addMembers.length}}人（限{{od.limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
-  <van-cell wx:else title="队员列表" title-class="redtitle" label="已报名{{od.members.length+od.addMembers.length}}人（不限人数）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
+  <van-cell wx:if="{{od.limits.maxPerson}}" title="队员列表" title-class="redtitle" label="已有{{od.members.length+od.addMembers.length}}人（限{{od.limits.personCount}}人）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
+  <van-cell wx:else title="队员列表" title-class="redtitle" label="已有{{od.members.length+od.addMembers.length}}人（不限人数）" value="点击查看队员名单" is-link url="LookMembers" border="{{false}}" />
 </van-cell-group>
 
 <!--集合地点-->
@@ -196,7 +196,7 @@
   </van-col>
   <!--报名-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapEntry" report-submit="true" wx:if="{{!entryFull && (entryInfo.status=='浏览中' || entryInfo.status=='占坑中') && remains.entry.time>=0}}">
+    <form bindsubmit="tapEntry" report-submit="true" wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">
       <button form-type="submit" type="primary">报名</button>
     </form>
   </van-col>

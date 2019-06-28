@@ -23,7 +23,7 @@ Page({
       } else {
         item.entryInfo.knowWay = "不认路"
       }
-      console.log(item.personid + " " + item.userInfo.nickName + " "  + item.userInfo.phone)
+      console.log(item)
     })
     self.setData({
       members: self.data.members,

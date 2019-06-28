@@ -175,7 +175,7 @@
   <van-cell title="  " border="{{false}}" />
 
   <van-row class="fix2" >
-    <van-col span="6" offset="1">
+    <van-col span="6" offset="1"> 
       <form bindsubmit="publishOutdoor" report-submit="true" >
         <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布</button>
       </form>

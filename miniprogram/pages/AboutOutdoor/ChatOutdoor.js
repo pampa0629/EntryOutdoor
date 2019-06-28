@@ -70,6 +70,7 @@ Page({
 
   // 把org上的留言消息刷新到留言上
   flushLvyrorg2Chat(outdoorid, websites, leader) {
+    console.log("flushLvyrorg2Chat()")
     const self = this
     if (websites && websites.lvyeorg && websites.lvyeorg.tid) {
       self.data.tid = websites.lvyeorg.tid
@@ -77,7 +78,6 @@ Page({
       var begin = websites.lvyeorg.chatPosition ? websites.lvyeorg.chatPosition : 0
       lvyeorg.loadPosts(self.data.tid, begin, posts => {
         if (posts.length > 0) {
-          console.log(posts)
           posts.forEach((item, index) => {
             // 确认不是小程序发的帖子，才能作为留言
             // 先把 </div> 前面的内容去掉
@@ -85,8 +85,7 @@ Page({
             if (findDiv >= 0) {
               item.message = item.message.substring(findDiv)
             }
-            console.log(item)
-            console.log("find:" + item.message.indexOf("户外报名"))
+            // console.log(item)
             if (item.message.indexOf("户外报名") < 0 && item.message.indexOf("小程序") < 0) {
               var message = {
                 msg: "(来自绿野org)：" + item.subject + item.message + " @" + leader,
@@ -105,9 +104,9 @@ Page({
             chat: self.data.chat
           })
           websites.lvyeorg.chatPosition = posts[posts.length - 1].position
-          console.log("after, websites.lvyeorg.chatPosition is:" + websites.lvyeorg.chatPosition)
           cloudfun.updateOutdoorWebsites(outdoorid, websites)
-          cloudfun.updateOutdoorChat(self.data.outdoorid, self.data.chat)
+          // 更新最小单元，防止云数据库修改数据结构类型
+          cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", self.data.chat.messages, "")
         }
       })
     }
@@ -121,6 +120,7 @@ Page({
   },
 
   flushChats(addMessage, callback) {
+    console.log("flushChats()")
     const self = this
     dbOutdoors.doc(self.data.outdoorid).get().then(res => {
       if (res.data.chat) { // 数据库有，就覆盖一下
@@ -128,6 +128,7 @@ Page({
         if (!self.data.chat.messages) {
           self.data.chat.messages = []
         }
+        
         for (var i = 0; i < self.data.chat.messages.length; i++) {
           const message = self.data.chat.messages[i]
           // 通过personid判断哪些消息是自己的
@@ -246,7 +247,7 @@ Page({
       self.setData({
         "message.msg": "",
       })
-      console.log(self.data.messages)
+      console.log(self.data.chat.messages)
     }
   },
 

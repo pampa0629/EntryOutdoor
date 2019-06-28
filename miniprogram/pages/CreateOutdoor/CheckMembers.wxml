@@ -5,7 +5,7 @@
       <van-checkbox wx:for="{{chatDlg.Options}}" wx:key="item" name="{{index}}">{{chatDlg.Options[index]}}</van-checkbox>
     </van-checkbox-group>
     <van-field wx:if="{{chatDlg.Options[chatDlg.selects[chatDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体留言内容" border="{{false}}" bind:change="changeChatContent" value="{{ chatDlg.content }}"/>
-  </van-panel>
+  </van-panel> 
 </van-dialog>   
 
 <!--驳回报名对话框-->
@@ -92,11 +92,12 @@
 </van-panel> 
 
 <!--领队编辑附加队员-->
-<van-switch-cell title="开启附加队员" wx:if="{{addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
-<block wx:if="{{openAdd || addMembers.length>0 || hasModified}}">
+<van-switch-cell title="开启附加队员" wx:if="{{od.addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
+<block wx:if="{{openAdd || od.addMembers.length>0 || hasModified}}">
   <van-panel>
-  	<van-cell slot="header" title-class="redtitle" title="附加队员列表（共{{addMembers.length}}人）" label="领队可增删非小程序报名队员"></van-cell>
-    <van-field wx:for="{{addMembers}}" wx:key="*this" value="{{item}}" readonly use-button-slot>
+  	<van-cell slot="header" title-class="redtitle" title="附加队员列表（共{{od.addMembers.length}}人）" label="领队可增删非小程序报名队员"></van-cell>
+    <van-tag type="primary" plain>附加队员增加和删除结果即时生效，无需保存</van-tag> 
+    <van-field wx:for="{{od.addMembers}}" wx:key="*this" value="{{item}}" readonly use-button-slot>
       <van-button slot="button" plain size="small" type="warning" bind:click="delAddMembers{{index}}">删除</van-button>
     </van-field>
   </van-panel>
@@ -107,9 +108,9 @@
   </van-field> 
 </block>
  
-<block wx:if="{{openAdd || addMembers.length>0 || hasModified}}">
+<!-- <!-- <block wx:if="{{openAdd || addMembers.length>0 || hasModified}}"> -->
   <!-- 保存和返回按钮 -->
-  <van-row>
+  <!-- <van-row>
     <van-col span="9" offset="2">
       <form bindsubmit="save" report-submit="true">
         <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
@@ -121,5 +122,5 @@
       </form>
     </van-col>
   </van-row>
-</block>
+</block> -->
 

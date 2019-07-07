@@ -12,7 +12,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
-
+ 
 Page({
 
   data: {
@@ -24,7 +24,7 @@ Page({
       agreedDisclaimer: false, // 认同免责条款
       knowWay: false, // 是否认路
     },
-
+ 
     remains: {
       occupy: { // 距离占坑截止还剩余的时间（单位：分钟）
         time: null,
@@ -53,6 +53,7 @@ Page({
     nickErrMsg: "", // 报名的时候，个人信息是否正确的判断
     genderErrMsg: "",
     phoneErrMsg: "",
+    formids:[],
   },
 
   onLoad: function(options) {
@@ -66,16 +67,9 @@ Page({
     console.log(outdoorid)
     var leaderid = options.leaderid ? options.leaderid : null
     console.log(leaderid)
-    // if (options.outdoorid) {
-    //   outdoorid = options.outdoorid
-    // } else if (options.scene) {
-    //   console.log(options.scene)
-    //   const scene = decodeURIComponent(options.scene)
-    //   console.log(scene) 
-    //   outdoorid = options.scene
-    // }
     // 存起来，以便其他地方能回到该活动
     util.saveOutdoorID(outdoorid);
+
     // 发现是领队是自己，则自动切换到发起活动页面
     if(leaderid && leaderid == app.globalData.personid) { 
       wx.switchTab({
@@ -96,23 +90,37 @@ Page({
     })
   },
 
+  // 得到formids数量
+  loadFormids() {
+    const self = this
+    template.clearPersonFormids(app.globalData.personid, formids => {
+      self.data.formids = formids ? formids : []
+      self.setData({
+        formids: self.data.formids,
+      })
+    })
+  },
+
   // 处理是否登录的问题
   checkLogin: function(outdoorid) {
     console.log("checkLogin, outdoorid is:" + outdoorid)
+    console.log(app.globalData)
     if (app.globalData.hasUserInfo && app.globalData.userInfo != null) {
       this.setData({
         userInfo: app.globalData.userInfo,
       })
-      this.loadOutdoor(outdoorid);
+      this.loadFormids()
+      this.loadOutdoor(outdoorid)
     } else {
       app.personidCallback = (personid, userInfo) => {
         if (personid != null) {
           this.setData({
             userInfo: userInfo,
-          });
+          })
         }
-        this.loadOutdoor(outdoorid);
+        this.loadFormids()
       }
+      this.loadOutdoor(outdoorid)
     }
   },
 
@@ -155,7 +163,7 @@ Page({
         })
       })
     }
-  },
+  }, 
 
   // 处理剩余时间
   dealRemainTime() {
@@ -412,7 +420,7 @@ Page({
         result = false
       }
     }
-    console.log("checkPersonInfo showLoginDlg:" + !result)
+    console.log("showLoginDlg:" + !result)
     self.setData({
       showLoginDlg: !result,
     })
@@ -531,7 +539,9 @@ Page({
           showLoginDlg: false,
         })
         // 最后还得继续报名才行
-        self.entryOutdoorInner(self.data.entryTemp.status)
+        if (self.checkFormids()) {
+          self.entryOutdoorInner(self.data.entryTemp.status)
+        }
       })
     }
   },
@@ -563,21 +573,63 @@ Page({
   //   self.checkPhone()
   // },
 
+  // 检查微信消息数量是否够用
+  checkFormids() {
+    console.log("checkFormids()")
+    var result = this.data.formids.length >= 5? true:false
+    console.log(result)
+    this.setData({
+      showFormidDlg: !result,
+    })
+  
+    return result
+  },
+
+  confirmFormidDlg() {
+    console.log("confirmFormidDlg()")
+    if(this.checkFormids()) {
+      this.entryOutdoorInner(this.data.entryTemp.status)
+    } else {
+      wx.showModal({
+        title: '请确认',
+        content: '您确定数量够五个了吗？',
+      })
+    }
+  },
+
+  cancelFormidDlg(){
+    console.log("cancelFormidDlg()")
+    this.setData({
+      showFormidDlg: false,
+    })
+  },
+
+  tapAddFormid(e) {
+    console.log("tapAddFormid()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.data.formids.push(template.buildOneFormid(e.detail.formId))
+    this.setData({
+      formids:this.data.formids,
+    })
+  },
+
   // 替补、占坑、报名，用同一个函数，减少重复代码
   doEntry(status, formid) {
     console.log("doEntry(): " + status)
     const self = this
     console.log("personid: " + app.globalData.personid)
     template.savePersonFormid(app.globalData.personid, formid, null)
-    if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg) {
+    if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg && !self.data.showFormidDlg) {
       self.data.entryTemp = {
         status: status,
       }
       var check1 = this.checkEntryInfo()
       var check2 = check1 ? this.checkPersonInfo() : false
+      var check3=  check2? this.checkFormids():false
       console.log("check1: " + check1)
       console.log("check2: " + check2)
-      if (check1 && check2) {
+      console.log("check3: " + check3)
+      if (check1 && check2 && check3) {
         this.entryOutdoorInner(status)
       }
     }
@@ -587,22 +639,33 @@ Page({
   tapQuit: function(e) {
     console.log("tapQuit()")
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    const self = this;
+    const self = this
+    var content = '您已经点击“退出”按钮，是否确定退出？'
+    if (odtools.isNeedAA(self.data.od, self.data.entryInfo.status)) {
+      content += "本活动已成行，退出若无人替补，则需要A共同费用，请慎重操作。"
+    }
+
     wx.showModal({
       title: '确定退出？',
-      content: '您已经点击“退出”按钮，是否确定退出？',
+      content: content,
       success(res) {
         if (res.confirm) {
           console.log('用户点击确定')
           var selfQuit = true
-          self.data.od.quit(app.globalData.personid, selfQuit, members => {
+          self.data.od.quit(app.globalData.personid, selfQuit, res => {
             // 删除Persons表中的entriedOutdoors中的对应id的item
             self.updateEntriedOutdoors(true)
             // 退出后还可以继续再报名
             self.setData({
               "entryInfo.status": "浏览中",
-              "od.members": members,
+              "od.members": res.members,
             })
+            if(res.isAfee) {
+              wx.showModal({
+                title: '费用分摊提醒',
+                content: '系统检测到您退出的活动已成行，且无人替补，请联系领队A费用，谢谢！',
+              })
+            }
           })
         } else if (res.cancel) {
           console.log('用户点击取消')

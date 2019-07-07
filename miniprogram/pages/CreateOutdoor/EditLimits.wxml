@@ -11,7 +11,7 @@
   <block wx:if="{{limits.personCount>oldPersonCount && (addMembers.length+members.length>oldPersonCount)}}">
     <van-tag type="primary" plain>已有替补队员，请点击下面的“扩编”按钮转为正式队员。</van-tag>
     <van-button type="primary" size="large" plain bindtap='tapEnlarge'>扩编</van-button>
-  </block>  
+  </block>   
   <!--缩编：允许人数减少，且需要把队员转为替补时-->
   <block wx:if="{{limits.personCount<oldPersonCount && (addMembers.length+members.length>limits.personCount)}}">
     <van-tag type="danger" plain>减少人数会造成已有队员转为替补，如确有必要，请点击点击下面的“缩编”。</van-tag>
@@ -51,6 +51,9 @@
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="活动规则"></van-cell>
   <van-checkbox-group>
+    <van-cell title="AA" title-width="80%" label="公共费用所有成员AA；领队确认活动成行后再退出，若无人替补，费用也要分摊" clickable bind:click="checkAA">
+      <van-checkbox value="{{limits.isAA}}" bind:change="checkAA"/>
+    </van-cell>
     <van-cell title="环保" title-width="80%" label="野外不得丢弃不可降解物品" clickable bind:click="checkEnvironment">
       <van-checkbox value="{{limits.isEnvironment}}" bind:change="checkEnvironment"/>
     </van-cell>
@@ -66,7 +69,7 @@
 <van-cell title="  " border="{{false}}" />
 
 <!-- 保存和返回按钮 -->
-<van-row class="fix">
+<van-row class="fix" wx:if="{{od.status=='拟定中' || !od.expired}}">
   <van-col span="9" offset="2">
     <form bindsubmit="save" report-submit="true">
       <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>

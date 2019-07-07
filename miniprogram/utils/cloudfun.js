@@ -19,7 +19,7 @@ const updateOutdoor=(outdoorid, od, callback)=>{
       callback(res)
     }
   }).catch(err=>{
-    console.log(err)
+    console.error(err)
   })
 }
 
@@ -41,11 +41,11 @@ const updateOutdoorItem = (outdoorid, item, value, callback) => {
       callback(res)
     }
   }).catch(err => {
-    console.log(err)
+    console.error(err)
   })
 }
 
-// 操作Outdoors表中的某个子项
+// 操作Outdoors表中的某个子项 
 const opOutdoorItem = (outdoorid, item, value, op, callback) => {
   console.log("opOutdoorItem")
   op = op ? op : "" // 默认的""为更新; push,pop,shift,unshift,""
@@ -65,7 +65,7 @@ const opOutdoorItem = (outdoorid, item, value, op, callback) => {
       callback(res)
     }
   }).catch(err => {
-    console.log(err)
+    console.error(err)
   })
 }
 
@@ -404,9 +404,33 @@ const unshiftPersonCared = (personid, outdoorid, title, callback)=>{
       callback()
     }
   }).catch(err=>{
+    console.error(err)
     if (callback) {
       callback()
     }
+  })
+}
+
+
+// 对Persons表的某个子项进行特定数据库操作
+const opPersonItem = (personid, item, value, op, callback) => {
+  console.log("cloudfun.opPersonItem()")
+  wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Persons",
+      id: personid,
+      item: item,
+      command: op,
+      value: value
+    }
+  }).then(res=>{
+    if(callback) {
+      callback()
+    }
+  }).catch(err => {
+    console.error(err)
   })
 }
 
@@ -423,7 +447,7 @@ const updatePersonFormids=(personid, formids)=>{
       value: formids
     }
   }).catch(err=>{
-    console.log(err)
+    console.error(err)
   })
 }
 
@@ -569,6 +593,7 @@ module.exports = {
   updateOutdoorDisclaimer: updateOutdoorDisclaimer, // 更新免责条款
 
   // Persons
+  opPersonItem: opPersonItem,
   unshiftPersonCared:unshiftPersonCared,
   updatePersonFormids: updatePersonFormids,
   updatePersonSubscriber: updatePersonSubscriber,

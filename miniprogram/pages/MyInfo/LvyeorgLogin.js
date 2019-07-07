@@ -9,7 +9,7 @@ const dbPersons = db.collection('Persons')
 Page({
 
   data: {
-    lvyeorgInfo: {
+    lvyeorgInfo: { 
       username: "",
       // 所有队员都必须遵守的代报名要求
       helpEntry: true, // 为尚未注册org的队员代报名
@@ -53,6 +53,8 @@ Page({
           // 读取后自动登录
           self.loginLvyeorg()
         }
+      }).catch(err=>{
+        console.error(err)
       })
     }
     console.log(self.data.lvyeorgInfo)

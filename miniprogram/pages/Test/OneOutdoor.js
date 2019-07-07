@@ -89,7 +89,7 @@ Page({
     })
   },
 
-  onTest: function(e) {
+  onTest: function(e) { 
 
     console.log(e.detail.errMsg)
     console.log(e.detail.iv)
@@ -183,16 +183,18 @@ Page({
   },
 
   tapCreateQrcode() {
-    var qrcode = new QRCode('canvas', {
+    var url = "https://6f75-outdoor-entry-1257647001.tcb.qcloud.la#mp.weixin.qq.com/Outdoors/e47e55695d1c242605401a1545249ed5/Route/马武寨-抱犊-老龙口-九莲山-锡崖沟-张沟.gpx"
+    //url += "#mp.weixin.qq.com"
+    var qrcode = new QRCode('canvas0', {
       // usingIn: this,
-      text: "https://github.com/tomfriwel/weapp-qrcode",
+      text: url,
       width: 128,
       height: 128,
       colorDark: "#1CA4FC",
       colorLight: "white",
       correctLevel: QRCode.CorrectLevel.H,
     });
-    qrcode.makeCode("test")
+    qrcode.makeCode(url)
     wx.showActionSheet({
       itemList: ['保存图片'],
       success: function(res) {
@@ -495,31 +497,91 @@ Page({
   },
 
   tapMofangLogin() {
+    console.log("tapMofangLogin()")
     const self = this
-    // http://www.doyouhike.net/event/yueban
+    // var cookie ="dyh_userid=3166998;dyh_password=d17476a155a43782e1f24e1b0f0e57e6" 50463253
+    var cookie = "dyh_userid=3917317;dyh_password=d17476a155a43782e1f24e1b0f0e57e6" // zengzhiming
+       
     wx.request({
-      url: "http://www.doyouhike.net/user/login?url=%2F",
+      url: "http://www.doyouhike.net/user/login",
       method: 'POST',
       header: {
-        "content-type": "application/x-www-form-urlencoded"
+        // "content-type": "application/x-www-form-urlencoded"
+        "content-type": "text/html",
+        // 'cookie': JSON.stringify(cookie),
+        'cookie': cookie,
       },
       data: {
-        username: "50463253@qq.com",
-        password: "xx123zzm",
+        username:  "zengzhiming@supermap.com",
+        password:  "xx123zzm",
+        url: "/my"
       },
+      fail: function(error) {
+        console.log("fail")
+        console.log(error)
+      },
+      success: function(res) {
+        console.log("success")
+        console.log(res)
+        if(res.data.indexOf("pampa")>0) {
+          console.log("login OK")
+        }
+        const c = res.cookies
+        self.setData({
+          "cookies0" :c[0].split(";")[0],
+          "cookies1": c[1].split(";")[0]
+        })
+        
+        console.log(self.data.cookies)
+      }
+    })
+  },
+
+// http://www.doyouhike.net/event/yueban/detail/6426077
+
+  tapMofangEntry() {
+    console.log("tapMofangEntry()")
+    const self = this
+    var entry = {
+      'realName': "pampa",//真实姓名
+      'mobile': "13693607590",//手机号码
+      'nodeID': "6426258",//活动id
+      'insuranceName': "youban",//保险名称
+      'insuranceNumber': "123312132",//保险单号
+      'contacterName': "aling",//紧急联系人
+      'contacterTel': "13693607590",//紧急联系电话
+      'remark': "测试测试测试测试测试"//活动留言
+      }
+    var cookie = "dyh_userid=3917317;dyh_password=d17476a155a43782e1f24e1b0f0e57e6;" // zengzhiming
+    cookie += self.data.cookies0 +";"
+    cookie += self.data.cookies1
+    console.log(cookie)
+    
+    // http://www.doyouhike.net/event/yueban/apply_join?realName=%E6%9B%BE%E5%BF%97%E6%98%8E&mobile=13693607590&nodeID=6426258&insuranceName=&insuranceNumber=&contacterName=%E5%B0%8F%E7%81%B5%E9%80%9A&contacterTel=13693607590&remark=
+    var url= "http://www.doyouhike.net/event/yueban/apply_join?"
+    url += "realName="+"pampa"
+    url += "&mobile=" + "13693607590"
+    url += "&nodeID=" + "6426258"
+    url += "&insuranceName=" + "youban"
+    url += "&insuranceNumber=" + "123312132"
+    url += "&contacterName=" + "aling"
+    url += "&contacterTel=" + "13693607590"
+    url += "&remark=" + ""
+    console.log(JSON.stringify(self.data.cookies))
+    wx.request({
+      url: url,
+      method: 'GET',
+      header: {
+        'content-type': 'text/html; charset=utf-8', // 默认值
+        'cookie': cookie,
+      },
+      data: JSON.stringify(entry),
       fail: function(error) {
         console.log(error)
       },
       success: function(res) {
-        // console.log(res)
-        // console.log(res.data)
-        const c = res.cookies
-        console.log(c)
-        self.setData({
-          "mofang.PHPSESSID": c[0].value,
-          "mofang.dyh_lastactivity": c[1].value,
-        })
-        console.log(self.data.mofang)
+        console.log(res)
+        console.log(res.data)
       }
     })
   },
@@ -527,19 +589,21 @@ Page({
   tapMofangMain() {
     const self = this
     wx.request({
-      url: "http://www.doyouhike.net/mobile/forum/index/topic_list?slug=city&city_id=110000",
-      method: 'POST',
+      // url: "http://www.doyouhike.net/mobile/forum/index/topic_list?slug=city&city_id=110000",
+      url: "http://www.doyouhike.net/my",
+      method: 'GET',
       header: {
-        "content-type": "application/x-www-form-urlencoded"
+        "content-type": "application/x-www-form-urlencoded",
+        'cookie': self.data.cookies,
       },
       data: {
-        PHPSESSID: self.data.mofang.PHPSESSID,
-        dyh_lastactivity: self.data.mofang.dyh_lastactivity,
+        // PHPSESSID: self.data.mofang.PHPSESSID,
+        // dyh_lastactivity: self.data.mofang.dyh_lastactivity,
       },
-      fail: function(error) {
+      fail: function (error) {
         console.log(error)
       },
-      success: function(res) {
+      success: function (res) {
         console.log(res)
         console.log(res.data)
       }
@@ -558,32 +622,10 @@ Page({
         PHPSESSID: self.data.mofang.PHPSESSID,
         dyh_lastactivity: self.data.mofang.dyh_lastactivity,
       },
-      fail: function(error) {
+      fail: function (error) {
         console.log(error)
       },
-      success: function(res) {
-        console.log(res)
-        console.log(res.data)
-      }
-    })
-  },
-
-  tapMofangPublish() {
-    const self = this
-    wx.request({
-      url: "http://www.doyouhike.net/event/yueban/publish",
-      method: 'POST',
-      header: {
-        "content-type": "application/x-www-form-urlencoded"
-      },
-      data: {
-        PHPSESSID: self.data.mofang.PHPSESSID,
-        dyh_lastactivity: self.data.mofang.dyh_lastactivity,
-      },
-      fail: function(error) {
-        console.log(error)
-      },
-      success: function(res) {
+      success: function (res) {
         console.log(res)
         console.log(res.data)
       }
@@ -690,29 +732,34 @@ Page({
 
   tapDBArray() {
     console.log("tapDBArray()")
-
-    var route= {
-      wayPoints: [{ id: "1" }], // 途经点
-      trackFiles: [], // 轨迹文件 
-      trackSites: [{ id: "2" }], // 轨迹网站
-    }
-
-    var name = "route"
-
-    var test = { arrs: [{ id: "1" }, { id: "2" }], arrs2: [{ id: "1" }, { id: "2" }]}
-    console.log(test)
-
-
-    wx.cloud.callFunction({
-      name: 'dbSimpleUpdate', // 云函数名称
-      data: {
-        table: "Temp",
-        id: app.globalData.personid,
-        item: name,
-        command: "",
-        value: route
-      }
+    var outdoorid = "3b07eb945d0ef173066862c55bcbe6ed"
+    dbOutdoors.doc(outdoorid).get().then(res=>{
+      console.log(res.data.route)
+      wx.cloud.callFunction({
+        name: 'dbSimpleUpdate', // 云函数名称
+        data: {
+          table: "Temp",
+          id: app.globalData.personid,
+          item: "route",
+          command: "",
+          value: res.data.route
+        }
+      })
     })
+
+   
   },
 
+  tapCopy() {
+    var now = new Date()
+    console.log("now: " + now)
+    console.log("1: " + new Date("2019-06-29"))
+    console.log(now > new Date("2019-06-29"))
+    console.log("2: " + new Date("2019-06-30"))
+    console.log(now > new Date("2019-06-30"))
+    console.log("3: " + new Date("2019-07-01"))
+    console.log(now > new Date("2019-07-01"))
+    
+  },
+    
 });

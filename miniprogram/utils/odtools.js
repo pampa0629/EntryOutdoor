@@ -371,75 +371,29 @@ const buildCostInfo = (traffic) => {
   return costInfo
 }
 
-// 移除某个队员（自己退出，或者领队驳回报名），回调返回新成员名单
-// const removeMember = (outdoorid, personid, selfQuit, callback) => {
-//   console.log("odtools.js removeMember fun")
+// 提醒占坑队员，占坑截止时间临近  
+const remindOcuppy=(od, callback)=>{
+  console.log("odtools.remindOcuppy()")
 
-//   // 先重新获取members，再删除personid，再调用云函数
-//   // 刷新一下队员列表
-//   dbOutdoors.doc(outdoorid).get()
-//     .then(res => {
-//       // 先找到personid
-//       var selfIndex = -1
-//       for (var i = 0; i < res.data.members.length; i++) {
-//         if (res.data.members[i].personid == personid) {
-//           selfIndex = i
-//           break
-//         }
-//       }
-//       if (selfIndex == -1) { // 找不到就直接返回
-//         if (callback) {
-//           callback(res.data.members)
-//         }
-//         return
-//       }
+  dbOutdoors.doc(od.outdoorid).get().then(res => {
+    const members = res.data.members
+    var temp = calcRemainTime(od.title.date, od.limits.ocuppy, true)
+    var remain = buildRemainText(calcRemainTime(od.title.date, od.limits.ocuppy, true))
+    console.log("temp:", temp)
+    console.log("remain:", remain)
+      
+    // 循环，找到所有占坑者
+    for (var i = 0; i < members.length; i++) {
+      if (members[i].entryInfo.status == "占坑中" && !members[i].remained) {
+        // 给占坑者发模板消息
+        template.sendRemindMsg2Ocuppy(members[i].personid, od.outdoorid, od.title.whole, remain, od.leader.userInfo.nickName, od.members.length+od.addMembers.length)
+        members[i].remained = true
+      }
+    }
 
-//       const self = res.data.members[selfIndex]
-//       console.log(self)
-//       // 退出的时候应检查一下，如果自己不是替补，则把第一个替补改为“报名中”
-//       var changeStatus = false;
-//       if (self.entryInfo.status == "占坑中" || self.entryInfo.status == "报名中") {
-//         changeStatus = true;
-//         // 这里要判断一下，若超过人数后面第一个队员不是替补，则不能change
-//         // todo 考虑附加队员的影响
-//         if (res.data.limits && res.data.limits.maxPerson
-//           && res.data.members.length > res.data.limits.personCount
-//           && res.data.members[res.data.limits.personCount].entryInfo.status != "替补中") {
-//           changeStatus = false;
-//         }
-//         console.log("changeStatus: " + changeStatus)
-//       }
-//       // 给自己发模板消息 
-//       var remark = ""
-//       if (selfQuit) {
-//         remark = "您已自行退出本次活动。您仍可以点击进入小程序继续报名。"
-//       } else {
-//         remark = "您已被领队驳回报名。若仍有意参加，请参考领队驳回理由，并联系领队确认情况。"
-//       }
-//       template.sendQuitMsg2Self(personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, self.userInfo.nickName, remark)
-//       // 删除自己的
-//       res.data.members.splice(selfIndex, 1)
-
-//       // 把第一个替补改为“报名中”
-//       if (changeStatus) {
-//         res.data.members.forEach((item, index) => {
-//           if (changeStatus && item.entryInfo.status == "替补中") {
-//             item.entryInfo.status = "报名中"
-//             changeStatus = false // 自己退出，只能补上排在最前面的替补
-//             // 给替补上的队员发模板消息
-//             template.sendEntryMsg2Bench(item.personid, outdoorid, res.data.title.whole, item.userInfo.nickName)
-//           }
-//         })
-//       }
-//       console.log(res.data.members)
-//       // 云函数
-//       cloudfun.updateOutdoorMembers(outdoorid, res.data.members, nouse => {
-//         if (callback) {
-//           callback(res.data.members)
-//         }
-//       })
-//     })
-// }
+    cloudfun.updateOutdoorMembers(od.outdoorid, members, null)
+  })
+}
 
 // 超过占坑截止时间（外部判断），则清退所有占坑队员，后续替补
 const removeOcuppy = (outdoorid, callback) => {
@@ -484,14 +438,20 @@ const buildRemainText = (remainMinute) => {
     remainMinute -= remainDay * 24 * 60
     var remainHour = Math.trunc(remainMinute / 60)
     remainMinute = Math.trunc(remainMinute - remainHour * 60)
-    remainText = remainDay + "天" + remainHour + "小时" + remainMinute + "分钟"
+    if (remindOcuppy>0) {
+      remainText += remainDay + "天"  
+    }
+    if (remainHour>0) {
+      remainText += remainHour + "小时"
+    }
+    remainText += remainMinute + "分钟"
   }
   return remainText
 }
 
 // 计算当前距离截止时间还剩余的时间（单位：分钟）
 // 若 limitItem 为空，则占坑为前两天22:00；报名为前一天22:00
-const calcRemainTime = (outdoorDate, limitItem, isOccupy) => {
+const calcRemainTime = (outdoorDate, limitItem, isOccupy) => { 
   // console.log(limitItem)
   if (!limitItem) {
     if (isOccupy) {
@@ -664,7 +624,7 @@ const isEntriedStatus = (status) => {
 
 const getDefaultWebsites = () => {
   return {
-    lvyeorg: {
+    lvyeorg: { 
       //fid: null, // 版块id
       tid: null, // 帖子id
       keepSame: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame : false),
@@ -682,7 +642,29 @@ const entryFull =  (limits, members, addMembers)=> {
   }
   return full
 }
+ 
+const getWebsites = (outdoorid, callback)=>{
+  dbOutdoors.doc(outdoorid).get().then(res=>{
+    if(callback) {
+      callback(res.data.websites)
+    }
+  })
+}
 
+// 判断某个时刻退出活动是否需要AA费用
+// 需要A费用的条件（必须全部满足）：活动已成行，有AA规则，报名状态为“报名中”，无人替补
+const isNeedAA=(od, entryStatus)=>{
+  var result = false
+  if(od.status=="已成行" && od.limits.isAA && entryStatus=="报名中") {
+    result = true
+    od.members.forEach((item, index)=>{
+      if(item.entryInfo.status == "替补中") {
+        result = false
+      }
+    })
+  }
+  return result
+}
 
 module.exports = {
   createTitle: createTitle, // 生成活动标题
@@ -701,6 +683,10 @@ module.exports = {
 
   // removeMember: removeMember, // 移除某个队员（自己退出，或者领队驳回报名）
   removeOcuppy: removeOcuppy, // 清退占坑队员
+  remindOcuppy: remindOcuppy, // 提醒占坑队员，占坑截止时间临近
+  isNeedAA: isNeedAA, // 判断某个时刻退出活动是否需要AA费用
+
+  getWebsites: getWebsites, // 得到数据库中的网站同步结构
 
   getChatStatus: getChatStatus, // 判断留言的状态：self、new等
   buildChatMessage: buildChatMessage, // 构建一条留言
@@ -715,4 +701,5 @@ module.exports = {
 
   // 得到默认的websites信息
   getDefaultWebsites: getDefaultWebsites,
+
 } 

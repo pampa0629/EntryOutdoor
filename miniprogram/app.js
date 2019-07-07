@@ -95,6 +95,7 @@ App({
         }
       })
       .catch(err => {
+        console.error(err)
         //直接用person id读取不到，则尝试是否能通过openid读取到 person id
         dbPersons.where({
           _openid: self.globalData.openid
@@ -207,7 +208,7 @@ App({
   },
 
   // 登录绿野网站，用callback得到登录结果
-  loginLvyeOrg: function() {
+  loginLvyeOrg: function() { 
     const self = this
     console.log("app.js loginLvyeOrg: function")
     console.log(self.globalData.lvyeorgInfo)

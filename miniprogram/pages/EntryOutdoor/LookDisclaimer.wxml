@@ -2,6 +2,7 @@
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="活动规则"></van-cell>
   <van-cell-group>
+    <van-cell wx:if="isAA" title="AA" title-width="20%" value="公共费用所有成员AA，领队确认活动成行后再退出，若无人替补，费用也要分摊"/>
     <van-cell wx:if="isEnvironment" title="环保" title-width="20%" value="野外不得丢弃不可降解物品"/>
     <van-cell wx:if="isKeepTime" title="守时"  title-width="20%" value="户外路远天黑危险，集合过时不候，费用照A" border="{{ false }}"/>
     </van-cell-group>

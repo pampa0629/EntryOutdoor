@@ -97,7 +97,7 @@ const login = (username, password, callback) => {
           var resp_dict = resp.data;
           if (resp_dict.err_code == 0) {
             wx.setStorageSync('LvyeOrgToken', resp_dict.data.token) // 这里必须把token存起来
-            if (callback) { // 回调函数，让外部知道是否登录了，哪个账号登录的
+            if (callback) { // 回调函数，让外部知道是哪个账号登录的
               callback({
                 username: username
               })
@@ -700,10 +700,10 @@ const add2Waitings = (outdoorid, message) => {
   console.log(message)
   cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
 }
-
+ 
 // 同步绿野org网站等待要发送的信息
 const postWaitings = (tid, waitings, callback) => {
-  console.log("postWaitings()")
+  console.log("lvyeorg.postWaitings()")
   console.log(tid)
   console.log(waitings.length)
   if (waitings.length > 0) {
@@ -742,11 +742,17 @@ const postOneWaiting = (tid, waiting, callback) => {
       var resp_dict = resp.data;
       console.log(resp_dict)
       if (resp_dict.err_code == 0) {
-        if (callback) { // 回调
-          callback()
-        }
       } else {
         logError(resp)
+      }
+      if (callback) { // 必须回调
+        callback()
+      }
+    },
+    fail(err){
+      console.error(err)
+      if (callback) { // 必须回调
+        callback()
       }
     }
   })

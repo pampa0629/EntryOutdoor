@@ -1,5 +1,5 @@
 <van-notice-bar  wx:if="{{hasLogin}}" text="欢迎回来，{{lvyeorgInfo.username}}"/>
-
+ 
 <!--登录--> 
 <van-cell-group wx:if="{{!hasLogin}}">
   <van-field value="{{lvyeorgInfo.username}}" label="账号：" placeholder="请输入绿野ORG账号" required bind:change="changeUsername"/>

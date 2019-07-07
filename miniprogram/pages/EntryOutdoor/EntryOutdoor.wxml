@@ -21,7 +21,7 @@
 
 <!--图标按钮-->
 <van-row>
-  <!--分享-->
+  <!--分享--> 
   <van-col span="2" offset="1">
     <view wx:if="{{od.status!='已取消'}}" style="flex-direction:column">
       <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
@@ -87,12 +87,22 @@
     </view>
   </van-col>
   <!--取消通知-->
-  <van-col wx:if="{{od.status=='已取消'}}" span="8" offset="1">
+  <van-col wx:if="{{od.status=='已取消'}}" span="12" offset="1">
     <view style="flex-direction:column">
       <view style="color:#F65959;font-size:20pt">本活动已取消</view>
     </view>
   </van-col>
 </van-row>
+
+<van-row wx:if="{{od.expired}}">
+  <van-col  span="16" offset="1">
+    <view style="flex-direction:column">
+      <view style="color:#F65959;font-size:20pt">本活动已过期</view>
+    </view>
+  </van-col>
+</van-row>
+
+<van-tag plain type="primary" wx:if="{{od.expired}}">提示：点击“新建”图标可创建同路线活动。</van-tag>
 
 <!--活动信息-->
 <van-panel>
@@ -129,7 +139,7 @@
 </van-cell-group>
 
 <!--集合地点-->
-<van-panel>
+<van-panel wx:if="{{!od.expired}}">
   <van-cell slot="header" title-class="redtitle" title="集合点选择"></van-cell>
   <van-cell required title="必须选择集合地点" clickable value="已选择第{{entryInfo.meetsIndex+1}}集合点" bind:click="lookMeetMap">
     <van-icon wx:if="{{entryInfo.meetsIndex>=0 &&meets[entryInfo.meetsIndex].latitude }}" slot="right-icon" name="map-marked" bind:click="lookMeetMap" />
@@ -152,14 +162,16 @@
 <van-cell wx:if="{{od.traffic}}" title="交通方式：{{od.traffic.mode}}" title-class="redtitle" label="车辆信息： {{od.traffic.carInfo}}" value="{{od.traffic.costInfo}}" border="{{false}}" />
 
 <!--免责条款与是否认路-->
-<van-cell title="免责条款与活动规则" title-class="redtitle" value="点击查看详细内容" clickable is-link url="LookDisclaimer" />
-<van-cell required title="我已阅读并同意条款和规则内容" title-width="70%" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
-  <van-checkbox value="{{entryInfo.agreedDisclaimer}}"/>
-</van-cell>
+<block wx:if="{{!od.expired}}">
+  <van-cell title="免责条款与活动规则" title-class="redtitle" value="点击查看详细内容" clickable is-link url="LookDisclaimer" />
+  <van-cell required title="我已阅读并同意条款和规则内容" title-width="70%" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
+    <van-checkbox value="{{entryInfo.agreedDisclaimer}}"/>
+  </van-cell>
 
-<van-cell title="是否认路" title-class="redtitle" label="{{entryInfo.knowWay?'认路':'不认路'}}" clickable bind:click="checkKnowWay" border="{{false}}">
-  <van-checkbox value="{{entryInfo.knowWay}}" bind:change="checkKnowWay" />
-</van-cell>
+  <van-cell title="是否认路" title-class="redtitle" label="{{entryInfo.knowWay?'认路':'不认路'}}" clickable bind:click="checkKnowWay" border="{{false}}">
+    <van-checkbox value="{{entryInfo.knowWay}}" bind:change="checkKnowWay" />
+  </van-cell>
+</block>
   
 <!--状态提示-->
 <van-tag type="primary" plain>活动状态：{{od.status}}</van-tag>
@@ -180,9 +192,9 @@
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
-<!--报名按钮--> 
+<!--报名按钮-->  
 <van-row class="fix" wx:if="{{od.status=='已发布'||od.status=='已成行'}}">
-  <!--替补-->
+  <!--替补--> 
   <van-col span="9" offset="2">
     <form bindsubmit="tapBench" report-submit="true" wx:if="{{entryFull && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
       <button form-type="submit">替补</button>
@@ -202,8 +214,8 @@
   </van-col>
   <!--退出-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapQuit" report-submit="true" wx:if="{{(entryInfo.status=='占坑中'||entryInfo.status=='报名中'||entryInfo.status=='替补中'||entryInfo.status=='领队组') && remains.entry.time>=0}}">
-        <button form-type="submit" type="warn">退出</button>
+    <form bindsubmit="tapQuit" report-submit="true" wx:if="{{entryInfo.status!='浏览中' && !od.expired}}">
+      <button form-type="submit" type="warn">退出</button>
     </form>
   </van-col>
 </van-row>
@@ -224,6 +236,21 @@
 
   <van-field required value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="真实、有效、方便领队联系" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" />
   <!-- <van-button open-type="getPhoneNumber" type="primary" size="large" plain bindgetuserinfo="dlgGetPhone">获取电话号码</van-button> 暂不提供-->
+
+</van-dialog>
+
+<!--保证formid数量对话框-->
+<van-dialog use-slot show="{{showFormidDlg}}" show-cancel-button  bind:cancel="cancelFormidDlg" bind:confirm="confirmFormidDlg" title="微信消息数量" confirmButtonText="够数了" cancelButtonText="不报了">
+  <text>为保证您能及时收到活动的消息提醒，包括：活动内容变更、活动成行与取消、领队审核等。请点击按钮，直到消息数量不小于五个。\n</text>
+  <text>您当前的微信消息数量为：\n</text>
+  <van-row>
+    <van-col span="6" offset="8">
+      <text class='bigtip'>{{formids.length}}个</text>
+    </van-col>
+  </van-row>
+  <form bindsubmit="tapAddFormid" report-submit="true" >
+    <button form-type="submit" type="primary">增加微信消息</button>
+  </form>
 
 </van-dialog>
 

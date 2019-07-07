@@ -9,7 +9,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
-
+ 
 Page({
 
   data: {
@@ -47,9 +47,10 @@ Page({
       }
         
       res.data.addMembers = res.data.addMembers ? res.data.addMembers:[]
+      res.data.aaMembers = res.data.aaMembers ? res.data.aaMembers : []
       if(!self.data.pay.count) {
         self.setData({
-          "pay.count": res.data.members.length + res.data.addMember.length
+          "pay.count": res.data.members.length + res.data.addMembers.length + res.data.aaMembers.length
         })
       }
       if (callback) {

@@ -7,6 +7,7 @@
     "van-cell": "/vant-weapp/cell/index",
     "van-field": "/vant-weapp/field/index",
     "van-panel": "/vant-weapp/panel/index",
+    "van-tag": "/vant-weapp/tag/index",
     "van-row": "/vant-weapp/row/index",
     "van-col": "/vant-weapp/col/index",
     "van-cell-group": "/vant-weapp/cell-group/index"

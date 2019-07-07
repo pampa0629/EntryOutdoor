@@ -1,8 +1,13 @@
 const app = getApp()
 
 const template = require('../../utils/template.js')
-const select = require('../../libs/select.js')
+// const select = require('../../libs/select.js')
 const odtools = require('../../utils/odtools.js')
+
+wx.cloud.init()
+const db = wx.cloud.database({})
+const dbSelect = db.collection('Selects')
+const _ = db.command
 
 Page({
 
@@ -20,6 +25,7 @@ Page({
       },
     },
     hasModified: false,
+    od:null, 
 
     showBrandPopup: false,
     showColorPopup: false,
@@ -34,14 +40,22 @@ Page({
     if (prevPage.data.od.traffic) {
       self.setData({
         traffic: prevPage.data.od.traffic,
+        od: prevPage.data.od,
       })
     }
     self.flashByMode()
     self.setData({
-      Brands: select.brand,
+      //Brands: select.brand,
       Colors: ["黑色", "白色", "棕色", "红色", "绿色", "银色", "黄色", "橙色", "其它"],
       hasModified: prevPage.data.hasModified,
     })
+
+    util.loadBrand(brand=>{
+      self.setData({
+        Brands: brand,
+      })
+    })
+
   },
 
   onUnload: function() {
@@ -63,7 +77,7 @@ Page({
         "od.traffic.carInfo": odtools.buildCarInfo(self.data.traffic),
         "od.traffic.costInfo": odtools.buildCostInfo(self.data.traffic),
       })
-      prevPage.data.od.saveItem("traffic")
+      this.data.od.saveItem("traffic")
       this.setData({
         hasModified: false,
       })

@@ -26,7 +26,7 @@ Page({
     showEmergency: false, // 是否显示紧急联系信息
     emergency: { // 紧急联系方式                                                                               
       contact: {
-        name: "",
+        name: "", 
         phone1: "",
         phone2: "",
       },

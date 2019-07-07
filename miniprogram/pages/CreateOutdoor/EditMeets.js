@@ -8,6 +8,7 @@ Page({
     meets: [], //集合点，可加多个
     index: 0, // 当前要处理的index
     hasModified: false,
+    od:null, 
   
     showAction: false, 
     Actions: [{
@@ -80,6 +81,7 @@ Page({
     self.setData({
       status: od.status,
       meets: od.meets,
+      od:od, 
     })
     self.rebuildClickMeetFun()
   },
@@ -113,7 +115,7 @@ Page({
       prevPage.setData({
         "od.meets": self.data.meets,
       })
-      prevPage.data.od.saveItem("meets")
+      this.data.od.saveItem("meets")
 
       this.setData({
         hasModified:false

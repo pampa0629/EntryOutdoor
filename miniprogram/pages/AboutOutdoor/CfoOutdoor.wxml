@@ -5,7 +5,7 @@
   <van-field label="人均费用（元）" title-width="70%" value="{{pay.average}}" type="digit" bind:change="changeAverage"/>
 </van-panel>
 
-<!--设置收款二维码-->
+<!--设置收款二维码--> 
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="第二步：上传收款二维码，发送收款通知"></van-cell>
   <van-row>

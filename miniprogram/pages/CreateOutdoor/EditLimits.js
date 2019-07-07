@@ -6,7 +6,7 @@ const template = require('../../utils/template.js')
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
-
+ 
 Page({
 
   data: {
@@ -24,6 +24,7 @@ Page({
       }, // 报名截止时间
       isEnvironment: true, // 环保
       isKeepTime: true, // 守时
+      isAA:true, // 费用AA
       intoHall: true, // 活动是否进入活动大厅
       isTest: false, // 是否为测试发帖
     },
@@ -31,6 +32,7 @@ Page({
 
     // 人数扩容或缩编导致需要即时变化的情况
     outdoorid: null,
+    od:null,
     title: null,
     members: null, // 当前已报名队员
     addMembers: null, // 附加队员
@@ -45,6 +47,7 @@ Page({
     let prevPage = pages[pages.length - 2];
     let od = prevPage.data.od
     self.setData({
+      od:od,
       outdoorid: od.outdoorid,
       title: od.title.whole,
       limits: od.limits,
@@ -90,7 +93,7 @@ Page({
       prevPage.setData({
         "od.limits": self.data.limits,
       })
-      prevPage.data.od.saveItem("limits")
+      this.data.od.saveItem("limits")
       this.setData({
         hasModified: false,
       })
@@ -251,6 +254,17 @@ Page({
     console.log(self.data.limits.isKeepTime)
     self.setData({
       "limits.isKeepTime": !self.data.limits.isKeepTime,
+      hasModified: true
+    })
+  },
+
+  // 勾选是否要求费用AA
+  checkAA: function (e) {
+    console.log(e)
+    const self = this;
+    console.log(self.data.limits.isAA)
+    self.setData({
+      "limits.isAA": !self.data.limits.isAA,
       hasModified: true
     })
   },

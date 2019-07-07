@@ -19,6 +19,12 @@
   color:#F65959;
 }
 
+.bigtip{
+  color:#F65959;
+  font-size:30pt;
+  text-align:center;
+}
+
 .icon_tip{
   font-family:黑体;
   font-size:10pt

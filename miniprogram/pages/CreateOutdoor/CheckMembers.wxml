@@ -6,7 +6,7 @@
     </van-checkbox-group>
     <van-field wx:if="{{chatDlg.Options[chatDlg.selects[chatDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体留言内容" border="{{false}}" bind:change="changeChatContent" value="{{ chatDlg.content }}"/>
   </van-panel> 
-</van-dialog>   
+</van-dialog>    
 
 <!--驳回报名对话框-->
 <van-dialog use-slot async-close show="{{rejectDlg.show}}" show-cancel-button  bind:close="closeRejectDlg" bind:confirm="confirmRejectDlg" title="驳回报名" confirmButtonText="确定驳回" cancelButtonText="取消">
@@ -88,6 +88,16 @@
   <van-field wx:for="{{members}}" title-width="60%" wx:key="item.personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot>
     <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onCheckPopup{{index}}">审核</van-button>
     <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onAppointPopup{{index}}">授权</van-button>
+  </van-field> 
+</van-panel> 
+
+<!--领队编辑退出后需A费用名单-->
+<van-panel wx:if="{{od.aaMembers.length>0}}">
+	<van-cell slot="header" title-class="redtitle" title="需要A费用名单（共{{od.aaMembers.length}}人）"></van-cell>
+  <van-tag type="primary" plain>操作结果即时生效，无需保存</van-tag> 
+  <van-field wx:for="{{od.aaMembers}}" title-width="60%" wx:key="item.personid" label="{{item.userInfo.nickName}}/{{item.userInfo.gender}}/{{item.userInfo.phone}}" value="{{item.result}}" disabled use-button-slot>
+    <van-button slot="button" plain size="small" type="primary" bind:click="onPhoneAA{{index}}">电话</van-button>
+    <van-button slot="button" plain size="small" type="primary" bind:click="onDeleteAA{{index}}">删除</van-button>
   </van-field> 
 </van-panel> 
 

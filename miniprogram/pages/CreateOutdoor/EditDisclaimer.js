@@ -9,6 +9,7 @@ Page({
   data: {
     disclaimer: "", //免责条款
     hasModified: false,
+    od:null, 
   },
 
   onLoad: function(options) {
@@ -17,6 +18,7 @@ Page({
     let prevPage = pages[pages.length - 2];
     self.setData({
       disclaimer: prevPage.data.od.limits.disclaimer,
+      od: prevPage.data.od,
     }) 
   },
 
@@ -24,7 +26,7 @@ Page({
     console.log("save()")
     if (e)
       template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    if (this.data.hasModified) {
+    if (this.data.hasModified) { 
       const self = this;
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
       let prevPage = pages[pages.length - 2];

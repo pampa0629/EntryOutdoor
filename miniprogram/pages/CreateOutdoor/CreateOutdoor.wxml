@@ -9,7 +9,7 @@
     
 <!--弹出分享按钮-->
 <van-popup show="{{ showPopup }}" overlay="{{false}}" position="bottom" custom-class="center" bind:close="closePopup">
-  <van-row>
+  <van-row> 
     <van-col span="20" offset="2">
       <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
     </van-col>
@@ -68,7 +68,7 @@
       <view class="icon_tip">详情</view>
     </view>
   </van-col>
-  <van-col span="2" offset="1" wx:if="{{od.pay}}">
+  <van-col span="2" offset="1" wx:if="{{od.pay && od.status != '拟定中'}}">
     <view style="flex-direction:column">
       <van-icon name="gold-coin-o" size="24px" color="#1aad19" bind:click="clickPay"></van-icon>
       <view class="icon_tip">支付</view>
@@ -79,8 +79,10 @@
       <van-icon name="new-o" size="24px" color="#1aad19" bind:click="newOutdoor"></van-icon>
       <view class="icon_tip">新建</view>
     </view>
-  </van-col>
+  </van-col> 
 </van-row>
+
+<van-tag type="danger" plain wx:if="{{od.status!='拟定中' && od.expired}}">本活动已过期，请勿编辑修改，点击“新建”图标可创建同路线活动。</van-tag>
 
 <!--活动标题信息--> 
 <van-panel>
@@ -109,7 +111,7 @@
       <van-stepper value="{{od.title.adjustLevel}}" min="50" max="200" step="5" bind:change="bindAdjustLevel" />
     </van-cell>
   </block>
-</van-panel>
+</van-panel> 
  
 <!--集合地点-->
 <van-panel>
@@ -168,24 +170,24 @@
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
-<block wx:if="{{od.status=='拟定中'}}">
+<block>
 <!--故意空白，防止遮挡-->
   <van-cell title="  " border="{{false}}" />
   <van-cell title="  " border="{{false}}" />
   <van-cell title="  " border="{{false}}" />
 
-  <van-row class="fix2" >
-    <van-col span="6" offset="1"> 
+  <van-row class="fix2" wx:if="{{od.status=='拟定中' || (od.status=='已发布' && od.expired)}}">
+    <van-col span="6" offset="1" wx:if="{{od.status=='拟定中'}}"> 
       <form bindsubmit="publishOutdoor" report-submit="true" >
         <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布</button>
       </form>
     </van-col>
-    <van-col span="6" offset="2">
+    <van-col span="6" offset="2" wx:if="{{od.status=='拟定中'}}">
       <form bindsubmit="clearOutdoor" report-submit="true" >
         <button form-type="submit" type="warn">清空</button>
       </form>
     </van-col>
-    <van-col span="6" offset="2">
+    <van-col span="6" offset="2" wx:if="{{od.status=='拟定中' || (od.status=='已发布' && od.expired && od.members.length==1)}}">
       <form bindsubmit="deleteOutdoor" report-submit="true" >
         <button form-type="submit" type="warn">删除</button>
       </form>
@@ -194,7 +196,7 @@
 </block>
 
   <!-- 保存修改 -->
-<van-row class="fix">
+<van-row class="fix" wx:if="{{od.status=='拟定中' || !od.expired}}">
   <van-col span="22" offset="1">
     <form bindsubmit="saveModified" report-submit="true">
       <button form-type="submit" disabled="{{!hasModified}}" type="primary">保存修改</button>

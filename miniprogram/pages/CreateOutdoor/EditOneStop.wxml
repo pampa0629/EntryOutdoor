@@ -12,7 +12,7 @@
 </picker>
 
 <!-- 保存和返回按钮 -->
-<van-row>
+<van-row  wx:if="{{od.status=='拟定中' || !od.expired}}">
   <van-col span="9" offset="2">
     <form bindsubmit="save" report-submit="true">
       <button form-type="submit" type="primary" disabled='{{!hasModified||!stop.place}}'>保存</button>

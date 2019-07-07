@@ -3,12 +3,17 @@ const app = getApp()
 const template = require('../../utils/template.js')
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
-const select = require('../../libs/select.js')
+// const select = require('../../libs/select.js')
+
+wx.cloud.init()
+const db = wx.cloud.database({})
+const dbSelect = db.collection('Selects')
+const _ = db.command
 
 Page({
 
   data: {
-    equipments: {
+    equipments: { 
       mustRes: [],
       canRes: [],
       noRes: [],
@@ -21,8 +26,8 @@ Page({
     weatherText: "", // 天气预报文本
     date: null, // 活动日期
     day: null, // 活动是周几
-    isOutDate: false, // 活动是否过期
     hasModified: false,
+    od:null, // 活动对象
 
     areaList: null, // 地区列表
     showPopup: false, // 是否显示弹窗
@@ -39,13 +44,22 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     let limits = prevPage.data.limits
-    let od = pages[pages.length - 3].data.od
+    this.setData({
+      od: pages[pages.length - 3].data.od
+    })
+    let od = this.data.od
 
     self.setData({
       loaded: od.title.loaded,
       date: od.title.date,
       day: util.getDay(od.title.date),
-      areaList: select.area, // 系统默认
+      //areaList: select.area, // 系统默认
+    })
+
+    util.loadArea(area=>{
+      self.setData({
+        areaList:area,
+      })
     })
 
     console.log(limits)
@@ -57,9 +71,8 @@ Page({
 
     console.log(self.data.equipments.area)
     // 处理过期活动
-    if ((new Date()) > new Date(od.title.date)) { // 过期活动，不能用天气预报，也就无法推荐装备了
+    if (od.expired) { // 过期活动，不能用天气预报，也就无法推荐装备了
       self.setData({
-        isOutDate: true,
         weatherText: "活动过期，无法获取天气预报，系统也无法推荐装备",
       })
     } else if (self.data.equipments.area) { // 没过期，有活动地区，则查询天气预报
@@ -106,7 +119,7 @@ Page({
   loadDefault: function() {
     const self = this
     // 没有天气预报，又没有过期，就查询一下
-    if (!self.data.isOutDate) { // 没过期，又没有给天气预报，则查询天气预报
+    if (!this.data.od.expired) { // 没过期，又没有给天气预报，则查询天气预报
       odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
         if (weather.result) {
           self.setData({
@@ -219,8 +232,7 @@ Page({
       prevPage.setData({
         "limits.equipments": self.data.equipments,
       })
-      let od = pages[pages.length - 3].data.od
-      od.saveItem("limits.equipments")
+      this.data.od.saveItem("limits.equipments")
       this.setData({
         hasModified: false
       })

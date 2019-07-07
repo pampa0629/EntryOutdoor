@@ -167,6 +167,7 @@ Page({
           }
         })
         .catch(err => {
+          console.error(err)
           wx.showModal({
             title: '提示',
             content: '点击的活动找不到了，可能已被删除',
@@ -174,7 +175,6 @@ Page({
             confirmText: "知道了",
           })
           // 找不到对应的outdoorid，则说明活动已经不存在了，得从Person表中删除对应活动信息
-          console.log("MyOutdoors.js in tapOneOutdoor fun, err is:" + JSON.stringify(err, null, 2))
           self.dealErrerOutdoor(outdoors, name, index)
         })
     } else {

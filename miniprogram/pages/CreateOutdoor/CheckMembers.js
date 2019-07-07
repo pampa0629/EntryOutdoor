@@ -11,10 +11,8 @@ const dbOutdoors = db.collection('Outdoors')
 Page({  
 
   data: {
-    // outdoorid: null,
-    // title: "",
     members: [],
-    // limits:null, 
+
     index: null, // 当前正在处理的index
     isLeader:false, // 判断自己是不是总领队
 
@@ -35,10 +33,8 @@ Page({
     showAppointPopup: false, // 弹出授权菜单
     cfo:{}, // 财务官
 
-    // addMembers: [], // 领队外挂
     addMember: "",
     entryFull:false, // 是否报名已满，防止领队添加过多附加队员
-    // hasModified: false, // 
     openAdd: false, // 是否开启附加队员
   },
 
@@ -47,9 +43,6 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     let od = pages[pages.length - 2].data.od;
-    // self.data.outdoorid = od.outdoorid
-    // self.data.title = od.title.whole
-    // self.data.limits = od.limits
     self.setData({
       od:od, // od 存起来，方便使用
       entryFull:odtools.entryFull(od.limits, od.members, od.addMembers)
@@ -69,6 +62,8 @@ Page({
     self.flushMembers()
     // 处理附加队员
     self.flushAddMembers()
+    // 处理需要AA费用的成员
+    self.flushAaMembers()
   },
 
   flushMembers() {
@@ -106,37 +101,40 @@ Page({
     })
   },
 
-  // save(e) {
-  //   const self = this;
-  //   console.log("CheckMembers save()")
-  //   console.log("this.data.hasModified：" + this.data.hasModified)
-  //   if (e)
-  //     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+  flushAaMembers() {
+    const members = this.data.od.aaMembers
+    const self = this;
+    const s = members
 
-  //   if (this.data.hasModified) {
-  //     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-  //     let prevPage = pages[pages.length - 2];
-  //     prevPage.setData({
-  //       "od.addMembers": self.data.addMembers,
-  //     })
-  //     prevPage.data.od.saveItem("addMembers")
-  //     this.setData({
-  //       hasModified: false,
-  //     })
-  //   }
-  // },
+    for (var i = 0; i < s.length; i++) {
+      // 增加函数
+      let index = i; // 还必须用let才行
+      this["onPhoneAA" + index] = () => {
+        this.onPhoneAA(index)
+      }
+      this["onDeleteAA" + index] = () => {
+        this.onDeleteAA(index)
+      }
+    }
+  },
+ 
+  onPhoneAA(index) {
+    util.phoneCall(this.data.od.aaMembers[index].userInfo.phone, false)
+  },
+
+  onDeleteAA(index) {
+    // todo 这里有删除的同时，又增加aa名单的冲突风险
+    const members = this.data.od.aaMembers
+    var deleted = members.splice(index, 1) 
+    this.setData({
+      "od.aaMembers":members
+    })
+    cloudfun.updateOutdoorItem(this.data.od.outdoorid, "aaMembers", members)
+  },
 
   onUnload: function() {
     console.log("onUnload()")
-    // this.save() // 自动保存
   },
-
-  // giveup(e) {
-  //   console.log("giveup()")
-  //   template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-  //   this.data.hasModified = false
-  //   wx.navigateBack({})
-  // },
 
   longPressMember(index) {
     util.phoneCall(this.data.members[index].phone, false)
@@ -383,12 +381,12 @@ Page({
       // 从队员报名表中剔除
       var selfQuit = false
       // let prevPage = pages[pages.length - 2];
-      // let od = pages[pages.length - 2].data.od;
-      this.data.od.quit(item.personid, selfQuit, members=>{ // 这里面会发送微信消息
+      // let od = pages[pages.length - 2].data.od; 
+      this.data.od.quit(item.personid, selfQuit, res=>{ // 这里面会发送微信消息
         this.setData({
-          "od.members":members
+          "od.members":res.members
         })
-        console.log(members)
+        console.log(res.members)
         self.flushMembers()
       })
 

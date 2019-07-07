@@ -6,7 +6,7 @@
     </view>
   </van-col>
 </van-row>
-
+ 
 <!--没有活动的提示-->
 <view wx:if="{{outdoors.length == 0 && !isPulldown}}">居然没有活动。可以修改设置，看看过期的活动；或者点击“发起活动”可以创建并发布自己的活动。
 </view>
@@ -23,7 +23,11 @@
   </van-cell-group>
 </view>
 
-<view wx:if="{{page.bottom && outdoors.length>0}}"> 没有更多活动了，可以试试改变“设置”中的条件。
+<van-cell title="  " border="{{false}}" />
+<ad unit-id="adunit-f50da3ef4ac99d19" class="adfix"></ad>
+<van-cell title="  " border="{{false}}" />
+
+<view wx:if="{{page.bottom && outdoors.length>0}}"> 没有更多活动了，可以试试改变“设置”中的条件，查看过期活动或根据关键字搜索活动。
 </view>
 
 <!--弹出设置按钮-->

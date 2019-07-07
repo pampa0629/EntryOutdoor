@@ -5,3 +5,8 @@
   font-family:黑体;
   font-size:10pt
 }
+
+.adfix{
+  position:fixed;
+  bottom: 10rpx;
+}

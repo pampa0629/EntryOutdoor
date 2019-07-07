@@ -86,6 +86,7 @@ Page({
     self.setData({
       route: prevPage.data.od.route,
       outdoorid: prevPage.data.od.outdoorid,
+      od: prevPage.data.od,
     })
     if(!self.data.route.wayPoints) {
       self.setData({
@@ -120,7 +121,9 @@ Page({
   },
 
   dealCompatibility(){
+    console.log("dealCompatibility()")
     const self = this
+    console.log(self.data.route.trackSites)
     self.data.route.trackSites.forEach((item, index)=>{
       if (item.name == "六只脚") {
         item.urlpre="http://www.foooooot.com/trip/"
@@ -182,7 +185,7 @@ Page({
       prevPage.setData({
         "od.route": self.data.route,
       })
-      prevPage.data.od.saveItem("route")
+      this.data.od.saveItem("route")
 
       this.setData({
         hasModified:false,
@@ -343,7 +346,7 @@ Page({
     }).then(res => {
       console.log("del track file ok: " + JSON.stringify(res, null, 2))
     }).catch(err => {
-      console.log("del track file err: " + JSON.stringify(err, null, 2))
+      console.error(err)
     })
 
     self.data.route.trackFiles.splice(index, 1)
@@ -360,7 +363,7 @@ Page({
     self.setData({
       "route.interphone":e.detail,
       hasModified: true,
-    })
+    }) 
     var error = false
     if (self.data.route.interphone) {
       var temps = self.data.route.interphone.split(".")

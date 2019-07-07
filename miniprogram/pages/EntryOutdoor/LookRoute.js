@@ -3,53 +3,95 @@ const util = require('../../utils/util.js')
 
 Page({
 
-  data: { 
+  data: {
     route: {}, // 活动路线，由多个站点（stop）组成
-    qrcodes:[], // 轨迹二维码
+    qrcodes: [], // 轨迹app二维码
+    fqrcodes: [], // 轨迹文件二维码
+    furls:[], // 轨迹文件临时下载url
   },
- 
+
   onLoad: function(options) {
-    console.log("onLoad")
-    const self = this;
+    console.log("onLoad()")
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
-    self.setData({
+    this.setData({
       route: prevPage.data.od.route,
     })
+    this.dealSites()
+    this.dealFiles()
+  },
 
-    if (self.data.route.trackSites) {
-      for (var i = 0; i < self.data.route.trackSites.length; i++) {
-        let index = i
-        this["copyoutUrl" + index] = () => {
-          this.copyoutUrl(index) 
-        }
-        this["saveQrcode" + index] = () => {
-          this.saveQrcode(index)
-        }
-        self.data.qrcodes[i] = new QRCode('canvas'+i, {
-          text: self.data.route.trackSites[i].qrcode,
+  dealSites() {
+    console.log("dealSites()")
+    const self = this
+    self.data.route.trackSites.forEach((item, index) => {
+      let i = index
+      this["copyoutUrl" + i] = () => {
+        this.copyoutUrl(i)
+      }
+      this["saveQrcode" + i] = () => {
+        this.saveQrcode(i)
+      }
+      if (!self.data.route.trackSites[i].qrcode) {
+        self.data.route.trackSites[i].qrcode = self.data.route.trackSites[i].url
+      }
+      self.data.qrcodes[i] = new QRCode('canvas' + i, {
+        text: self.data.route.trackSites[i].qrcode,
+        width: 128,
+        height: 128,
+        colorDark: "#1CA4FC",
+        colorLight: "white",
+        correctLevel: QRCode.CorrectLevel.H,
+      })
+      console.log(self.data.route.trackSites[i], self.data.qrcodes[i])
+    })
+  },
+
+  dealFiles() {
+    console.log("dealFiles()")
+    const self = this
+    console.log(self.data.route.trackFiles)
+  
+    self.data.route.trackFiles.forEach((item, index) => {
+      let i = index; // 还必须用let才行 
+      this["copyFileUrl" + i] = () => {
+        this.copyFileUrl(i)
+      }
+      this["saveFileQrcode" + i] = () => {
+        this.saveFileQrcode(i)
+      }
+      this.getFileUrl(i, url => {
+        console.log("url: " + url)
+        self.data.furls[i] = url
+        self.data.fqrcodes[i] = new QRCode('fcanvas' + i, {
+          text: url,
           width: 128,
           height: 128,
           colorDark: "#1CA4FC",
           colorLight: "white",
           correctLevel: QRCode.CorrectLevel.H,
-        });
-      }
-    }
-
-    if (self.data.route && self.data.route.trackFiles) {
-      for (var i = 0; i < self.data.route.trackFiles.length; i++) {
-        let j = i; // 还必须用let才行
-        this["downloadTrackFile" + j] = () => {
-          this.downloadTrackFile(j)
-        }
-      }
-    }
+        })
+      })
+    })
   },
 
-  downloadTrackFile(index) {
+  copyFileUrl(index, callback) {
     const self = this
-    console.log("downloadTrackFile(index):"+index)
+    wx.setClipboardData({
+      data: self.data.furls[index],
+      success(res) {
+        wx.showModal({
+          title: '复制链接成功',
+          content: "下载链接已经复制到内存中，请打开任意浏览器粘贴后下载该轨迹文件",
+          showCancel: false,
+        })
+      }
+    })
+  },
+
+  getFileUrl(index, callback) {
+    const self = this
+    console.log("copyFileUrl(index):" + index)
     const track = self.data.route.trackFiles[index]
     console.log(track)
 
@@ -57,19 +99,29 @@ Page({
       fileList: [track.src]
     }).then(res => {
       console.log(res.fileList)
-      if(res.fileList.length==1) {
-        wx.setClipboardData({
-          data: res.fileList[0].tempFileURL,
-          success(res) {
-            wx.showModal({
-              title: '获取链接成功',
-              content: "下载链接已经拷贝到内存中，请打开任意浏览器复制链接下载该轨迹文件",
-              showCancel: false,
-            })
-          }
-        })
+      if (res.fileList.length == 1) {
+        const url = res.fileList[0].tempFileURL
+        console.log("url:"+url)
+        if (callback) {
+          callback(url)
+        }
       }
     })
+  },
+
+  saveFileQrcode(index) {
+    console.log("saveFileQrcode()")
+    console.log(index)
+    const self = this
+    var message = "同意授权“保存到相册”才能保存二维码图片"
+    util.authorize("writePhotosAlbum", message, res => {
+      self.data.fqrcodes[index].exportImage(function (path) {
+        wx.saveImageToPhotosAlbum({
+          filePath: path,
+        })
+      })
+    })
+
   },
 
   copyoutUrl(index) {
@@ -92,13 +144,12 @@ Page({
     const self = this
     var message = "同意授权“保存到相册”才能保存二维码图片"
     util.authorize("writePhotosAlbum", message, res => {
-      self.data.qrcodes[index].exportImage(function (path) {
+      self.data.qrcodes[index].exportImage(function(path) {
         wx.saveImageToPhotosAlbum({
           filePath: path,
         })
       })
     })
-    
   },
 
 })

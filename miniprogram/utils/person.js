@@ -60,7 +60,7 @@ const getUniqueNickname=(nickName, callback)=>{
 
 // 在Persons表中创建一条记录（个人账号）
 const createRecord=(userInfo, openid, callback)=>{
-  console.log("createRecord")
+  console.log("person.createRecord()")
   // 最后仍然得判断openid真的在Persons表中没有，才创建新的
   dbPersons.where({
     _openid: openid,
@@ -75,7 +75,7 @@ const createRecord=(userInfo, openid, callback)=>{
           data: {
             userInfo: userInfo,
             myOutdoors: [],
-            entriedOutdoors: [],
+            entriedOutdoors: [], 
             caredOutdoors: [],
           }
         }).then(res => {
@@ -85,9 +85,11 @@ const createRecord=(userInfo, openid, callback)=>{
         })
       })
     } else if (res.data.length == 1) { // 有的话，用读取的就好
-      if (callback) {
-        callback({ personid: res.data[0]._id, userInfo: userInfo })
-      }
+      cloudfun.opPersonItem(res.data[0]._id, "userInfo", userInfo, "", none=>{
+        if (callback) {
+          callback({ personid: res.data[0]._id, userInfo: userInfo })
+        }
+      })
     } else { // 已经有多个账号，后台处理
       wx.setClipboardData({
         data: openid,
@@ -127,7 +129,7 @@ const checkNickname = (nickName, personid, callback)=>{
       callback(nickErrMsg, false)
     }
   } else {
-    dbPersons.where({
+    dbPersons.where({ 
       "userInfo.nickName": nickName
     }).get().then(res => {
       console.log(res.data)

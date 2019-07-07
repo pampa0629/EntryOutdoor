@@ -18,6 +18,7 @@ Page({
     },
     index: -1,
     hasModified: false,
+    od:null,
 
     action: null, // 发起这个页面的行为
   },
@@ -38,7 +39,8 @@ Page({
         let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
         let prevPage = pages[pages.length - 2];
         self.setData({
-          meet: prevPage.data.meets[options.index]
+          meet: prevPage.data.meets[options.index],
+          od: pages[pages.length - 3].data.od,
         })
       }
     }
@@ -123,7 +125,7 @@ Page({
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
       let prevPage = pages[pages.length - 2];
       let prevprevPage = pages[pages.length - 3];
-      let od = prevprevPage.data.od
+      let od = this.data.od
       console.log(self.data.action)
       console.log(self.data.meet)
       if (self.data.action == "edit") {

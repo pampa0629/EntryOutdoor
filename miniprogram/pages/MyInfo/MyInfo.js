@@ -78,7 +78,7 @@ Page({
 
   },
 
-  onLoad: function() {
+  onLoad: function() { 
     const self = this;
     if (app.globalData.openid == null || app.globalData.openid.length == 0) {
       app.openidCallback = (openid) => {
@@ -108,7 +108,8 @@ Page({
   },
 
   loginWeixin: function(e) {
-    console.log("loginWeixin")
+    console.log("MyInfo.loginWeixin()")
+    console.log(app.globalData)
     const self = this;
     // 这里仍然存在：Persons表中已经有用户记录，但由于网络等原因尚未读取到的情况
     if (app.globalData.hasUserInfo) {
@@ -261,7 +262,6 @@ Page({
   // 要是不是自己创建的，则转到“参加活动”页面
   gotoLastOutdoor: function() {
     var outdoorid = util.loadOutdoorID();
-   // outdoorid = "cbdb4c165cff05af0362c70c3c1bac02" // todo del
     // onShow那里做了判断，这里就默认肯定有了
     dbOutdoors.doc(outdoorid).get()
       .then(res => {
@@ -277,6 +277,7 @@ Page({
         }
       })
       .catch(err => {
+        console.error(err)
         wx.showModal({
           title: '查找活动ID失败',
           content: '对应的活动可能已被领队删除',

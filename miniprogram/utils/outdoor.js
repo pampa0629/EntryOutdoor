@@ -36,6 +36,7 @@ function OD() {
   this.traffic = {} // 交通方式
   this.members = [] // 已报名成员（含领队）
   this.addMembers = [] // 未通过小程序报名，领队添加的“附加队员”
+  this.aaMembers = [] // 需要参与A费用的退出队员
   this.brief = { // 活动简要介绍，分为文字和图片（多张）
     disc: "领队有点懒，什么也没介绍",
     pics: [], // {src:string} 云存储路径
@@ -45,6 +46,9 @@ function OD() {
     allowPopup: false, // 是否允许空降
     maxPerson: false, // 是否限制人数
   }
+  this.chat = {
+    messages: []
+  } // 必须先把数组结构定义出来，这样后面保存才不会把数组变对象（坑死人的微信云数据库）
   this.leader = {} // 领队，save时确定，或者领队转让时修改
   this.status = "拟定中" // 活动本身的状态，分为：拟定中，已发布，已成行，报名截止，已取消
 
@@ -75,20 +79,29 @@ OD.prototype.load = function(outdoorid, callback) {
 
 OD.prototype.removeOcuppy = function(callback) {
   // 判断处理占坑过期的问题
-  if (this.title.date && odtools.calcRemainTime(this.title.date, this.limits.ocuppy, true) < 0) {
+  var remainTime = this.title.date ? odtools.calcRemainTime(this.title.date, this.limits.ocuppy, true) : 60 * 24 * 7
+  if (remainTime < 0) {
     odtools.removeOcuppy(this.outdoorid, members => {
       this.members = members
       if (callback) {
         callback()
       }
     })
-  } else if (callback) {
+  } else if (remainTime < 60 * 8) { // 不够八小时就给占坑队员发消息
+    odtools.remindOcuppy(this, () => {
+      if (callback) {
+        callback()
+      }
+    })
+  }
+  if (callback) {
     callback()
   }
 }
 
-// 拷贝内容
+// 加载活动时，原样拷贝活动，并处理兼容性问题
 OD.prototype.copy = function(od) {
+  console.log("OD.prototype.copy()")
   this.outdoorid = od.outdoorid
   this.title = od.title
   this.title.adjustLevel = this.title.adjustLevel ? this.title.adjustLevel : 100
@@ -97,6 +110,7 @@ OD.prototype.copy = function(od) {
   // 设置领队，顺序：od中保存的、第一个队员、默认的（null）
   this.leader = od.leader ? od.leader : od.members[0]
   this.addMembers = od.addMembers ? od.addMembers : this.addMembers
+  this.aaMembers = od.aaMembers ? od.aaMembers : this.aaMembers  
   this.status = od.status
 
   // brief 文字加图片 
@@ -135,21 +149,34 @@ OD.prototype.copy = function(od) {
   this.route.trackFiles = this.route.trackFiles ? this.route.trackFiles : [] // 轨迹文件
 
   this.chat = od.chat ? od.chat : this.chat
+  this.chat.messages = this.chat.messages ? this.chat.messages : [] // 设置数组类型
   this.QcCode = od.QcCode
   this.pay = od.pay ? od.pay : this.pay
+
+  // 增加对活动是否过期的判断
+  this.expired = (new Date()) > new Date(this.title.date + ",24:00") ? true : false
 
   // next 
 
 }
 
-// 把当前活动设置为可供后续创建新活动的样子，即把活动id、活动日期、队员列表、网站同步信息、活动状态等信息置空
+// 把当前活动设置为可供后续创建新活动的样子
+// 即把活动id、活动日期、队员列表、网站同步信息、活动状态、活动留言、活动二维码、付款信息等和特定活动相关的信息置空
 OD.prototype.setDefault4New = function() {
   console.log("OD.prototype.setDefault4New()")
   this.outdoorid = null
   this.title.date = null
   this.members = []
+  this.addMembers = []
+  this.aaMembers = []
   this.websites = odtools.getDefaultWebsites()
+  this.chat = {
+    messages: []
+  }
+  this.QcCode = null
+  this.pay = null
   this.status = "拟定中"
+  this.expired = false
 }
 
 // 保存（更新）od到数据库中，若之前没有保存过，则新建一条记录
@@ -158,25 +185,37 @@ OD.prototype.setDefault4New = function() {
 // callback: 返回活动本身
 OD.prototype.save = function(myself, modifys, callback) {
   console.log("OD.prototype.save()")
-  console.log("outdoorid:" + this.outdoorid)
+  console.log("outdoorid: " + this.outdoorid)
+  console.log("modifys: " + JSON.stringify(modifys))
   const self = this
   if (this.outdoorid) {
-    // 必须先刷新一下成员，不然容易覆盖
-    dbOutdoors.doc(self.outdoorid).get().then(res => {
-      self.members = res.data.members
-      // 找到自己的index，并更新信息
-      self.members.forEach((item, index) => {
-        if (item.personid == myself.personid) {
-          self.members[index] = myself // 不能用item设置，大坑
-        }
-      })
+    // 已发布且过期的活动，不允许保存
+    if (!this.expired || this.status == "拟定中") {
+      // 必须先刷新一下成员，不然容易覆盖
+      dbOutdoors.doc(self.outdoorid).get().then(res => {
+        self.members = res.data.members
+        // 找到自己的index，并更新信息
+        self.members.forEach((item, index) => {
+          if (item.personid == myself.personid) {
+            self.members[index] = myself // 不能用item设置，大坑
+          }
+        })
 
-      cloudfun.updateOutdoor(self.outdoorid, self, res => {
-        if (callback) {
-          callback(self)
-        }
+        cloudfun.updateOutdoor(self.outdoorid, self, res => {
+
+          // 如果设置了与网站同步，则需要即时处理
+          this.postWaitings()
+          // 修改的内容同步到网站上
+          this.postModify2Websites(modifys)
+          // 信息修改要发送给队员
+          this.sendModify2Members(modifys)
+
+          if (callback) {
+            callback(self)
+          }
+        })
       })
-    })
+    }
   } else { // 若之前没有保存过，则创建活动记录
     self.create(myself, id => {
       if (callback) {
@@ -184,22 +223,18 @@ OD.prototype.save = function(myself, modifys, callback) {
       }
     })
   }
-  // 如果设置了与网站同步，则需要即时处理
-  this.postWaitings()
-  // 修改的内容同步到网站上
-  this.postModify2Websites(modifys)
-  this.sendModify2Members(modifys)
 }
 
 // 发布活动
 // 返回活动本身
 OD.prototype.publish = function(leader, callback) {
+  console.log("OD.prototype.publish()")
   const self = this
   // 保存到数据库中
   this.leader = leader
   this.save(leader, {}, res => {
-    // 对于需要同步网站的，生成 tid
-    self.ensureWebsites()
+    // save中肯定保证有tid了，这里就不要重复调用了
+    // self.ensureWebsites() 
     if (callback) {
       callback(res)
     }
@@ -279,6 +314,7 @@ OD.prototype.create = function(leader, callback) {
           title: this.title,
           traffic: this.traffic,
           websites: this.websites,
+          chat: this.chat,
         }
       }).then(res => {
         this.outdoorid = res._id
@@ -358,39 +394,42 @@ OD.prototype.copyTrackFiles = function() {
 OD.prototype.saveItem = function(name, callback) {
   console.log("OD.prototype.saveItem()" + name)
   console.log("outdoorid: " + this.outdoorid)
-  var value = util.getValue(this, name)
-  console.log(value)
-  // 存储到数据库中
-  wx.cloud.callFunction({
-    name: 'dbSimpleUpdate', // 云函数名称
-    // table,id,item,command(push,pop,shift,unshift,""),value
-    data: {
-      table: "Outdoors",
-      id: this.outdoorid,
-      item: name,
-      command: "",
-      value: value
-    }
-  }).then(res => {
-    console.log(res)
+  // 已发布且过期的活动，不允许保存
+  if (!this.expired || this.status == "拟定中") {
+    var value = util.getValue(this, name)
+    console.log(value)
+    // 存储到数据库中
+    wx.cloud.callFunction({
+      name: 'dbSimpleUpdate', // 云函数名称
+      // table,id,item,command(push,pop,shift,unshift,""),value
+      data: {
+        table: "Outdoors",
+        id: this.outdoorid,
+        item: name,
+        command: "",
+        value: value
+      }
+    }).then(res => {
+      console.log(res)
 
-    var modifys = {} // 提取修改的第一级子项的名字
-    modifys[name.split(".")[0]] = true
-    console.log(modifys)
-    // 一些重要的基本信息被修改，需要通知到所有已报名队员
-    this.sendModify2Members(modifys)
-    // 同步到网站
-    this.postModify2Websites(modifys)
+      var modifys = {} // 提取修改的第一级子项的名字
+      modifys[name.split(".")[0]] = true
+      console.log(modifys)
+      // 一些重要的基本信息被修改，需要通知到所有已报名队员
+      this.sendModify2Members(modifys)
+      // 同步到网站
+      this.postModify2Websites(modifys)
 
-    wx.showToast({
-      title: '保存成功',
+      wx.showToast({
+        title: '保存成功',
+      })
+      if (callback) {
+        callback()
+      }
+    }).catch(err => {
+      console.log(err)
     })
-    if (callback) {
-      callback()
-    }
-  }).catch(err => {
-    console.log(err)
-  })
+  }
 }
 
 // 一些重要的基本信息被修改，需要通知到所有已报名队员
@@ -526,7 +565,7 @@ OD.prototype.quit4Add = function(index) {
 
 // 排位第一的替补转正
 // 信息同步到网站，并发送微信消息；但不负责保存到数据库
-// 发生返回true
+// 有替补，则返回true
 OD.prototype.firstBench2Member = function() {
   console.log("OD.prototype.firstBench2Member()")
   if (this.limits.maxPerson && (this.members.length + this.addMembers.length > this.limits.personCount)) {
@@ -561,17 +600,29 @@ OD.prototype.quit = function(personid, selfQuit, callback) {
       var member = this.members[index]
 
       // 第三步：判断是否能让替补上；原则：我不是替补，我退出，就让第一个替补顶上
+      var isAfee = odtools.isNeedAA(this, member.entryInfo.status) // 判断是否A费用
+      isAfee = selfQuit ? isAfee : false // 若不是自行退出（领队驳回），则肯定不用A费用
       if (member.entryInfo.status != "替补中") {
-        this.firstBench2Member()
+        var hasBench = this.firstBench2Member()
+        if (isAfee && hasBench) { // 如果有替补，又要A费用，就说明有地方出错了
+          console.error("isAfee: ", isAfee, "hasBench: ", hasBench)
+        }
       }
 
-      this.members.splice(index, 1) // 别忘了删除自己
+      var deleted = this.members.splice(index, 1) // 别忘了删除自己
       // 第四步：新成员列表写入数据库
       cloudfun.updateOutdoorItem(this.outdoorid, "members", this.members)
+      if (isAfee) { // 要A费用的时候，单独开一个名单列表
+        this.aaMembers.push(deleted)
+        cloudfun.opOutdoorItem(this.outdoorid, "aaMembers", deleted, "push")
+      }
 
       // 第五步：给退出者发消息
       if (selfQuit) {
         var remark = "您已自行退出本次活动。您仍可以点击进入小程序继续报名。"
+        if (isAfee) {
+          remark += "由于活动已成行，您退出且无人替补，请联系领队A费用。"
+        }
         template.sendQuitMsg2Self(member.personid, this.outdoorid, this.title.whole, this.title.date, this.leader.userInfo.nickName, member.userInfo.nickName, remark)
       } else {
         var remark = "您已被领队驳回报名，可点击回到活动的“留言”页面中查看原因。若仍有意参加，可在留言中@领队或电话等方式联系领队确认情况。"
@@ -583,7 +634,7 @@ OD.prototype.quit = function(personid, selfQuit, callback) {
       this.postEntry2Websites(member, true, selfQuit)
       // 第七步：回调
       if (callback) {
-        callback(this.members)
+        callback({members:this.members, isAfee:isAfee})
       }
     }
   })
@@ -601,9 +652,12 @@ OD.prototype.ensureWebsites = function(callback) {
     // 第二步，判断是否已经发帖; 已发布和已成行的活动，尚未发帖，则应立即发帖
     if (!lvyeobj.tid && (this.status == "已发布" || this.status == "已成行")) {
       lvyeorg.addThread(this.outdoorid, this, lvyeobj.isTesting || this.limits.isTest, tid => {
-        if (tid && callback) {
+        console.log("tid: " + tid)
+        if (tid) {
           lvyeobj.tid = tid
-          callback(tid)
+          if (callback) {
+            callback(tid)
+          }
         }
       })
     } else if (lvyeobj.tid && callback) {
@@ -622,12 +676,24 @@ OD.prototype.postWaitings = function() {
     // 必须已经发帖，再看看是否有waitings需要推送
     // 若之前没有发帖成功，则现在发帖
     this.ensureWebsites(tid => {
-      console.log(tid)
+      console.log("tid: " + tid)
+      // 为了防止多人同时load，waitings信息被多次发送，增加数据库锁机制
+      // 思路：1）再次刷新得到waitings和posting信息
+      //       2）若posting为false，则把数据库中的posting改为true，然后发送waitings信息；若posting为true，则啥也不干
+      //       3）发送结束，把数据库中的posting改为false，清空waitings
       if (tid && lvyeobj.waitings && lvyeobj.waitings.length > 0) {
-        lvyeorg.postWaitings(lvyeobj.tid, lvyeobj.waitings, callback => {
-          cloudfun.clearOutdoorLvyeWaitings(this.outdoorid, callback => {
-            lvyeobj.waitings = []
-          })
+        odtools.getWebsites(this.outdoorid, websites => { // 1）
+          if (!websites.lvyeorg.posting) { // 别人没有posting中，自己才能干活
+            cloudfun.opOutdoorItem(this.outdoorid, "websites.lvyeorg.posting", true, "", callback => { // 2.1）
+              lvyeorg.postWaitings(lvyeobj.tid, websites.lvyeorg.waitings, callback => { // 2.1）
+                cloudfun.opOutdoorItem(this.outdoorid, "websites.lvyeorg.posting", false, "") // 3.1）
+                cloudfun.clearOutdoorLvyeWaitings(this.outdoorid, callback => { // 3.2)
+                  lvyeobj.waitings = [] // 自己内存中的也要清空
+                  lvyeobj.posting = false
+                })
+              })
+            })
+          }
         })
       }
     })
@@ -638,12 +704,16 @@ OD.prototype.postWaitings = function() {
 OD.prototype.postModify2Websites = function(modifys) {
   console.log("OD.prototype.postModify2Websites()")
   console.log(modifys)
-  const lvyeobj = this.websites.lvyeorg
-  if (lvyeobj.keepSame) {
-    var addedMessage = "领队对以下内容作了更新，请报名者留意！"
-    var message = lvyeorg.buildOutdoorMesage(this, false, modifys, addedMessage, this.websites.lvyeorg.allowSiteEntry) // 构建活动信息
+  // 有修改项，且不是拟定中，才写入
+  if (util.anyTrue(modifys) && this.status != "拟定中") {
+    console.log("anyTrue: " + util.anyTrue(modifys))
+    const lvyeobj = this.websites.lvyeorg
+    if (lvyeobj.keepSame) {
+      var addedMessage = "领队对以下内容作了更新，请报名者留意！"
+      var message = lvyeorg.buildOutdoorMesage(this, false, modifys, addedMessage, this.websites.lvyeorg.allowSiteEntry) // 构建活动信息
 
-    this.postMessage2Websites(addedMessage, addedMessage + message)
+      this.postMessage2Websites(addedMessage, addedMessage + message)
+    }
   }
 }
 

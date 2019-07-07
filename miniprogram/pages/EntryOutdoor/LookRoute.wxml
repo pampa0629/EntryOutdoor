@@ -10,9 +10,24 @@
 <!--轨迹文件-->
 <van-panel wx:if="{{route.trackFiles.length>0}}" use-footer-slot>
   <van-cell slot="header" title-class="redtitle" title="轨迹文件"></van-cell>
-  <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}" title-width="70%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
-    <van-button slot="button" size="small" type="primary" bind:click='downloadTrackFile{{index}}'>获取链接</van-button>
-  </van-field>
+  <van-tag plain type="primary">方法1：点击“获取链接”，再到任意浏览器中粘贴链接下载。</van-tag>
+  <van-tag plain type="primary">方法2：用支付宝扫码(微信无效,不会扣款)，直接跳转到浏览器下载。</van-tag>
+  <block wx:for="{{route.trackFiles}}" wx:key="item">
+    <van-field   label="{{item.name}}" title-width="70%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
+      <van-button slot="button" size="small" type="primary" bind:click='copyFileUrl{{index}}'>复制链接</van-button>
+    </van-field>
+    <van-row>
+        <van-col span="4" offset="1">
+          <text style="font-size:10pt">二维码:</text> 
+        </van-col>
+        <van-col span="10" offset="2">
+          <canvas class='canvas' canvas-id='fcanvas{{index}}'/>
+        </van-col>
+        <van-col span="4" offset="2">
+          <van-button size="small" type="primary" bind:click='saveFileQrcode{{index}}'>保存</van-button>
+        </van-col>
+      </van-row>
+  </block>
 </van-panel>
  
 <!--户外轨迹--> 
@@ -25,12 +40,12 @@
       </van-cell>
       <van-row>
         <van-col span="4" offset="1">
-          <text style="font-size:12pt">二维码:</text>
+          <text style="font-size:10pt">二维码:</text> 
         </van-col>
-        <van-col span="10" offset="1">
+        <van-col span="10" offset="2">
           <canvas class='canvas' canvas-id='canvas{{index}}'/>
         </van-col>
-        <van-col span="4" offset="4">
+        <van-col span="4" offset="2">
           <van-button size="small" type="primary" bind:click='saveQrcode{{index}}'>保存</van-button>
         </van-col>
       </van-row>

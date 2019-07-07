@@ -1,10 +1,10 @@
 <!--装备类型--> 
 <van-notice-bar text="活动类型：{{loaded}}，活动日期：{{date}}({{day}})"/>
-<van-notice-bar wx:if="{{isOutDate}}" text="{{weatherText}}"/>
+<van-notice-bar wx:if="{{od.expired}}" text="{{weatherText}}"/>
 <van-notice-bar wx:else text="天气预报：{{weatherText}}"/>
  
 <!--选择地区--> 
-<block wx:if="{{!isOutDate}}"> 
+<block wx:if="{{!od.expired}}"> 
   <van-tag wx:if="{{!equipments.area}}" type="primary" plain>只有选择活动地区，才能通过天气预报推荐合适的装备</van-tag> 
   <van-field value="{{equipments.area}}" center required clearable label="活动所在地区" placeholder="请选择/输入城市或区县" border="{{ false }}" use-button-slot bind:input="inputArea">
     <van-button slot="button" size="small" round plain type="primary" bind:click="onPopup">选择地区</van-button>
@@ -16,7 +16,7 @@
   <!--加载默认--> 
   <van-row >
     <van-col span="20" offset="2">
-      <van-button wx:if="{{!isOutDate}}" disabled="{{!equipments.area}}" plain size="large" type="primary" bind:click='loadDefault'>加载系统推荐</van-button>
+      <van-button wx:if="{{!od.expired}}" disabled="{{!equipments.area}}" plain size="large" type="primary" bind:click='loadDefault'>加载系统推荐</van-button>
     </van-col>
   </van-row>
 </block>
@@ -90,7 +90,7 @@
 <van-cell title="  " border="{{false}}" />
 
 <!-- 保存和返回按钮 -->
-<van-row class="fix">
+<van-row class="fix"  wx:if="{{od.status=='拟定中' || !od.expired}}">
   <van-col span="9" offset="2">
     <form bindsubmit="save" report-submit="true">
       <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>

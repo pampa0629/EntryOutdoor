@@ -46,7 +46,7 @@ const savePersonFormid = (personid, formid, callback) => {
         callback(result)
       }
     }).catch(err=>{
-      console.log(err)
+      console.error(err)
     })
   }
 }
@@ -88,7 +88,7 @@ const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone, callback) =
       })
     })
   }).catch(err=>{
-    console.log(err)
+    console.error(err)
     if (callback) {
       callback(err)
     }
@@ -161,10 +161,10 @@ const sendModifyMsg2Member = (personid, outdoorid, title, leader, modifys) => {
 
 // 给所有队员发活动成行通知
 const sendConfirmMsg2Member = (personid, outdoorid, title, count, leader) => {
-  console.log("sendConfirmMsg2Member")
+  console.log("sendConfirmMsg2Member()")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
-    var tempid = "Eh_ODLoKykVkGGjJPLEmKjLs9xJXv5NyGKF-cyVwyBc"
+    var tempid = "Eh_ODLoKykVkGGjJPLEmKkkrK5tRlPC8i7O-yhrT5xc"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
       "keyword1": { // 活动名称
         "value": title
@@ -174,6 +174,9 @@ const sendConfirmMsg2Member = (personid, outdoorid, title, count, leader) => {
       },
       "keyword3": { // 发起人
         "value": leader
+      },
+      "keyword4": { // 组团信息
+        "value": "领队已确认活动成行；若退出活动又无人替补，请主动联系领队A共同费用（包括但不限于车费）"
       },
     }
     var page = buildPage("EntryOutdoor", outdoorid)
@@ -535,6 +538,36 @@ const sendStatusChangeMsg2Member = (personid, outdoorid, title, nickName, status
   })
 }
 
+// 给占坑队员发占坑截止时间临近的消息提醒
+const sendRemindMsg2Ocuppy = (personid, outdoorid, title, remain, leader, memCount) => {
+  console.log("template.sendRemindMsg2Ocuppy()")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "vN9juB3mmUl0f_RYryo1a2Re5bboLr3hs-ZNBo7n4J0"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 活动主题
+        "value": title
+      },
+      "keyword2": { // 地点：活动信息
+        "value": "本活动您现在是“占坑”状态，若要参加活动请点击进入小程序，并改为报名。占坑截止时间结束后，占坑队员将自动被清退。"
+      },
+      "keyword3": { // 时间：占坑截止时间
+        "value": "距离占坑截止时间还有："+remain
+      },
+      "keyword4": { // 发布者：领队
+        "value": leader
+      },
+      "keyword5": { // 参加人数：已报名人数
+        "value": memCount
+      },
+    }
+    var page = buildPage("EntryOutdoor", outdoorid)
+    fetchPersonFormid(personid, res.data.formids, formid => {
+      sendMessage(openid, tempid, formid, page, data)
+    })
+  })
+}
+
 // 给特定openid发特定id的模板消息
 const sendMessage = (openid, tempid, formid, page, data, callback) => {
   console.log("sendMessage")
@@ -564,6 +597,7 @@ const sendMessage = (openid, tempid, formid, page, data, callback) => {
           callback(res)
         }
       }).catch(err=>{
+        console.error(err)
         if (callback) {
           callback(err)
         }
@@ -591,6 +625,7 @@ module.exports = {
   sendEntryMsg2Bench: sendEntryMsg2Bench, // 给替补队员发转为正式队员的消息
   sendBenchMsg2Member: sendBenchMsg2Member, // 给队员(报名/占坑)发转为替补队员的消息，用于领队缩编时
   sendQuitMsg2Occupy: sendQuitMsg2Occupy, // 给被强制退坑者发消息提醒
+  sendRemindMsg2Ocuppy: sendRemindMsg2Ocuppy, // 给占坑队员发占坑截止时间临近的消息提醒
   sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况
   sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息
   sendModifyMsg2Member: sendModifyMsg2Member, // // 给队员发送活动重要内容修改通知

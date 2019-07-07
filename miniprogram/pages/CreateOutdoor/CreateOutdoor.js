@@ -7,11 +7,11 @@ const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 
-wx.cloud.init()
+wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
-const _ = db.command
+const _ = db.command 
 
 Page({
   data: {
@@ -87,9 +87,12 @@ Page({
     // 设置myself 信息
     this.data.myself.userInfo = app.globalData.userInfo;
     this.data.myself.personid = app.globalData.personid;
-    this.setData({
-      "myself.entryInfo": {} // 结构先定义出来
-    })
+    if(!this.data.myself.entryInfo) {
+      this.setData({
+        "myself.entryInfo": {} // 结构先定义出来，有了的时候不要清空
+      })
+    }
+    
     console.log("this.data.myself: ")
     console.log(this.data.myself)
   },
@@ -105,7 +108,7 @@ Page({
         startDate: util.formatDate(new Date()), // 起始日期，只能从今天开始
         endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，不能发半年之后的活动
         hasModified: false, // 刚load，没有修改
-      })
+      }) 
 
       self.setChat(od.chat) // 判断留言
 
@@ -115,6 +118,7 @@ Page({
           self.setData({
             myself: item
           })
+          console.log("myself: " + JSON.stringify(self.data.myself))
           if (item.entryInfo.status == "领队组") { // 判断自己是否为领队组成员
             self.setData({
               isLeaderGroup: true,
@@ -509,7 +513,7 @@ Page({
   postOneSubscriber(personid, acceptNotice, callback) {
     console.log("postOneSubscriber()")
     cloudfun.unshiftPersonCared(personid, this.data.od.outdoorid, this.data.od.title.whole, res => {
-      // 发微信消息
+      // 发微信消息 
       if (acceptNotice) {
         template.sendCreateMsg2Subscriber(personid, this.data.od.title.whole, this.data.od.outdoorid, app.globalData.userInfo.phone, res => {
           if (callback) {

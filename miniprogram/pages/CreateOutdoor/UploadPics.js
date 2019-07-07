@@ -90,7 +90,7 @@ Page({
     }).then(res => {
       console.log("CreateOutdoor.js in deletePic fun, del pic ok: " + JSON.stringify(res, null, 2))
     }).catch(err => {
-      console.log("CreateOutdoor.js in deletePic fun, del pic err: " + JSON.stringify(err, null, 2))
+      console.error(err)
     })
 
     this.data.pics.pop(); // 去掉最后一个

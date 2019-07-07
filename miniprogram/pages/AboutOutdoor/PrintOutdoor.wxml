@@ -3,12 +3,12 @@
 
 <!--活动基本情况-->
 <view>
-  <van-tag type="primary" plain>请截长屏保存</van-tag>
+  <van-tag type="primary" plain>请截长屏保存到手机相册</van-tag>
   <text>\n{{od.title.whole}}\n</text>
   <text class="tip">地点：</text>
   <text>{{od.title.place}}\n</text>  
   <text class="tip">活动日期：</text> 
-  <text>{{od.title.date}}\n</text> 
+  <text>{{od.title.date}}\n</text>  
   <text class="tip">活动强度：</text>
   <text>{{od.title.level}}（累积距离{{od.title.addedLength}}公里，累积上升{{od.title.addedUp}}00米）\n</text>
   <block wx:if="{{interphone}}"> 
@@ -29,7 +29,7 @@
 
 <!--集合地点-->
 <text class="tip">\n集合地点</text>
-<view wx:for="{{od.meets}}" wx:key="place" data-pos='{{index}}'>集合点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
+<view wx:for="{{od.meets}}" wx:key="place" data-pos='{{index}}'>{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
 
 <!--队员列表-->
 <view> 

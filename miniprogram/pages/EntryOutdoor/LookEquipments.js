@@ -1,6 +1,6 @@
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
-const select = require('../../libs/select.js')
+// const select = require('../../libs/select.js')
 
 Page({
 
@@ -36,7 +36,13 @@ Page({
       loaded: od.title.loaded,
       date: od.title.date,
       day: util.getDay(od.title.date),
-      areaList: select.area, // 系统默认
+      // areaList: select.area, // 系统默认
+    }) 
+
+    util.loadArea(area => {
+      self.setData({
+        areaList: area,
+      })
     })
 
     var hasEquipments = od.limits && od.limits.equipments && (od.limits.equipments.must.length || od.limits.equipments.can.length ||od.limits.equipments.no.length)

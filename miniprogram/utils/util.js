@@ -4,7 +4,8 @@
 const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database()
-const dbPersons = db.collection('Persons')
+const dbPersons = db.collection('Persons') 
+const dbSelect = db.collection('Selects')
  
 const formatTime = date => {
   const year = date.getFullYear()
@@ -412,6 +413,34 @@ const getValue=(obj, name) =>{
   return result
 }
 
+// 是否有任意修改项为true 
+const anyTrue = (obj) => {
+  for (var key in obj) {
+    if (obj[key]) {
+      return true
+    }
+  }
+  return false
+}
+
+// 装载Select表中的地区数据
+const loadArea=(callback)=>{
+  dbSelect.doc("5d1c0ea6f2b2dd50a6590416").get().then(res => {
+    if (callback) {
+      callback(res.data.area)
+    }
+  })
+}
+
+// 装载Select表中的车型数据
+const loadBrand = (callback) => {
+  dbSelect.doc("5d1c1150f2b2dd50a6592060").get().then(res => {
+    if (callback) {
+      callback(res.data.brand)
+    }
+  })
+}
+
 module.exports = {
   formatTime: formatTime,
   Ymd2Mdy: Ymd2Mdy,
@@ -451,6 +480,10 @@ module.exports = {
   buildPayResult: buildPayResult, // 付款截屏
   buildPersonPhotoSrc: buildPersonPhotoSrc,
 
+  // 装载Select表中的数据
+  loadArea: loadArea, 
+  loadBrand: loadBrand, 
+
   // 截止日期数组和字符串的相互转化
   getLimitDates: getLimitDates,
   getLimitDateIndex: getLimitDateIndex,
@@ -460,7 +493,7 @@ module.exports = {
   phoneCall: phoneCall,
   // 字符串转数字
   myParseInt: myParseInt,
-  // 统一授权入口
+  // 统一授权入口 
   authorize: authorize,
   // 得到最近步数的top值
   stepsTopNs: stepsTopNs,
@@ -470,4 +503,5 @@ module.exports = {
   findIndex: findIndex, // 查找索引
   // 从对象中得到指定属性的值
   getValue: getValue,
+  anyTrue: anyTrue, // 是否有任意项为true
 }

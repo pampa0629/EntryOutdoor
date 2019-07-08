@@ -500,21 +500,39 @@ Page({
     console.log("tapMofangLogin()")
     const self = this
     // var cookie ="dyh_userid=3166998;dyh_password=d17476a155a43782e1f24e1b0f0e57e6" 50463253
-    var cookie = "dyh_userid=3917317;dyh_password=d17476a155a43782e1f24e1b0f0e57e6" // zengzhiming
+    //  var cookie = "dyh_userid=3917317;dyh_password=d17476a155a43782e1f24e1b0f0e57e6" // zengzhiming
+    var cookie =""
+    if (self.data.mofang_pid) {
+      cookie += self.data.mofang_pid // + ";"  
+    }
+    // cookie += self.data.cookies0 // + ";"
+    // cookie += self.data.cookies1
+    console.log("cookie: " + cookie)
        
     wx.request({
       url: "http://www.doyouhike.net/user/login",
       method: 'POST',
       header: {
         // "content-type": "application/x-www-form-urlencoded"
-        "content-type": "text/html",
+        "content-type": "application/x-www-form-urlencoded",
         // 'cookie': JSON.stringify(cookie),
-        'cookie': cookie,
+        'Cookie': cookie,
+        // Accept: text / html, application/xhtml+xml,application/xml; q=0.9, image/webp,image/apng, */*;q=0.8,application/signed-exchange;v=b3
+// Accept-Encoding: gzip, deflate
+// Accept-Language: zh-CN,zh;q=0.9,en;q=0.8
+"cache-control": "max-age=0",
+  // "connection": "keep-alive",
+// Content-Length: 44
+// Content-Type: application/x-www-form-urlencoded
+  // "host": "www.doyouhike.net",
+// Origin: null
+// Upgrade-Insecure-Requests: 1
+        // "user-agent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36",
       },
       data: {
         username:  "zengzhiming@supermap.com",
-        password:  "xx123zzm",
-        url: "/my"
+        password:  "xx123zzm"
+        // url: "/my"
       },
       fail: function(error) {
         console.log("fail")
@@ -523,16 +541,18 @@ Page({
       success: function(res) {
         console.log("success")
         console.log(res)
-        if(res.data.indexOf("pampa")>0) {
+        if (res.data.indexOf("pampa") > 0 || res.data.indexOf("攀爬") > 0) {
           console.log("login OK")
+          console.log(res.data)
         }
         const c = res.cookies
-        self.setData({
-          "cookies0" :c[0].split(";")[0],
-          "cookies1": c[1].split(";")[0]
-        })
-        
-        console.log(self.data.cookies)
+        console.log(c)
+        var c0 = c[0].split(";")[0]
+        if (c0.indexOf("PHPSESSID")>=0) {
+          self.setData({
+            "mofang_pid":c0,
+          })  
+        }
       }
     })
   },
@@ -552,7 +572,7 @@ Page({
       'contacterTel': "13693607590",//紧急联系电话
       'remark': "测试测试测试测试测试"//活动留言
       }
-    var cookie = "dyh_userid=3917317;dyh_password=d17476a155a43782e1f24e1b0f0e57e6;" // zengzhiming
+    var cookie = "" // "dyh_userid=3917317;dyh_password=d17476a155a43782e1f24e1b0f0e57e6;" // zengzhiming
     cookie += self.data.cookies0 +";"
     cookie += self.data.cookies1
     console.log(cookie)

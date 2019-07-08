@@ -23,6 +23,11 @@
   </van-cell-group>
 </view>
 
+<!-- 防止广告遮挡 -->
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 <ad unit-id="adunit-f50da3ef4ac99d19" class="adfix"></ad>
 <van-cell title="  " border="{{false}}" />

@@ -397,12 +397,14 @@ const remindOcuppy=(od, callback)=>{
 
 // 超过占坑截止时间（外部判断），则清退所有占坑队员，后续替补
 const removeOcuppy = (outdoorid, callback) => {
+  console.log("odtools.removeOcuppy()")
   dbOutdoors.doc(outdoorid).get().then(res => {
     const members = res.data.members
     var count = 0
     // 第一遍循环，找到所有占坑者
     for (var i = 0; i < members.length; i++) {
       if (members[i].entryInfo.status == "占坑中") {
+        console.log(i, JSON.stringify(members[i]))
         count++
         // 给被强制退坑者发模板消息
         template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
@@ -414,8 +416,9 @@ const removeOcuppy = (outdoorid, callback) => {
     // 第二遍循环，对应的替补队员改为报名
     for (var i = 0; i < members.length && count > 0; i++) {
       if (members[i].entryInfo.status == "替补中") {
+        console.log(i, JSON.stringify(members[i]))
         count--
-        members[i].entryInfo.status == "报名中"
+        members[i].entryInfo.status = "报名中"
         // 给替补上的队员发模板消息
         template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
       }
@@ -438,7 +441,7 @@ const buildRemainText = (remainMinute) => {
     remainMinute -= remainDay * 24 * 60
     var remainHour = Math.trunc(remainMinute / 60)
     remainMinute = Math.trunc(remainMinute - remainHour * 60)
-    if (remindOcuppy>0) {
+    if (remainDay>0) {
       remainText += remainDay + "天"  
     }
     if (remainHour>0) {
@@ -453,7 +456,7 @@ const buildRemainText = (remainMinute) => {
 // 若 limitItem 为空，则占坑为前两天22:00；报名为前一天22:00
 const calcRemainTime = (outdoorDate, limitItem, isOccupy) => { 
   // console.log(limitItem)
-  if (!limitItem) {
+  if (!limitItem) { 
     if (isOccupy) {
       limitItem = {
         date: "前两天",
@@ -625,10 +628,11 @@ const isEntriedStatus = (status) => {
 const getDefaultWebsites = () => {
   return {
     lvyeorg: { 
-      //fid: null, // 版块id
+      fid: null, // 版块id
       tid: null, // 帖子id
-      keepSame: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame : false),
-      isTesting: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.isTesting : false),
+      qrcodeUrl:null, // 报名二维码
+      // keepSame: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame : false),
+      // isTesting: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.isTesting : false),
       waitings: [], // 要同步但尚未同步的信息列表
     }
   }

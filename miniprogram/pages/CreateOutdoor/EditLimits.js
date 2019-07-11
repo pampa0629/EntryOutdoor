@@ -31,13 +31,15 @@ Page({
     hasModified: false,
 
     // 人数扩容或缩编导致需要即时变化的情况
-    outdoorid: null,
+    // outdoorid: null,
     od:null,
-    title: null,
-    members: null, // 当前已报名队员
-    addMembers: null, // 附加队员
+    // title: null,
+    // members: null, // 当前已报名队员
+    // addMembers: null, // 附加队员
     //newPersonCount:null, // 变化后的人数
     oldPersonCount: null,
+
+    lvyeorgInfo:null, // 绿野org信息
   },
 
   onLoad: function(options) {
@@ -48,11 +50,11 @@ Page({
     let od = prevPage.data.od
     self.setData({
       od:od,
-      outdoorid: od.outdoorid,
-      title: od.title.whole,
+      // outdoorid: od.outdoorid,
+      // title: od.title.whole,
       limits: od.limits,
-      members: od.members, // 当前已报名队员
-      addMembers: od.addMembers, // 附加队员
+      // members: od.members, // 当前已报名队员
+      // addMembers: od.addMembers, // 附加队员
       oldPersonCount: od.limits.personCount ? od.limits.personCount : 0,
     })
     console.log(self.data)
@@ -75,6 +77,13 @@ Page({
       self.setData({
         intoHall: true,
         hasModified: true,
+      })
+    }
+
+    // 绿野org
+    if (app.globalData.lvyeorgLogin) {
+      self.setData({
+        lvyeorgInfo: app.globalData.lvyeorgInfo
       })
     }
   },
@@ -144,15 +153,15 @@ Page({
   // 扩编：允许人数增加，且已经有替补队员时--> 把对应的替补队员改为正式队员，并发微信通知
   tapEnlarge() {
     const self = this
-    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       const members = res.data.members
-      var begin = self.data.oldPersonCount - self.data.addMembers.length // 起点index
+      var begin = self.data.oldPersonCount - self.data.od.addMembers.length // 起点index
       begin = Math.max(0, begin) // 不能比0小
-      var end = Math.min(members.length, self.data.limits.personCount - self.data.addMembers.length)
+      var end = Math.min(members.length, self.data.limits.personCount - self.data.od.addMembers.length)
       for (var i = begin; i < end; i++) {
         if (members[i].entryInfo.status == "替补中") {
           members[i].entryInfo.status = "报名中"
-          template.sendEntryMsg2Bench(members[i].personid, self.data.outdoorid, self.data.title, members[i].userInfo.nickName)
+          template.sendEntryMsg2Bench(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].userInfo.nickName)
         }
       }
       self.afterAdjust(members)
@@ -162,14 +171,14 @@ Page({
   // 缩编：允许人数减少，且需要把队员转为替补时-- >把对应的正式队员改为替补队员，并发微信通知
   tapReduce() {
     const self = this
-    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       const members = res.data.members
-      var begin = self.data.limits.personCount - self.data.addMembers.length // 起点index
+      var begin = self.data.limits.personCount - self.data.od.addMembers.length // 起点index
       begin = Math.max(0, begin) // 不能比0小
-      var end = Math.min(members.length, self.data.oldPersonCount - self.data.addMembers.length)
+      var end = Math.min(members.length, self.data.oldPersonCount - self.data.od.addMembers.length)
       for (var i = begin; i < end; i++) {
         if (members[i].entryInfo.status != "替补中") {
-          template.sendBenchMsg2Member(members[i].personid, self.data.outdoorid, self.data.title, members[i].entryInfo.status, members[i].userInfo.nickName)
+          template.sendBenchMsg2Member(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].entryInfo.status, members[i].userInfo.nickName)
           members[i].entryInfo.status = "替补中"
         }
       }
@@ -181,7 +190,7 @@ Page({
   afterAdjust(members) {
     this.setData({
       oldPersonCount: this.data.limits.personCount, // 把人数限制的变化保存起来 
-      members: members,
+      // members: members,
     }) 
 
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -189,7 +198,7 @@ Page({
     prevPage.setData({
       "od.members": members,
     })
-    prevPage.data.od.saveItem("members")
+    this.data.od.saveItem("members")
   },
 
   // 勾选是否允许空降

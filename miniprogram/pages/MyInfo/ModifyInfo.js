@@ -9,7 +9,9 @@ const util = require('../../utils/util.js')
 const person = require('../../utils/person.js')
 const crypto = require('../../utils/crypto.js')
 
-Page({
+let interstitialAd = null // 插屏广告
+
+Page({ 
   data: { 
     userInfo: {
       nickName: null,  
@@ -46,21 +48,55 @@ Page({
       userInfo: prevPage.data.userInfo,
       password: wx.getStorageSync("EmergencyPassword")
     })
+    console.log("password: ", this.data.password)
     self.data.oldNickName = self.data.userInfo.nickName
 
-    dbPersons.doc(app.globalData.personid).get().then(res => {
-      if (res.data.emergency) {
-        console.log(res.data.emergency)
-        self.setData({ // 解密
-          emergency: crypto.decrypt(res.data.emergency, self.data.password)
-        })
-        console.log(self.data.emergency)
-      }
-    })
+    // dbPersons.doc(app.globalData.personid).get().then(res => {
+    //   if (res.data.emergency) {
+    //     console.log(res.data.emergency)
+    //     self.setData({ // 解密
+    //       emergency: crypto.decrypt(res.data.emergency, self.data.password)
+    //     })
+    //     console.log(self.data.emergency)
+    //   }
+    // })
     
     wx.showShareMenu({
       withShareTicket: true
     })
+    this.addAd()
+  },
+
+  // 添加广告
+  addAd() {
+    if (wx.createInterstitialAd) {
+      interstitialAd = wx.createInterstitialAd({
+        adUnitId: 'adunit-83d9b67d53f57ebe'
+      })
+      interstitialAd.onLoad(() => {
+        console.log('ad onLoad event emit')
+      })
+      interstitialAd.onError((err) => {
+        console.log('ad onError event emit', err)
+      })
+      interstitialAd.onClose((res) => {
+        console.log('ad onClose event emit', res)
+      })
+    }
+  },
+
+  showAd() {
+    console.log('showAd()')
+    console.log('interstitialAd: ', interstitialAd)
+    // 每次进入显示广告
+    if (interstitialAd) {
+      interstitialAd.show()
+        .then(res => {
+          console.log(res)
+        }).catch(err => {
+          console.error(err)
+        })
+    }
   },
 
   onUnload() {
@@ -82,7 +118,7 @@ Page({
           userInfo: self.data.userInfo,
         }
       })
-      self.saveEmergency()
+      // self.saveEmergency()
     }
   },
  
@@ -122,6 +158,7 @@ Page({
       "userInfo.gender": e.target.dataset.name,
       hasModified: true,
     })
+    this.showAd()
   },
 
   changeGender: function(e) {
@@ -131,6 +168,7 @@ Page({
       "userInfo.gender": e.detail,
       hasModified: true,
     })
+    this.showAd()
   },
 
   changeEmergency(e) {
@@ -198,18 +236,18 @@ Page({
     })
   },
 
-  onShareAppMessage: function (options) {
-    console.log("onShareAppMessage")
-    const self = this;
-    self.saveEmergency()
-    // 给密码也加个密，用appid作为密码
-    var key = crypto.encrypt(self.data.password, "wx20edd5723fb67799")
-    return {
-      title: app.globalData.userInfo.nickName,
-      desc: '授权查看紧急联系信息',
-      path: 'pages/MyInfo/LookEmergency?personid=' + app.globalData.personid + "&password="+key,
-    }
-  },
+  // onShareAppMessage: function (options) {
+  //   console.log("onShareAppMessage")
+  //   const self = this;
+  //   self.saveEmergency()
+  //   // 给密码也加个密，用appid作为密码
+  //   var key = crypto.encrypt(self.data.password, "wx20edd5723fb67799")
+  //   return {
+  //     title: app.globalData.userInfo.nickName,
+  //     desc: '授权查看紧急联系信息',
+  //     path: 'pages/MyInfo/LookEmergency?personid=' + app.globalData.personid + "&password="+key,
+  //   }
+  // },
 
   // 加密后保存起来
   saveEmergency() {

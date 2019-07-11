@@ -1,14 +1,14 @@
 const app = getApp()
 
 const template = require('../../utils/template.js')
-// const select = require('../../libs/select.js')
+const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbSelect = db.collection('Selects')
 const _ = db.command
-
+ 
 Page({
 
   data: {

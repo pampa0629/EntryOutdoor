@@ -57,10 +57,10 @@ Page({
       if (item.entryInfo.agreedDisclaimer) {
         item.entryInfo.agreedDisclaimer = "已同意免责条款"
       }
-      // 转化是否认路
-      if (item.entryInfo.knowWay || index == 0) { // 第一个是领队，必须认路
-        item.entryInfo.knowWay = "认路"
-      } else {
+      // 转化是否认路 
+      if (item.entryInfo.knowWay == true || item.entryInfo.knowWay == undefined) {
+        item.entryInfo.knowWay = "认路" // undefined 为没有设置，一般为领队，默认认路
+      } else { 
         item.entryInfo.knowWay = "不认路"
       }
       // 设置回去

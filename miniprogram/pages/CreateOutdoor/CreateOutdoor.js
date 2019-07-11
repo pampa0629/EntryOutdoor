@@ -6,7 +6,7 @@ const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
-
+ 
 wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -85,11 +85,11 @@ Page({
 
   setMyselfDefault() {
     // 设置myself 信息
-    this.data.myself.userInfo = app.globalData.userInfo;
-    this.data.myself.personid = app.globalData.personid;
+    this.data.myself.userInfo = app.globalData.userInfo
+    this.data.myself.personid = app.globalData.personid
     if(!this.data.myself.entryInfo) {
       this.setData({
-        "myself.entryInfo": {} // 结构先定义出来，有了的时候不要清空
+        "myself.entryInfo": {knowWay:true} // 结构先定义出来，有了的时候不要清空
       })
     }
     
@@ -127,7 +127,7 @@ Page({
         }
       })
 
-      self.loadDisclaimer(); // 还需要单独处理“免责条款”的内容
+      self.loadDisclaimer() // 还需要单独处理“免责条款”的内容
       // 加载后就要构建画布生成分享图片文件
       self.createCanvasFile()
 
@@ -136,8 +136,8 @@ Page({
         self.newOutdoor()
         app.globalData.newOutdoor = false // 即时清空
       }
-      self.createAutoInfo();
-      self.checkPublish(); // 判断一下是否能发布活动
+      self.createAutoInfo()
+      self.checkPublish() // 判断一下是否能发布活动
     })
   },
 
@@ -159,7 +159,7 @@ Page({
             canPublish: false, // 判断是否可发布
             hasModified: true,
           })
-          self.createAutoInfo(); // 做必要的自动计算
+          self.createAutoInfo() // 做必要的自动计算
         } else if (res.cancel) {
           console.log('用户点击取消')
         }
@@ -208,22 +208,22 @@ Page({
       hasModified: true, // 新建之后，马上可以保存
     })
     this.setMyselfDefault() // 自己也要重新恢复默认
-    this.createAutoInfo(); // 做必要的自动计算
+    this.createAutoInfo() // 做必要的自动计算
     this.saveOutdoor() // 必须存起来，修改才不会丢失
   },
 
   onShow: function() {
     console.log("CreateOutdoor.js onShow()")
-    const self = this;
+    const self = this
     var outdoorid = util.loadOutdoorID()
     self.checkLogin()
 
     console.log("outdoorid: " + outdoorid)
     if (outdoorid && outdoorid != self.data.od.outdoorid) {
       // 缓存中有id，且还和od中加载的outdoorid不一样，则说明要重新加载
-      self.loadOutdoor(outdoorid);
+      self.loadOutdoor(outdoorid)
     } else if (!outdoorid) { // id为空，则新创建活动
-      self.newOutdoor();
+      self.newOutdoor()
     }
   },
 
@@ -247,8 +247,8 @@ Page({
   // 生成应 自动变化的内容，如强度值、标题等
   createAutoInfo: function() {
     console.log("createAutoInfo")
-    this.calcLevel(); // 计算强度
-    this.createTitle(); // 生成标题
+    this.calcLevel() // 计算强度
+    this.createTitle() // 生成标题
   },
 
   // 根据各类信息，生成活动主题信息，修改whole
@@ -481,12 +481,12 @@ Page({
 
   // 给自己的订阅者发消息
   post2Subscriber() {
-    console.log("post2Subscriber()");
+    console.log("post2Subscriber()")
     const self = this
     if (!this.data.od.limits.isTest) { // 测试帖就不发消息了
       console.log("outdoorid: " + self.data.od.outdoorid)
       dbPersons.doc(app.globalData.personid).get().then(res => {
-        console.log(res.data.subscribers);
+        console.log(res.data.subscribers)
         self.postRemainSubscribers(res.data.subscribers)
       })
     }
@@ -545,7 +545,7 @@ Page({
 
   saveOutdoor: function() {
     console.log("saveOutdoor()")
-    const self = this;
+    const self = this
 
     // 活动记录是否已经创建了
     var isCreated = self.data.od.outdoorid ? true : false
@@ -637,7 +637,7 @@ Page({
   },
 
   chatOutdoor() {
-    const self = this;
+    const self = this
     wx.navigateTo({
       url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.od.outdoorid + "&isLeader=" + true,
       complete(res) {
@@ -652,15 +652,15 @@ Page({
   onPullDownRefresh: function() {
     console.log("onPullDownRefresh()")
     const self = this
-    wx.showNavigationBarLoading();
+    wx.showNavigationBarLoading()
     // 主要就刷新队员和留言信息
     dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       self.setData({
         "od.members": res.data.members,
       })
       self.setChat(res.data.chat)
-      wx.hideNavigationBarLoading();
-      wx.stopPullDownRefresh();
+      wx.hideNavigationBarLoading()
+      wx.stopPullDownRefresh()
     })
   },
 
@@ -718,7 +718,7 @@ Page({
 
   onShareAppMessage: function(options) {
     console.log(options)
-    const self = this;
+    const self = this
     this.closePopup()
     console.log(self.data.shareCanvasFile)
     // options.from == "menu" &&     // options.type = "tap" from="button"
@@ -733,7 +733,7 @@ Page({
   },
 
   onShare2Circle: function() {
-    const self = this;
+    const self = this
     qrcode.share2Circle(self.data.od.outdoorid, self.data.od.title.whole, true)
     this.closePopup()
   },
@@ -754,6 +754,16 @@ Page({
       hasModified: true,
     })
     this.checkPublish()
+  },
+
+  // 勾选是否认路
+  checkKnowWay: function (e) {
+    console.log(e)
+    this.setData({
+      "myself.entryInfo.knowWay": !this.data.myself.entryInfo.knowWay,
+      hasModified: true,
+    })
+    console.log(this.data.myself.entryInfo.knowWay)
   },
 
   // 选择或改变集合地点选择

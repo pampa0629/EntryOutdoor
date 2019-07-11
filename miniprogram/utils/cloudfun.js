@@ -5,7 +5,7 @@ const db = wx.cloud.database()
 const dbPersons = db.collection('Persons')
 const dbOutdoors = db.collection('Outdoors')
 const _ = db.command
-  
+   
 const updateOutdoor=(outdoorid, od, callback)=>{
   console.log("updateOutdoor") 
   wx.cloud.callFunction({ 

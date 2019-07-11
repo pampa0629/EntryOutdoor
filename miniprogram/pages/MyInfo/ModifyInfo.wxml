@@ -15,7 +15,7 @@
 </van-panel>
 
   <!--紧急联系信息-->
-<van-switch-cell title="紧急联系信息已{{showEmergency?'显示':'隐藏'}}" checked="{{showEmergency}}" bind:change="changeEmergency"/>
+<van-switch-cell wx:if="{{false}}" title="紧急联系信息已{{showEmergency?'显示':'隐藏'}}" checked="{{showEmergency}}" bind:change="changeEmergency"/>
 <block wx:if="{{showEmergency}}">
   <van-tag plain type="primary">紧急联系信息已加密保存，敬请放心。</van-tag>
   <van-panel>

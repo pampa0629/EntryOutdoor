@@ -201,8 +201,13 @@ Page({
 
   onShareAppMessage: function() {
     return {
-      title: 活动大厅,
+      title: "活动大厅",
       path: 'pages/AboutOutdoor/HallOutdoor',
     }
-  }
+  },
+
+  adError(e) {
+    console.error(e)
+  },
+  
 })

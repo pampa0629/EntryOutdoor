@@ -14,9 +14,9 @@ Page({
       // 所有队员都必须遵守的代报名要求
       helpEntry: true, // 为尚未注册org的队员代报名
       // 领队需要决定的选项
-      keepSame: true, // 发帖信息是否自动同步到org上
+      // keepSame: true, // 发帖信息是否自动同步到org上
       allowSiteEntry: false, // 是否允许网站跟帖报名
-      isTesting: false, // 是否为测试帖，测试帖发布到技术小组版面
+      // isTesting: false, // 是否为测试帖，测试帖发布到技术小组版面
     },
     password: "",  // 密码存到本地缓存，不放到数据库中了
     showPwd:false, // 是否显示密码

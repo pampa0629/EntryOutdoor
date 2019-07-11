@@ -18,8 +18,8 @@ Page({
     
     // 把认路与否的转化为文本
     self.data.members.forEach((item, index)=>{
-      if(item.entryInfo.knowWay){
-        item.entryInfo.knowWay = "认路"
+      if (item.entryInfo.knowWay == true || item.entryInfo.knowWay==undefined){
+        item.entryInfo.knowWay = "认路" // undefined 为没有设置，一般为领队，默认认路
       } else {
         item.entryInfo.knowWay = "不认路"
       }

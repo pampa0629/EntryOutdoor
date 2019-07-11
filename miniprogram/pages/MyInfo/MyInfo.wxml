@@ -21,7 +21,7 @@
   <van-col span="3" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>1.0.0</view>
+      <view style='font-family:黑体;font-size:11pt'>1.0.2</view>
     </view>
   </van-col>
 </van-row>
@@ -73,5 +73,5 @@
   <van-button size="large" bind:click="bindTest">Test</van-button>
 </block>
 
-<van-cell title="  " border="{{false}}" />
-<ad unit-id="adunit-69985c499f47e8de"></ad>
+<!-- <van-cell title="  " border="{{false}}" />
+<ad unit-id="adunit-69985c499f47e8de" ad-intervals="30" binderror="adError"></ad> -->

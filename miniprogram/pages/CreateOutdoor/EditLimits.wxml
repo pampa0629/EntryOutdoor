@@ -39,13 +39,16 @@
 </van-panel>
 
 <!--截止时间-->
-<van-cell title="占坑/报名截止时间" title-class="redtitle" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{false}}"/>
+<van-cell title="占坑/报名截止时间" title-class="redtitle" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{true}}"/>
 
 <!--活动装备-->
-<van-cell title="活动装备要求" title-class="redtitle" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{false}}"/>
+<van-cell title="活动装备要求" title-class="redtitle" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{true}}"/>
 
 <!--微信服务通知-->
-<van-cell title="微信服务通知" title-class="redtitle" label="" value="点击设置微信通知" is-link url="EditWxnotice" border="{{false}}"/>
+<van-cell title="微信服务通知" title-class="redtitle" label="" value="点击设置微信通知" is-link url="EditWxnotice" border="{{true}}"/>
+
+<!--户外网站同步-->
+<van-cell title="户外网站同步" wx:if="{{lvyeorgInfo}}" title-class="redtitle" label="" value="点击同步户外网站" is-link url="EditWebsites" border="{{true}}"/>
 
 <!--活动规则-->
 <van-panel>

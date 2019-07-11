@@ -99,7 +99,7 @@ OD.prototype.removeOcuppy = function(callback) {
   }
 }
 
-// 加载活动时，原样拷贝活动，并处理兼容性问题
+// 加载活动时，原样拷贝活动，并处理兼容性问题 
 OD.prototype.copy = function(od) {
   console.log("OD.prototype.copy()")
   this.outdoorid = od.outdoorid
@@ -187,6 +187,7 @@ OD.prototype.save = function(myself, modifys, callback) {
   console.log("OD.prototype.save()")
   console.log("outdoorid: " + this.outdoorid)
   console.log("modifys: " + JSON.stringify(modifys))
+  console.log("myself: " + JSON.stringify(myself))
   const self = this
   if (this.outdoorid) {
     // 已发布且过期的活动，不允许保存
@@ -198,9 +199,12 @@ OD.prototype.save = function(myself, modifys, callback) {
         self.members.forEach((item, index) => {
           if (item.personid == myself.personid) {
             self.members[index] = myself // 不能用item设置，大坑
+            console.log("members[index]: ", index, myself)
           }
         })
 
+        console.log("outdoorid: ", this.outdoorid)
+        console.log("members: ", this.members)
         cloudfun.updateOutdoor(self.outdoorid, self, res => {
 
           // 如果设置了与网站同步，则需要即时处理
@@ -568,7 +572,7 @@ OD.prototype.quit4Add = function(index) {
 // 有替补，则返回true
 OD.prototype.firstBench2Member = function() {
   console.log("OD.prototype.firstBench2Member()")
-  if (this.limits.maxPerson && (this.members.length + this.addMembers.length > this.limits.personCount)) {
+  if (this.limits.maxPerson) {
     for (var i in this.members) {
       if (this.members[i].entryInfo.status == "替补中") {
         this.members[i].entryInfo.status = "报名中"
@@ -642,16 +646,30 @@ OD.prototype.quit = function(personid, selfQuit, callback) {
 
 //////////////////  户外网站处理 start  /////////////////////////////////////////////
 
-// 确保网站已经同步，并有了tid（帖子id）
+// 确保网站已经同步，并有了tid（帖子id） 
 OD.prototype.ensureWebsites = function(callback) {
   console.log("OD.prototype.ensureWebsites()")
   const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
   console.log(lvyeobj)
   // 第一步，得有要求同步才行，并且还得登录网址了
-  if (lvyeobj.keepSame && app.globalData.lvyeorgLogin) {
+  if (app.globalData.lvyeorgLogin) {
     // 第二步，判断是否已经发帖; 已发布和已成行的活动，尚未发帖，则应立即发帖
-    if (!lvyeobj.tid && (this.status == "已发布" || this.status == "已成行")) {
-      lvyeorg.addThread(this.outdoorid, this, lvyeobj.isTesting || this.limits.isTest, tid => {
+    if (lvyeobj.tid && callback) {
+      callback(lvyeobj.tid)
+    }
+  }
+}
+
+// 把活动同步到org网站上，只提供领队明确发布
+OD.prototype.push2org = function (fid, callback) {
+  console.log("OD.prototype.push2org()")
+  const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
+  console.log(lvyeobj)
+  // 第一步，得登录网址
+  if (app.globalData.lvyeorgLogin) {
+    // 第二步，判断是否已经发帖; 已发布和已成行的活动，尚未发帖，则应立即发帖
+    if (!lvyeobj.tid) {
+      lvyeorg.addThread(this.outdoorid, this, fid, tid => {
         console.log("tid: " + tid)
         if (tid) {
           lvyeobj.tid = tid
@@ -661,18 +679,19 @@ OD.prototype.ensureWebsites = function(callback) {
         }
       })
     } else if (lvyeobj.tid && callback) {
+      console.error("已经同步到org上，不要重复同步")
       callback(lvyeobj.tid)
     }
   }
 }
 
 // 判断处理websites中的信息，主要就是把信息同步到网站
-OD.prototype.postWaitings = function() {
+OD.prototype.postWaitings = function(callback) {
   console.log("OD.prototype.postWaitings()")
   const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
   console.log(lvyeobj)
   // 得有要求同步才行，并且还得登录网址了
-  if (lvyeobj.keepSame && app.globalData.lvyeorgLogin) {
+  if (app.globalData.lvyeorgLogin) {
     // 必须已经发帖，再看看是否有waitings需要推送
     // 若之前没有发帖成功，则现在发帖
     this.ensureWebsites(tid => {
@@ -684,12 +703,15 @@ OD.prototype.postWaitings = function() {
       if (tid && lvyeobj.waitings && lvyeobj.waitings.length > 0) {
         odtools.getWebsites(this.outdoorid, websites => { // 1）
           if (!websites.lvyeorg.posting) { // 别人没有posting中，自己才能干活
-            cloudfun.opOutdoorItem(this.outdoorid, "websites.lvyeorg.posting", true, "", callback => { // 2.1）
-              lvyeorg.postWaitings(lvyeobj.tid, websites.lvyeorg.waitings, callback => { // 2.1）
+            cloudfun.opOutdoorItem(this.outdoorid, "websites.lvyeorg.posting", true, "", res => { // 2.1）
+              lvyeorg.postWaitings(lvyeobj.tid, websites.lvyeorg.waitings, res => { // 2.1）
                 cloudfun.opOutdoorItem(this.outdoorid, "websites.lvyeorg.posting", false, "") // 3.1）
-                cloudfun.clearOutdoorLvyeWaitings(this.outdoorid, callback => { // 3.2)
+                cloudfun.clearOutdoorLvyeWaitings(this.outdoorid, res => { // 3.2)
                   lvyeobj.waitings = [] // 自己内存中的也要清空
                   lvyeobj.posting = false
+                  if (callback) {
+                    callback()
+                  }
                 })
               })
             })
@@ -708,7 +730,7 @@ OD.prototype.postModify2Websites = function(modifys) {
   if (util.anyTrue(modifys) && this.status != "拟定中") {
     console.log("anyTrue: " + util.anyTrue(modifys))
     const lvyeobj = this.websites.lvyeorg
-    if (lvyeobj.keepSame) {
+    if (lvyeobj.tid) {
       var addedMessage = "领队对以下内容作了更新，请报名者留意！"
       var message = lvyeorg.buildOutdoorMesage(this, false, modifys, addedMessage, this.websites.lvyeorg.allowSiteEntry) // 构建活动信息
 
@@ -721,13 +743,11 @@ OD.prototype.postModify2Websites = function(modifys) {
 OD.prototype.postMessage2Websites = function(title, message) {
   console.log("OD.prototype.postMessage2Websites()")
   const lvyeobj = this.websites.lvyeorg
-  if (lvyeobj.keepSame) {
-    // 登录了，且有tid了，就直接跟帖报名
-    if (lvyeobj.tid && app.globalData.lvyeorgLogin) {
-      lvyeorg.postMessage(this.outdoorid, this.websites.lvyeorg.tid, title, message)
-    } else { // 没有登录，或者tid还没有，则记录到waitings中
-      lvyeorg.add2Waitings(this.outdoorid, message)
-    }
+  // 登录了，且有tid了，就直接跟帖报名
+  if (lvyeobj.tid && app.globalData.lvyeorgLogin) {
+    lvyeorg.postMessage(this.outdoorid, this.websites.lvyeorg.tid, title, message)
+  } else { // 没有登录，或者tid还没有，则记录到waitings中
+    lvyeorg.add2Waitings(this.outdoorid, message)
   }
 }
 
@@ -738,7 +758,7 @@ OD.prototype.postMessage2Websites = function(title, message) {
 OD.prototype.postEntry2Websites = function(member, isQuit, selfQuit) {
   const lvyeobj = this.websites.lvyeorg
   // 先确定是否要同步
-  if (lvyeobj.keepSame) {
+  if (lvyeobj.tid) {
     // 构建报名信息
     var entryMessage = lvyeorg.buildEntryMessage(member.userInfo, member.entryInfo, isQuit, selfQuit, false)
     var entryNotice = lvyeorg.buildEntryNotice(lvyeobj.qrcodeUrl, false, lvyeobj.allowSiteEntry)
@@ -765,9 +785,13 @@ module.exports = {
   entry4Add: OD.prototype.entry4Add, // 为附加队员报名
   quit4Add: OD.prototype.quit4Add, // 附加队员退出
 
+  // org同步功能
+  push2org: OD.prototype.push2org, // 同步到org网址
+  postWaitings: OD.prototype.postWaitings,
+
   // 以下为内部函数，外面不得调用
   // create: OD.prototype.create, // save内部判断处理
-  // postWaitings: OD.prototype.postWaitings,
+  // 
   // removeOcuppy:OD.prototype.removeOcuppy,
   // copyPics:OD.prototype.copyPics,
   // copyTrackFiles:OD.prototype.copyTrackFiles,

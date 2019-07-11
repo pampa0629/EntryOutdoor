@@ -39,10 +39,10 @@ Page({
   },
 
   onLoad: function(options) {
-    const self = this;
-    let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    let prevPage = pages[pages.length - 2];
-    let od = pages[pages.length - 2].data.od;
+    const self = this
+    let pages = getCurrentPages() //获取当前页面js里面的pages里的所有信息。
+    let prevPage = pages[pages.length - 2]
+    let od = pages[pages.length - 2].data.od
     self.setData({
       od:od, // od 存起来，方便使用
       entryFull:odtools.entryFull(od.limits, od.members, od.addMembers)
@@ -68,7 +68,7 @@ Page({
 
   flushMembers() {
     const members = this.data.od.members
-    const self = this;
+    const self = this
     self.data.members = []
     const s = members
     for (var i = 0; i < s.length; i++) {
@@ -84,7 +84,7 @@ Page({
       self.data.members.push(member)
  
       // 增加函数
-      let index = i; // 还必须用let才行
+      let index = i // 还必须用let才行
       this["onCheckPopup" + index] = () => {
         this.onCheckPopup(index)
       }
@@ -103,12 +103,12 @@ Page({
 
   flushAaMembers() {
     const members = this.data.od.aaMembers
-    const self = this;
+    const self = this
     const s = members
 
     for (var i = 0; i < s.length; i++) {
       // 增加函数
-      let index = i; // 还必须用let才行
+      let index = i // 还必须用let才行
       this["onPhoneAA" + index] = () => {
         this.onPhoneAA(index)
       }

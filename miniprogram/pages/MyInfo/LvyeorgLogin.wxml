@@ -20,8 +20,10 @@
     </van-cell>
 </van-panel>
 
+<van-tag type="primary" plain>活动同步到ORG网站的功能，已放到“发起活动”--“附加设置”--“户外网站同步”中。请先确保您已在本页面登录绿野org。</van-tag>
+
 <!--领队设置-->
-<van-panel>
+<!-- <van-panel>
   <van-cell slot="header" title-class="redtitle" title="领队选项设置"></van-cell>
   <van-cell title="活动{{lvyeorgInfo.keepSame?'将自动同步':'不同步'}}到绿野ORG网站" label="{{lvyeorgInfo.keepSame?'':'建议同步'}}" clickable bind:click="checkKeepSame" border="{{lvyeorgInfo.keepSame}}">
     <van-checkbox value="{{lvyeorgInfo.keepSame}}" />
@@ -34,7 +36,7 @@
       <van-checkbox value="{{lvyeorgInfo.isTesting}}" />
     </van-cell>
   </block>
-</van-panel>
+</van-panel> -->
 
 <block wx:if="{{hasLogin}}">
   <van-button size="large"  type="warning" bindtap='tapLvyeorgLogout' plain>退出登录</van-button>

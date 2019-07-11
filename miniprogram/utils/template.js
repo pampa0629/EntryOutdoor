@@ -35,7 +35,7 @@ const buildOneFormid = (formid) => {
 const savePersonFormid = (personid, formid, callback) => {
   console.log("savePersonFormid")
   var result = buildOneFormid(formid)
-  if (result) {
+  if (result && personid) {
     dbPersons.doc(personid).update({
       data: {
         formids: _.push(result)

@@ -37,7 +37,8 @@
     "pages/AboutGroup/MyGroups",
     "pages/AboutGroup/OneGroup",
     "pages/AboutOutdoor/PayOutdoor",
-    "pages/AboutOutdoor/CfoOutdoor"
+    "pages/AboutOutdoor/CfoOutdoor",
+    "pages/CreateOutdoor/EditWebsites"
   ],
   "window": {
     "backgroundTextStyle": "dark",

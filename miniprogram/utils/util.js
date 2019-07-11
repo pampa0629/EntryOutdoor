@@ -392,13 +392,26 @@ const findObj=(objs, name, value)=>{
 // objs:对象数组
 // name：要查找的属性
 // value: 指定的值
-const findIndex = (objs, name, value) => {
+const findIndex = (objs, name, value) => { 
   for (var index in objs) {
     if (objs[index][name] == value) {
       return index
     }
   }
   return -1
+}
+
+// 在对象数组中查找指定属性为某个值的对象；找到返回对象，没找到返回null
+// objs:对象数组
+// name：要查找的属性
+// value: 指定的值
+const findValue = (objs, name, value) => {
+  for (var index in objs) {
+    if (objs[index][name] == value) {
+      return objs[index]
+    }
+  }
+  return null
 }
 
 // 从对象中得到指定属性的值
@@ -501,6 +514,7 @@ module.exports = {
   // 在对象数组中查找指定属性为某个值的对象；找到返回该对象，没找到返回null
   findObj: findObj,
   findIndex: findIndex, // 查找索引
+  findValue: findValue, // 查找数组中的值
   // 从对象中得到指定属性的值
   getValue: getValue,
   anyTrue: anyTrue, // 是否有任意项为true

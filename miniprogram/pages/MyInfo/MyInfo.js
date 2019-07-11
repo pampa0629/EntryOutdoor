@@ -10,7 +10,7 @@ const dbPersons = db.collection('Persons')
 Page({ 
 
   data: { 
-    isTesting: true, // for test， false true
+    isTesting: false, // for test， false true
 
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
     userInfo: {
@@ -357,6 +357,10 @@ Page({
     wx.navigateTo({
       url: './MyCareer',
     })
+  },
+
+  adError(e) {
+    console.error(e)
   },
 
   //////////////////////////////// for testing ////////////////////////

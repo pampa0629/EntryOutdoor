@@ -8,7 +8,7 @@ const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
  
 wx.cloud.init()
-const db = wx.cloud.database({})
+const db = wx.cloud.database({})  
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
@@ -68,7 +68,7 @@ Page({
     var leaderid = options.leaderid ? options.leaderid : null
     console.log(leaderid)
     // 存起来，以便其他地方能回到该活动
-    util.saveOutdoorID(outdoorid);
+    util.saveOutdoorID(outdoorid)
 
     // 发现是领队是自己，则自动切换到发起活动页面
     if(leaderid && leaderid == app.globalData.personid) { 
@@ -80,10 +80,10 @@ Page({
     if (app.globalData.openid == null || app.globalData.openid.length == 0) {
       app.openidCallback = (openid) => {
         app.globalData.openid = openid // 其实屁事没有，就是要等到app的onLaunch中得到openid
-        this.checkLogin(outdoorid);
+        this.checkLogin(outdoorid)
       }
     } else {
-      this.checkLogin(outdoorid);
+      this.checkLogin(outdoorid)
     }
     wx.showShareMenu({ // 处理分享到群的情况
       withShareTicket: true
@@ -127,7 +127,7 @@ Page({
   // 从数据库中装载信息
   loadOutdoor: function(outdoorid) {
     console.log("loadOutdoor, id is: " + outdoorid)
-    const self = this;
+    const self = this
     // 这里读取数据库，加载各类信息
     this.data.od.load(outdoorid, od => {
       // 设置活动信息
@@ -167,6 +167,9 @@ Page({
 
   // 处理剩余时间
   dealRemainTime() {
+    console.log("dealRemainTime()")
+    console.log("time limits: ",this.data.od.limits.entry)
+
     this.setData({
       "remains.occupy.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.ocuppy, true),
       "remains.entry.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.entry, false)
@@ -175,6 +178,7 @@ Page({
       "remains.occupy.text": odtools.buildRemainText(this.data.remains.occupy.time),
       "remains.entry.text": odtools.buildRemainText(this.data.remains.entry.time)
     })
+    console.log(this.data.remains)
   },
 
   // 处理报名信息
@@ -243,7 +247,7 @@ Page({
   },
 
   onShareAppMessage: function(e) {
-    const self = this;
+    const self = this
     this.closePopup()
     if (self.data.od.outdoorid) { // 数据库里面有，才能分享出去
       return {
@@ -258,7 +262,7 @@ Page({
   // 分享到朋友圈
   onShare2Circle: function(e) {
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    const self = this;
+    const self = this
     qrcode.share2Circle(self.data.od.outdoorid, self.data.od.title.whole, false)
     this.closePopup()
   },
@@ -292,7 +296,7 @@ Page({
   // 报名就是在活动表中加上自己的id，同时还要在Person表中加上活动的id
   entryOutdoorInner: function(status) {
     console.log("entryOutdoorInner()")
-    const self = this;
+    const self = this
     console.log("status is:" + JSON.stringify(status, null, 2))
     self.setData({
       "entryInfo.status": status,
@@ -617,8 +621,8 @@ Page({
   doEntry(status, formid) {
     console.log("doEntry(): " + status)
     const self = this
-    console.log("personid: " + app.globalData.personid)
     template.savePersonFormid(app.globalData.personid, formid, null)
+    
     if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg && !self.data.showFormidDlg) {
       self.data.entryTemp = {
         status: status,
@@ -677,7 +681,7 @@ Page({
   // 查看报名情况，同时可以截屏保存起来
   printOutdoor() {
     // 导航到 printOutdoor页面
-    const self = this;
+    const self = this
     var isLeader = "&isLeader=" + false
     if (self.data.entryInfo.status == "领队") {
       isLeader = "&isLeader=" + true
@@ -688,7 +692,7 @@ Page({
   },
 
   chatOutdoor() {
-    const self = this;
+    const self = this
     wx.navigateTo({
       url: "../AboutOutdoor/ChatOutdoor?outdoorid=" + self.data.od.outdoorid + "&isLeader=" + false,
       complete(res) {
@@ -717,7 +721,7 @@ Page({
   onPullDownRefresh: function() {
     console.log("onPullDownRefresh")
     const self = this
-    wx.showNavigationBarLoading();
+    wx.showNavigationBarLoading()
     // 主要就刷新队员和留言信息
     dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       self.setData({
@@ -727,8 +731,8 @@ Page({
         entryFull:odtools.entryFull(self.data.od.limits, self.data.od.members, self.data.od.addMembers),
       })
       self.setChat(res.data.chat)
-      wx.hideNavigationBarLoading();
-      wx.stopPullDownRefresh();
+      wx.hideNavigationBarLoading()
+      wx.stopPullDownRefresh()
     })
   },
 
@@ -748,7 +752,7 @@ Page({
         }.bind(this), 800)
       } else {
         clearInterval(self.data.interval)
-      }
+      } 
     })
   },
 
@@ -787,15 +791,24 @@ Page({
 
   // 勾选同意免责条款
   checkDisclaimer: function(e) {
-    const self = this;
+    const self = this
+    if(this.data.entryInfo.status=="浏览中") {
     self.setData({
       "entryInfo.agreedDisclaimer": !self.data.entryInfo.agreedDisclaimer,
     })
+    } else {
+      wx.showModal({
+        title: '不能取消',
+        content: '您已报名，不能取消“同意条款和规则”选项',
+        showCancel:false, 
+        confirmText:"知道了"
+      })
+    }
   },
 
   // 勾选是否认路
   checkKnowWay: function(e) {
-    const self = this;
+    const self = this
     console.log(self.data.entryInfo.knowWay)
     self.setData({
       "entryInfo.knowWay": !self.data.entryInfo.knowWay,
@@ -809,8 +822,8 @@ Page({
   careOutdoor: function() {
     console.log("careOutdoor()")
     // 关注活动，就是往Persons表中做一下记录
-    const self = this;
-    if (!self.data.hasCared) {
+    const self = this
+    if (!self.data.hasCared && app.globalData.personid) {
       self.data.caredOutdoors.unshift({
         id: self.data.od.outdoorid,
         title: self.data.od.title.whole
@@ -830,8 +843,8 @@ Page({
   //取消关注
   cancelCare: function() {
     console.log("cancelCare()")
-    const self = this;
-    if (self.data.hasCared) {
+    const self = this
+    if (self.data.hasCared && app.globalData.personid) {
       self.data.caredOutdoors.forEach((item, index) => {
         if (item.id == self.data.od.outdoorid) {
           self.data.caredOutdoors.splice(index, 1)

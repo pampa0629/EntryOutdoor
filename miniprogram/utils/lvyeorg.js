@@ -263,7 +263,7 @@ const uploadImages = (outdoorid, pics, aids, callback) => {
   }
 }
 
-// 这里确定活动应发布的版面
+// 这里确定活动应发布的版面 
 //  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游; 93：技术小组
 const chooseForum = (title, isTesting) => {
   console.log(title)
@@ -538,9 +538,9 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
 }
 
 // 发布活动
-const addThread = function(outdoorid, data, isTesting, callback) {
-  console.log("addThread()")
-  console.log("isTesting:" + isTesting)
+const addThread = function(outdoorid, data, fid, callback) {
+  console.log("lvyeorg.addThread()")
+  console.log("fid:" + fid)
   var temp = []
   uploadImages(outdoorid, data.brief.pics, temp, resAids => {
     console.log("resAids is:")
@@ -552,7 +552,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
       console.log("图片地址：" + resQrCode.url)
       data.websites.lvyeorg.qrcodeUrl = resQrCode.url // 记录下来
 
-      var fid = chooseForum(data.title, isTesting) // 要发帖的版面
+      // var fid = chooseForum(data.title, isTesting) // 要发帖的版面
       var message = buildOutdoorMesage(data, true, null, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
       // console.log(message)
       var token = wx.getStorageSync("LvyeOrgToken")
@@ -610,7 +610,7 @@ const addThread = function(outdoorid, data, isTesting, callback) {
                 success(res) {
                   if (res.confirm) {
                     console.log('用户点击确定')
-                    addThread(outdoorid, data, isTesting, callback) // 立刻重发
+                    addThread(outdoorid, data, fid, callback) // 立刻重发
                   } else if (res.cancel) {
                     console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
                     // 这里要更新Outdoors表
@@ -685,19 +685,19 @@ const postMessage = (outdoorid, tid, title, message) => {
 
 // 把未发布出去的信息加到waitings中
 const add2Waitings = (outdoorid, message) => {
-  wx.showModal({
-    title: '请登录或注册绿野ORG',
-    content: '本活动被领队设置为同步到绿野ORG网站，建议您注册ORG账号。系统将自动跳转到“绿野ORG登录”页面，请登录或注册以便报名信息同步',
-    showCancel: false,
-    confirmText: "知道了",
-    success(res) {
-      wx.navigateTo({
-        url: '/pages/MyInfo/LvyeorgLogin',
-      })
-    }
-  })
+  console.log("lvyeorg.add2Waitings()",outdoorid, message)
+  // wx.showModal({
+  //   title: '请登录或注册绿野ORG',
+  //   content: '本活动被领队设置为同步到绿野ORG网站，建议您注册ORG账号。系统将自动跳转到“绿野ORG登录”页面，请登录或注册以便报名信息同步',
+  //   showCancel: false,
+  //   confirmText: "知道了",
+  //   success(res) {
+  //     wx.navigateTo({
+  //       url: '/pages/MyInfo/LvyeorgLogin',
+  //     })
+  //   }
+  // })
 
-  console.log(message)
   cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
 }
  
@@ -871,6 +871,7 @@ module.exports = {
 
   loadPosts: loadPosts, // 从帖子中读取跟帖
   isTestForum: isTestForum, // 判断fid是否属于测试帖
+  chooseForum: chooseForum, // 选择论坛
 
   // 处理错误信息
   getError: getError,

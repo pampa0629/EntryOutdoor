@@ -21,7 +21,7 @@ const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const dbTemp = db.collection('Temp')
 
-
+let interstitialAd = null 
 Page({
   data: {
     home: false,
@@ -34,35 +34,54 @@ Page({
         etc: "b"
       },
       id3: "c"
-    }
+    },
+    // 在页面中定义插屏广告
+
   },
 
   onLoad() {
+    console.log("onLoad()")
     this.setData({
       // od: new outdoor.OD()
     })
 
-    this.initRecord()
+    // this.initRecord()
 
-    var time = new Date()
-    console.log("load time:" + time.toTimeString())
-    dbTemp.doc(app.globalData.personid).update({
-      data: {
-        loadtime: time.toTimeString(),
-      }
-    })
-    return
-    setInterval(() => {
-      dbTemp.doc(app.globalData.personid).update({
-        data: {
-          timing: (new Date()).toTimeString(),
-        }
-      })
-    }, 10000)
+    // var time = new Date()
+    // console.log("load time:" + time.toTimeString())
+    // dbTemp.doc(app.globalData.personid).update({
+    //   data: {
+    //     loadtime: time.toTimeString(),
+    //   }
+    // })
+    // return
+    // setInterval(() => {
+    //   dbTemp.doc(app.globalData.personid).update({
+    //     data: {
+    //       timing: (new Date()).toTimeString(),
+    //     }
+    //   })
+    // }, 10000)
 
     // wx.startGyroscope({
     //   interval: 'normal'
     // })
+
+    // console.log("wx.createInterstitialAd: " +wx.createInterstitialAd)
+    if (wx.createInterstitialAd) {
+      interstitialAd = wx.createInterstitialAd({
+        adUnitId: 'adunit-83d9b67d53f57ebe'
+      })
+      interstitialAd.onLoad(() => {
+        console.log('onLoad event emit')
+      })
+      interstitialAd.onError((err) => {
+        console.log('onError event emit', err)
+      })
+      interstitialAd.onClose((res) => {
+        console.log('onClose event emit', res)
+      })
+    }
   },
 
   onUnload() {
@@ -89,7 +108,7 @@ Page({
     })
   },
 
-  onTest: function(e) { 
+  onTest: function(e) {
 
     console.log(e.detail.errMsg)
     console.log(e.detail.iv)
@@ -501,14 +520,14 @@ Page({
     const self = this
     // var cookie ="dyh_userid=3166998;dyh_password=d17476a155a43782e1f24e1b0f0e57e6" 50463253
     //  var cookie = "dyh_userid=3917317;dyh_password=d17476a155a43782e1f24e1b0f0e57e6" // zengzhiming
-    var cookie =""
+    var cookie = ""
     if (self.data.mofang_pid) {
       cookie += self.data.mofang_pid // + ";"  
     }
     // cookie += self.data.cookies0 // + ";"
     // cookie += self.data.cookies1
     console.log("cookie: " + cookie)
-       
+
     wx.request({
       url: "http://www.doyouhike.net/user/login",
       method: 'POST',
@@ -518,20 +537,20 @@ Page({
         // 'cookie': JSON.stringify(cookie),
         'Cookie': cookie,
         // Accept: text / html, application/xhtml+xml,application/xml; q=0.9, image/webp,image/apng, */*;q=0.8,application/signed-exchange;v=b3
-// Accept-Encoding: gzip, deflate
-// Accept-Language: zh-CN,zh;q=0.9,en;q=0.8
-"cache-control": "max-age=0",
-  // "connection": "keep-alive",
-// Content-Length: 44
-// Content-Type: application/x-www-form-urlencoded
-  // "host": "www.doyouhike.net",
-// Origin: null
-// Upgrade-Insecure-Requests: 1
+        // Accept-Encoding: gzip, deflate
+        // Accept-Language: zh-CN,zh;q=0.9,en;q=0.8
+        "cache-control": "max-age=0",
+        // "connection": "keep-alive",
+        // Content-Length: 44
+        // Content-Type: application/x-www-form-urlencoded
+        // "host": "www.doyouhike.net",
+        // Origin: null
+        // Upgrade-Insecure-Requests: 1
         // "user-agent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36",
       },
       data: {
-        username:  "zengzhiming@supermap.com",
-        password:  "xx123zzm"
+        username: "zengzhiming@supermap.com",
+        password: "xx123zzm"
         // url: "/my"
       },
       fail: function(error) {
@@ -548,38 +567,38 @@ Page({
         const c = res.cookies
         console.log(c)
         var c0 = c[0].split(";")[0]
-        if (c0.indexOf("PHPSESSID")>=0) {
+        if (c0.indexOf("PHPSESSID") >= 0) {
           self.setData({
-            "mofang_pid":c0,
-          })  
+            "mofang_pid": c0,
+          })
         }
       }
     })
   },
 
-// http://www.doyouhike.net/event/yueban/detail/6426077
+  // http://www.doyouhike.net/event/yueban/detail/6426077
 
   tapMofangEntry() {
     console.log("tapMofangEntry()")
     const self = this
     var entry = {
-      'realName': "pampa",//真实姓名
-      'mobile': "13693607590",//手机号码
-      'nodeID': "6426258",//活动id
-      'insuranceName': "youban",//保险名称
-      'insuranceNumber': "123312132",//保险单号
-      'contacterName': "aling",//紧急联系人
-      'contacterTel': "13693607590",//紧急联系电话
-      'remark': "测试测试测试测试测试"//活动留言
-      }
+      'realName': "pampa", //真实姓名
+      'mobile': "13693607590", //手机号码
+      'nodeID': "6426258", //活动id
+      'insuranceName': "youban", //保险名称
+      'insuranceNumber': "123312132", //保险单号
+      'contacterName': "aling", //紧急联系人
+      'contacterTel': "13693607590", //紧急联系电话
+      'remark': "测试测试测试测试测试" //活动留言
+    }
     var cookie = "" // "dyh_userid=3917317;dyh_password=d17476a155a43782e1f24e1b0f0e57e6;" // zengzhiming
-    cookie += self.data.cookies0 +";"
+    cookie += self.data.cookies0 + ";"
     cookie += self.data.cookies1
     console.log(cookie)
-    
+
     // http://www.doyouhike.net/event/yueban/apply_join?realName=%E6%9B%BE%E5%BF%97%E6%98%8E&mobile=13693607590&nodeID=6426258&insuranceName=&insuranceNumber=&contacterName=%E5%B0%8F%E7%81%B5%E9%80%9A&contacterTel=13693607590&remark=
-    var url= "http://www.doyouhike.net/event/yueban/apply_join?"
-    url += "realName="+"pampa"
+    var url = "http://www.doyouhike.net/event/yueban/apply_join?"
+    url += "realName=" + "pampa"
     url += "&mobile=" + "13693607590"
     url += "&nodeID=" + "6426258"
     url += "&insuranceName=" + "youban"
@@ -620,10 +639,10 @@ Page({
         // PHPSESSID: self.data.mofang.PHPSESSID,
         // dyh_lastactivity: self.data.mofang.dyh_lastactivity,
       },
-      fail: function (error) {
+      fail: function(error) {
         console.log(error)
       },
-      success: function (res) {
+      success: function(res) {
         console.log(res)
         console.log(res.data)
       }
@@ -642,10 +661,10 @@ Page({
         PHPSESSID: self.data.mofang.PHPSESSID,
         dyh_lastactivity: self.data.mofang.dyh_lastactivity,
       },
-      fail: function (error) {
+      fail: function(error) {
         console.log(error)
       },
-      success: function (res) {
+      success: function(res) {
         console.log(res)
         console.log(res.data)
       }
@@ -730,11 +749,19 @@ Page({
   },
 
   tapCloud() {
-    var oldobjs= {
-      id1: { a: "a" },
-      id2: { a: "a" },
-      id3: { a: "a" },
-      id4: { a: "a" },
+    var oldobjs = {
+      id1: {
+        a: "a"
+      },
+      id2: {
+        a: "a"
+      },
+      id3: {
+        a: "a"
+      },
+      id4: {
+        a: "a"
+      },
     }
     var objs = Object.getOwnPropertyNames(oldobjs)
     console.log(objs)
@@ -753,7 +780,7 @@ Page({
   tapDBArray() {
     console.log("tapDBArray()")
     var outdoorid = "3b07eb945d0ef173066862c55bcbe6ed"
-    dbOutdoors.doc(outdoorid).get().then(res=>{
+    dbOutdoors.doc(outdoorid).get().then(res => {
       console.log(res.data.route)
       wx.cloud.callFunction({
         name: 'dbSimpleUpdate', // 云函数名称
@@ -767,19 +794,21 @@ Page({
       })
     })
 
-   
+
   },
 
   tapCopy() {
-    var now = new Date()
-    console.log("now: " + now)
-    console.log("1: " + new Date("2019-06-29"))
-    console.log(now > new Date("2019-06-29"))
-    console.log("2: " + new Date("2019-06-30"))
-    console.log(now > new Date("2019-06-30"))
-    console.log("3: " + new Date("2019-07-01"))
-    console.log(now > new Date("2019-07-01"))
-    
+    console.log("tapCopy()")
+    console.log("interstitialAd: ", interstitialAd)
+    if (interstitialAd) {
+      interstitialAd.show()
+      .then(res=>{
+        console.log(res)
+      }).catch(err => {
+        console.error(err)
+      })
+    }
+
   },
-    
+
 });

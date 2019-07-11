@@ -7,7 +7,7 @@
   </van-panel>  
 </van-dialog>  
     
-<!--弹出分享按钮-->
+<!--弹出分享按钮--> 
 <van-popup show="{{ showPopup }}" overlay="{{false}}" position="bottom" custom-class="center" bind:close="closePopup">
   <van-row> 
     <van-col span="20" offset="2">
@@ -123,6 +123,11 @@
     </van-cell>
   </van-radio-group>
 </van-panel>
+
+<!-- 领队是否认路 -->
+<van-cell title="是否认路" title-class="redtitle" label="{{myself.entryInfo.knowWay?'认路':'不认路'}}" clickable bind:click="checkKnowWay" border="{{false}}">
+  <van-checkbox value="{{myself.entryInfo.knowWay}}" bind:change="checkKnowWay" />
+</van-cell>
 
 <!--交通方式-->
 <van-cell wx:if="{{od.traffic}}" title="交通方式" title-class="redtitle" title-width="60%" label="{{od.traffic.mode}}；{{od.traffic.carInfo}}；{{od.traffic.costInfo}}" value="点击编辑交通方式" is-link url="EditTraffic" />

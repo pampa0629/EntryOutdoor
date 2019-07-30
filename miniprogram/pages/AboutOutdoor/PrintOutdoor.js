@@ -8,8 +8,8 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
- 
-Page({ 
+  
+Page({  
  
   data: {    
     od:null, 
@@ -28,7 +28,15 @@ Page({
    
     this.data.od = new outdoor.OD()
     this.data.od.load(options.outdoorid, od => {
+      console.log("od:",od)
       
+      var myself = util.findValue(od.members, "personid", app.globalData.personid)
+      if (myself && myself.entryInfo.status == "领队组") {
+        self.setData({ // 领队组也算领队
+          isLeader: true,
+        })
+      }
+
       // 处理兼容性
       self.dealCompatibility()
 

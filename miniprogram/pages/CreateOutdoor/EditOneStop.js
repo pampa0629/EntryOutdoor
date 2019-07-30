@@ -31,15 +31,17 @@ Page({
 
     if (options.action) {
       self.data.action = options.action
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2];
       if (self.data.action == "edit") {
         // 编辑，则先把原来的加载进来
-        let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-        let prevPage = pages[pages.length - 2];
         self.setData({
           stop: prevPage.data.route.wayPoints[options.index],
-          od: pages[pages.length - 3].data.od,
         })
       }
+      self.setData({
+        od: pages[pages.length - 3].data.od,
+      })
     }
   },
 

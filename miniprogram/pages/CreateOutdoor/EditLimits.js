@@ -9,7 +9,7 @@ const dbOutdoors = db.collection('Outdoors')
  
 Page({
 
-  data: {
+  data: { 
     limits: {
       maxPerson: false, // 是否进行人数限制 
       personCount: 20, // 最多人数，默认20（中巴车）

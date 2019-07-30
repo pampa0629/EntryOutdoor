@@ -391,8 +391,8 @@ const findObj=(objs, name, value)=>{
 // 在对象数组中查找指定属性为某个值的对象；找到返回该对象所在的index，没找到返回-1
 // objs:对象数组
 // name：要查找的属性
-// value: 指定的值
-const findIndex = (objs, name, value) => { 
+// value: 指定的值 
+const findIndex = (objs, name, value) => {  
   for (var index in objs) {
     if (objs[index][name] == value) {
       return index

@@ -8,7 +8,7 @@ Page({
     meets: [], //集合点，可加多个
     index: 0, // 当前要处理的index
     hasModified: false,
-    od:null, 
+    od:null,  
   
     showAction: false, 
     Actions: [{
@@ -42,7 +42,7 @@ Page({
     if (e.detail.name == "删除") {
       self.data.meets.splice(self.data.index,1)
       this.setData({
-        meets: self.data.meets,
+        meets: self.data.meets, 
         hasModified:true,
       })
     } else {
@@ -74,16 +74,15 @@ Page({
 
   onLoad: function(options) {
     console.log("onLoad")
-    const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     let od = prevPage.data.od
-    self.setData({
+    this.setData({
       status: od.status,
       meets: od.meets,
       od:od, 
     })
-    self.rebuildClickMeetFun()
+    this.rebuildClickMeetFun()
   },
 
   rebuildClickMeetFun: function() {

@@ -6,11 +6,11 @@ const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 
 wx.cloud.init()
-const db = wx.cloud.database({})
+const db = wx.cloud.database({}) 
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
-
+ 
 Page({
 
   data: {
@@ -39,6 +39,9 @@ Page({
     console.log(options)
     const self = this
     self.data.outdoorid = options.outdoorid
+    self.setData({
+      tid: options.tid
+    })
     if (options.isLeader == "true") {
       self.setData({
         isLeader: true,
@@ -70,7 +73,7 @@ Page({
 
   // 把org上的留言消息刷新到留言上
   flushLvyrorg2Chat(outdoorid, websites, leader) {
-    console.log("flushLvyrorg2Chat()")
+    console.log("ChatOutdoor.flushLvyrorg2Chat()")
     const self = this
     if (websites && websites.lvyeorg && websites.lvyeorg.tid) {
       self.data.tid = websites.lvyeorg.tid
@@ -117,7 +120,7 @@ Page({
     console.log("onUnload")
     const self = this
     cloudfun.updateOutdoorItem(self.data.outdoorid, "chat.seen." + app.globalData.personid, self.data.chat.messages.length)
-  },
+  }, 
 
   flushChats(addMessage, callback) {
     console.log("flushChats()")
@@ -241,8 +244,14 @@ Page({
       if (this.data.sendWxnotice) {
         this.sendWxnotice(message.msg)
       }
-      // push 到数据库中
+      // push 到数据库中 
       cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", message, "push")
+      // push 到org网站 
+      if( self.data.tid) {
+        var chatMessage = lvyeorg.buildChatMessage(message)
+        lvyeorg.postMessage(self.data.outdoorid, self.data.tid, chatMessage.title, chatMessage.message)
+      }
+ 
       // 输入框清空
       self.setData({
         "message.msg": "",
@@ -292,6 +301,14 @@ Page({
   onReachBottom: function() {
     console.log("onReachBottom")
     this.flushChats(null, null)
+  },
+
+  gotoLvyeOrg() {
+    var url = 'pages/detail/detail?tid=' + this.data.tid
+    wx.navigateToMiniProgram({
+      appId: 'wx1599b7c8d1e2b4d4', // 要跳转的小程序的appid
+      path: url, // 跳转的目标页面
+    })
   },
 
   tapWho(index, e) {

@@ -7,15 +7,15 @@ const _ = db.command
 Page({
 
   data: {
-    evaluation:{
-      level:null,
-      campEquipment:false,
-      campExperience:false,
+    evaluation: {
+      level: null,
+      campEquipment: false,
+      campExperience: false,
     },
     Questions: [{
         question: "您是否有过户外运动的经历，即无补给的爬山和较长距离徒步等？",
         answers: ["有过", "没有"],
-        show:false,
+        show: false,
         nexts: [1, 3]
       },
       {
@@ -39,9 +39,9 @@ Page({
       },
       {
         question: "您平时是否进行一定强度的运动，如跑步/健身/游泳/篮球/足球等？一周平均几次？",
-        answers: ["有，一周两次以上", "有，一周一到两次", "有，一周不到一次","没有"],
+        answers: ["有，一周两次以上", "有，一周一到两次", "有，一周不到一次", "没有"],
         show: false,
-        nexts: [-1,-1,5, 5],
+        nexts: [-1, -1, 5, 5],
         levels: ["1.5", "1.0"]
       },
       {
@@ -49,8 +49,9 @@ Page({
         answers: ["打死也不自己爬楼", "多休息几次还是能爬上去", "可以坚持不休息", "很轻松，干嘛要休息"],
         show: false,
         nexts: [-1, -1, -1, -1],
-        levels: ["0.1","0.5", "0.8", "1.0"]
-      }],
+        levels: ["0.1", "0.5", "0.8", "1.0"]
+      }
+    ],
   },
 
   onLoad: function(options) {
@@ -58,10 +59,10 @@ Page({
     for (var i = 0; i < self.data.Questions.length; i++) {
       let index = i
       this["clickAnsweer" + index] = (e) => {
-        self.clickAnsweer(index,e)
+        self.clickAnsweer(index, e)
       }
       this["changeAnswer" + index] = (e) => {
-        self.changeAnswer(index,e)
+        self.changeAnswer(index, e)
       }
       this["clickNext" + index] = () => {
         self.clickNext(index)
@@ -69,37 +70,39 @@ Page({
     }
 
     // 读取数据库
-    dbPersons.doc(app.globalData.personid).get().then(res=>{
-      if (res.data.career){
-        self.setData({
-          evaluation: res.data.career.evaluation
-        })
-      }
-      console.log(self.data.evaluation)
-      if (!self.data.evaluation){ // 没有记录，则自动重新测评
-        self.evaluateAgain()
-      }
-    })
+    if (app.checkLogin()) {
+      dbPersons.doc(app.globalData.personid).get().then(res => {
+        if (res.data.career) {
+          self.setData({
+            evaluation: res.data.career.evaluation
+          })
+        }
+        console.log(self.data.evaluation)
+        if (!self.data.evaluation) { // 没有记录，则自动重新测评
+          self.evaluateAgain()
+        }
+      })
+    }
   },
 
-  onUnload: function () {
+  onUnload: function() {
     const self = this;
-    let pages = getCurrentPages(); 
+    let pages = getCurrentPages();
     let prevPage = pages[pages.length - 2];
     prevPage.setData({
       "career.evaluation": self.data.evaluation,
     })
   },
 
-  changeAnswer: function (index, e) {
+  changeAnswer: function(index, e) {
     console.log(index)
     console.log(e.detail)
     this.setData({
-      ["Questions[" + index+"].select"]: e.detail,
+      ["Questions[" + index + "].select"]: e.detail,
     })
   },
 
-  clickAnsweer: function (index, e) {
+  clickAnsweer: function(index, e) {
     console.log(index)
     console.log(e.target.dataset.name)
     this.setData({
@@ -107,18 +110,18 @@ Page({
     })
   },
 
-  clickNext(i){
+  clickNext(i) {
     console.log(i)
     const self = this
     // 先全部不可见
-    self.data.Questions.forEach((item, index)=>{
+    self.data.Questions.forEach((item, index) => {
       self.setData({
-        ["Questions["+index+"].show"] :false,
+        ["Questions[" + index + "].show"]: false,
       })
     })
     // 再设置下一道题可见
     var nextQ = self.data.Questions[i].nexts[self.data.Questions[i].select]
-    if(nextQ >= 0) {
+    if (nextQ >= 0) {
       self.setData({
         ["Questions[" + nextQ + "].show"]: true,
       })
@@ -129,7 +132,7 @@ Page({
       // 扎营与否
       var campEquipment = false
       var campExperience = false
-      if (self.data.Questions[1].select ==0) {
+      if (self.data.Questions[1].select == 0) {
         campEquipment = true
         campExperience = true
       } else if (self.data.Questions[1].select == 1) {
@@ -141,19 +144,21 @@ Page({
         "evaluation.campEquipment": campEquipment,
         "evaluation.campExperience": campExperience,
       })
-      console.log("扎营情况："+self.data.Questions[2].select)
+      console.log("扎营情况：" + self.data.Questions[2].select)
       console.log(self.data.evaluation)
       // 写到个人数据库中
-      dbPersons.doc(app.globalData.personid).update({
-        data:{
-          "career.evaluation": _.set(self.data.evaluation)
-        }
-      })
+      if (app.globalData.personid) {
+        dbPersons.doc(app.globalData.personid).update({
+          data: {
+            "career.evaluation": _.set(self.data.evaluation)
+          }
+        })
+      }
     }
   },
 
   // 重新测评
-  evaluateAgain(){
+  evaluateAgain() {
     // 设置level为null
     this.setData({ // 体力情况
       "evaluation.level": null

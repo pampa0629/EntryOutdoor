@@ -88,6 +88,7 @@ Page({
           memCount: item.members.length + item.addMembers.length,
           maxCount: item.limits.maxPerson ? item.limits.personCount:"∞",
           openid: item._openid,
+          leader: item.leader ? item.leader : item.members[0],
           status:item.status,
         }
         console.log(outdoor)
@@ -117,7 +118,8 @@ Page({
     console.log(e)
     const self = this
     const oneOutdoor = self.data.outdoors[index]
-    if (oneOutdoor.openid == app.globalData.openid) {
+    // if (oneOutdoor.openid == app.globalData.openid) {
+    if (oneOutdoor.leader.personid == app.globalData.personid) {
       // 自己创建的活动，进入编辑
       util.saveOutdoorID(oneOutdoor.id)
       wx.switchTab({

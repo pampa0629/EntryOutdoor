@@ -6,6 +6,10 @@
     <van-button size="large" open-type="getPhoneNumber" bindgetphonenumber="onTest">测试</van-button>
   </van-col>
 </van-row>
+
+<Login id="login" showLoginDlg="{{showLogin}}">
+</Login>
+<van-button size="large" bind:click="tapLogin">登录</van-button>
  
 <van-button size="large" bind:click="sendTemplate">发模板消息</van-button>
 <van-button size="large" bind:click="tapWalk">读取步数</van-button>

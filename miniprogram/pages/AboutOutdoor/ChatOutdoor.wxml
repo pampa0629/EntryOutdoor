@@ -5,9 +5,9 @@
  
 <!--活动标题--> 
 <van-row>
-  <van-col span="20"> 
+  <van-col span="20">  
     <van-notice-bar scrollable="{{true}}" text="{{title}}" />
-  </van-col>
+  </van-col> 
   <van-col span="2" offset="1">
     <view wx:if="{{isLeader}}" style="flex-direction:column">
       <van-icon name="upgrade" size="24px" color="#1aad19" bind:click="onEnterGroup"></van-icon>
@@ -20,16 +20,23 @@
   </van-col>
 </van-row>
 
-<!-- <!-- <van-cell title="{{limits.maxPerson?'限制人数':'不限制人数'}}" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
-    <van-checkbox value="{{limits.maxPerson}}"/>
-  </van-cell>     -->
-
-<van-cell title="@人 的留言{{sendWxnotice?'同时':'不'}}发送微信服务消息" title-width="80%" clickable  bind:click="changeSendWxnotice">
-  <van-checkbox value="{{sendWxnotice}}"/>
-</van-cell>
+<!-- 留言是否同步到org网站 -->
+<van-row wx:if="{{tid}}">
+  <van-col span="16" offset=""> 
+    <van-tag  size="large" plain>留言将被同步到绿野org网站</van-tag>
+  </van-col>
+  <van-col span="7" offset="1"> 
+    <van-button size="small" bind:click="gotoLvyeOrg">跳转：绿野org</van-button>
+  </van-col>
+</van-row>
 
 <!--刷新提示-->
 <van-tag wx:if="{{!hasPullFlush}}" size="large" type="success">下拉即时刷新留言</van-tag>
+
+<!-- 留言是否发送微信服务消息 -->
+<van-cell title="@人 的留言{{sendWxnotice?'同时':'不'}}发送微信服务消息" title-width="80%" clickable  bind:click="changeSendWxnotice">
+  <van-checkbox value="{{sendWxnotice}}"/>
+</van-cell>
 
 <!--活动留言--> 
 <van-row wx:for="{{chat.messages}}" wx:key="who+msg">

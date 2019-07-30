@@ -38,7 +38,7 @@ Page({
         password: password,
         hasLogin:true,
       })
-    } else{
+    } else if (app.checkLogin()) {
     // 直接从数据库读取
     dbPersons.doc(app.globalData.personid).get()
       .then(res => {
@@ -67,7 +67,7 @@ Page({
   // 存储到Persons数据库中
   save2Person:function(){
     const self = this;
-    if (self.data.hasModified) { // 修改了才写回到数据库中
+    if (self.data.hasModified && app.globalData.personid) { // 修改了才写回到数据库中
       dbPersons.doc(app.globalData.personid).update({
         data: {
           "websites.lvyeorgInfo": self.data.lvyeorgInfo

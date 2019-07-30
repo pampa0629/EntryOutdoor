@@ -3,6 +3,7 @@ const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const template = require('../../utils/template.js')
 const odtools = require('../../utils/odtools.js')
+const person = require('../../utils/person.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -48,11 +49,14 @@ Page({
       entryFull:odtools.entryFull(od.limits, od.members, od.addMembers)
     })
 
+    console.log(od.leader.personid ,app.globalData.personid)
     if(od.leader.personid == app.globalData.personid) {
       self.setData({ // 判断是否为总领队
         isLeader:true,
       })
     }
+    console.log(this.data.isLeader)
+
     if (od.pay && od.pay.cfo){
       self.setData({
         cfo: od.pay.cfo, 
@@ -80,6 +84,7 @@ Page({
         knowWay: knowWay,
         status: s[i].entryInfo.status,
         personid: s[i].personid,
+        meetsIndex:"第"+(s[i].entryInfo.meetsIndex+1)+"集合点",
       }
       self.data.members.push(member)
  
@@ -142,28 +147,55 @@ Page({
 
   onSetLeader() {
     const self = this
-    dbOutdoors.doc(self.data.od.outdoorid).get().then(res=>{
-      odtools.findPersonIndex(res.data.members, self.data.members[self.data.index].personid, index=>{
-        console.log("person index: "+index)
-        var temp = res.data.members[0]
-        res.data.members[0] = res.data.members[index]
-        res.data.members[0].entryInfo.status = "领队"
-        res.data.members[index] = temp
-        res.data.members[index].entryInfo.status = "领队组"
-        cloudfun.updateOutdoorMembers(self.data.od.outdoorid, res.data.members)
-        cloudfun.updateOutdoorLeader(self.data.od.outdoorid, res.data.members[0])
-        // 刷新当前列表
-        self.setData({
-          "od.members": res.data.members
-        })
-        self.flushMembers()
-        // 给所有队员发通知
-        res.data.members.forEach((item, i)=>{
-          // old(index) ==> new （0）
-          template.sendResetMsg2Member(self.data.od.outdoorid, item.personid, self.data.od.title.whole, res.data.members[index].userInfo.nickName, res.data.members[0].userInfo.nickName)
-        })
+    this.data.od.transferLeader(app.globalData.personid, this.data.members[self.data.index].personid, members=>{
+      self.setData({
+        "od.members": members,
+        isLeader:false
       })
+      self.flushMembers()
+      let pages = getCurrentPages() //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2]
+      console.log("title:", )
+      prevPage.setData({
+        "od.title":self.data.od.title
+      })
+      // let od = pages[pages.length - 2].data.od
     })
+
+    // dbOutdoors.doc(self.data.od.outdoorid).get().then(res=>{
+    //   odtools.findPersonIndex(res.data.members, self.data.members[self.data.index].personid, index=>{
+    //     console.log("person index: "+index)
+    //     var temp = res.data.members[0]
+    //     res.data.members[0] = res.data.members[index]
+    //     res.data.members[0].entryInfo.status = "领队"
+    //     res.data.members[index] = temp
+    //     res.data.members[index].entryInfo.status = "领队组"
+    //     cloudfun.updateOutdoorMembers(self.data.od.outdoorid, res.data.members)
+    //     cloudfun.updateOutdoorLeader(self.data.od.outdoorid, res.data.members[0])
+    //     // 两个人的 outdoors内容也要处理
+    //     var outdoor = {
+    //       id: self.data.od.outdoorid,
+    //       title: self.data.od.title.whole
+    //     }
+    //     // 原领队（现队员），myOutdoors中去掉本项，entriedOutdoors中增加
+    //     person.dealOutdoors(res.data.members[index].personid, "myOutdoors", outdoor, true)
+    //     person.dealOutdoors(res.data.members[index].personid, "entriedOutdoors", outdoor, false)
+    //     // 现领队（原队员），myOutdoors中增加本项，entriedOutdoors中去掉
+    //     person.dealOutdoors(res.data.members[0].personid, "myOutdoors", outdoor, false)
+    //     person.dealOutdoors(res.data.members[0].personid, "entriedOutdoors", outdoor, true)
+
+    //     // 刷新当前列表
+    //     self.setData({ 
+    //       "od.members": res.data.members
+    //     })
+    //     self.flushMembers()
+    //     // 给所有队员发通知
+    //     res.data.members.forEach((item, i)=>{
+    //       // old(index) ==> new （0）
+    //       template.sendResetMsg2Member(self.data.od.outdoorid, item.personid, self.data.od.title.whole, res.data.members[index].userInfo.nickName, res.data.members[0].userInfo.nickName)
+    //     })
+    //   })
+    // })
   },
 
   onCheckPopup(index) {

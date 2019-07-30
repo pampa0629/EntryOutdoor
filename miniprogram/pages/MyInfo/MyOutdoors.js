@@ -25,8 +25,6 @@ Page({
   },
 
   onLoad: function() {
-    this.checkLogin()
-
     var sysInfo = wx.getSystemInfoSync();
     this.setData({
       screenHeight: (sysInfo.screenHeight - sysInfo.statusBarHeight) * 0.8,
@@ -34,24 +32,19 @@ Page({
     console.log("MyOutdoors.js in onLoad fun, screenHeight is:" + this.data.screenHeight)
   },
 
-  checkLogin() { 
-    var title = "查看“我的活动”需先登录"
-    var content = "小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录"
-    app.checkLogin(title, content)
-  },
-
   onShow: function() {
+    console.log("MyOutdoors.onShow()")
     const self = this;
-    self.checkLogin()
-    
+    if(app.checkLogin()) {
       // 从Persons表中取出数据
-    dbPersons.doc(app.globalData.personid).get().then(res => {
-      self.setData({
-        myOutdoors: res.data.myOutdoors,
-        entriedOutdoors: res.data.entriedOutdoors,
-        caredOutdoors: res.data.caredOutdoors,
+      dbPersons.doc(app.globalData.personid).get().then(res => {
+        self.setData({
+          myOutdoors: res.data.myOutdoors,
+          entriedOutdoors: res.data.entriedOutdoors,
+          caredOutdoors: res.data.caredOutdoors,
+        })
       })
-    })
+    }
   },
 
   // 隐藏，则需要把列表内容写回去

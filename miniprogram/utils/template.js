@@ -20,7 +20,7 @@ const getDefaultNotice = () => {
 }
 
 const buildOneFormid = (formid) => {
-  if (formid.indexOf("mock") == -1) { // 模拟的不要
+  if (formid && formid.indexOf("mock") == -1) { // 模拟的不要
     var expire = util.nextDate(new Date(), 7).getTime()
     return {
       "formid": formid,

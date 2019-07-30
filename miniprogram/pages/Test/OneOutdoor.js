@@ -1,4 +1,4 @@
-import Page from 'page';
+
 const app = getApp()
 const QRCode = require('../../libs/weapp-qrcode.js')
 const util = require('../../utils/util.js')
@@ -28,15 +28,7 @@ Page({
     formIds: [],
     od: null,
     a: null,
-    objs: {
-      id: "a",
-      id2: {
-        etc: "b"
-      },
-      id3: "c"
-    },
-    // 在页面中定义插屏广告
-
+   
   },
 
   onLoad() {
@@ -45,43 +37,6 @@ Page({
       // od: new outdoor.OD()
     })
 
-    // this.initRecord()
-
-    // var time = new Date()
-    // console.log("load time:" + time.toTimeString())
-    // dbTemp.doc(app.globalData.personid).update({
-    //   data: {
-    //     loadtime: time.toTimeString(),
-    //   }
-    // })
-    // return
-    // setInterval(() => {
-    //   dbTemp.doc(app.globalData.personid).update({
-    //     data: {
-    //       timing: (new Date()).toTimeString(),
-    //     }
-    //   })
-    // }, 10000)
-
-    // wx.startGyroscope({
-    //   interval: 'normal'
-    // })
-
-    // console.log("wx.createInterstitialAd: " +wx.createInterstitialAd)
-    if (wx.createInterstitialAd) {
-      interstitialAd = wx.createInterstitialAd({
-        adUnitId: 'adunit-83d9b67d53f57ebe'
-      })
-      interstitialAd.onLoad(() => {
-        console.log('onLoad event emit')
-      })
-      interstitialAd.onError((err) => {
-        console.log('onError event emit', err)
-      })
-      interstitialAd.onClose((res) => {
-        console.log('onClose event emit', res)
-      })
-    }
   },
 
   onUnload() {
@@ -92,6 +47,17 @@ Page({
         unloadtime: time.toTimeString(),
       }
     })
+  },
+
+  tapLogin() {
+    console.log("tapLogin()")
+    console.log("before personid：", app.globalData.personid)
+    person.ensureLogin(null, this, personid=>{
+      console.log("personid:", personid)  
+    })
+   
+    console.log("showLogin:", this.data.showLogin)
+    console.log("after personid：", app.globalData.personid)
   },
 
   sendTemplate() {
@@ -799,15 +765,19 @@ Page({
 
   tapCopy() {
     console.log("tapCopy()")
-    console.log("interstitialAd: ", interstitialAd)
-    if (interstitialAd) {
-      interstitialAd.show()
-      .then(res=>{
-        console.log(res)
-      }).catch(err => {
-        console.error(err)
-      })
-    }
+    var outdoors = [{ id: "1" }, { id: "" }, { id: "1" }, { id: "2" }, { id: "1" }, { id: "1" }]
+    // var outdoors = [{ id: "" }, { id: "1" }, { id: "2" }]
+    var value = {id:"1"}
+    
+    var index = -1
+    do { // 循环保证清楚干净
+      index = util.findIndex(outdoors, "id", value.id)
+      console.log(outdoors, "id", value, index)
+      if (index>=0) {
+        outdoors.splice(index, 1)
+      }
+      count++
+    } while (index >= 0 ) 
 
   },
 

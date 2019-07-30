@@ -1,7 +1,7 @@
 <!--嘚瑟用-->
 <van-button plain type="primary" size="large" open-type="share" bind:click="onShareAppMessage">嘚瑟一下</van-button>
 
-<!--户外评测-->
+<!--户外评测--> 
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="户外评测"></van-cell>
   <van-cell wx:if="{{!career.evaluation}}" title="新人户外评测"  value="点击进行户外评测" is-link url="MyEvaluate" border="{{false}}" />

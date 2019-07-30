@@ -11,7 +11,7 @@
   <van-field label="预计时间" disabled  value="{{stop.time}}" placeholder="请选择预计到达时间"/>
 </picker>
 
-<!-- 保存和返回按钮 -->
+<!-- 保存和返回按钮 --> 
 <van-row  wx:if="{{od.status=='拟定中' || !od.expired}}">
   <van-col span="9" offset="2">
     <form bindsubmit="save" report-submit="true">

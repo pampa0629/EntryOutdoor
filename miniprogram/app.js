@@ -82,6 +82,7 @@ App({
     // 读取数据库
     self.globalData.personid = util.loadPersonID();
     console.log("app.js in getPersonInfo fun, loadPersonID is:" + self.globalData.personid)
+    if (self.globalData.personid) {
     dbPersons.doc(self.globalData.personid).get()
       .then(res => { // 顺利读取到，万事大吉
         self.globalData.userInfo = res.data.userInfo;
@@ -96,37 +97,47 @@ App({
       })
       .catch(err => {
         console.error(err)
-        //直接用person id读取不到，则尝试是否能通过openid读取到 person id
-        dbPersons.where({
-          _openid: self.globalData.openid
-        }).get().then(res => {
-          if (res.data.length > 0) { // 找到了
-            self.globalData.userInfo = res.data[0].userInfo;
-            self.globalData.hasUserInfo = true;
-            self.dealCompatibility(res.data[0]) // 处理兼容性问题
-            // 同时设置到globalData中
-            self.globalData.personid = res.data[0]._id;
-            util.savePersonID(self.globalData.personid);
-            // callback 第二种情况：通过openid找回正确的personid成功
-            console.log("app.js in getPersonInfo fun, 2 callback personid is:" + self.globalData.personid)
-            console.log("app.js in getPersonInfo fun, 2 callback fun is:" + self.personidCallback)
-            if (self.personidCallback) {
-              self.personidCallback(self.globalData.personid, self.globalData.userInfo);
-            }
-          } else { // 这是没有找到
-            // 这里最重要的是把 personid的缓存清除掉，别下次登录继续害人
-            self.globalData.personid = null;
-            util.clearPersonID();
-            // callback 第三种情况：就是找不到当前用户的personid，说明还没有登录了
-            console.log("app.js in getPersonInfo fun, 3 callback personid is:" + self.globalData.personid)
-            console.log("app.js in getPersonInfo fun, 3 callback fun is:" + self.personidCallback)
-            if (self.personidCallback) {
-              self.personidCallback(self.globalData.personid, null);
-            }
-          }
-        })
+        self.findIDbyOpenid()
       })
+    } else {
+      self.findIDbyOpenid()
+    }
     wx.hideLoading()
+  },
+
+  // personid 为空或数据库doc不到时，通过openid来查找personid
+  findIDbyOpenid() {
+    console.log("app.findIDbyOpenid()")
+    const self = this
+    //直接用person id读取不到，则尝试是否能通过openid读取到 person id
+    dbPersons.where({
+      _openid: self.globalData.openid
+    }).get().then(res => {
+      if (res.data.length > 0) { // 找到了
+        self.globalData.userInfo = res.data[0].userInfo;
+        self.globalData.hasUserInfo = true;
+        self.dealCompatibility(res.data[0]) // 处理兼容性问题
+        // 同时设置到globalData中
+        self.globalData.personid = res.data[0]._id;
+        util.savePersonID(self.globalData.personid);
+        // callback 第二种情况：通过openid找回正确的personid成功
+        console.log("app.js in getPersonInfo fun, 2 callback personid is:" + self.globalData.personid)
+        console.log("app.js in getPersonInfo fun, 2 callback fun is:" + self.personidCallback)
+        if (self.personidCallback) {
+          self.personidCallback(self.globalData.personid, self.globalData.userInfo);
+        }
+      } else { // 这是没有找到
+        // 这里最重要的是把 personid的缓存清除掉，别下次登录继续害人
+        self.globalData.personid = null;
+        util.clearPersonID();
+        // callback 第三种情况：就是找不到当前用户的personid，说明还没有登录了
+        console.log("app.js in getPersonInfo fun, 3 callback personid is:" + self.globalData.personid)
+        console.log("app.js in getPersonInfo fun, 3 callback fun is:" + self.personidCallback)
+        if (self.personidCallback) {
+          self.personidCallback(self.globalData.personid, null);
+        }
+      }
+    })
   },
 
   // 处理Person表的兼容性问题，关键是与网站的对接信息
@@ -190,21 +201,33 @@ App({
     }
   }, 
  
-  checkLogin(title, content) {
-    const self = this
-    if (!self.globalData.hasUserInfo) { // 判断是否登录先
+  checkLogin(title, content, showCancel) {
+    console.log('app.checkLogin()')
+    title = title ? title:"此项功能须先登录"
+    showCancel = showCancel == undefined ? true: showCancel
+    console.log('showCancel: ', showCancel)
+    content = content ? content : "点击“去登录”将自动切换到“我的信息”页面，再点击“微信登录”按钮登录"
+    if (!this.globalData.hasUserInfo) { // 判断是否登录先
       wx.showModal({
         title: title, // '查看“我的活动”需先登录',
         content: content, // '小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录',
-        showCancel: false,
-        confirmText: "知道了",
-        complete: function (res) {
-          wx.switchTab({
-            url: '../MyInfo/MyInfo'
-          })
+        showCancel: showCancel,
+        cancelText:"先不了",
+        confirmText: "去登录",
+        success(res) {
+          if (res.confirm) {
+            console.log('用户点击确定')
+            wx.switchTab({
+              url: '../MyInfo/MyInfo'
+            })
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
         }
       })
+      return false
     } 
+    return true
   },
 
   // 登录绿野网站，用callback得到登录结果

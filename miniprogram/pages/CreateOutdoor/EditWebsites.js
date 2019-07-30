@@ -10,7 +10,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 
-Page({
+Page({ 
 
   data: {
     od: null,
@@ -149,9 +149,10 @@ Page({
   },
 
   tapOrgHall: function () {
+    var url = 'pages/detail/detail?tid=' + this.data.od.websites.lvyeorg.tid
     wx.navigateToMiniProgram({
       appId: 'wx1599b7c8d1e2b4d4', // 要跳转的小程序的appid
-      path: "pages/index/index", // 跳转的目标页面
+      path: url, // 跳转的目标页面
       success(res) {
         // 打开成功  
       }

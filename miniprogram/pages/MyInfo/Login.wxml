@@ -1,0 +1,18 @@
+<!--pages/MyInfo/Login.wxml-->
+
+<van-dialog use-slot show="{{showLoginDlg}}" show-cancel-button  bind:cancel="cancelLoginDlg" bind:confirm="confirmLoginDlg" title="请填写个人信息" confirmButtonText="确定" cancelButtonText="取消">
+ 
+    <van-field required value="{{userInfo.nickName}}" label="户外昵称：" placeholder="好听、易记、非真名"  bind:change="changeNickname" bind:blur="blurNickname" error-message="{{nickErrMsg}}"/>
+
+  <van-field required label="性别：" value="{{userInfo.gender}}" error-message="{{genderErrMsg}}" disabled/>
+  <van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">
+      <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender">
+        <van-radio name="{{item}}"/>
+      </van-cell>
+  </van-radio-group> 
+  <van-button open-type="getUserInfo" type="primary" size="large" plain bindgetuserinfo="dlgGetUserinfo">填入微信昵称和性别</van-button>
+
+  <van-field required value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="真实、有效、方便领队联系" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" />
+  <!-- <van-button open-type="getPhoneNumber" type="primary" size="large" plain bindgetuserinfo="dlgGetPhone">获取电话号码</van-button> 暂不提供-->
+
+</van-dialog>

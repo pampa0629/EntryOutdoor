@@ -10,7 +10,7 @@ const dbSelect = db.collection('Selects')
 const _ = db.command
  
 Page({
-
+ 
   data: {
     Modes: ["公共交通", "包车", "自驾"],
     traffic: {

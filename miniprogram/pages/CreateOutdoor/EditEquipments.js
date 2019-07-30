@@ -369,7 +369,7 @@ Page({
     })
   },
 
-  onClose(event) {
+  onClose(event) { 
     const self = this
     console.log(event)
     if (event.detail === 'confirm') {
@@ -392,13 +392,13 @@ Page({
         })
       }
 
-      setTimeout(() => {
+      // setTimeout(() => {
         self.setData({
           hasModified: true,
           "dialog.show": false
-        });
-        self.onShow()
-      }, 100);
+        })
+        // self.onShow()
+      // }, 100);
     } else {
       this.setData({
         "dialog.show": false

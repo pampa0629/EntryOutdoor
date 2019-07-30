@@ -1,6 +1,6 @@
 {
   "usingComponents": {
-    "demo-block": "demo-block/index",
+    "Login": "../MyInfo/Login",
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",
     "van-dialog": "/vant-weapp/dialog/index",

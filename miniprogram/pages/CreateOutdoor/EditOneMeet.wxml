@@ -14,7 +14,7 @@
 <!--集合时间点：8:00-->
 <picker mode="time" value="{{meet.time}}" start="00:00" end="24:00" bindchange="changMeetTime">
   <van-field label="集合时间" disabled required value="{{meet.time}}" placeholder="请选择集合时间"/>
-</picker>
+</picker> 
  
 <!-- 保存和返回按钮 -->
 <van-row  wx:if="{{od.status=='拟定中' || !od.expired}}">

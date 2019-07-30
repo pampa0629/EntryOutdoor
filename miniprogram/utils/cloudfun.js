@@ -415,10 +415,11 @@ const unshiftPersonCared = (personid, outdoorid, title, callback)=>{
 // 对Persons表的某个子项进行特定数据库操作
 const opPersonItem = (personid, item, value, op, callback) => {
   console.log("cloudfun.opPersonItem()")
+  console.log(personid, item, value, op)
   wx.cloud.callFunction({
     name: 'dbSimpleUpdate', // 云函数名称
     // table,id,item,command(push,pop,shift,unshift,""),value
-    data: {
+    data: { 
       table: "Persons",
       id: personid,
       item: item,

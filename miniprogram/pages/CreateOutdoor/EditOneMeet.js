@@ -8,7 +8,7 @@ Page({
     MeetDates: ["前三天", "前两天", "前一天", "当天"],
     meetDatesIndex: 3, // 默认是当天集合
 
-    meet: { 
+    meet: {  
       place: "", // 人输入的位置描述
       date: "当天",  
       time: "", 
@@ -34,15 +34,17 @@ Page({
 
     if (options.action) {
       self.data.action = options.action
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 2];
       if (self.data.action == "edit") {
         // 编辑，则先把原来的加载进来
-        let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-        let prevPage = pages[pages.length - 2];
         self.setData({
           meet: prevPage.data.meets[options.index],
-          od: pages[pages.length - 3].data.od,
         })
       }
+      self.setData({
+        od: pages[pages.length - 3].data.od,
+      })
     }
   },
 
@@ -147,6 +149,7 @@ Page({
         prevPage.rebuildClickMeetFun()
       }
       // 最上面也要记得设置，以便刷新主界面
+      console.log("od:",od)
       prevprevPage.setData({
         "od.meets":od.meets
       })

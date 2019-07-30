@@ -7,7 +7,7 @@ const cloudfun = require('./cloudfun.js')
 wx.cloud.init()
 const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
-
+  
 const LvyeOrgURL = 'https://www.lvye.net/panpa/'
 
 // 得到登录org网站所需要的token， 用callback传回
@@ -498,12 +498,12 @@ const buildEntryNotice = (qrcode, first, allowSiteEntry) => {
 
 // 构建网站报名信息; isQuit:是否为退出活动； isPrint：是否为集中打印名单时调用
 const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
-  console.log("lvyeorg.js buildEntryMessage") 
+  console.log("lvyeorg.buildEntryMessage()") 
   console.log(userInfo)
   var message = ""
   var title = ""
   if (!isPrint) {
-    message += "（本内容由“户外报名”小程序自动发出，与发帖人无关；相应责权由" + userInfo.nickName + "承担）\r\n"
+    message += "（本内容由“户外报名”小程序自动发出，与发帖人无关；相应责权由“" + userInfo.nickName + "”承担）\r\n"
   }
   if (isQuit) {
     var temp = userInfo.nickName + " 因故退出活动，抱歉！"
@@ -535,6 +535,15 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
     title: title,
     message: message
   }
+}
+
+// 构建留言信息文本
+const buildChatMessage = (chat) =>{
+  console.log("lvyeorg.buildChatMessage()") 
+  console.log(chat) 
+  var message = "（本内容由“户外报名”小程序自动发出，与发帖人无关；相应责权由“" + chat.who + "”承担）\r\n"
+  message += chat.msg
+  return {title:chat.msg, message:message}
 }
 
 // 发布活动
@@ -626,7 +635,7 @@ const addThread = function(outdoorid, data, fid, callback) {
           cloudfun.updateOutdoorWebsites(outdoorid, data.websites)
         }
       })
-    })
+    }) 
   })
 }
 
@@ -647,7 +656,6 @@ const postMessage = (outdoorid, tid, title, message) => {
     data: {
       token: token,
       tid: tid,
-      // pid: "44440649", // todo 没用
       subject: title, // 
       message: encodeURI(message),
     },
@@ -661,22 +669,24 @@ const postMessage = (outdoorid, tid, title, message) => {
         });
       } else {
         getError(resp, (error) => {
-          wx.showModal({
-            title: '信息发布到绿野ORG失败',
-            content: '原因是：' + error + "。\r\n点击“再试一次”则再次尝试同步，点击“以后再发”则在下次进入本活动页面时自动重发。",
-            confirmText: "再试一次",
-            cancelText: "以后再发",
-            success(res) {
-              if (res.confirm) {
-                console.log('用户点击确定')
-                postMessage(outdoorid, tid, title, message) // 立刻重发
-              } else if (res.cancel) {
-                console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
-                // 这里要更新Outdoors表
-                cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
-              }
-            }
-          })
+          cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
+          // 减少烦人
+          // wx.showModal({
+          //   title: '信息发布到绿野ORG失败',
+          //   content: '原因是：' + error + "。\r\n点击“再试一次”则再次尝试同步，点击“以后再发”则在下次进入本活动页面时自动重发。",
+          //   confirmText: "再试一次",
+          //   cancelText: "以后再发",
+          //   success(res) {
+          //     if (res.confirm) {
+          //       console.log('用户点击确定')
+          //       postMessage(outdoorid, tid, title, message) // 立刻重发
+          //     } else if (res.cancel) {
+          //       console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
+          //       // 这里要更新Outdoors表
+                
+          //     }
+          //   }
+          // })
         })
       }
     }
@@ -865,6 +875,7 @@ module.exports = {
   buildOutdoorMesage: buildOutdoorMesage, // 构造活动信息
   buildEntryMessage: buildEntryMessage, // 构造报名信息
   buildEntryNotice: buildEntryNotice, // 构造报名须知
+  buildChatMessage: buildChatMessage, // 构造留言信息
   postMessage: postMessage, // 跟帖
   add2Waitings: add2Waitings, // 往waiting中增加一条信息
   postWaitings: postWaitings, // 把正在等待发布的信息发布出去

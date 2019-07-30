@@ -76,7 +76,7 @@
   </van-col>
   <van-col span="2" offset="1" wx:if="{{od.status != '拟定中'}}">
     <view style="flex-direction:column">
-      <van-icon name="new-o" size="24px" color="#1aad19" bind:click="newOutdoor"></van-icon>
+      <van-icon name="new-o" size="24px" color="#1aad19" bind:click="tapNewOutdoor"></van-icon>
       <view class="icon_tip">新建</view>
     </view>
   </van-col> 

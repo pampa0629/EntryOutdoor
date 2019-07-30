@@ -1,12 +1,13 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const person = require('../../utils/person.js')
+const outdoor = require('../../utils/outdoor.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons') 
-  
+   
 Page({ 
 
   data: { 
@@ -261,33 +262,31 @@ Page({
   // 回到最近的活动；要是自己创建的，就跳转到“创建活动”页面；
   // 要是不是自己创建的，则转到“参加活动”页面
   gotoLastOutdoor: function() {
-    var outdoorid = util.loadOutdoorID();
-    // onShow那里做了判断，这里就默认肯定有了
-    dbOutdoors.doc(outdoorid).get()
-      .then(res => {
-        if (res.data._openid == app.globalData.openid) {
-          // 自己的活动 
-          wx.switchTab({
-            url: "../CreateOutdoor/CreateOutdoor",
-          })
-        } else {
-          wx.navigateTo({
-            url: "../EntryOutdoor/EntryOutdoor?outdoorid=" + outdoorid
-          })
-        }
-      })
-      .catch(err => {
-        console.error(err)
+    var outdoorid = util.loadOutdoorID()
+    var od = new outdoor.OD()
+    od.load(outdoorid, res=>{
+      if(!res) {
         wx.showModal({
           title: '查找活动ID失败',
           content: '对应的活动可能已被领队删除',
           showCancel: false,
           confirmText: "知道了",
-          complete: function(res) {
+          complete: function (res) {
             util.clearOutdoorID()
           }
         })
-      })
+      }
+      else if (od.leader.personid == app.globalData.personid) {
+        // 自己的活动 
+        wx.switchTab({
+          url: "../CreateOutdoor/CreateOutdoor",
+        })
+      } else {
+        wx.navigateTo({
+          url: "../EntryOutdoor/EntryOutdoor?outdoorid=" + outdoorid
+        })
+      }
+    })
   },
 
   tapMyOutdoors() {

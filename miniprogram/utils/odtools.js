@@ -12,7 +12,7 @@ const dbOutdoors = db.collection('Outdoors')
 const createTitle = (title, nickName) => {
   var result = "" // 2018.09.16（周日）大觉寺一日轻装1.0强度休闲游； 
   // 日期 
-  if (title.date) { 
+  if (title.date) {
     result += title.date
     result += "(" + util.getDay(title.date) + ")"
   } else {
@@ -66,11 +66,11 @@ const calcLevel = (title) => {
   }
   var uQuotiety = 2 - lValue / (title.addedLength / 10.0);
   var level = (up * uQuotiety + lValue) / 2;
-  console.log(title)
-  console.log("up:" + up)
-  console.log("value:" + lValue)
-  console.log("uQuotiety:" + uQuotiety)
-  console.log("level:" + level)
+  // console.log(title)
+  // console.log("up:" + up)
+  // console.log("value:" + lValue)
+  // console.log("uQuotiety:" + uQuotiety)
+  // console.log("level:" + level)
 
   // 重装 *1.5，休闲游（如景区）：*0.5
   if (title.loaded == "重装") {
@@ -79,7 +79,7 @@ const calcLevel = (title) => {
     level *= 0.5
   }
   // 多日活动：除以天数乘以1.5
-  console.log(title)
+  // console.log(title)
   var duringCount = util.parseChar(title.during[0])
   if (duringCount > 1) {
     level = level * 1.5 / (duringCount + 1)
@@ -113,7 +113,7 @@ const getLocation = (callback) => {
             console.log('scope.userLocationv OK')
             wx.getLocation({
               type: 'wgs84',
-              success: function (res) {
+              success: function(res) {
                 if (callback) {
                   callback(res)
                 }
@@ -130,7 +130,7 @@ const getLocation = (callback) => {
       } else {
         wx.getLocation({
           type: 'wgs84',
-          success: function (res) {
+          success: function(res) {
             if (callback) {
               callback(res)
             }
@@ -146,7 +146,7 @@ const getWeather = (area, date, callback) => {
   var ak = "zGuNHdYow4wGhrC1IytHDweHPWGxdbaX"
   wx.request({ // 通过area得到经纬度
     url: "https://api.map.baidu.com/geocoder/v2/?address=" + area + "&output=json&ak=" + ak,
-    fail: function (error) {
+    fail: function(error) {
       console.log(error)
       if (callback) {
         callback({
@@ -155,14 +155,16 @@ const getWeather = (area, date, callback) => {
         })
       }
     },
-    success: function (res) {
+    success: function(res) {
       console.log(res);
       var latitude = res.data.result.location.lat //维度
       var longitude = res.data.result.location.lng //经度
-      var BMap = new bmap.BMapWX({ ak: ak });
+      var BMap = new bmap.BMapWX({
+        ak: ak
+      });
       BMap.weather({
         location: longitude + "," + latitude,
-        fail: function (error) {
+        fail: function(error) {
           console.log(error)
           if (callback) {
             callback({
@@ -171,7 +173,7 @@ const getWeather = (area, date, callback) => {
             })
           }
         },
-        success: function (res) {
+        success: function(res) {
           console.log(res)
           let forecast = res.originalData.results[0].weather_data
           console.log(forecast)
@@ -372,7 +374,7 @@ const buildCostInfo = (traffic) => {
 }
 
 // 提醒占坑队员，占坑截止时间临近  
-const remindOcuppy=(od, callback)=>{
+const remindOcuppy = (od, callback) => {
   console.log("odtools.remindOcuppy()")
 
   dbOutdoors.doc(od.outdoorid).get().then(res => {
@@ -381,12 +383,12 @@ const remindOcuppy=(od, callback)=>{
     var remain = buildRemainText(calcRemainTime(od.title.date, od.limits.ocuppy, true))
     console.log("temp:", temp)
     console.log("remain:", remain)
-      
+
     // 循环，找到所有占坑者
     for (var i = 0; i < members.length; i++) {
       if (members[i].entryInfo.status == "占坑中" && !members[i].remained) {
         // 给占坑者发模板消息
-        template.sendRemindMsg2Ocuppy(members[i].personid, od.outdoorid, od.title.whole, remain, od.leader.userInfo.nickName, od.members.length+od.addMembers.length)
+        template.sendRemindMsg2Ocuppy(members[i].personid, od.outdoorid, od.title.whole, remain, od.leader.userInfo.nickName, od.members.length + od.addMembers.length)
         members[i].remained = true
       }
     }
@@ -441,10 +443,10 @@ const buildRemainText = (remainMinute) => {
     remainMinute -= remainDay * 24 * 60
     var remainHour = Math.trunc(remainMinute / 60)
     remainMinute = Math.trunc(remainMinute - remainHour * 60)
-    if (remainDay>0) {
-      remainText += remainDay + "天"  
+    if (remainDay > 0) {
+      remainText += remainDay + "天"
     }
-    if (remainHour>0) {
+    if (remainHour > 0) {
       remainText += remainHour + "小时"
     }
     remainText += remainMinute + "分钟"
@@ -454,9 +456,9 @@ const buildRemainText = (remainMinute) => {
 
 // 计算当前距离截止时间还剩余的时间（单位：分钟）
 // 若 limitItem 为空，则占坑为前两天22:00；报名为前一天22:00
-const calcRemainTime = (outdoorDate, limitItem, isOccupy) => { 
+const calcRemainTime = (outdoorDate, limitItem, isOccupy) => {
   // console.log(limitItem)
-  if (!limitItem) { 
+  if (!limitItem) {
     if (isOccupy) {
       limitItem = {
         date: "前两天",
@@ -519,13 +521,17 @@ const getChatStatus = (personid, nickName, chat, callback) => {
       callback(status)
     }
   }
-} 
+}
 
 const buildChatMessage = (msg) => {
   var message = {}
   //  { who: "", msg: "", personid:"", self: false},
-  message.who = app.globalData.userInfo.nickName
   message.personid = app.globalData.personid
+  if (app.globalData.personid) {
+    message.who = app.globalData.userInfo.nickName
+  } else {
+    message.who = "游客"
+  }
   message.msg = msg
   message.self = true // 肯定是自己了
   return message
@@ -542,30 +548,38 @@ const findPersonIndex = (members, personid, callback) => {
 }
 
 const drawText = (canvas, text, x, y, size, dy, color) => {
-  canvas.setFontSize(size)
-  canvas.setFillStyle(color)
+  canvas.font = size + "px sans-serif" //  "normal bold 12px cursive"
+  canvas.fillStyle = color
   canvas.fillText(text, x, y)
-  return { x: x, y: y + size + dy }
+  return {
+    x: x,
+    y: y + size + dy
+  }
 }
 
 const drawShareCanvas = (canvas, od, callback) => {
   console.log("odtools.drawShareCanvas")
 
-  var green = "#1aad19", pos = { x: 10, y: 35 }, dx = 35
+  var green = "#1aad19",
+    pos = {
+      x: 10,
+      y: 35
+    },
+    dx = 35
   // 领队
   pos = drawText(canvas, "领队：" + od.leader.userInfo.nickName, pos.x, pos.y, 30, 15, green)
 
   // 集合地点
   pos = drawText(canvas, "集合时间及地点", pos.x, pos.y, 30, 10, green)
   od.meets.forEach((item, index) => {
-    var message = + (index + 1) + "）" + (item.date ? item.date : '当天') + " " + (item.time ? item.time : ' ')
+    var message = +(index + 1) + "）" + (item.date ? item.date : '当天') + " " + (item.time ? item.time : ' ')
     pos = drawText(canvas, message, pos.x, pos.y, 24, 5, green)
     pos = drawText(canvas, item.place, pos.x + dx, pos.y, 24, 10, green)
     pos.x -= dx
   })
 
   // 人数
-  var countText = "已参加人数：" + (od.members.length+od.addMembers.length)
+  var countText = "已参加人数：" + (od.members.length + od.addMembers.length)
   if (od.limits.maxPerson) {
     countText += "，本活动限" + od.limits.personCount + "人"
   } else {
@@ -576,7 +590,7 @@ const drawShareCanvas = (canvas, od, callback) => {
   // 活动状态
   pos = drawText(canvas, "活动状态：" + od.status, pos.x, pos.y + 5, 30, 15, green)
 
-  canvas.draw(false, function (res) {
+  canvas.draw(false, function(res) {
     console.log('canvas.draw done...')
     wx.canvasToTempFilePath({
       canvasId: 'shareCanvas',
@@ -591,7 +605,7 @@ const drawShareCanvas = (canvas, od, callback) => {
       }
     })
   })
-} 
+}
 
 const setCFO = (outdoorid, cfo) => {
   dbOutdoors.doc(outdoorid).get().then(res => {
@@ -627,10 +641,10 @@ const isEntriedStatus = (status) => {
 
 const getDefaultWebsites = () => {
   return {
-    lvyeorg: { 
+    lvyeorg: {
       fid: null, // 版块id
       tid: null, // 帖子id
-      qrcodeUrl:null, // 报名二维码
+      qrcodeUrl: null, // 报名二维码
       // keepSame: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.keepSame : false),
       // isTesting: (app.globalData.lvyeorgInfo ? app.globalData.lvyeorgInfo.isTesting : false),
       waitings: [], // 要同步但尚未同步的信息列表
@@ -639,17 +653,17 @@ const getDefaultWebsites = () => {
 }
 
 // 是否报名已满员；满员后就只能替补，不能报名/占坑
-const entryFull =  (limits, members, addMembers)=> {
+const entryFull = (limits, members, addMembers) => {
   var full = false
   if (limits.maxPerson && (members.length + addMembers.length) >= limits.personCount) {
     full = true
   }
   return full
 }
- 
-const getWebsites = (outdoorid, callback)=>{
-  dbOutdoors.doc(outdoorid).get().then(res=>{
-    if(callback) {
+
+const getWebsites = (outdoorid, callback) => {
+  dbOutdoors.doc(outdoorid).get().then(res => {
+    if (callback) {
       callback(res.data.websites)
     }
   })
@@ -657,12 +671,12 @@ const getWebsites = (outdoorid, callback)=>{
 
 // 判断某个时刻退出活动是否需要AA费用
 // 需要A费用的条件（必须全部满足）：活动已成行，有AA规则，报名状态为“报名中”，无人替补
-const isNeedAA=(od, entryStatus)=>{
+const isNeedAA = (od, entryStatus) => {
   var result = false
-  if(od.status=="已成行" && od.limits.isAA && entryStatus=="报名中") {
+  if (od.status == "已成行" && od.limits.isAA && entryStatus == "报名中") {
     result = true
-    od.members.forEach((item, index)=>{
-      if(item.entryInfo.status == "替补中") {
+    od.members.forEach((item, index) => {
+      if (item.entryInfo.status == "替补中") {
         result = false
       }
     })
@@ -706,4 +720,4 @@ module.exports = {
   // 得到默认的websites信息
   getDefaultWebsites: getDefaultWebsites,
 
-} 
+}

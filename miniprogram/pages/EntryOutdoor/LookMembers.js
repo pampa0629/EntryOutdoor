@@ -6,7 +6,7 @@ Page({
     addMembers:null,
   },
 
-  onLoad: function (options) { 
+  onLoad: function (options) {  
     console.log("onLoad")
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -18,12 +18,12 @@ Page({
     
     // 把认路与否的转化为文本
     self.data.members.forEach((item, index)=>{
-      if (item.entryInfo.knowWay == true || item.entryInfo.knowWay==undefined){
+      console.log(JSON.stringify(item))
+      if (item.entryInfo.knowWay ==undefined || item.entryInfo.knowWay == true){
         item.entryInfo.knowWay = "认路" // undefined 为没有设置，一般为领队，默认认路
       } else {
         item.entryInfo.knowWay = "不认路"
       }
-      console.log(item)
     })
     self.setData({
       members: self.data.members,

@@ -1,0 +1,5 @@
+/* miniprogram/pages/Test/Test1.wxss */
+
+page{
+  height: 100%;
+}

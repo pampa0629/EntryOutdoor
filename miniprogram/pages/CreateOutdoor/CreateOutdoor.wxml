@@ -6,7 +6,7 @@
     </van-radio-group>  
   </van-panel>  
 </van-dialog>  
-    
+     
 <!--弹出分享按钮--> 
 <van-popup show="{{ showPopup }}" overlay="{{false}}" position="bottom" custom-class="center" bind:close="closePopup">
   <van-row> 
@@ -27,7 +27,7 @@
 <!--图标按钮-->
 <van-row>
   <!--成行-->
-  <van-col span="2" offset="1">
+  <van-col span="2" offset="1"> 
     <view wx:if="{{od.status=='已发布'}}" style="flex-direction:column">
       <van-icon name="passed" size="24px" color="#1aad19" bind:click="confirmOutdoor"></van-icon>
       <view class="icon_tip">成行</view>
@@ -208,6 +208,20 @@
     </form>
   </van-col>
 </van-row>
+
+<!--保证formid数量对话框-->
+<van-dialog use-slot show="{{showFormidDlg}}" show-cancel-button  bind:cancel="cancelFormidDlg" bind:confirm="confirmFormidDlg" title="微信消息数量" confirmButtonText="够数了" cancelButtonText="不报了">
+  <text>为保证您能及时收到活动的消息提醒，如队员报名信息等。请点击按钮，直到消息数量不小于六个。您还可以“附加设置”--“微信服务通知”中进行更多的设置。\n</text>
+  <text>您当前的微信消息数量为：\n</text>
+  <van-row>
+    <van-col span="6" offset="8">
+      <text class='bigtip'>{{formids.length}}个</text>
+    </van-col>
+  </van-row>
+  <form bindsubmit="tapAddFormid" report-submit="true" >
+    <button form-type="submit" type="primary">增加微信消息</button>
+  </form>
+</van-dialog>
 
 <!--画布-->
 <view style="position:fixed;top:9999rpx;">

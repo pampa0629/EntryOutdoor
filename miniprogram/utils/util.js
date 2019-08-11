@@ -9,7 +9,7 @@ const dbSelect = db.collection('Selects')
  
 const formatTime = date => {
   const year = date.getFullYear()
-  const month = date.getMonth() + 1
+  const month = date.getMonth() + 1 
   const day = date.getDate() 
   const hour = date.getHours()
   const minute = date.getMinutes()
@@ -76,7 +76,7 @@ const loadOpenID = () => {
 // outdoorid ：刚创建的活动信息,存储在数据库Outdoors中的_id
 const saveOutdoorID = value => {
   console.log("saveOutdoorID:" + value)
-  wx.setStorageSync("outdoorid", value)
+  wx.setStorageSync("outdoorid", value) 
 }
 
 const loadOutdoorID = () => {
@@ -140,8 +140,8 @@ const createMember = (personid, userInfo, entryInfo) => {
   return member
 }
 
-// 用微信账号创建Person
-const createPerson = (userInfo) => {
+// 用微信账号构建Person中的UserInfo结构
+const buildUserInfo = (userInfo) => {
   var person = {
     nickName: userInfo.nickName,
     gender: userInfo.gender,
@@ -454,6 +454,25 @@ const loadBrand = (callback) => {
   })
 }
 
+// 判断是否为正确的手机号码
+const validPhone = (phone) =>{
+  if(phone && phone.length == 11) {
+    return true
+  }
+  return false
+}
+
+const getIDFromOptions=(options)=>{
+  if (options.outdoorid) {
+    return options.outdoorid
+  } else if (options.scene){
+    var scene = decodeURIComponent(options.scene)
+    console.log("scene:", scene)
+    return scene
+  }
+  return null  
+}
+
 module.exports = {
   formatTime: formatTime,
   Ymd2Mdy: Ymd2Mdy,
@@ -481,7 +500,7 @@ module.exports = {
   // 创造队员
   createMember: createMember,
   // 根据userInfo（非微信）创建Person
-  createPerson: createPerson,
+  buildUserInfo: buildUserInfo,
   getDay: getDay,
   parseChar: parseChar,
   // 图片在云存储上的位置
@@ -518,4 +537,8 @@ module.exports = {
   // 从对象中得到指定属性的值
   getValue: getValue,
   anyTrue: anyTrue, // 是否有任意项为true
+
+  validPhone: validPhone, // 判断是否为有效的手机号码
+
+  getIDFromOptions: getIDFromOptions, // 从options中得到活动id
 }

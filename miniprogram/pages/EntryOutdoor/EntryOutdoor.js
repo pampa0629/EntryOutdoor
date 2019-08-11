@@ -63,7 +63,7 @@ Page({
     })
 
     console.log(options)
-    var outdoorid = options.outdoorid ? options.outdoorid : decodeURIComponent(options.scene)
+    var outdoorid = util.getIDFromOptions(options)
     console.log(outdoorid)
     var leaderid = options.leaderid ? options.leaderid : null
     console.log(leaderid)
@@ -77,14 +77,16 @@ Page({
       })
     }
 
-    if (app.globalData.openid == null || app.globalData.openid.length == 0) {
-      app.openidCallback = (openid) => {
-        app.globalData.openid = openid // 其实屁事没有，就是要等到app的onLaunch中得到openid
-        this.checkLogin(outdoorid)
-      }
-    } else {
-      this.checkLogin(outdoorid)
-    }
+    // if (app.globalData.openid == null || app.globalData.openid.length == 0) {
+    //   app.openidCallback = (openid) => {
+    //     app.globalData.openid = openid // 其实屁事没有，就是要等到app的onLaunch中得到openid
+    //     this.checkLogin(outdoorid)
+    //   }
+    // } else {
+    //   this.checkLogin(outdoorid)
+    // }
+    this.checkLogin(outdoorid)
+
     wx.showShareMenu({ // 处理分享到群的情况
       withShareTicket: true
     })
@@ -102,26 +104,35 @@ Page({
   },
 
   // 处理是否登录的问题
-  checkLogin: function(outdoorid) {
+  async checkLogin(outdoorid) {
     console.log("checkLogin, outdoorid is:" + outdoorid)
     console.log(app.globalData)
-    if (app.globalData.hasUserInfo && app.globalData.userInfo != null) {
+    var isLogin = await app.ensureLogin()
+    if (isLogin) {
       this.setData({
         userInfo: app.globalData.userInfo,
       })
       this.loadFormids()
-      this.loadOutdoor(outdoorid)
-    } else {
-      app.personidCallback = (personid, userInfo) => {
-        if (personid != null) {
-          this.setData({
-            userInfo: userInfo,
-          })
-        }
-        this.loadFormids()
-      }
-      this.loadOutdoor(outdoorid)
     }
+    this.loadOutdoor(outdoorid)
+
+    // if (app.globalData.hasUserInfo && app.globalData.userInfo != null) {
+    //   this.setData({
+    //     userInfo: app.globalData.userInfo,
+    //   })
+    //   this.loadFormids()
+    //   this.loadOutdoor(outdoorid)
+    // } else {
+    //   app.personidCallback = (personid, userInfo) => {
+    //     if (personid != null) {
+    //       this.setData({
+    //         userInfo: userInfo,
+    //       })
+    //     }
+    //     this.loadFormids()
+    //   }
+    //   this.loadOutdoor(outdoorid)
+    // }
   },
 
   // 从数据库中装载信息
@@ -401,7 +412,7 @@ Page({
           nickErrMsg: "昵称不能为空",
         })
         result = false
-      }
+      } 
       if (!self.data.userInfo.phone || self.data.userInfo.phone.length != 11) { // 电话号码不合格
         self.setData({
           phoneErrMsg: "手机号码不能为空且必须是11位有效号码",
@@ -545,12 +556,14 @@ Page({
   dlgGetUserinfo(e) {
     console.log(e)
     const self = this
-    self.setData({
-      "userInfo.gender": util.fromWxGender(e.detail.userInfo.gender),
-      "userInfo.nickName": e.detail.userInfo.nickName,
-    })
-    self.checkGender()
-    self.checkNickname(self.data.userInfo.nickName)
+    if (e.detail.userInfo) {
+      self.setData({
+        "userInfo.gender": util.fromWxGender(e.detail.userInfo.gender),
+        "userInfo.nickName": e.detail.userInfo.nickName,
+      })
+      self.checkGender()
+      self.checkNickname(self.data.userInfo.nickName)
+    }
   },
 
   // dlgGetPhone(e) {
@@ -565,7 +578,7 @@ Page({
   // 检查微信消息数量是否够用
   checkFormids() {
     console.log("checkFormids()")
-    var result = this.data.formids.length >= 5 ? true : false
+    var result = this.data.formids.length >= 6 ? true : false
     console.log(result)
     this.setData({
       showFormidDlg: !result,
@@ -581,7 +594,7 @@ Page({
     } else {
       wx.showModal({
         title: '请确认',
-        content: '您确定数量够五个了吗？',
+        content: '您确定数量够六个了吗？',
       })
     }
   },
@@ -629,38 +642,46 @@ Page({
     console.log("tapQuit()")
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this
-    var content = '您已经点击“退出”按钮，是否确定退出？'
-    if (odtools.isNeedAA(self.data.od, self.data.entryInfo.status)) {
-      content += "本活动已成行，退出若无人替补，则需要A共同费用，请慎重操作。"
-    }
-
-    wx.showModal({
-      title: '确定退出？',
-      content: content,
-      success(res) {
-        if (res.confirm) {
-          console.log('用户点击确定')
-          var selfQuit = true
-          self.data.od.quit(app.globalData.personid, selfQuit, res => {
-            // 删除Persons表中的entriedOutdoors中的对应id的item
-            self.updateEntriedOutdoors(true)
-            // 退出后还可以继续再报名
-            self.setData({
-              "entryInfo.status": "浏览中",
-              "od.members": res.members,
-            })
-            if (res.isAfee) {
-              wx.showModal({
-                title: '费用分摊提醒',
-                content: '系统检测到您退出的活动已成行，且无人替补，请联系领队A费用，谢谢！',
-              })
-            }
-          })
-        } else if (res.cancel) {
-          console.log('用户点击取消')
-        }
+    
+    if (self.data.od.leader.personid == app.globalData.personid) {
+      wx.showModal({
+        title: '不能退出',
+        content: '您是本活动领队，不能退出活动。您可以在“审核队员”页面转让领队，然后再退出；或者点击最上面的“取消”图标来取消活动。',
+      })
+    } else {
+      var content = '您已经点击“退出”按钮，是否确定退出本活动？'
+      if (odtools.isNeedAA(self.data.od, self.data.entryInfo.status)) {
+        content += "本活动已成行，退出若无人替补，则需要A共同费用，请慎重操作。"
       }
-    })
+
+      wx.showModal({
+        title: '确定退出？',
+        content: content,
+        success(res) {
+          if (res.confirm) {
+            console.log('用户点击确定')
+            var selfQuit = true
+            self.data.od.quit(app.globalData.personid, selfQuit, res => {
+              // 删除Persons表中的entriedOutdoors中的对应id的item
+              self.updateEntriedOutdoors(true)
+              // 退出后还可以继续再报名
+              self.setData({
+                "entryInfo.status": "浏览中",
+                "od.members": res.members,
+              })
+              if (res.isAfee) {
+                wx.showModal({
+                  title: '费用分摊提醒',
+                  content: '系统检测到您退出的活动已成行，且无人替补，请联系领队A费用，谢谢！',
+                })
+              }
+            })
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        }
+      })
+    }
   },
 
   // 查看报名情况，同时可以截屏保存起来

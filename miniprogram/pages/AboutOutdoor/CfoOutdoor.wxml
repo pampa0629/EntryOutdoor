@@ -8,20 +8,24 @@
 <!--设置收款二维码--> 
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="第二步：上传收款二维码，发送收款通知"></van-cell>
-  <van-row>
+  <van-row> 
     <van-col span="20" offset="2">
       <image mode="widthFix" src="{{pay.qrcode}}"></image>
     </van-col>
   </van-row>
-  <van-button size="large" plain type="primary" bind:click='uploadQrcode'>上传二维码，并通知队员</van-button>
+  <van-button size="large" plain type="primary" bind:click='uploadQrcode'>上传二维码</van-button>
+  <van-button size="large" plain type="primary" bind:click='sendPayNotice'>通知队员付款</van-button>
 </van-panel>
 
 <!--统计收款状况-->
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="第三步：统计收款状况"></van-cell>
-  <van-button size="large" plain type="primary" bind:click='statPay'>统计收款状况</van-button>
-  <van-cell title="已交款名单" title-width="30%" value="已收款{{pay.alreadyCount}}份(共{{pay.count}}份)"/>
-  <van-cell wx:for="{{pay.results}}" wx:key="*this" title="{{item.nickName}}，{{item.num}}份" title-width="50%" value="{{curScreen?'点击清除':'点击查看'}}" bind:click="clickOne{{index}}"/>
+</van-panel>
+<van-button size="large" plain type="primary" bind:click='statPay'>统计收款状况</van-button>
+  
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="已交款名单" title-width="30%" value="已收款{{pay.alreadyCount}}人(共{{pay.count}}人)"/>
+  <van-cell wx:for="{{pay.results}}" wx:key="nickName" title="{{item.nickName}}" title-width="50%" value="{{curScreen?'点击关闭':'点击查看'}}" bind:click="clickOne{{index}}"/>
 </van-panel>
 
 <van-row wx:if="{{curScreen}}">
@@ -30,9 +34,9 @@
   </van-col>
 </van-row>
 
-<block wx:if="{{pay.lacks}}">
-  <van-cell title="未交款名单"/>
-  <van-cell wx:for="{{pay.lacks}}" wx:key="*this" title="{{item}}" title-width="50%"/>
-</block>
+<van-panel wx:if="{{pay.lacks}}">
+  <van-cell slot="header" title-class="redtitle" title="未交款名单"></van-cell>
+  <van-cell wx:for="{{pay.lacks}}" wx:key="item" title="{{item}}" title-width="50%"/>
+</van-panel>
 
 

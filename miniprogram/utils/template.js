@@ -1,5 +1,6 @@
 const util = require('./util.js')
 const cloudfun = require('./cloudfun.js')
+// const regeneratorRuntime = require('regenerator-runtime')
 
 const app = getApp()
 wx.cloud.init()
@@ -61,11 +62,37 @@ const personid2openid = (personid, callback) => {
   })
 }
 
+// 构建页面路径
+const buildDefaultPage = (outdoorid,personid,leaderid) => {
+  // 给了领队id，就用；没给，就用发起者作为领队
+  leaderid = leaderid ? leaderid : app.globalData.personid
+  if (leaderid)
+  if(personid == leaderid) {
+    return "pages/CreateOutdoor/CreateOutdoor?outdoorid=" + outdoorid
+  }else {
+    return "pages/EntryOutdoor/EntryOutdoor?outdoorid=" + outdoorid
+  }
+}
+
+const buildPage = (page, outdoorid) => {
+  var result = "pages/" + page + "/" + page + "?outdoorid=" + outdoorid
+  return result
+}
+
+const buildPage2 = (page1, page2, outdoorid, items) => {
+  var result = "pages/" + page1 + "/" + page2 + "?outdoorid=" + outdoorid
+  items = items ? items : []
+  for (var i in items) {
+    result += "&" + items[i].key + "=" + items[i].value
+  }
+  return result
+}
+
 // 给订阅者发“新活动”消息 
-const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone, callback) => {
-  console.log("sendCreateMsg2Subscriber")
-  dbPersons.doc(personid).get()
-  .then(res => {
+const sendCreateMsg2Subscriber = async (personid, title, outdoorid, phone) => {
+  console.log("template.sendCreateMsg2Subscriber()")
+  try{
+    const res = await dbPersons.doc(personid).get()
     var openid = res.data._openid
     var tempid = "TpeH_K6s2zQSk49oJT3koMSlaSXQIoZjatxB4Wd_dBE"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -78,27 +105,18 @@ const sendCreateMsg2Subscriber = (personid, title, outdoorid, phone, callback) =
       "keyword3": { // 联系电话
         "value": phone
       },
-    } 
-    var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data, res=>{
-        if (callback) {
-          callback(res)
-        }
-      })
-    })
-  }).catch(err=>{
-    console.error(err)
-    if (callback) {
-      callback(err)
     }
-  })
+    var page = buildDefaultPage(outdoorid,personid)
+    var formid = fetchPersonFormid_a(personid, res.data.formids, formid)
+    return await sendMessage_a(openid, tempid, formid, page, data)
+  } catch (err) { console.error(err) }
 }
 
 // 发送活动取消的消息
-const sendCancelMsg2Member = (personid, title, outdoorid, leader, reason) => {
-  console.log("sendCancelMsg2Member")
-  dbPersons.doc(personid).get().then(res => {
+const sendCancelMsg2Member = async (personid, title, outdoorid, leader, reason) => {
+  console.log("template.sendCancelMsg2Member()")
+  try{
+    const res = await dbPersons.doc(personid).get()
     var openid = res.data._openid
     var tempid = "yNh70qvwnC6iW6jwQ3OdY2w7aBfi3tstUdAGWwDiEdg"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -112,17 +130,16 @@ const sendCancelMsg2Member = (personid, title, outdoorid, leader, reason) => {
         "value": reason
       },
     }
-    var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
-  })
+    var page = buildDefaultPage(outdoorid, personid)	
+    var formid = fetchPersonFormid_a(personid, res.data.formids)
+    return await sendMessage_a(openid, tempid, formid, page, data)
+  } catch (err) { console.error(err) }
 }
 
 // 给全体队员发送活动重要内容修改通知
-const sendModifyMsg2Member = (personid, outdoorid, title, leader, modifys) => {
-  console.log("sendModifyMsg2Member") 
-  var info = "您报名的户外活动"
+const sendModifyMsg2Member = async (personid, outdoorid, title, leader, modifys) => {
+  console.log("template.sendModifyMsg2Member()") 
+  var info = "您参加的户外活动"
   var tip = ""
   console.log(modifys)
   if (modifys.title) {
@@ -135,7 +152,8 @@ const sendModifyMsg2Member = (personid, outdoorid, title, leader, modifys) => {
   }
   info += "敬请留意！"
 
-  dbPersons.doc(personid).get().then(res => {
+  try{
+    const res = await dbPersons.doc(personid).get()
     var openid = res.data._openid
     var tempid = "HrOjxx70qtkyerdup5zISeydonsvpH_f_vjLe2LwkIc"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -152,17 +170,17 @@ const sendModifyMsg2Member = (personid, outdoorid, title, leader, modifys) => {
         "value": tip
       },
     }
-    var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
-  })
+    var page = buildDefaultPage(outdoorid, personid)
+    var formid = fetchPersonFormid_a(personid, res.data.formids)
+    return await sendMessage_a(openid, tempid, formid, page, data)
+  } catch (err) { console.error(err) }
 }
 
 // 给所有队员发活动成行通知
-const sendConfirmMsg2Member = (personid, outdoorid, title, count, leader) => {
-  console.log("sendConfirmMsg2Member()")
-  dbPersons.doc(personid).get().then(res => {
+const sendConfirmMsg2Member = async(personid, outdoorid, title, count, leader) => {
+  console.log("template.sendConfirmMsg2Member()")
+  try{
+    const res = await dbPersons.doc(personid).get()
     var openid = res.data._openid
     var tempid = "Eh_ODLoKykVkGGjJPLEmKkkrK5tRlPC8i7O-yhrT5xc"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -176,20 +194,20 @@ const sendConfirmMsg2Member = (personid, outdoorid, title, count, leader) => {
         "value": leader
       },
       "keyword4": { // 组团信息
-        "value": "领队已确认活动成行；若退出活动又无人替补，请主动联系领队A共同费用（包括但不限于车费）"
+        "value": "领队已确认活动成行；若退出活动又无人替补，请主动联系领队分摊车费等共同费用"
       },
     }
-    var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
-  })
+    var page = buildDefaultPage(outdoorid, personid)
+    var formid = fetchPersonFormid_a(personid, res.data.formids)
+    return await sendMessage_a(openid, tempid, formid, page, data)
+  } catch (err) { console.error(err) }
 }
 
 // 给队员发换领队的消息
-const sendResetMsg2Member=(outdoorid, personid, title, oldLeader, newLeader)=>{
-  console.log("sendResetMsg2Member") 
-  dbPersons.doc(personid).get().then(res => {
+const sendResetMsg2Member = async (outdoorid, personid, title, oldLeader, newLeader, newLeaderid)=>{
+  console.log("template.sendResetMsg2Member()") 
+  try{
+    const res = await dbPersons.doc(personid).get()
     var openid = res.data._openid
     var tempid = "gE0pItk53ho16bMoJdjuuPPua-Ev2THvtiVe8KksEMU"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -203,16 +221,16 @@ const sendResetMsg2Member=(outdoorid, personid, title, oldLeader, newLeader)=>{
         "value": newLeader
       },
     }
-    var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
-  })
+    var page = buildDefaultPage(outdoorid, personid, newLeaderid) 
+    var formid = fetchPersonFormid_a(personid, res.data.formids)
+    return await sendMessage_a(openid, tempid, formid, page, data)
+  } catch (err) { console.error(err) }
 }
 
-const sendPayMsg2Member=(outdoorid, personid, title, cfo, money, member)=>{
-  console.log("sendResetMsg2Member")
-  dbPersons.doc(personid).get().then(res => {
+const sendPayMsg2Member= async (outdoorid, personid, title, cfo, money, member)=>{
+  console.log("template.sendResetMsg2Member()")
+  try{
+    const res = await dbPersons.doc(personid).get()
     var openid = res.data._openid
     var tempid = "sAE5UXzlJVVNPnCGG4C-nM9YnpSSz5WkH2d1XW2dq5Y"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
@@ -233,24 +251,9 @@ const sendPayMsg2Member=(outdoorid, personid, title, cfo, money, member)=>{
       },
     }
     var page = buildPage2("AboutOutdoor", "PayOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
-  })
-}
-
-const buildPage = (page, outdoorid) => {
-  var result = "pages/" + page + "/" + page + "?outdoorid=" + outdoorid
-  return result
-}
-
-const buildPage2 = (page1, page2, outdoorid, items) => {
-  var result = "pages/" + page1 + "/" + page2 + "?outdoorid=" + outdoorid
-  items = items ? items:[]
-  for (var i in items) {
-    result += "&" + items[i].key + "=" + items[i].value
-  }
-  return result
+    var formid = fetchPersonFormid_a(personid, res.data.formids)
+    return await sendMessage_a(openid, tempid, formid, page, data)
+  }catch(err) {console.error(err)}
 }
 
 // 给自己发报名消息
@@ -388,7 +391,6 @@ const sendRejectMsg2Member = (personid, title, outdoorid, nickName, phone, conte
         "value": phone
       }
     }
-    //var page = buildPage("EntryOutdoor", outdoorid)
     var page = buildPage2("AboutOutdoor", "ChatOutdoor", outdoorid, [{ key: "sendWxnotice", value: "true" }])
 
     fetchPersonFormid(personid, res.data.formids, formid => {
@@ -436,6 +438,22 @@ const findFirstFormid = (formids, isDelFind) => {
     formids = [] // 清空
   }
   return { formid: formid, formids: formids}
+}
+
+// 得到某人的form id
+const fetchPersonFormid_a = (personid, formids) => {
+  console.log("fetchPersonFormid")
+  var formid = null
+  // 这里得调用云函数才行了，拿到第一个合格的formid，不合格的全部删掉 
+  if (formids && formids.length > 0) {
+    var result = findFirstFormid(formids, true)
+    formid = result.formid
+    console.log("find result:")
+    console.log(result)
+    // 最后调用云函数写回去
+    cloudfun.updatePersonFormids(personid, result.formids)
+  }
+  return formid
 }
 
 // 得到某人的form id
@@ -569,6 +587,32 @@ const sendRemindMsg2Ocuppy = (personid, outdoorid, title, remain, leader, memCou
 }
 
 // 给特定openid发特定id的模板消息
+const sendMessage_a = async (openid, tempid, formid, page, data) => {
+  console.log("sendMessage")
+  console.log("openid: " + openid)
+  console.log("tempid: " + tempid)
+  console.log("formid: " + formid)
+  console.log("page: " + page)
+  console.log(data)
+  if (formid) {
+    const res = await wx.cloud.callFunction({name: 'getAccessToken'})
+    console.log(res)
+    const res2 = await wx.cloud.callFunction({
+      name: 'sendTemplate', // 云函数名称
+      data: {
+        openid: openid,
+        access_token: JSON.parse(res.result).access_token,
+        tempid: tempid,
+        formid: formid,
+        data: data,
+        page: page,
+      },
+    })
+    return res2
+  }
+}
+
+// 给特定openid发特定id的模板消息
 const sendMessage = (openid, tempid, formid, page, data, callback) => {
   console.log("sendMessage")
   console.log("openid: " + openid)
@@ -613,26 +657,27 @@ module.exports = {
 
   buildOneFormid: buildOneFormid,
   savePersonFormid: savePersonFormid,
-  // saveOutdoorFormid: saveOutdoorFormid, 废弃，存到Persons表中
   clearPersonFormids: clearPersonFormids, // 清理并得到有效的个人formids
 
   sendMessage: sendMessage, // 发送模板消息
 
-  // 给队员发消息
+  // 给队员发消息；多人群发，注意控制并发数量不超过20
   sendCreateMsg2Subscriber: sendCreateMsg2Subscriber, // 给订阅者发“新活动”消息
-  sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
-  sendQuitMsg2Self: sendQuitMsg2Self, // 给自己发报名退出消息
-  sendEntryMsg2Bench: sendEntryMsg2Bench, // 给替补队员发转为正式队员的消息
-  sendBenchMsg2Member: sendBenchMsg2Member, // 给队员(报名/占坑)发转为替补队员的消息，用于领队缩编时
-  sendQuitMsg2Occupy: sendQuitMsg2Occupy, // 给被强制退坑者发消息提醒
-  sendRemindMsg2Ocuppy: sendRemindMsg2Ocuppy, // 给占坑队员发占坑截止时间临近的消息提醒
-  sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况
-  sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息
   sendModifyMsg2Member: sendModifyMsg2Member, // // 给队员发送活动重要内容修改通知
   sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
   sendConfirmMsg2Member: sendConfirmMsg2Member, // 给队员发活动成行消息
   sendResetMsg2Member: sendResetMsg2Member, // 给队员发换领队的消息
   sendPayMsg2Member: sendPayMsg2Member, // 给队员发收款的消息
+
+// 给队员发消息；一般是给单人发或者少数几人同时发
+  sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
+  sendQuitMsg2Self: sendQuitMsg2Self, // 给自己发报名退出消息
+  sendEntryMsg2Bench: sendEntryMsg2Bench, // 给替补队员发转为正式队员的消息
+  sendBenchMsg2Member: sendBenchMsg2Member, // 给队员(报名/占坑)发转为替补队员的消息，用于领队缩编时
+  sendQuitMsg2Occupy: sendQuitMsg2Occupy, // 给被强制退坑者发消息提醒 
+  sendRemindMsg2Ocuppy: sendRemindMsg2Ocuppy, // 给占坑队员发占坑截止时间临近的消息提醒
+  sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况
+  sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息
 
   // 给领队/领队组/财务官等发消息
   sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息

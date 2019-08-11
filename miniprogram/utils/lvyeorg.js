@@ -3,6 +3,7 @@ const app = getApp()
 const qrcode = require('./qrcode.js')
 const util = require('./util.js')
 const cloudfun = require('./cloudfun.js')
+const promisify = require('./promisify')
 
 wx.cloud.init()
 const db = wx.cloud.database()
@@ -710,6 +711,42 @@ const add2Waitings = (outdoorid, message) => {
 
   cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
 }
+
+// 同步绿野org网站等待要发送的信息
+const postWaitings_a = async (tid, waitings) => {
+  console.log("lvyeorg.postWaitings_a()")
+  console.log(tid)
+  console.log(waitings.length)
+  while (waitings.length > 0) {
+    var waiting = waitings.shift()
+    await postOneWaiting(tid, waiting)
+    console.log(waitings.length)
+  }
+}
+
+// 发一条等待发布的信息，成功后用callback返回
+const postOneWaiting_a = async (tid, waiting) => {
+  console.log("lvyeorg.postOneWaiting_a()")
+  console.log(tid)
+  console.log(waiting)
+  var token = wx.getStorageSync("LvyeOrgToken")
+  console.log(token)
+
+  const request = promisify(wx.request)
+
+  return await request({
+    url: LvyeOrgURL + "add_post.php",
+    method: "POST",
+    header: {
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    data: {
+      token: token,
+      tid: tid,
+      message: encodeURI(waiting),
+    }
+  })
+}
  
 // 同步绿野org网站等待要发送的信息
 const postWaitings = (tid, waitings, callback) => {
@@ -879,6 +916,7 @@ module.exports = {
   postMessage: postMessage, // 跟帖
   add2Waitings: add2Waitings, // 往waiting中增加一条信息
   postWaitings: postWaitings, // 把正在等待发布的信息发布出去
+  postWaitings_a: postWaitings_a, // async 版本
 
   loadPosts: loadPosts, // 从帖子中读取跟帖
   isTestForum: isTestForum, // 判断fid是否属于测试帖

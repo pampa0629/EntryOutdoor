@@ -10,7 +10,7 @@ const person = require('./person.js')
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
-const dbPersons = db.collection('Persons')
+const dbPersons = db.collection('Persons') 
 const _ = db.command
 
 // 创建函数，使用者必须： var od = new outdoor.OD() 来获得活动对象，并设置默认值
@@ -68,7 +68,7 @@ OD.prototype.load = function(outdoorid, callback) {
       console.log("leader:", JSON.stringify(this.leader))
 
       // 判断处理websites中的信息
-      this.postWaitings()
+      this.postWaitings_a()
 
       // 移除占坑过期队员 
       this.removeOcuppy(() => {
@@ -219,7 +219,7 @@ OD.prototype.save = function(myself, modifys, callback) {
         cloudfun.updateOutdoor(this.outdoorid, this, res => {
 
           // 如果设置了与网站同步，则需要即时处理
-          this.postWaitings()
+          this.postWaitings_a()
           // 修改的内容同步到网站上
           this.postModify2Websites(modifys)
           // 信息修改要发送给队员
@@ -294,7 +294,7 @@ OD.prototype.deleteClouds = function() {
   }
   for (var i in this.brief.trackFiles) {
     dels.push(this.brief.trackFiles[i].src)
-  }
+  } 
 
   wx.cloud.deleteFile({
     fileList: dels
@@ -450,15 +450,15 @@ OD.prototype.saveItem = function(name, callback) {
 }
 
 // 一些重要的基本信息被修改，需要通知到所有已报名队员
-OD.prototype.sendModify2Members = function(modifys) {
+OD.prototype.sendModify2Members = async function(modifys) {
   console.log("OD.prototype.sendModify2Members()")
   console.log(modifys)
   // 只有活动标题和集合地点内容修改，才发通知给队员
   if (modifys.title || modifys.meets) {
     if (this.status == "已发布" || this.status == "已成行") {
-      this.members.forEach((item, index) => {
-        template.sendModifyMsg2Member(item.personid, this.outdoorid, this.title.whole, this.leader.userInfo.nickName, modifys)
-      })
+      for (let item of this.members) {
+        await template.sendModifyMsg2Member(item.personid, this.outdoorid, this.title.whole, this.leader.userInfo.nickName, modifys)
+      }
     }
   }
 }
@@ -658,7 +658,7 @@ OD.prototype.quit = function(personid, selfQuit, callback) {
 }
 
 // 转让领队
-OD.prototype.transferLeader = function(oldLeader, newLeader, callback){
+OD.prototype.transferLeader = async function(oldLeader, newLeader){
   console.log("OD.prototype.transferLeader()")
   console.log(oldLeader, newLeader)
   if(this.leader) { // 核实领队身份
@@ -667,57 +667,56 @@ OD.prototype.transferLeader = function(oldLeader, newLeader, callback){
     console.assert(this.members[0].personid == oldLeader)
   }
 
-  dbOutdoors.doc(this.outdoorid).get().then(res=>{
-    this.members = res.data.members
-    var index = util.findIndex(this.members, "personid", newLeader)
-    if(index >= 1) {
-      console.log("find new leader index: " + index)
-      var temp = this.members[0]
-      this.members[0] = this.members[index]
-      this.members[0].entryInfo.status = "领队"
-      this.members[index] = temp
-      this.members[index].entryInfo.status = "领队组"
-      cloudfun.updateOutdoorMembers(this.outdoorid, this.members)
-      cloudfun.updateOutdoorLeader(this.outdoorid, this.members[0])
-      this.title.whole = odtools.createTitle(this.title, this.leader.userInfo.nickName)
-      cloudfun.opOutdoorItem(this.outdoorid, "title", this.title, "")
-      // 两个人的 outdoors内容也要处理
-      var value = {
-        id: this.outdoorid,
-        title: this.title.whole
-      }
-      // 原领队（现队员），myOutdoors中去掉本项，entriedOutdoors中增加
-      person.dealOutdoors(this.members[index].personid, "myOutdoors", value, true)
-      person.dealOutdoors(this.members[index].personid, "entriedOutdoors", value, false)
-      // 现领队（原队员），myOutdoors中增加本项，entriedOutdoors中去掉
-      person.dealOutdoors(this.members[0].personid, "myOutdoors", value, false)
-      person.dealOutdoors(this.members[0].personid, "entriedOutdoors", value, true)
-      // 给所有队员发通知
-      this.members.forEach((item, i) => {
-        // old(index) ==> new （0）
-        template.sendResetMsg2Member(this.outdoorid, item.personid, this.title.whole, this.members[index].userInfo.nickName, this.members[0].userInfo.nickName)
-      })
-      if(callback) {
-        callback(this.members)
-      }
+  const res = await dbOutdoors.doc(this.outdoorid).get()
+  this.members = res.data.members
+  var index = util.findIndex(this.members, "personid", newLeader)
+  if(index >= 1) {
+    console.log("find new leader index: " + index)
+    this.leader = this.members[index] // 设置领队
+    this.members[index] = this.members[0] // 原领队挪到后面
+    this.members[index].entryInfo.status = "领队组"
+    this.members[0] = this.leader // 新领队放到第一
+    this.members[0].entryInfo.status = "领队"
+    cloudfun.updateOutdoorMembers(this.outdoorid, this.members)
+    cloudfun.updateOutdoorLeader(this.outdoorid, this.members[0])
+    
+    this.title.whole = odtools.createTitle(this.title, this.leader.userInfo.nickName)
+    cloudfun.opOutdoorItem(this.outdoorid, "title", this.title, "")
+    // 两个人的 outdoors内容也要处理
+    var value = {
+      id: this.outdoorid,
+      title: this.title.whole
     }
-  })
+    // 原领队（现队员），myOutdoors中去掉本项，entriedOutdoors中增加
+    person.dealOutdoors(this.members[index].personid, "myOutdoors", value, true)
+    person.dealOutdoors(this.members[index].personid, "entriedOutdoors", value, false)
+    // 现领队（原队员），myOutdoors中增加本项，entriedOutdoors中去掉
+    person.dealOutdoors(this.members[0].personid, "myOutdoors", value, false)
+    person.dealOutdoors(this.members[0].personid, "entriedOutdoors", value, true)
+    // 给所有队员发通知
+    // this.members.forEach((item, i) => {
+    for(let item of this.members) {
+      // old(index) ==> new （0）
+      await template.sendResetMsg2Member(this.outdoorid, item.personid, this.title.whole, this.members[index].userInfo.nickName, this.members[0].userInfo.nickName,this.leader.personid)
+    }
+    
+    return this.members
+  }
 }
 
 //////////////////  户外网站处理 start  /////////////////////////////////////////////
 
-// 确保网站已经同步，并有了tid（帖子id） 
-OD.prototype.ensureWebsites = function(callback) {
-  console.log("OD.prototype.ensureWebsites()")
+// 若已登录，返回tid（帖子id）；否则返回null
+OD.prototype.getTid = function() {
+  console.log("OD.prototype.getTid()")
   const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
   console.log(lvyeobj)
   // 第一步，得有要求同步才行，并且还得登录网址了
   if (app.globalData.lvyeorgLogin) {
     // 第二步，判断是否已经发帖; 已发布和已成行的活动，尚未发帖，则应立即发帖
-    if (lvyeobj.tid && callback) {
-      callback(lvyeobj.tid)
-    }
+    return lvyeobj.tid
   }
+  return null
 }
 
 // 把活动同步到org网站上，只提供领队明确发布
@@ -746,7 +745,39 @@ OD.prototype.push2org  = function (fid, callback) {
 }
 
 // 判断处理websites中的信息，主要就是把信息同步到网站
-OD.prototype.postWaitings = function(callback) {
+OD.prototype.postWaitings_a = async function () {
+  console.log("OD.prototype.postWaitings_a()")
+  const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
+  console.log(lvyeobj)
+  // 得有要求同步才行，并且还得登录网址了
+  if (app.globalData.lvyeorgLogin) {
+    // 必须已经发帖，再看看是否有waitings需要推送
+    // 若之前没有发帖成功，则现在发帖
+    var tid = this.getTid()
+    if(tid) {
+      console.log("tid: " + tid)
+      // 为了防止多人同时load，waitings信息被多次发送，增加数据库锁机制
+      // 思路：1）再次刷新得到waitings和posting信息
+      //       2）若posting为false，则把数据库中的posting改为true，然后发送waitings信息；若posting为true，则啥也不干
+      //       3）发送结束，把数据库中的posting改为false，清空waitings
+      if (tid && lvyeobj.waitings && lvyeobj.waitings.length > 0) {
+        var websites = await odtools.getWebsites_a(this.outdoorid) // 1）
+        if (!websites.lvyeorg.posting) { // 别人没有posting中，自己才能干活
+          await cloudfun.opOutdoorItem_a(this.outdoorid, "websites.lvyeorg.posting", true, "") // 2.1）
+          lvyeorg.postWaitings_a(lvyeobj.tid, websites.lvyeorg.waitings)  // 2.1）
+          await cloudfun.opOutdoorItem_a(this.outdoorid, "websites.lvyeorg.posting", false, "") // 3.1）
+          // cloudfun.clearOutdoorLvyeWaitings(this.outdoorid, res => { // 3.2)
+          await cloudfun.opOutdoorItem_a(this.outdoorid, "websites.lvyeorg.waitings", [], "") // 2.1）
+          lvyeobj.waitings = [] // 自己内存中的也要清空
+          lvyeobj.posting = false
+        }
+      }
+    }
+  }
+}
+
+// 判断处理websites中的信息，主要就是把信息同步到网站
+OD.prototype.postWaitings = function (callback) {
   console.log("OD.prototype.postWaitings()")
   const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
   console.log(lvyeobj)
@@ -754,7 +785,8 @@ OD.prototype.postWaitings = function(callback) {
   if (app.globalData.lvyeorgLogin) {
     // 必须已经发帖，再看看是否有waitings需要推送
     // 若之前没有发帖成功，则现在发帖
-    this.ensureWebsites(tid => {
+    var tid = this.getTid()
+    if(tid) {
       console.log("tid: " + tid)
       // 为了防止多人同时load，waitings信息被多次发送，增加数据库锁机制
       // 思路：1）再次刷新得到waitings和posting信息
@@ -778,7 +810,7 @@ OD.prototype.postWaitings = function(callback) {
           }
         })
       }
-    })
+    }
   }
 }
 

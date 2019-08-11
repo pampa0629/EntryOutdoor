@@ -17,6 +17,8 @@ Page({
     this.setData({
       route: prevPage.data.od.route,
     })
+    this.data.route.trackSites = this.data.route.trackSites ? this.data.route.trackSites:[]
+    this.data.route.trackFiles = this.data.route.trackFiles ? this.data.route.trackFiles : []
     this.dealSites()
     this.dealFiles()
   },

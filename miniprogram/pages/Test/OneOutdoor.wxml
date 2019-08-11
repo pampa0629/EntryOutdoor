@@ -39,4 +39,4 @@
 <van-button size="large" bind:click="tapCloud">云存储</van-button>
 <van-button size="large" bind:click="tapDBArray">数据库数组</van-button>
 <van-button size="large" bind:click="tapCopy">广告</van-button>
-<!-- <ad unit-id="adunit-f50da3ef4ac99d19"></ad> -->
+<ad unit-id="adunit-f50da3ef4ac99d19"></ad>

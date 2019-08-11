@@ -68,7 +68,7 @@
       <view class="icon_tip">详情</view>
     </view>
   </van-col>
-  <van-col span="2" offset="1" wx:if="{{od.pay}}">
+  <van-col span="2" offset="1" wx:if="{{od.pay&& od.status != '拟定中'}}"> 
     <view style="flex-direction:column">
       <van-icon name="gold-coin-o" size="24px" color="#1aad19" bind:click="clickPay"></van-icon>
       <view class="icon_tip">支付</view>
@@ -241,7 +241,7 @@
 
 <!--保证formid数量对话框-->
 <van-dialog use-slot show="{{showFormidDlg}}" show-cancel-button  bind:cancel="cancelFormidDlg" bind:confirm="confirmFormidDlg" title="微信消息数量" confirmButtonText="够数了" cancelButtonText="不报了">
-  <text>为保证您能及时收到活动的消息提醒，包括：活动内容变更、活动成行与取消、领队审核等。请点击按钮，直到消息数量不小于五个。\n</text>
+  <text>为保证您能及时收到活动的消息提醒，包括：活动内容变更、活动成行与取消、领队审核等。请点击按钮，直到消息数量不小于六个。\n</text>
   <text>您当前的微信消息数量为：\n</text>
   <van-row>
     <van-col span="6" offset="8">
@@ -251,7 +251,6 @@
   <form bindsubmit="tapAddFormid" report-submit="true" >
     <button form-type="submit" type="primary">增加微信消息</button>
   </form>
-
 </van-dialog>
 
 <!--画布-->

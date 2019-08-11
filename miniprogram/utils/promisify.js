@@ -4,4 +4,4 @@ module.exports = (api) => {
       api(Object.assign({}, options, { success: resolve, fail: reject }), ...params);
     });
   }
-}
+} 

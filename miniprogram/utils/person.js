@@ -1,10 +1,25 @@
 const app = getApp()
 const util = require('./util.js')
 const cloudfun = require('./cloudfun.js')
+// const regeneratorRuntime = require('regenerator-runtime')
 
-wx.cloud.init()
+wx.cloud.init()  
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
+
+const getPersonData = async (personid)=>{
+  console.log("getPersonData()")
+  console.log("personid:", personid)
+  // return await dbPersons.doc(personid).get()
+  try{
+    return await dbPersons.doc(personid).get()
+  } catch (e) {}
+  // 
+  //   console.log(personid+"不存在")
+  //   console.log(e)
+  //   return Error(e)
+  // }
+}
 
 const updateWalkStep = (personid, callback) => {
   wx.login({
@@ -207,4 +222,6 @@ module.exports = {
   checkNickname: checkNickname, //  判断昵称的唯一性和不能为空
   ensureLogin: ensureLogin, // 确保已经注册并登录（有personid）
   dealOutdoors: dealOutdoors, // 处理 Persons表中Outdoors内容
+
+  getPersonData: getPersonData, 
 }

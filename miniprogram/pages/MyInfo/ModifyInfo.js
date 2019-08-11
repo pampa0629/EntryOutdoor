@@ -9,7 +9,7 @@ const util = require('../../utils/util.js')
 const person = require('../../utils/person.js')
 const crypto = require('../../utils/crypto.js')
 
-let interstitialAd = null // 插屏广告
+// let interstitialAd = null // 插屏广告
 
 Page({ 
   data: { 
@@ -67,37 +67,37 @@ Page({
     this.addAd()
   },
 
-  // 添加广告
-  addAd() {
-    if (wx.createInterstitialAd) {
-      interstitialAd = wx.createInterstitialAd({
-        adUnitId: 'adunit-83d9b67d53f57ebe'
-      })
-      interstitialAd.onLoad(() => {
-        console.log('ad onLoad event emit')
-      })
-      interstitialAd.onError((err) => {
-        console.log('ad onError event emit', err)
-      })
-      interstitialAd.onClose((res) => {
-        console.log('ad onClose event emit', res)
-      })
-    }
-  },
+  // // 添加广告
+  // addAd() {
+  //   if (wx.createInterstitialAd) {
+  //     interstitialAd = wx.createInterstitialAd({
+  //       adUnitId: 'adunit-83d9b67d53f57ebe'
+  //     })
+  //     interstitialAd.onLoad(() => {
+  //       console.log('ad onLoad event emit')
+  //     })
+  //     interstitialAd.onError((err) => {
+  //       console.log('ad onError event emit', err)
+  //     })
+  //     interstitialAd.onClose((res) => {
+  //       console.log('ad onClose event emit', res)
+  //     })
+  //   }
+  // },
 
-  showAd() {
-    console.log('showAd()')
-    console.log('interstitialAd: ', interstitialAd)
-    // 每次进入显示广告
-    if (interstitialAd) {
-      interstitialAd.show()
-        .then(res => {
-          console.log(res)
-        }).catch(err => {
-          console.error(err)
-        })
-    }
-  },
+  // showAd() {
+  //   console.log('showAd()')
+  //   console.log('interstitialAd: ', interstitialAd)
+  //   // 每次进入显示广告
+  //   if (interstitialAd) {
+  //     interstitialAd.show()
+  //       .then(res => {
+  //         console.log(res)
+  //       }).catch(err => {
+  //         console.error(err)
+  //       })
+  //   }
+  // },
 
   onUnload() {
     console.log("onUnload")
@@ -158,7 +158,7 @@ Page({
       "userInfo.gender": e.target.dataset.name,
       hasModified: true,
     })
-    this.showAd()
+    // this.showAd()
   },
 
   changeGender: function(e) {
@@ -168,7 +168,7 @@ Page({
       "userInfo.gender": e.detail,
       hasModified: true,
     })
-    this.showAd()
+    // this.showAd()
   },
 
   changeEmergency(e) {

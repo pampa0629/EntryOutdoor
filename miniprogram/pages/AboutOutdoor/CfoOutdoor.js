@@ -3,6 +3,7 @@ const util = require('../../utils/util.js')
 const qrcode = require('../../utils/qrcode.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
+const regeneratorRuntime = require('regenerator-runtime')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -15,7 +16,8 @@ Page({
   data: {
     outdoorid: null,
     title: "",
-    members: [], // 所有队员
+    members: [], // 队员
+    aaMembers: [], // 需要参加aa的其他人员
     pay: {},
 
   },
@@ -27,8 +29,10 @@ Page({
     self.flushPay(res => {
       self.setData({
         members: res.data.members,
+        aaMembers: res.data.aaMembers,
         title: res.data.title.whole,
       })
+      self.statPay()
     })
   },
 
@@ -104,38 +108,44 @@ Page({
             self.setData({
               "pay.qrcode": resUpload.fileID,
             })
-            self.perpareResults()
+            // self.perpareResults()
             // 写入 pay 到数据库中
-            cloudfun.updateOutdoorPay(self.data.outdoorid, pay)
+            cloudfun.updateOutdoorPay(self.data.outdoorid, self.data.pay)
             if (oldpath) { // 删除原来的二维码文件
               wx.cloud.deleteFile({
                 fileList: [oldpath]
               })
             }
-            self.sendPayNotice()
           })
         })
       }
     })
   },
 
-  perpareResults() {
-    const self = this
-    self.data.pay.results
-    self.data.members.forEach((item, index) => {
+  // perpareResults() {
+  //   const self = this
+  //   self.data.pay.results
+  //   self.data.members.forEach((item, index) => {
 
-    })
-  },
+  //   })
+  // },
   
-  sendPayNotice() {
+  // 通知所有队员付款
+  async sendPayNotice() {
     const self = this
     const pay = self.data.pay
     console.log(pay)
     
-    // 发微信模板信息
-    self.data.members.forEach((item, index) => {
-      template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
-    })
+    // 发微信模板信息;for 加 await实现顺序发送，避免并发太多
+    for (let item of self.data.members) {
+      await template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
+    }
+    
+    // aa members也要发送消息
+    for (let item of self.data.aaMembers) {
+      await template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
+    }
+    
     wx.showToast({
       title: '已发送',
     })
@@ -156,12 +166,14 @@ Page({
   },
 
   statPay() {
+    console.log("CfoOutdoor.statPay()")
     const self = this
     self.flushPay(none=>{
       const results = this.data.pay.results
       var count = 0
       for (var i in results) {
-        count += results[i].num
+        // count += results[i].num
+        count += 1
       }
       self.setData({
         "pay.alreadyCount": count
@@ -172,19 +184,26 @@ Page({
   },
 
   // 统计没交款的
-  statLacks(){
+  statLacks() {
+    console.log("CfoOutdoor.statLacks()")
     const self = this
     const pay = this.data.pay
-    const members = this.data.members
     pay.lacks = []
+    const members = this.data.members
     members.forEach((item, index)=>{
+      if (!pay.results[item.personid]) {
+        pay.lacks.push(item.userInfo.nickName)
+      }
+    })
+    const aaMembers = this.data.aaMembers
+    aaMembers.forEach((item, index) => {
       if (!pay.results[item.personid]) {
         pay.lacks.push(item.userInfo.nickName)
       }
     })
     
     self.setData({
-      "pay":pay,
+      "pay.lacks":pay.lacks,
     })
     console.log(self.data.pay.lacks)
   },

@@ -95,6 +95,9 @@ Page({
 
       // 遍历所有队员
       for (var j = 0; j < self.data.od.members.length; j++) {
+        if (!self.data.od.members[j].entryInfo.meetsIndex) { // 防止领队没有选择集合地点
+          self.data.od.members[j].entryInfo.meetsIndex = 0
+        }
         self.data.meetMembers[self.data.od.members[j].entryInfo.meetsIndex].push(self.data.od.members[j])
       }
 

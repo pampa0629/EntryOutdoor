@@ -1,3 +1,16 @@
+<!--活动标题-->  
+<van-row>
+  <van-col span="20">  
+    <van-notice-bar scrollable="{{true}}" text="{{title}}" />
+  </van-col> 
+  <van-col span="2" offset="1">
+    <view style="flex-direction:column">
+      <van-icon name="arrow-left" size="24px" color="#1aad19" bind:click="back2Outdoor"></van-icon>
+      <view class="icon_tip">返回</view>
+    </view>
+  </van-col>
+</van-row>
+
 <!--我是财务官-->
 <block wx:if="{{isCFO}}">
   <van-cell  title="我是财务官" value="点击进入收款设置" is-link bind:click="clickCFO"/>
@@ -14,13 +27,18 @@
     </van-col>
   </van-row>
 </van-panel>
-
+   
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="第二步：确定费用，用微信APP扫码支付"></van-cell>
-  <van-cell title="人均：{{pay.average}}（元）" title-width="50%" value="{{pay.total}}除以{{pay.count}}" />
-  <van-cell title="您需要交纳的费用为：{{pay.average*mine.num}}（元）" title-width="60%">
-    <van-stepper value="{{mine.num}}" min="1" max="20" bind:change="bindNum" />
-  </van-cell>
+	<van-cell slot="header" title-class="redtitle" title="第二步：用微信APP扫码，选择保存的二维码进行支付"/>
+  <van-cell wx:if="{{pay.average}}" title="人均：{{pay.average}}（元）" title-width="30%" value="{{pay.total}}（总费用）除以{{pay.count}}（人数）" />
+    <!-- 暂不支持代为缴费 -->
+    <!-- <van-cell title="您交纳几份的费用：{{pay.average*mine.num}}（元）" title-width="60%">
+      <van-stepper value="{{mine.num}}" min="1" max="20" bind:change="bindNum" />
+    </van-cell>
+    <van-cell title="您总费用：{{pay.average*mine.num}}（元）" title-width="60%">
+      <van-stepper value="{{mine.num}}" min="1" max="20" bind:change="bindNum" />
+    </van-cell> -->
+  
 </van-panel>
 
 <van-panel>

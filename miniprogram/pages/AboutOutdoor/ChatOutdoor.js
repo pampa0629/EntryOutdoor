@@ -13,7 +13,7 @@ const _ = db.command
  
 Page({
 
-  data: {
+  data: { 
     outdoorid: null,
     title: null,
     message: {
@@ -39,6 +39,7 @@ Page({
     console.log(options)
     const self = this
     self.data.outdoorid = options.outdoorid
+    options.tid = options.tid ? options.tid:null
     self.setData({
       tid: options.tid
     })
@@ -58,6 +59,11 @@ Page({
     }
 
     self.flushChats(null, res => {
+      // console.log("leader: ",res.data.leader)
+      // if (res.data.leader) {
+      //   self.data.members.push(res.data.leader.userInfo.nickName)
+      //   self.data.personids.push(res.data.leader.personid)
+      // }
       res.data.members.forEach((item, index) => {
         self.data.members.push(item.userInfo.nickName)
         self.data.personids.push(item.personid)

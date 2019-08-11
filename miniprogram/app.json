@@ -38,7 +38,8 @@
     "pages/AboutGroup/OneGroup",
     "pages/AboutOutdoor/PayOutdoor",
     "pages/AboutOutdoor/CfoOutdoor",
-    "pages/CreateOutdoor/EditWebsites"
+    "pages/CreateOutdoor/EditWebsites",
+    "pages/Test/Test1"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -82,5 +83,7 @@
     "wx1599b7c8d1e2b4d4",
     "wxd45c635d754dbf59"
   ],
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "plugins": {
+  }
 }

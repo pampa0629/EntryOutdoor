@@ -5,16 +5,26 @@
 	},
 	"setting": {
 		"urlCheck": true,
-		"es6": true,
+		"es6": false,
+		"enhance": true,
 		"postcss": true,
 		"minified": true,
 		"newFeature": true,
-		"checkInvalidKey": true
+		"nodeModules": true,
+		"autoAudits": false,
+		"checkInvalidKey": true,
+		"checkSiteMap": true,
+		"uploadWithSourceMap": true,
+		"babelSetting": {
+			"ignore": [],
+			"disablePlugins": [],
+			"outputPath": ""
+		}
 	},
 	"miniprogramRoot": "miniprogram/",
 	"cloudfunctionRoot": "cloud-functions/",
 	"compileType": "miniprogram",
-	"libVersion": "2.6.0",
+	"libVersion": "2.7.0",
 	"appid": "wx20edd5723fb67799",
 	"projectname": "%E6%88%B7%E5%A4%96%E6%8A%A5%E5%90%8D",
 	"debugOptions": {

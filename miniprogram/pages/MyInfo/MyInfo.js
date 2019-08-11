@@ -80,15 +80,17 @@ Page({
   },
 
   onLoad: function() { 
-    const self = this;
-    if (app.globalData.openid == null || app.globalData.openid.length == 0) {
-      app.openidCallback = (openid) => {
-        app.globalData.openid = openid // 其实屁事没有，就是要等到app的onLaunch中得到openid
-        this.loginWeixin(null) // 参数为null，说明是启动时主动调用，则无需重复调用app的函数
-      }
-    } else {
-      this.loginWeixin(null)
-    }
+    this.loginWeixin(null) // 参数为null，说明是启动时主动调用，则无需重复调用app的函数
+
+    // const self = this
+    // if (app.globalData.openid == null || app.globalData.openid.length == 0) {
+    //   app.openidCallback = (openid) => {
+    //     app.globalData.openid = openid // 其实屁事没有，就是要等到app的onLaunch中得到openid
+    //     this.loginWeixin(null) // 参数为null，说明是启动时主动调用，则无需重复调用app的函数
+    //   }
+    // } else {
+    //   this.loginWeixin(null)
+    // }
   },
 
   // 点击 > 图标想修改信息，主要看是否登录了
@@ -108,33 +110,61 @@ Page({
     }
   },
 
-  loginWeixin: function(e) {
+  async loginWeixin(e) {
     console.log("MyInfo.loginWeixin()")
-    console.log(app.globalData)
-    const self = this;
-    // 这里仍然存在：Persons表中已经有用户记录，但由于网络等原因尚未读取到的情况
-    if (app.globalData.hasUserInfo) {
+    console.log("app.globalData: ",app.globalData)
+    const self = this
+    var isLogin = await app.ensureLogin()
+    console.log("isLogin：", isLogin)
+    if(isLogin) {
       self.setData({
         hasLogin: true,
-        userInfo: app.globalData.userInfo,
+        userInfo: util.buildUserInfo(app.globalData.userInfo),
       })
-    } else {
-      app.personidCallback = (personid, userInfo) => {
-        if (personid != null) { // 不为null，则登录了
-          self.setData({
-            hasLogin: true,
-            userInfo: util.createPerson(userInfo),
-          });
-        } else { 
-          // openid不为null，说明真的需要创建新记录了
-          self.createOnePerson(e);
-        } 
-      }
-      if (e) { // 如果e不为null，则说明是通过按钮调用的，那就需要启动app的函数
-        app.getPersonInfo(); // 调用app 获得个人信息的函数
-      }
+    } else if(e) {
+      self.createOnePerson(e);
+    } 
+  },
+
+  createOnePerson: function (e) {
+    const self = this;
+    if (e && e.detail) {
+      console.log("MyInfo.js in createOnePerson fun, e is:", e)
+      self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
+      self.data.userInfo.nickName = e.detail.userInfo.nickName
+      person.createRecord(self.data.userInfo, app.globalData.openid, res => {
+        self.setPersonInfo(res.personid, res.userInfo)
+      })
     }
   },
+
+  // loginWeixin_bak: function(e) {
+  //   console.log("MyInfo.loginWeixin_bak()")
+  //   console.log(app.globalData)
+  //   const self = this;
+  //   // 这里仍然存在：Persons表中已经有用户记录，但由于网络等原因尚未读取到的情况
+  //   if (app.globalData.hasUserInfo) {
+  //     self.setData({
+  //       hasLogin: true,
+  //       userInfo: app.globalData.userInfo,
+  //     })
+  //   } else {
+  //     app.personidCallback = (personid, userInfo) => {
+  //       if (personid != null) { // 不为null，则登录了
+  //         self.setData({
+  //           hasLogin: true,
+  //           userInfo: util.buildUserInfo(userInfo),
+  //         });
+  //       } else { 
+  //         // openid不为null，说明真的需要创建新记录了
+  //         self.createOnePerson(e);
+  //       } 
+  //     }
+  //     if (e) { // 如果e不为null，则说明是通过按钮调用的，那就需要启动app的函数
+  //       app.getPersonInfo(); // 调用app 获得个人信息的函数
+  //     }
+  //   }
+  // },
 
   // 绿野org登录，直接跳转到登录页面
   lvyeorgLogin: function() {
@@ -188,64 +218,52 @@ Page({
     }
   },
 
-  createOnePerson: function (e) {
-    const self = this;
-    if (e != null) {
-      console.log("MyInfo.js in createOnePerson fun, e is:" + +JSON.stringify(e, null, 2))
-      self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
-      self.data.userInfo.nickName = e.detail.userInfo.nickName
-      person.createRecord(self.data.userInfo, app.globalData.openid, res=>{
-        self.setPersonInfo(res.personid, res.userInfo)
-      })
-    }
-  },
-  
-  createOnePerson_old: function(e) {
-    const self = this;
-    if (e != null) {
-      console.log("MyInfo.js in createOnePerson fun, e is:" + +JSON.stringify(e, null, 2))
+  // createOnePerson_old: function(e) {
+  //   const self = this;
+  //   if (e != null) {
+  //     console.log("MyInfo.js in createOnePerson fun, e is:" + +JSON.stringify(e, null, 2))
 
-      // 最后仍然得判断openid真的在Persons表中没有，才创建新的
-      dbPersons.where({
-          _openid: app.globalData.openid,
-        }).get()
-        .then(res => {
-          if (res.data.length == 0) { // 确认没有才加新的记录
-            // 从微信登录信息中获取昵称和性别，不过不能与原有昵称重名
-            util.getUniqueNickname(e.detail.userInfo.nickName, nickName => {
-              self.data.userInfo.nickName = nickName
-              self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
-              // 在Persons表中创建一条新用户的记录
-              dbPersons.add({
-                data: {
-                  userInfo: self.data.userInfo,
-                  myOutdoors: self.data.myOutdoors,
-                  entriedOutdoors: self.data.entriedOutdoors,
-                  caredOutdoors: self.data.caredOutdoors,
-                  // websites: self.data.websites,
-                }
-              }).then(res => {
-                self.setPersonInfo(res._id, self.data.userInfo)
-              })
-            })
-          } else if (res.data.length == 1) { // 有的话，用读取的就好
-            self.setPersonInfo(res.data[0]._id, self.data.userInfo)
-          } else { // 已经有多个账号，后台处理
-            wx.setClipboardData({
-              data: app.globalData.openid,
-              success: function(res) {
-                wx.showModal({
-                  title: '检测到您有多个账号',
-                  content: '可能会导致后续问题，OpenID已经复制到内存中，请发给作者“攀爬”予以核实。',
-                  showCancel: false,
-                  confirmText: "马上就去",
-                })
-              }
-            })
-          }
-        })
-    }
-  },
+  //     // 最后仍然得判断openid真的在Persons表中没有，才创建新的
+  //     dbPersons.where({
+  //         _openid: app.globalData.openid,
+  //       }).get()
+  //       .then(res => {
+  //         if (res.data.length == 0) { // 确认没有才加新的记录
+  //           // 从微信登录信息中获取昵称和性别，不过不能与原有昵称重名
+  //           util.getUniqueNickname(e.detail.userInfo.nickName, nickName => {
+  //             self.data.userInfo.nickName = nickName
+  //             self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
+  //             // 在Persons表中创建一条新用户的记录
+  //             dbPersons.add({
+  //               data: {
+  //                 userInfo: self.data.userInfo,
+  //                 myOutdoors: self.data.myOutdoors,
+  //                 entriedOutdoors: self.data.entriedOutdoors,
+  //                 caredOutdoors: self.data.caredOutdoors,
+  //                 // websites: self.data.websites,
+  //               }
+  //             }).then(res => {
+  //               self.setPersonInfo(res._id, self.data.userInfo)
+  //             })
+  //           })
+  //         } else if (res.data.length == 1) { // 有的话，用读取的就好
+  //           self.setPersonInfo(res.data[0]._id, self.data.userInfo)
+  //         } else { // 已经有多个账号，后台处理
+  //           wx.setClipboardData({
+  //             data: app.globalData.openid,
+  //             success: function(res) {
+  //               wx.showModal({
+  //                 title: '检测到您有多个账号',
+  //                 content: '可能会导致后续问题，OpenID已经复制到内存中，请发给作者“攀爬”予以核实。',
+  //                 showCancel: false,
+  //                 confirmText: "马上就去",
+  //               })
+  //             }
+  //           })
+  //         }
+  //       })
+  //   }
+  // },
 
   // 设置用户信息
   setPersonInfo: function(personid, userInfo) {
@@ -262,6 +280,8 @@ Page({
   // 回到最近的活动；要是自己创建的，就跳转到“创建活动”页面；
   // 要是不是自己创建的，则转到“参加活动”页面
   gotoLastOutdoor: function() {
+    console.log("gotoLastOutdoor()")
+    const self = this
     var outdoorid = util.loadOutdoorID()
     var od = new outdoor.OD()
     od.load(outdoorid, res=>{
@@ -273,6 +293,9 @@ Page({
           confirmText: "知道了",
           complete: function (res) {
             util.clearOutdoorID()
+            self.setData({
+              lastOutdoorid:null,
+            })
           }
         })
       }
@@ -363,10 +386,10 @@ Page({
   },
 
   //////////////////////////////// for testing ////////////////////////
-  bindTest: function() {
+  bindTest1: function() {
     wx.navigateTo({
-      url: '../Test/OneOutdoor',
+      url: '../Test/Test1',
     })
   },
-
+  
 })

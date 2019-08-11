@@ -25,8 +25,9 @@ App({
     lvyeorgLogin: false,
   },
 
-  onLaunch(options) {
-    console.log(options)
+  async onLaunch(options) {
+    console.log("app.onLaunch()")
+    console.log("options:",options)
     this.globalData.options = options // 存起来后面用
 
     // 判断微信版本号，太低的给予提示
@@ -37,108 +38,166 @@ App({
         title: '微信版本过低',
         content: '请升级微信版本，不低于6.6.3',
       })
-    }
+    } 
 
+    await this.ensureLogin()
+
+    // const self = this
+    // // 尝试从本地缓存中读取openid
+    // self.globalData.openid = util.loadOpenID()
+    // // 从本地缓存中读取到openid，则尝试从Persons表读取用户信息
+    // console.log("app.js in onLaunch fun, self.globalData.openid:" + self.globalData.openid)
+    // if (self.globalData.openid != null && self.globalData.openid.length > 0) {
+    //   if (self.openidCallback) {
+    //     self.openidCallback(self.globalData.openid);
+    //   }
+    //   console.log("app.js in onLaunch fun, openid is ok:" + self.globalData.openid)
+    //   self.getPersonInfo()
+    // } else { // 要是本地缓存中没有OpenID，就调用云函数来获取
+    //   console.log("app.js in onLaunch fun, openid is null:" + self.globalData.openid)
+    //   wx.showLoading({ // 保证获取OpenID成功
+    //     title: '加载用户ID中...',
+    //   })
+
+    //   wx.cloud.callFunction({
+    //     name: 'getUserInfo', // 云函数名称
+    //     complete: res => {
+    //       self.globalData.openid = res.result.openId
+    //       if (self.openidCallback) {
+    //         self.openidCallback(self.globalData.openid);
+    //       }
+    //       console.log("app.js in onLaunch fun, cloud function get openid:" + res.result.openId)
+    //       // 缓存到本地
+    //       util.saveOpenID(self.globalData.openid)
+    //       self.getPersonInfo()
+    //       wx.hideLoading()
+    //     }
+    //   })
+    // }
+  },
+
+  // 用await确保登录
+  async ensureLogin() {
+    console.log("app.ensureLogin()")
     const self = this
-    // 尝试从本地缓存中读取openid
-    self.globalData.openid = util.loadOpenID()
-    // 从本地缓存中读取到openid，则尝试从Persons表读取用户信息
-    console.log("app.js in onLaunch fun, self.globalData.openid:" + self.globalData.openid)
-    if (self.globalData.openid != null && self.globalData.openid.length > 0) {
-      if (self.openidCallback) {
-        self.openidCallback(self.globalData.openid);
-      }
-      console.log("app.js in onLaunch fun, openid is ok:" + self.globalData.openid)
-      self.getPersonInfo()
-    } else { // 要是本地缓存中没有OpenID，就调用云函数来获取
-      console.log("app.js in onLaunch fun, openid is null:" + self.globalData.openid)
-      wx.showLoading({ // 保证获取OpenID成功
-        title: '加载用户ID中...',
-      })
-
-      wx.cloud.callFunction({
-        name: 'getUserInfo', // 云函数名称
-        complete: res => {
+    if (self.globalData.hasUserInfo) {
+      return true
+    } else {
+      var personid = util.loadPersonID()
+      console.log("personid:", personid)
+      try {
+        var res = await dbPersons.doc(personid).get()
+        console.log("person by id, res:", res)
+        this.setPersonInfo(res.data)
+        return true
+      } 
+      catch (e) {
+        // 试图用openid查找
+        self.globalData.openid = util.loadOpenID()
+        console.log("openid:", self.globalData.openid)
+        if (!self.globalData.openid){
+          const res = await wx.cloud.callFunction({
+            name: 'getUserInfo', // 云函数名称
+          })
+          console.log("openid by cloud:", res)
           self.globalData.openid = res.result.openId
-          if (self.openidCallback) {
-            self.openidCallback(self.globalData.openid);
-          }
-          console.log("app.js in onLaunch fun, cloud function get openid:" + res.result.openId)
-          // 缓存到本地
           util.saveOpenID(self.globalData.openid)
-          self.getPersonInfo()
-          wx.hideLoading()
         }
-      })
+        //直接用person id读取不到，则尝试是否能通过openid读取到 person id
+        try{
+          const res = await dbPersons.where({_openid: self.globalData.openid}).get()
+          console.log("person res by openid:", res)
+          if (res.data.length > 0) { // 找到了
+            self.setPersonInfo(res.data[0])
+            // 同时设置到globalData中
+            self.globalData.personid = res.data[0]._id
+            util.savePersonID(self.globalData.personid)
+            return true
+          }
+        }
+        catch(e){
+          return false
+        }
+      }
     }
+    return false
+  },
+
+  setPersonInfo(data) {
+    console.log("app.setPersonInfo()")
+    this.globalData.personid = data._id
+    this.globalData.openid = data._openid
+    this.globalData.userInfo = data.userInfo;
+    this.globalData.hasUserInfo = true
+    this.dealCompatibility(data) // 处理兼容性问题
   },
 
   // 试图从Person数据库中读取当前用户的基本信息
-  getPersonInfo: function() {
-    const self = this;
-    wx.showLoading({ // 保证获取OpenID成功
-      title: '加载用户信息中...',
-    })
-    // 读取数据库
-    self.globalData.personid = util.loadPersonID();
-    console.log("app.js in getPersonInfo fun, loadPersonID is:" + self.globalData.personid)
-    if (self.globalData.personid) {
-    dbPersons.doc(self.globalData.personid).get()
-      .then(res => { // 顺利读取到，万事大吉
-        self.globalData.userInfo = res.data.userInfo;
-        self.globalData.hasUserInfo = true
-        self.dealCompatibility(res.data) // 处理兼容性问题
-        // callback 第一种情况：数据库直接读取personid成功
-        console.log("app.js in getPersonInfo fun, 1 callback personid is:" + self.globalData.personid)
-        // console.log("app.js in getPersonInfo fun, 1 callback fun is:" + self.personidCallback)
-        if (self.personidCallback) {
-          self.personidCallback(self.globalData.personid, self.globalData.userInfo);
-        }
-      })
-      .catch(err => {
-        console.error(err)
-        self.findIDbyOpenid()
-      })
-    } else {
-      self.findIDbyOpenid()
-    }
-    wx.hideLoading()
-  },
+  // getPersonInfo: function() {
+  //   const self = this;
+  //   wx.showLoading({ // 保证获取OpenID成功
+  //     title: '加载用户信息中...',
+  //   })
+  //   // 读取数据库
+  //   self.globalData.personid = util.loadPersonID();
+  //   console.log("app.js in getPersonInfo fun, loadPersonID is:" + self.globalData.personid)
+  //   if (self.globalData.personid) {
+  //   dbPersons.doc(self.globalData.personid).get()
+  //     .then(res => { // 顺利读取到，万事大吉
+  //       self.globalData.userInfo = res.data.userInfo;
+  //       self.globalData.hasUserInfo = true
+  //       self.dealCompatibility(res.data) // 处理兼容性问题
+  //       // callback 第一种情况：数据库直接读取personid成功
+  //       console.log("app.js in getPersonInfo fun, 1 callback personid is:" + self.globalData.personid)
+  //       // console.log("app.js in getPersonInfo fun, 1 callback fun is:" + self.personidCallback)
+  //       if (self.personidCallback) {
+  //         self.personidCallback(self.globalData.personid, self.globalData.userInfo);
+  //       }
+  //     })
+  //     .catch(err => {
+  //       console.error(err)
+  //       self.findIDbyOpenid()
+  //     })
+  //   } else {
+  //     self.findIDbyOpenid()
+  //   }
+  //   wx.hideLoading()
+  // },
 
   // personid 为空或数据库doc不到时，通过openid来查找personid
-  findIDbyOpenid() {
-    console.log("app.findIDbyOpenid()")
-    const self = this
-    //直接用person id读取不到，则尝试是否能通过openid读取到 person id
-    dbPersons.where({
-      _openid: self.globalData.openid
-    }).get().then(res => {
-      if (res.data.length > 0) { // 找到了
-        self.globalData.userInfo = res.data[0].userInfo;
-        self.globalData.hasUserInfo = true;
-        self.dealCompatibility(res.data[0]) // 处理兼容性问题
-        // 同时设置到globalData中
-        self.globalData.personid = res.data[0]._id;
-        util.savePersonID(self.globalData.personid);
-        // callback 第二种情况：通过openid找回正确的personid成功
-        console.log("app.js in getPersonInfo fun, 2 callback personid is:" + self.globalData.personid)
-        console.log("app.js in getPersonInfo fun, 2 callback fun is:" + self.personidCallback)
-        if (self.personidCallback) {
-          self.personidCallback(self.globalData.personid, self.globalData.userInfo);
-        }
-      } else { // 这是没有找到
-        // 这里最重要的是把 personid的缓存清除掉，别下次登录继续害人
-        self.globalData.personid = null;
-        util.clearPersonID();
-        // callback 第三种情况：就是找不到当前用户的personid，说明还没有登录了
-        console.log("app.js in getPersonInfo fun, 3 callback personid is:" + self.globalData.personid)
-        console.log("app.js in getPersonInfo fun, 3 callback fun is:" + self.personidCallback)
-        if (self.personidCallback) {
-          self.personidCallback(self.globalData.personid, null);
-        }
-      }
-    })
-  },
+  // findIDbyOpenid() {
+  //   console.log("app.findIDbyOpenid()")
+  //   const self = this
+  //   //直接用person id读取不到，则尝试是否能通过openid读取到 person id
+  //   dbPersons.where({
+  //     _openid: self.globalData.openid
+  //   }).get().then(res => {
+  //     if (res.data.length > 0) { // 找到了
+  //       self.globalData.userInfo = res.data[0].userInfo;
+  //       self.globalData.hasUserInfo = true;
+  //       self.dealCompatibility(res.data[0]) // 处理兼容性问题
+  //       // 同时设置到globalData中
+  //       self.globalData.personid = res.data[0]._id;
+  //       util.savePersonID(self.globalData.personid);
+  //       // callback 第二种情况：通过openid找回正确的personid成功
+  //       console.log("app.js in getPersonInfo fun, 2 callback personid is:" + self.globalData.personid)
+  //       console.log("app.js in getPersonInfo fun, 2 callback fun is:" + self.personidCallback)
+  //       if (self.personidCallback) {
+  //         self.personidCallback(self.globalData.personid, self.globalData.userInfo);
+  //       }
+  //     } else { // 这是没有找到
+  //       // 这里最重要的是把 personid的缓存清除掉，别下次登录继续害人
+  //       self.globalData.personid = null;
+  //       util.clearPersonID();
+  //       // callback 第三种情况：就是找不到当前用户的personid，说明还没有登录了
+  //       console.log("app.js in getPersonInfo fun, 3 callback personid is:" + self.globalData.personid)
+  //       console.log("app.js in getPersonInfo fun, 3 callback fun is:" + self.personidCallback)
+  //       if (self.personidCallback) {
+  //         self.personidCallback(self.globalData.personid, null);
+  //       }
+  //     }
+  //   })
+  // },
 
   // 处理Person表的兼容性问题，关键是与网站的对接信息
   dealCompatibility: function(data) {
@@ -205,7 +264,7 @@ App({
     console.log('app.checkLogin()')
     title = title ? title:"此项功能须先登录"
     showCancel = showCancel == undefined ? true: showCancel
-    console.log('showCancel: ', showCancel)
+    console.log('showCancel: ', showCancel) 
     content = content ? content : "点击“去登录”将自动切换到“我的信息”页面，再点击“微信登录”按钮登录"
     if (!this.globalData.hasUserInfo) { // 判断是否登录先
       wx.showModal({

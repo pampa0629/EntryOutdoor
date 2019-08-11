@@ -8,7 +8,7 @@ Page({
 
   onLoad: function (options) {  
     console.log("onLoad")
-    const self = this;
+    const self = this; 
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     self.setData({

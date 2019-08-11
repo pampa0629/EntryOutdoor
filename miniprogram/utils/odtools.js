@@ -669,6 +669,11 @@ const getWebsites = (outdoorid, callback) => {
   })
 }
 
+const getWebsites_a = async (outdoorid) => {
+  const res = await dbOutdoors.doc(outdoorid).get()
+  return res.data.websites
+}
+
 // 判断某个时刻退出活动是否需要AA费用
 // 需要A费用的条件（必须全部满足）：活动已成行，有AA规则，报名状态为“报名中”，无人替补
 const isNeedAA = (od, entryStatus) => {
@@ -705,6 +710,7 @@ module.exports = {
   isNeedAA: isNeedAA, // 判断某个时刻退出活动是否需要AA费用
 
   getWebsites: getWebsites, // 得到数据库中的网站同步结构
+  getWebsites_a: getWebsites_a, // aynsc
 
   getChatStatus: getChatStatus, // 判断留言的状态：self、new等
   buildChatMessage: buildChatMessage, // 构建一条留言

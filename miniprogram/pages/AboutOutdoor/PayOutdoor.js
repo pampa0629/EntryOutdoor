@@ -13,7 +13,7 @@ const _ = db.command
 
 Page({
 
-  data: {
+  data: { 
     outdoorid:null, 
     title:"", 
     
@@ -53,15 +53,20 @@ Page({
           isCFO: true,
         })
       }
-    })
+    }) 
   },
 
   clickCFO() {
-    const self = this
     wx.navigateTo({
-      url: './CfoOutdoor?outdoorid='+self.data.outdoorid, 
+      url: './CfoOutdoor?outdoorid='+this.data.outdoorid, 
     })
   }, 
+
+  back2Outdoor() {
+    wx.navigateTo({
+      url: "../EntryOutdoor/EntryOutdoor?outdoorid=" + this.data.outdoorid
+    })
+  },
 
   onUnload: function () {
 

@@ -45,7 +45,24 @@ const updateOutdoorItem = (outdoorid, item, value, callback) => {
   })
 }
 
-// 操作Outdoors表中的某个子项 
+// 操作Outdoors表中的某个子项  
+const opOutdoorItem_a = async(outdoorid, item, value, op) => {
+  console.log("opOutdoorItem")
+  op = op ? op : "" // 默认的""为更新; push,pop,shift,unshift,""
+  return await wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value 
+    data: {
+      table: "Outdoors",
+      id: outdoorid,
+      item: item,
+      command: op,
+      value: value
+    }
+  })
+}
+
+// 操作Outdoors表中的某个子项  
 const opOutdoorItem = (outdoorid, item, value, op, callback) => {
   console.log("opOutdoorItem")
   op = op ? op : "" // 默认的""为更新; push,pop,shift,unshift,""
@@ -411,6 +428,22 @@ const unshiftPersonCared = (personid, outdoorid, title, callback)=>{
   })
 }
 
+// 对Persons表的某个子项进行特定数据库操作
+const opPersonItem_a = async(personid, item, value, op) => {
+  console.log("cloudfun.opPersonItem()_a")
+  console.log(personid, item, value, op)
+  return await wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value
+    data: {
+      table: "Persons",
+      id: personid,
+      item: item,
+      command: op,
+      value: value
+    }
+  })
+}
 
 // 对Persons表的某个子项进行特定数据库操作
 const opPersonItem = (personid, item, value, op, callback) => {
@@ -565,6 +598,7 @@ module.exports = {
   updateOutdoor: updateOutdoor, 
   updateOutdoorItem: updateOutdoorItem, // 更新某个子项
   opOutdoorItem: opOutdoorItem, // 操作某个子项，op为""时，操作命令为“更新”
+  opOutdoorItem_a:opOutdoorItem_a,
 
   updateOutdoorChat: updateOutdoorChat,
   // updateOutdoorChatSeen: updateOutdoorChatSeen,
@@ -595,6 +629,7 @@ module.exports = {
 
   // Persons
   opPersonItem: opPersonItem,
+  opPersonItem_a: opPersonItem_a,
   unshiftPersonCared:unshiftPersonCared,
   updatePersonFormids: updatePersonFormids,
   updatePersonSubscriber: updatePersonSubscriber,

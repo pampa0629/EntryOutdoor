@@ -45,6 +45,7 @@ Page({
     chatChange: false,
     interval: null, // 计时器
     editTitle: false, // 开启基础信息编辑
+    formids:[], // 消息数量
   },
 
   openEditTitle(e) {
@@ -117,7 +118,7 @@ Page({
       var content = "小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录；然后再回来创建活动"
        // 确保登录
       if(app.checkLogin(title, content, false)){
-        this.loadFormids()
+        this.loadFormids() 
 
         // 确保留有手机号码
         if (!util.validPhone(app.globalData.userInfo.phone)) {
@@ -133,6 +134,8 @@ Page({
           })
         }
       }
+    } else {
+      this.loadFormids() 
     }
     this.setMyselfDefault()
   },
@@ -153,7 +156,7 @@ Page({
     console.log(this.data.myself)
   },
 
-  loadOutdoor: function(outdoorid) {
+  loadOutdoor: function(outdoorid,callback) {
     console.log("CreateOutdoor.loadOutdoor()")
     console.log("outdoorid: " + outdoorid)
 
@@ -198,6 +201,9 @@ Page({
         }
         self.createAutoInfo()
         self.checkPublish() // 判断一下是否能发布活动
+        if (callback) {
+          callback()
+        }
       }
     })
   },
@@ -586,6 +592,9 @@ Page({
       // 第四步：给自己的订阅者发通知
       self.post2Subscriber()
       self.createCanvasFile() // 把图片更新一下
+      self.setData({
+        hasModified:false, // 发布时，已经保存过了
+      })
     })
   },
 
@@ -646,11 +655,6 @@ Page({
 
       // 这里处理 Person表中对应的MyOutdoors
       self.dealMyoutdoors()
-      // if (isCreated) {
-      //   self.updatePersonMyoutdoors()
-      // } else {
-      //   self.addPersonMyoutdoors()
-      // }
     })
   },
 
@@ -712,21 +716,6 @@ Page({
     person.dealOutdoors(app.globalData.personid, "myOutdoors", value, true, res => {
       self.data.myOutdoors = res
     })
-    // dbPersons.doc(app.globalData.personid).get()
-    //   .then(res => {
-    //     let myOutdoors = res.data.myOutdoors
-    //     for (var i in myOutdoors) {
-    //       if (myOutdoors[i].id == outdoorid) {
-    //         myOutdoors.splice(i, 1)
-    //         break
-    //       }
-    //     }
-    //     dbPersons.doc(app.globalData.personid).update({
-    //       data: {
-    //         myOutdoors: myOutdoors
-    //       }
-    //     })
-    //   })
   },
 
   // 查看报名情况，同时可以截屏保存起来
@@ -758,8 +747,12 @@ Page({
     console.log("onPullDownRefresh()")
     const self = this
     wx.showNavigationBarLoading()
-    this.loadOutdoor(this.data.od.outdoorid)
-    wx.stopPullDownRefresh()
+    // 全刷一遍
+    this.loadOutdoor(this.data.od.outdoorid, res=>{
+      wx.hideNavigationBarLoading()
+      wx.stopPullDownRefresh()
+    })
+    
     // 主要就刷新队员和留言信息
     // dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
     //   self.setData({

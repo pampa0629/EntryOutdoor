@@ -136,7 +136,7 @@ Page({
   },
 
   // 从数据库中装载信息
-  loadOutdoor: function(outdoorid) {
+  loadOutdoor: function(outdoorid, callback) {
     console.log("loadOutdoor, id is: " + outdoorid)
     const self = this
     // 这里读取数据库，加载各类信息
@@ -148,12 +148,17 @@ Page({
       })
       // 处理剩余时间
       self.dealRemainTime()
+      // 设置留言
+      self.setChat(od.chat)
       // 处理报名信息
       self.dealEntryInfo()
       // 加载后就要构建画布生成分享图片文件
       self.createCanvasFile()
       // 判断本活动是否已经被关注
       self.dealCared()
+      if (callback) {
+        callback()
+      }
     })
   },
 
@@ -743,21 +748,25 @@ Page({
   // 页面相关事件处理函数--监听用户下拉动作  
   onPullDownRefresh: function() {
     console.log("onPullDownRefresh")
-    const self = this
     wx.showNavigationBarLoading()
-    // 主要就刷新队员和留言信息
-    dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
-      self.setData({
-        "od.members": res.data.members,
-        "od.addMembers": res.data.addMembers ? res.data.addMembers : [],
-        "od.limits": res.data.limits,
-        entryFull: odtools.entryFull(self.data.od.limits, self.data.od.members, self.data.od.addMembers),
-      })
-      self.setChat(res.data.chat)
-      self.createCanvasFile() // 把图片更新一下
+    // 全刷一遍
+    this.loadOutdoor(this.data.od.outdoorid, res => {
       wx.hideNavigationBarLoading()
       wx.stopPullDownRefresh()
     })
+    // 主要就刷新队员和留言信息
+    // dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
+    //   self.setData({
+    //     "od.members": res.data.members,
+    //     "od.addMembers": res.data.addMembers ? res.data.addMembers : [],
+    //     "od.limits": res.data.limits,
+    //     entryFull: odtools.entryFull(self.data.od.limits, self.data.od.members, self.data.od.addMembers),
+    //   })
+    //   self.setChat(res.data.chat)
+    //   self.createCanvasFile() // 把图片更新一下
+    //   wx.hideNavigationBarLoading()
+    //   wx.stopPullDownRefresh()
+    // })
   },
 
   // 判断是否有新留言

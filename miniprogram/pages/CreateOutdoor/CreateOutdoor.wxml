@@ -198,7 +198,7 @@
       </form>
     </van-col>
   </van-row>
-</block>
+</block> 
 
   <!-- 保存修改 -->
 <van-row class="fix" wx:if="{{od.status=='拟定中' || !od.expired}}">

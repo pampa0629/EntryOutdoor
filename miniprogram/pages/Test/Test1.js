@@ -4,6 +4,7 @@ const lvyeorg = require('../../utils/lvyeorg.js')
 const person = require('../../utils/person.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const util = require('../../utils/util.js')
+const promisify = require('../../utils/promisify.js')
 
 
 const app = getApp()
@@ -157,6 +158,21 @@ Page({
       console.log("if undef:", this.undef, value)
     }
   },
+
+  async tapLocation() {
+    console.log("wx.startLocationUpdateBackground:", wx.startLocationUpdateBackground)
+    const locationStart = promisify(wx.startLocationUpdateBackground)
+    const resStart = await locationStart()
+    console.log("location start:", resStart)
+
+    // const locationChange = promisify(wx.onLocationChange)
+    // const location = await locationChange()
+    // console.log("location:", location)
+
+    wx.onLocationChange(function (res) {
+      console.log('location change', res)
+    })
+  }
 
 
 })

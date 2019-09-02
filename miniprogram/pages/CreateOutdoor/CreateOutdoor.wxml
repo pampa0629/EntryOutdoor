@@ -125,8 +125,8 @@
 </van-panel>
 
 <!-- 领队是否认路 -->
-<van-cell title="是否认路" title-class="redtitle" label="{{myself.entryInfo.knowWay?'认路':'不认路'}}" clickable bind:click="checkKnowWay" border="{{false}}">
-  <van-checkbox value="{{myself.entryInfo.knowWay}}" bind:change="checkKnowWay" />
+<van-cell title="{{myself.entryInfo.knowWay?'认路':'不认路'}}" title-class="redtitle" label="是否认路" clickable bind:click="checkKnowWay" border="{{false}}">
+  <van-checkbox value="{{myself.entryInfo.knowWay}}"/>
 </van-cell>
 
 <!--交通方式-->

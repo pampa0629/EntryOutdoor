@@ -168,8 +168,8 @@
     <van-checkbox value="{{entryInfo.agreedDisclaimer}}"/>
   </van-cell> 
 
-  <van-cell title="是否认路" title-class="redtitle" label="{{entryInfo.knowWay?'认路':'不认路'}}" clickable bind:click="checkKnowWay" border="{{false}}">
-    <van-checkbox value="{{entryInfo.knowWay}}" bind:change="checkKnowWay" />
+  <van-cell title="{{entryInfo.knowWay?'认路':'不认路'}}" title-class="redtitle" label="是否认路" clickable bind:click="checkKnowWay" border="{{false}}">
+    <van-checkbox value="{{entryInfo.knowWay}}"/>
   </van-cell>
 </block>
   

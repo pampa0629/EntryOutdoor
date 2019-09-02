@@ -5,7 +5,8 @@ const person = require('../../utils/person.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const util = require('../../utils/util.js')
 const promisify = require('../../utils/promisify.js')
-
+// const tencentcloud = require("../../../../tencentcloud-sdk-nodejs");
+// const tencentcloud = require("tencentcloud-sdk-nodejs");
 
 const app = getApp()
 wx.cloud.init()
@@ -172,7 +173,35 @@ Page({
     wx.onLocationChange(function (res) {
       console.log('location change', res)
     })
-  }
+  },
+
+  async tapPython() {
+    const request = promisify(wx.request)
+
+    const env = "outdoor-entry"
+    const cloudUrl =  
+    "cloud://outdoor-entry.6f75-outdoor-entry-1257647001/Outdoors/25c59b425d50e53e1201b1f13f21aff3/1567070269630.jpg"
+
+    // "cloud://outdoor-entry.6f75-outdoor-entry-1257647001/Outdoors/25c59b425d50e53e1201b1f13f21aff3/1567151954384.jpg"
+    
+    const resTemp = await wx.cloud.getTempFileURL({
+      fileList: [cloudUrl]
+    })
+
+    console.log(resTemp)
+    const tempUrl = resTemp.fileList[0].tempFileURL
+    console.log(tempUrl)
+    
+    let res = await request({
+      url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url="+tempUrl,
+      method: "POST",
+      header: {
+        "content-type": "application/x-www-form-urlencoded"
+      },
+    })
+    console.log(res)
+
+  },
 
 
 })

@@ -146,7 +146,7 @@ Page({
 
     if (s.mode == "byTime") {
       // 大于等于 之前的时间， 小于今天
-      var dMonth
+      var dMonth = 0
       if (s.option == "三个月") {
         dMonth = 3
       } else if (s.option == "半年") {

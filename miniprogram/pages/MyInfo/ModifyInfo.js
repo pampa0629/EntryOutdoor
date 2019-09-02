@@ -64,7 +64,7 @@ Page({
     wx.showShareMenu({
       withShareTicket: true
     })
-    this.addAd()
+    // this.addAd()
   },
 
   // // 添加广告

@@ -489,7 +489,7 @@ OD.prototype.entry = function(member, callback) {
       }
       self.members.push(member)
     }
-
+ 
     // 更新Outdoors数据库
     cloudfun.updateOutdoorItem(self.outdoorid, "members", self.members)
     // 报名信息同步到网站
@@ -500,7 +500,29 @@ OD.prototype.entry = function(member, callback) {
         entry: !findSelf
       })
     }
+    if (!findSelf) { // 新报名，才有必要看看是否处理AA名单；修改报名状态时用不着的
+      self.dealAaMembers(member) // 处理AA名单
+    }
   })
+}
+
+// 有人新报名时，需要处理AA名单
+OD.prototype.dealAaMembers = function (member) {
+  console.log("OD.prototype.dealAaMembers()")
+  if (this.aaMembers && this.aaMembers.length>0) {
+    index = util.findIndex(this.aaMembers, "personid", member.personid)
+    // 首先从AA名单中剔除自己（即退出后又报名的情况）
+    if (index > -1) { //找到自己，则删掉即可
+      this.aaMembers.splice(index, 1)
+      cloudfun.updateOutdoorItem(this.outdoorid, "aaMembers", this.aaMembers)
+    } else if (this.limits.maxPerson) {
+      // 若非上述情况，且正式名单 + AA名单超过名额限制，则剔除AA名单中的第一位，保证分摊费用的人数不应超过原定总人数
+      if( (this.members.length+this.aaMembers.length)>this.limits.personCount) {
+        this.aaMembers.splice(0, 1)
+        cloudfun.updateOutdoorItem(this.outdoorid, "aaMembers", this.aaMembers)
+      }
+    }
+  }
 }
 
 // 为附加队员报名 

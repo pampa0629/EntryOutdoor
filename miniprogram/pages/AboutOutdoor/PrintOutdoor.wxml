@@ -34,7 +34,7 @@
 <!--队员列表-->
 <view> 
   <van-tag type="primary" plain>\n活动状态：{{od.status}}</van-tag>
-  <text class="tip">\n正式队员列表（共{{od.members.length}}人）\n</text>
+  <text class="tip">\n队员列表（共{{od.members.length}}人）\n</text>
 </view>
 
 <!--要按照集合地点排列名单--> 

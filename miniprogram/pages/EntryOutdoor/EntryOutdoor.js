@@ -9,7 +9,7 @@ const person = require('../../utils/person.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
-const dbOutdoors = db.collection('Outdoors')
+const dbOutdoors = db.collection('Outdoors') 
 const dbPersons = db.collection('Persons')
 const _ = db.command
 
@@ -317,19 +317,19 @@ Page({
           title: '替补通知',
           content: '由于有人抢先点击报名了，报名人数已满，您不得不变为替补。若不愿替补，可随时退出；若前面队员退出或领队扩编，您将自动转为报名',
         })
-      }
+      } 
 
       // Person表中，还要把当前outdoorid记录下来
       self.updateEntriedOutdoors(false)
 
-      // 首次报名，则给领队发个微信模板消息
+      // 首次报名，发送微信消息
       if (res.entry) {
         self.postEntryMsg()
       }
     })
   },
 
-  // 把报名消息给领队发个微信模板消息
+  // 把报名消息给自己和领队发送微信模板消息
   postEntryMsg() {
     console.log("postEntryMsg")
     const self = this

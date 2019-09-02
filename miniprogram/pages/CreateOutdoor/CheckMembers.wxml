@@ -82,8 +82,8 @@
 
 <!--审核与授权-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="正式队员列表（共{{members.length}}人）"></van-cell>
-  <van-tag type="primary" plain>正式队员审核与授权结果即时生效，无需保存</van-tag> 
+	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人）"></van-cell>
+  <van-tag type="primary" plain>审核与授权结果即时生效，无需保存</van-tag> 
   <van-cell wx:if="{{cfo.nickName}}" title="当前财务官（CFO）为：{{cfo.nickName}}" title-width="90%" />
   <van-field wx:for="{{members}}" title-width="60%" wx:key="item.personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.meetsIndex}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot>
     <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onCheckPopup{{index}}">审核</van-button>
@@ -105,8 +105,8 @@
 <van-switch-cell title="开启附加队员" wx:if="{{od.addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
 <block wx:if="{{openAdd || od.addMembers.length>0 || hasModified}}">
   <van-panel>
-  	<van-cell slot="header" title-class="redtitle" title="附加队员列表（共{{od.addMembers.length}}人）" label="领队可增删非小程序报名队员"></van-cell>
-    <van-tag type="primary" plain>附加队员增加和删除结果即时生效，无需保存</van-tag> 
+  	<van-cell slot="header" title-class="redtitle" title="附加队员名单（共{{od.addMembers.length}}人）" label="领队可增删非小程序报名队员"></van-cell>
+    <van-tag type="primary" plain>增加和删除结果即时生效，无需保存</van-tag> 
     <van-field wx:for="{{od.addMembers}}" wx:key="*this" value="{{item}}" readonly use-button-slot>
       <van-button slot="button" plain size="small" type="warning" bind:click="delAddMembers{{index}}">删除</van-button>
     </van-field>

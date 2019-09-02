@@ -5,7 +5,7 @@ const request = require('request');
 const tencentcloud = require("tencentcloud-sdk-nodejs");
 
 // 云函数入口函数
-exports.main = async(event, context) => {
+exports.main = async(event, context) => { 
   // return text event.voice
 
   console.log(event.voice)

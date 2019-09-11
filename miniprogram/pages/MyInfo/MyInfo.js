@@ -2,6 +2,7 @@ const app = getApp()
 const util = require('../../utils/util.js')
 const person = require('../../utils/person.js')
 const outdoor = require('../../utils/outdoor.js')
+const promisify = require('../../utils/promisify.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -126,15 +127,13 @@ Page({
     } 
   },
 
-  createOnePerson: function (e) {
-    const self = this;
+  async createOnePerson(e) {
+    console.log("MyInfo.createOnePerson()", e)
     if (e && e.detail) {
-      console.log("MyInfo.js in createOnePerson fun, e is:", e)
-      self.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
-      self.data.userInfo.nickName = e.detail.userInfo.nickName
-      person.createRecord(self.data.userInfo, app.globalData.openid, res => {
-        self.setPersonInfo(res.personid, res.userInfo)
-      })
+      this.data.userInfo.gender = util.fromWxGender(e.detail.userInfo.gender);
+      this.data.userInfo.nickName = e.detail.userInfo.nickName
+      let res = await person.createRecord(this.data.userInfo, app.globalData.openid)
+      this.setPersonInfo(res.personid, res.userInfo)
     }
   },
 
@@ -279,37 +278,36 @@ Page({
 
   // 回到最近的活动；要是自己创建的，就跳转到“创建活动”页面；
   // 要是不是自己创建的，则转到“参加活动”页面
-  gotoLastOutdoor: function() {
+  async gotoLastOutdoor() {
     console.log("gotoLastOutdoor()")
     const self = this
     var outdoorid = util.loadOutdoorID()
     var od = new outdoor.OD()
-    od.load(outdoorid, res=>{
-      if(!res) {
-        wx.showModal({
-          title: '查找活动ID失败',
-          content: '对应的活动可能已被领队删除',
-          showCancel: false,
-          confirmText: "知道了",
-          complete: function (res) {
-            util.clearOutdoorID()
-            self.setData({
-              lastOutdoorid:null,
-            })
-          }
-        })
-      }
-      else if (od.leader.personid == app.globalData.personid) {
-        // 自己的活动 
-        wx.switchTab({
-          url: "../CreateOutdoor/CreateOutdoor",
-        })
-      } else {
-        wx.navigateTo({
-          url: "../EntryOutdoor/EntryOutdoor?outdoorid=" + outdoorid
-        })
-      }
-    })
+    const res = await od.load(outdoorid)
+    if(!res) {
+      wx.showModal({
+        title: '查找活动ID失败',
+        content: '对应的活动可能已被领队删除',
+        showCancel: false,
+        confirmText: "知道了",
+        complete: function (res) {
+          util.clearOutdoorID()
+          self.setData({
+            lastOutdoorid:null,
+          })
+        }
+      })
+    }
+    else if (od.leader.personid == app.globalData.personid) {
+      // 自己的活动 
+      wx.switchTab({
+        url: "../CreateOutdoor/CreateOutdoor",
+      })
+    } else {
+      wx.navigateTo({
+        url: "../EntryOutdoor/EntryOutdoor?outdoorid=" + outdoorid
+      })
+    }
   },
 
   tapMyOutdoors() {
@@ -334,26 +332,20 @@ Page({
     })
   },
 
-  bindEmergencyCall() {
-    const self = this
-    self.setData({
+  async bindEmergencyCall() {
+    this.setData({
       showCalls: true,
     })
 
     var message = "获取坐标会有助于您报警救援时给出准确位置；小程序不会记录您的位置，请放心！"
-    util.authorize("userLocation", message, res => {
-      console.log("util.authorize,userLocation")
-      wx.getLocation({
-        altitude: true,
-        success(res) {
-          console.log(res)
-          console.log(self.data.Calls)
-          self.data.Calls[0].subname = "经度:" + res.longitude + ",维度:" + res.latitude + ",海拔:" + res.altitude + ",误差:" + res.accuracy + "米"
-          self.setData({
-            Calls: self.data.Calls
-          })
-        }
-      })
+    await util.authorize("userLocation", message)
+    console.log("util.authorize,userLocation")
+    let res = promisify.getLocation({altitude: true})
+    console.log(res)
+    console.log(this.data.Calls)
+    this.data.Calls[0].subname = "经度:" + res.longitude + ",维度:" + res.latitude + ",海拔:" + res.altitude + ",误差:" + res.accuracy + "米"
+    this.setData({
+      Calls: this.data.Calls
     })
   },
 

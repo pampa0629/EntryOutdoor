@@ -33,7 +33,7 @@ Page({
     Colors: null,
   },
 
-  onLoad: function(options) {
+  async onLoad(options) {
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
@@ -50,12 +50,10 @@ Page({
       hasModified: prevPage.data.hasModified,
     })
 
-    util.loadBrand(brand=>{
-      self.setData({
-        Brands: brand,
-      })
+    let brand = await util.loadBrand()
+    self.setData({
+      Brands: brand,
     })
-
   },
 
   onUnload: function() {

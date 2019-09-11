@@ -19,7 +19,8 @@ const ensureMember=(groupOpenid, openid, personid, userInfo)=>{
         res.data.members[openid] = member
         console.log("group id: "+res.data._id)
         console.log(res.data.members)
-        cloudfun.updateGroupMembers(res.data._id, res.data.members)
+        // cloudfun.updateGroupMembers(res.data._id, res.data.members)
+        cloudfun.opGroupItem(res.data._id, "members", res.data.members, "")
       })
     } else { // 不存在则新创建记录
       let item = "members[" + openid+"]"
@@ -34,7 +35,8 @@ const ensureMember=(groupOpenid, openid, personid, userInfo)=>{
         console.log(res)
         var members = {}
         members[openid] = member
-        cloudfun.updateGroupMembers(res._id, members)
+        // cloudfun.updateGroupMembers(res._id, members)
+        cloudfun.opGroupItem(res._id, "members", members, "")
       })
     }
   })
@@ -45,7 +47,8 @@ const changeOwner=(groupid, ownerOpenid, callback)=>{
   console.log("group.changeOwner")
   dbGroups.doc(groupid).get().then(res=>{
     var owner = res.data.members[ownerOpenid]
-    cloudfun.updateGroupOwner(groupid, owner)
+    // cloudfun.updateGroupOwner(groupid, owner)
+    cloudfun.opGroupItem(groupid, "owner", owner, "")
     if (callback) {
       callback(owner)
     }
@@ -53,7 +56,8 @@ const changeOwner=(groupid, ownerOpenid, callback)=>{
 }
 
 const saveRank=(groupid, rank)=>{
-  cloudfun.updateGroupRank(groupid, rank)
+  // cloudfun.updateGroupRank(groupid, rank)
+  cloudfun.opGroupItem(groupid, "rank", rank, "")
 }
 
 module.exports = {

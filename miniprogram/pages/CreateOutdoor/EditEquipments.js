@@ -39,7 +39,7 @@ Page({
     }
   },
 
-  onLoad: function(options) {
+  async onLoad(options) {
     const self = this
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
@@ -56,10 +56,9 @@ Page({
       //areaList: select.area, // 系统默认
     })
 
-    util.loadArea(area=>{
-      self.setData({
-        areaList:area,
-      })
+    let area = await util.loadArea()
+    self.setData({
+      areaList:area,
     })
 
     console.log(limits)
@@ -76,18 +75,17 @@ Page({
         weatherText: "活动过期，无法获取天气预报，系统也无法推荐装备",
       })
     } else if (self.data.equipments.area) { // 没过期，有活动地区，则查询天气预报
-      odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
-        if (weather.result) {
-          self.setData({
-            weather: weather.weather,
-            weatherText: odtools.buildWeatherMessage(weather.weather),
-          })
-        } else {
-          self.setData({
-            weatherText: weather.msg,
-          })
-        }
-      })
+      let weather = await odtools.getWeather(self.data.equipments.area, self.data.date)
+      if (weather.result) {
+        self.setData({
+          weather: weather.weather,
+          weatherText: odtools.buildWeatherMessage(weather.weather),
+        })
+      } else {
+        self.setData({
+          weatherText: weather.msg,
+        })
+      }
     }
 
     var hasEquipments = limits && limits.equipments && (limits.equipments.must.length || limits.equipments.can.length || limits.equipments.no.length)
@@ -103,36 +101,33 @@ Page({
   },
 
   loadEquipments(weather) {
-    const self = this
-    var area = self.data.equipments.area
-    odtools.loadEquipments(self.data.loaded, self.data.date, weather, equipments => {
-      self.setData({
-        equipments: equipments,
-        "equipments.area": area,
-        hasModified: true,
-      })
-      self.createButtonFun()
+    var area = this.data.equipments.area
+    let equipments = odtools.loadEquipments(this.data.loaded, this.data.date, weather)
+    this.setData({
+      equipments: equipments,
+      "equipments.area": area,
+      hasModified: true,
     })
+    this.createButtonFun()
   },
 
   // 恢复默认装备推荐
-  loadDefault: function() {
+  async loadDefault() {
     const self = this
     // 没有天气预报，又没有过期，就查询一下
     if (!this.data.od.expired) { // 没过期，又没有给天气预报，则查询天气预报
-      odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
-        if (weather.result) {
-          self.setData({
-            weather: weather.weather,
-            weatherText: odtools.buildWeatherMessage(weather.weather),
-          })
-          self.loadEquipments(self.data.weather)
-        } else {
-          self.setData({
-            weatherText: weather.msg,
-          })
-        }
-      })
+      let weather = await odtools.getWeather(self.data.equipments.area, self.data.date)
+      if (weather.result) {
+        self.setData({
+          weather: weather.weather,
+          weatherText: odtools.buildWeatherMessage(weather.weather),
+        })
+        self.loadEquipments(self.data.weather)
+      } else {
+        self.setData({
+          weatherText: weather.msg,
+        })
+      }
     }
   },
 

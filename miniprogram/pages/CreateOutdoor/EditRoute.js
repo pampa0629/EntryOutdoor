@@ -234,13 +234,12 @@ Page({
   },
 
   copyinUrl(index) {
-    console.log("copyinUrl")
-    console.log(index)
+    console.log("copyinUrl():", index)
     const self = this
     const sites = self.data.route.trackSites
     wx.getClipboardData({
       success: function(res) {
-        console.log(res.data)
+        console.log("getClipboardData:",res.data)
         self.setData({
           ["route.trackSites[" + index + "].url"]: res.data,
           ["route.trackSites[" + index + "].trackid"]: self.removePrePost(res.data, index),
@@ -253,12 +252,12 @@ Page({
 
   // 删除网址的前缀和后缀
   removePrePost(url, index) {
-    const self = this
-    var pre = self.data.route.trackSites[index].pre
-    var post = self.data.route.trackSites[index].post
-    console.log(url)
+    console.log("removePrePost():", url, index)
+    console.log("trackSites:", this.data.route.trackSites[index])
+    var pre = this.data.route.trackSites[index].urlpre
+    var post = this.data.route.trackSites[index].urlpost
     console.log(pre)
-    console.log(post)
+    console.log(post) 
     return url.substr(pre.length, url.length - pre.length - post.length)
   },
 

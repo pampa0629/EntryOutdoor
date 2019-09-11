@@ -491,7 +491,7 @@ Page({
     var cookie = ""
     if (self.data.mofang_pid) {
       cookie += self.data.mofang_pid // + ";"  
-    }
+    } 
     // cookie += self.data.cookies0 // + ";"
     // cookie += self.data.cookies1
     console.log("cookie: " + cookie)
@@ -663,11 +663,11 @@ Page({
   },
 
   tapOD() {
-    this.data.od.load("57896b495cf64f1e0b873e3675d01598", callback => {
-      this.setData({
-        od: this.data.od
-      })
-    })
+    // this.data.od.load("57896b495cf64f1e0b873e3675d01598", callback => {
+    //   this.setData({
+    //     od: this.data.od
+    //   })
+    // })
   },
 
   find(objs, name, id) {

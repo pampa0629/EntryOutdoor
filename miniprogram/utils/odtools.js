@@ -3,6 +3,7 @@ const util = require('./util.js')
 var bmap = require('../libs/bmap-wx.min.js')
 const cloudfun = require('./cloudfun.js')
 const template = require('./template.js')
+const promisify = require('./promisify.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -103,112 +104,103 @@ const buildWeatherMessage = (weather) => {
   return message
 }
 
-const getLocation = (callback) => {
-  wx.getSetting({
-    success(res) {
-      if (!res.authSetting['scope.userLocation']) {
-        wx.authorize({
-          scope: 'scope.userLocationscope.userLocation',
-          success() {
-            console.log('scope.userLocationv OK')
-            wx.getLocation({
-              type: 'wgs84',
-              success: function(res) {
-                if (callback) {
-                  callback(res)
-                }
-              }
-            })
-          },
-          fail() {
-            wx.showModal({
-              title: '请给予授权',
-              content: '授权获取大致位置，才能通过所在城市的天气预报推荐装备，不然装备推荐不准。小程序不会记录您的位置',
-            })
-          }
-        })
-      } else {
-        wx.getLocation({
-          type: 'wgs84',
-          success: function(res) {
-            if (callback) {
-              callback(res)
-            }
-          }
-        })
-      }
-    }
+const getLocation = async() => {
+  const message = "授权获取大致位置，才能通过所在城市的天气预报推荐装备，不然装备推荐不准。小程序不会记录您的位置"
+  await util.authorize("userLocation", message)
+  let res = await promisify.getLocation({
+    type: 'wgs84'
   })
+  return res
 }
 
-// 根据地区和日期，查看天气预报
-const getWeather = (area, date, callback) => {
-  var ak = "zGuNHdYow4wGhrC1IytHDweHPWGxdbaX"
-  wx.request({ // 通过area得到经纬度
-    url: "https://api.map.baidu.com/geocoder/v2/?address=" + area + "&output=json&ak=" + ak,
-    fail: function(error) {
-      console.log(error)
-      if (callback) {
-        callback({
-          result: false,
-          msg: area + "转化经纬度失败，具体原因是：" + error
-        })
-      }
-    },
-    success: function(res) {
-      console.log(res);
-      var latitude = res.data.result.location.lat //维度
-      var longitude = res.data.result.location.lng //经度
-      var BMap = new bmap.BMapWX({
-        ak: ak
-      });
-      BMap.weather({
-        location: longitude + "," + latitude,
-        fail: function(error) {
-          console.log(error)
-          if (callback) {
-            callback({
-              result: false,
-              msg: "获取天气预报失败，具体原因是：" + error
-            })
-          }
-        },
-        success: function(res) {
-          console.log(res)
-          let forecast = res.originalData.results[0].weather_data
-          console.log(forecast)
-          var nowDay = new Date()
-          var lastDay = new Date()
-          lastDay.setDate(nowDay.getDate() + forecast.length)
-          var outdoorDay = new Date(date)
-          var index = forecast.length - 1 // 用哪天的数据
-          if (lastDay >= outdoorDay) {
-            index = Math.ceil((outdoorDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24));
-            if (index >= forecast.length) {
-              index = forecast.length - 1
-            }
-          }
-          console.log("outdoorDay is:" + outdoorDay)
-          console.log("nowDay is:" + nowDay)
-          console.log("lastDay is:" + lastDay)
-          console.log(index)
-          var weather = null
-          if (index >= 0 && index < forecast.length) {
-            weather = forecast[index]
-            weather.area = area
-          }
-          console.log(weather)
-          if (callback) {
-            callback({
-              result: true,
-              weather: weather
-            })
-          }
-        }
-      })
-    }
-  })
+// let res = await promisify.getSetting({})
+// if (!res.authSetting['scope.userLocation']) {
+//   wx.authorize({
+//     scope: 'scope.userLocation',
+//     success() {
+//       console.log('scope.userLocationv OK')
+//       wx.getLocation({
+//         type: 'wgs84',
+//         success: function(res) {
+//           if (callback) {
+//             callback(res)
+//           }
+//         }
+//       })
+//     },
+//     fail() {
+//       wx.showModal({
+//         title: '请给予授权',
+//         content: '授权获取大致位置，才能通过所在城市的天气预报推荐装备，不然装备推荐不准。小程序不会记录您的位置',
+//       })
+//     }
+//   })
+// } else {
+//   wx.getLocation({
+//     type: 'wgs84',
+//     success: function(res) {
+//       if (callback) {
+//         callback(res)
+//       }
+//     }
+//   })
+// }
+// }
 
+// 根据地区和日期，查看天气预报
+const getWeather = async(area, date) => {
+var ak = "zGuNHdYow4wGhrC1IytHDweHPWGxdbaX"
+try {
+  let resLocation = await promisify.request({ // 通过area得到经纬度
+    url: "https://api.map.baidu.com/geocoder/v2/?address=" + area + "&output=json&ak=" + ak
+  })
+  console.log(resLocation);
+  var latitude = resLocation.data.result.location.lat //维度
+  var longitude = resLocation.data.result.location.lng //经度
+
+  var BMap = new bmap.BMapWX({
+    ak: ak
+  })
+  const promise_weather = promisify(BMap.weather)
+
+  let resWeather = promise_weather({
+    location: longitude + "," + latitude
+  })
+  console.log(resWeather)
+  let forecast = resWeather.originalData.results[0].weather_data
+  console.log(forecast)
+  var nowDay = new Date()
+  var lastDay = new Date()
+  lastDay.setDate(nowDay.getDate() + forecast.length)
+  var outdoorDay = new Date(date)
+  var index = forecast.length - 1 // 用哪天的数据
+  if (lastDay >= outdoorDay) {
+    index = Math.ceil((outdoorDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24));
+    if (index >= forecast.length) {
+      index = forecast.length - 1
+    }
+  }
+  console.log("outdoorDay is:" + outdoorDay)
+  console.log("nowDay is:" + nowDay)
+  console.log("lastDay is:" + lastDay)
+  console.log(index)
+  var weather = null
+  if (index >= 0 && index < forecast.length) {
+    weather = forecast[index]
+    weather.area = area
+  }
+  console.log(weather)
+  return {
+      result: true,
+      weather: weather
+    }
+  }catch (err) {
+  console.log(err)
+  return {
+      result: false,
+      msg: "获取天气预报或转化经纬度失败，具体原因是：" + err
+    }
+  }
 }
 
 // 把天气预报的结果转换一个户外装备需要的表达方式
@@ -261,7 +253,7 @@ const simulateWeather = (date) => {
 
 // 根据负重类型和活动日期，得到默认的装备列表
 // 根据地区和日期，得到天气预报，再推荐合适的装备（防雨、防晒、保温等）
-const loadEquipments = (loaded, date, weather, callback) => {
+const loadEquipments = (loaded, date, weather) => {
   var e = {}
   if (weather) {
     weather = convertWeather(weather)
@@ -338,9 +330,7 @@ const loadEquipments = (loaded, date, weather, callback) => {
     e.must.push(waterRes)
   }
 
-  if (callback) {
-    callback(e)
-  }
+  return e
 }
 
 // 把车辆信息输出为一个短语
@@ -374,65 +364,63 @@ const buildCostInfo = (traffic) => {
 }
 
 // 提醒占坑队员，占坑截止时间临近  
-const remindOcuppy = (od, callback) => {
+const remindOcuppy = async(od) => {
   console.log("odtools.remindOcuppy()")
 
-  dbOutdoors.doc(od.outdoorid).get().then(res => {
-    const members = res.data.members
-    var temp = calcRemainTime(od.title.date, od.limits.ocuppy, true)
-    var remain = buildRemainText(calcRemainTime(od.title.date, od.limits.ocuppy, true))
-    console.log("temp:", temp)
-    console.log("remain:", remain)
+  let res = await dbOutdoors.doc(od.outdoorid).get()
+  const members = res.data.members
+  var temp = calcRemainTime(od.title.date, od.limits.ocuppy, true)
+  var remain = buildRemainText(calcRemainTime(od.title.date, od.limits.ocuppy, true))
+  console.log("temp:", temp)
+  console.log("remain:", remain)
 
-    // 循环，找到所有占坑者
-    for (var i = 0; i < members.length; i++) {
-      if (members[i].entryInfo.status == "占坑中" && !members[i].remained) {
-        // 给占坑者发模板消息
-        template.sendRemindMsg2Ocuppy(members[i].personid, od.outdoorid, od.title.whole, remain, od.leader.userInfo.nickName, od.members.length + od.addMembers.length)
-        members[i].remained = true
-      }
+  // 循环，找到所有占坑者
+  for (var i = 0; i < members.length; i++) {
+    if (members[i].entryInfo.status == "占坑中" && !members[i].remained) {
+      // 给占坑者发模板消息
+      template.sendRemindMsg2Ocuppy(members[i].personid, od.outdoorid, od.title.whole, remain, od.leader.userInfo.nickName, od.members.length + od.addMembers.length)
+      members[i].remained = true
     }
+  }
 
-    cloudfun.updateOutdoorMembers(od.outdoorid, members, null)
-  })
+  // cloudfun.updateOutdoorMembers(od.outdoorid, members, null)
+  cloudfun.opOutdoorItem(od.outdoorid, "members", members, "")
 }
 
 // 超过占坑截止时间（外部判断），则清退所有占坑队员，后续替补
-const removeOcuppy = (outdoorid, callback) => {
+const removeOcuppy = async(outdoorid) => {
   console.log("odtools.removeOcuppy()")
-  dbOutdoors.doc(outdoorid).get().then(res => {
-    const members = res.data.members
-    var count = 0
-    // 第一遍循环，找到所有占坑者
-    for (var i = 0; i < members.length; i++) {
-      if (members[i].entryInfo.status == "占坑中") {
-        console.log(i, JSON.stringify(members[i]))
-        count++
-        // 给被强制退坑者发模板消息
-        template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
-        members.splice(i, 1)
-        i-- // i 要回退一格
-      }
+  let res = await dbOutdoors.doc(outdoorid).get()
+  const members = res.data.members
+  var count = 0
+  // 第一遍循环，找到所有占坑者
+  for (var i = 0; i < members.length; i++) {
+    if (members[i].entryInfo.status == "占坑中") {
+      console.log(i, JSON.stringify(members[i]))
+      count++
+      // 给被强制退坑者发模板消息
+      template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
+      members.splice(i, 1)
+      i-- // i 要回退一格
     }
+  }
 
-    // 第二遍循环，对应的替补队员改为报名
-    for (var i = 0; i < members.length && count > 0; i++) {
-      if (members[i].entryInfo.status == "替补中") {
-        console.log(i, JSON.stringify(members[i]))
-        count--
-        members[i].entryInfo.status = "报名中"
-        // 给替补上的队员发模板消息
-        template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
-      }
+  // 第二遍循环，对应的替补队员改为报名
+  for (var i = 0; i < members.length && count > 0; i++) {
+    if (members[i].entryInfo.status == "替补中") {
+      console.log(i, JSON.stringify(members[i]))
+      count--
+      members[i].entryInfo.status = "报名中"
+      // 给替补上的队员发模板消息
+      template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
     }
+  }
 
-    // 删完了还得存到数据库中，调用云函数写入
-    cloudfun.updateOutdoorMembers(outdoorid, members, null)
+  // 删完了还得存到数据库中，调用云函数写入
+  // cloudfun.updateOutdoorMembers(outdoorid, members, null)
+  cloudfun.opOutdoorItem(outdoorid, "members", members, "")
 
-    if (callback) {
-      callback(members)
-    }
-  })
+  return members
 }
 
 // 构建剩余时间的文本提示信息
@@ -495,7 +483,7 @@ const calcRemainTime = (outdoorDate, limitItem, isOccupy) => {
   return remainMinute
 }
 
-const getChatStatus = (personid, nickName, chat, callback) => {
+const getChatStatus = (personid, nickName, chat) => {
   if (chat && chat.messages) {
     var count = 0
     if (chat.seen && chat.seen[personid]) {
@@ -517,9 +505,7 @@ const getChatStatus = (personid, nickName, chat, callback) => {
         status = "new"
       }
     }
-    if (callback) {
-      callback(status)
-    }
+    return status
   }
 }
 
@@ -537,15 +523,15 @@ const buildChatMessage = (msg) => {
   return message
 }
 
-const findPersonIndex = (members, personid, callback) => {
-  members.forEach((item, index) => {
-    if (item.personid == personid) {
-      if (callback) {
-        callback(index)
-      }
-    }
-  })
-}
+// const findPersonIndex = (members, personid, callback) => {
+//   members.forEach((item, index) => {
+//     if (item.personid == personid) {
+//       if (callback) {
+//         callback(index)
+//       }
+//     }
+//   })
+// }
 
 const drawText = (canvas, text, x, y, size, dy, color) => {
   canvas.font = size + "px sans-serif" //  "normal bold 12px cursive"
@@ -614,7 +600,8 @@ const setCFO = (outdoorid, cfo) => {
       pay = res.data.pay
     }
     pay.cfo = cfo
-    cloudfun.updateOutdoorPay(outdoorid, pay)
+    // cloudfun.updateOutdoorPay(outdoorid, pay)
+    cloudfun.opOutdoorItem(outdoorid, "pay", pay, "")
     // 发模板消息
     template.sendAppointMsg2CFO(cfo.personid, outdoorid, res.data.title.whole, cfo.nickName)
   })
@@ -628,7 +615,8 @@ const setPayMine = (outdoorid, personid, mine) => {
       pay.results = {}
     }
     pay.results[personid] = mine
-    cloudfun.updateOutdoorPay(outdoorid, pay)
+    // cloudfun.updateOutdoorPay(outdoorid, pay)
+    cloudfun.opOutdoorItem(outdoorid, "pay", pay, "")
   })
 }
 
@@ -661,15 +649,15 @@ const entryFull = (limits, members, addMembers) => {
   return full
 }
 
-const getWebsites = (outdoorid, callback) => {
-  dbOutdoors.doc(outdoorid).get().then(res => {
-    if (callback) {
-      callback(res.data.websites)
-    }
-  })
-}
+// const getWebsites = (outdoorid, callback) => {
+//   dbOutdoors.doc(outdoorid).get().then(res => {
+//     if (callback) {
+//       callback(res.data.websites)
+//     }
+//   })
+// }
 
-const getWebsites_a = async (outdoorid) => {
+const getWebsites = async(outdoorid) => {
   const res = await dbOutdoors.doc(outdoorid).get()
   return res.data.websites
 }
@@ -710,12 +698,12 @@ module.exports = {
   isNeedAA: isNeedAA, // 判断某个时刻退出活动是否需要AA费用
 
   getWebsites: getWebsites, // 得到数据库中的网站同步结构
-  getWebsites_a: getWebsites_a, // aynsc
+  // getWebsites_a: getWebsites_a, // aynsc
 
   getChatStatus: getChatStatus, // 判断留言的状态：self、new等
   buildChatMessage: buildChatMessage, // 构建一条留言
 
-  findPersonIndex: findPersonIndex, // 从Members数组中找到自己的index
+  // findPersonIndex: findPersonIndex, // 从Members数组中找到自己的index
 
   setCFO: setCFO, // 设置财务官
   setPayMine: setPayMine, // 设置我的活动费用支付结果

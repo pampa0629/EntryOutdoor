@@ -7,4 +7,6 @@
 <van-button size="large"  bind:click="tapUndefined">未定义</van-button>
 <van-button size="large"  bind:click="tapLocation">实时位置</van-button>
 <van-button size="large"  bind:click="tapPython">python</van-button>
+<van-button size="large"  bind:click="tapKET">KET</van-button>
+<van-button size="large"  bind:click="tapCallback">去回调</van-button>
 

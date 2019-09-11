@@ -17,43 +17,43 @@ Page({
     isLeader: false, // 是否是领队：领队能看到队员的电话，非领队看不到；领队按照集合地点排列名单，队员不需要
   },
  
-  onLoad: function(options) {
-    const self = this;
+  async onLoad(options) {
+    console.log("PrintOutdoor.js onLoad()")
     if (options.isLeader == "true") {
-      self.setData({
+      this.setData({
         isLeader: true,
       })
     }
-    console.log("PrintOutdoor.js in onLoad fun, isLeader is:" + self.data.isLeader)
+    console.log("isLeader is:", this.data.isLeader)
    
     this.data.od = new outdoor.OD()
-    this.data.od.load(options.outdoorid, od => {
-      console.log("od:",od)
-      
-      var myself = util.findValue(od.members, "personid", app.globalData.personid)
-      if (myself && myself.entryInfo.status == "领队组") {
-        self.setData({ // 领队组也算领队
-          isLeader: true,
-        })
-      }
-
-      // 处理兼容性
-      self.dealCompatibility()
-
-      // 把队员按照集合地点进行排列
-      self.groupMembersByMeets()
-      self.dealChecked()
-
-      // 不是领队，隐藏电话号码中间三位
-      console.log(self.data.isLeader)
-      if (!self.data.isLeader) {
-        self.hidePhone()
-      }
-
-      // 设置活动信息
-      self.setData({
-        od: self.data.od,
+    await this.data.od.load(options.outdoorid)
+    const od = this.data.od
+    console.log("od:",od)
+    
+    var myself = util.findValue(od.members, "personid", app.globalData.personid)
+    if (myself && myself.entryInfo.status == "领队组") {
+      this.setData({ // 领队组也算领队
+        isLeader: true,
       })
+    }
+
+    // 处理兼容性
+    this.dealCompatibility()
+
+    // 把队员按照集合地点进行排列
+    this.groupMembersByMeets()
+    this.dealChecked()
+
+    // 不是领队，隐藏电话号码中间三位
+    console.log(this.data.isLeader)
+    if (!this.data.isLeader) {
+      this.hidePhone()
+    }
+
+    // 设置活动信息
+    this.setData({
+      od: this.data.od,
     })
   },
 

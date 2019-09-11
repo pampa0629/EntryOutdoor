@@ -53,17 +53,15 @@
 <!--活动规则-->
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="活动规则"></van-cell>
-  <!-- <van-checkbox-group> -->
-    <van-cell title="AA" title-width="80%" label="公共费用所有成员AA；领队确认活动成行后再退出，若无人替补，费用也要分摊" clickable bind:click="checkAA"> 
-      <van-checkbox value="{{limits.isAA}}"/>
-    </van-cell>
-    <van-cell title="环保" title-width="80%" label="带走自己不可降解的垃圾，不摘一花一叶" clickable bind:click="checkEnvironment">
-      <van-checkbox value="{{limits.isEnvironment}}"/>
-    </van-cell>
-      <van-cell title="守时" title-width="80%" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime">
-        <van-checkbox value="{{limits.isKeepTime}}"/>
-    </van-cell>
-  <!-- </van-checkbox-group> -->
+  <van-cell title="AA" title-width="80%" label="公共费用所有成员AA；领队确认活动成行后再退出，若无人替补，费用也要分摊" clickable bind:click="checkAA"> 
+    <van-checkbox value="{{limits.isAA}}"/>
+  </van-cell>
+  <van-cell title="环保" title-width="80%" label="带走自己不可降解的垃圾，不摘一花一叶" clickable bind:click="checkEnvironment">
+    <van-checkbox value="{{limits.isEnvironment}}"/>
+  </van-cell>
+  <van-cell title="守时" title-width="80%" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime">
+      <van-checkbox value="{{limits.isKeepTime}}"/>
+  </van-cell>
 </van-panel>
 
 <!--故意空白，防止遮挡-->

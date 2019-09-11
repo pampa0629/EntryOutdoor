@@ -21,32 +21,30 @@ Page({
     outdoors: {}, // 领队发起的活动列表
   },
 
-  onLoad: function(options) {
+  async onLoad(options) {
     const self = this
   
     // 读取领队信息
     console.log(options)
-    self.data.leaderid = options.leaderid
-    dbPersons.doc(self.data.leaderid).get().then(res => {
-      self.setData({
-        outdoors: res.data.myOutdoors,
-      })
-      if (res.data.subscribers && res.data.subscribers[app.globalData.personid]) {
-        self.setData({
-          mine: res.data.subscribers[app.globalData.personid], // 得到自己的订阅信息
-          hasSubscribed: true
-        })
-      }
+    this.data.leaderid = options.leaderid
+    let res = await dbPersons.doc(this.data.leaderid).get()
+    this.setData({
+      outdoors: res.data.myOutdoors,
     })
+    if (res.data.subscribers && res.data.subscribers[app.globalData.personid]) {
+      this.setData({
+        mine: res.data.subscribers[app.globalData.personid], // 得到自己的订阅信息
+        hasSubscribed: true
+      })
+    }
 
     if (app.checkLogin()) {
       // 得到过滤后的formids
-      template.clearPersonFormids(app.globalData.personid, formids => {
-        self.setData({
-          formids: formids,
-        })
-        console.log(self.data.formids.length)
+      let formids = template.clearPersonFormids(app.globalData.personid)
+      this.setData({
+        formids: formids,
       })
+      console.log(this.data.formids.length)
     }
   },
 
@@ -54,7 +52,8 @@ Page({
     const self = this
     // 领队用云函数
     console.log(self.data.mine)
-    cloudfun.updatePersonSubscriber(self.data.leaderid, app.globalData.personid, self.data.mine)
+    // cloudfun.updatePersonSubscriber(self.data.leaderid, app.globalData.personid, self.data.mine)
+    cloudfun.opPersonItem(self.data.leaderid, "subscribers."+app.globalData.personid, self.data.mine, "")
   },
 
   // 订阅领队/取消订阅
@@ -80,7 +79,7 @@ Page({
   addCount(e) {
     console.log("addCount: " + e.detail.formId)
     const self = this
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId)
     self.data.formids.push(e.detail.formId)
     self.setData({
       formids: self.data.formids

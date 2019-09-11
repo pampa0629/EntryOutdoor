@@ -114,27 +114,24 @@ Page({
   },
  
   // 内部实现
-  loginLvyeorg:function(){
-    const self = this;
-    // 调用app中的登录函数
-    console.log("loginLvyeorg: function")
-    console.log(self.data.lvyeorgInfo)
-    lvyeorg.login(self.data.lvyeorgInfo.username, self.data.password, res => {
-      if(res.username){
-        console.log("loginLvyeOrg callback")
-        // 并存储到数据库中
-        self.save2Person()
-        self.setData({
-          hasLogin: true
-        })
-        console.log(self.data.lvyeorgInfo)
-        // 记得把全局的设置上
-        app.globalData.lvyeorgInfo = self.data.lvyeorgInfo
-        app.globalData.lvyeorgLogin = true
-      }
-      // 修改MyInfo中的按钮中的username名称
-      self.setMyInfoUsername(res)
-    })
+  async loginLvyeorg(){
+    console.log("loginLvyeorg()")
+    console.log(this.data.lvyeorgInfo)
+    let res = await lvyeorg.login(this.data.lvyeorgInfo.username, this.data.password)
+    if(res.username){
+      console.log("loginLvyeOrg callback")
+      // 并存储到数据库中
+      this.save2Person()
+      this.setData({
+        hasLogin: true
+      })
+      console.log(this.data.lvyeorgInfo)
+      // 记得把全局的设置上
+      app.globalData.lvyeorgInfo = this.data.lvyeorgInfo
+      app.globalData.lvyeorgLogin = true
+    }
+    // 修改MyInfo中的按钮中的username名称
+    this.setMyInfoUsername(res)
   },
 
   // 修改MyInfo中的按钮中的username名称
@@ -148,15 +145,14 @@ Page({
     }
   },
   
-  tapLvyeorgLogout: function () {
+  async tapLvyeorgLogout() {
     var self = this;
-    lvyeorg.logout(callback=>{
-      self.setData({
-        hasLogin: false
-      })
-      app.globalData.lvyeorgLogin = false
-      self.setMyInfoUsername({error:"绿野ORG登录"}) // 退出设置
+    await lvyeorg.logout()
+    this.setData({
+      hasLogin: false
     })
+    app.globalData.lvyeorgLogin = false
+    this.setMyInfoUsername({error:"绿野ORG登录"}) // 退出设置
   },
 
   // 新用户注册

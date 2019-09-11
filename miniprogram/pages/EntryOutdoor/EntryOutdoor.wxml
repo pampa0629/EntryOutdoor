@@ -151,8 +151,9 @@
           <van-radio name="{{index}}" />
         </van-cell>
       </van-col>
-      <van-col span="3" offset="1" wx:if="{{index==entryInfo.meetsIndex && od.meets[index].latitude}}">
-        <van-button type="primary" plain size="small" bind:click="lookMeetMap">地图</van-button>
+      <!-- <van-col span="3" offset="1" wx:if="{{index==entryInfo.meetsIndex && od.meets[index].latitude}}"> -->
+      <van-col span="3" offset="1" wx:if="{{od.meets[index].latitude}}">
+        <van-button type="primary" plain size="small" bind:click="lookMeetMap{{index}}">地图</van-button>
       </van-col>
     </van-row>
   </van-radio-group>

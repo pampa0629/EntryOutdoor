@@ -6,8 +6,10 @@ const dbPersons = db.collection('Persons')
 const _ = db.command
 
 const util = require('../../utils/util.js')
+const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
-const crypto = require('../../utils/crypto.js')
+const promisify = require('../../utils/promisify.js')
+// const crypto = require('../../utils/crypto.js')
 
 // let interstitialAd = null // 插屏广告
 
@@ -25,6 +27,8 @@ Page({
     nickErrMsg: "", // 昵称必须唯一
     oldNickName: "", // 只有修改了，才进行昵称的唯一性判断
 
+    facecodes:[], // 脸部特征数组，每个元素包括：src，云存储地址和 code：特征编码
+
     showEmergency: false, // 是否显示紧急联系信息
     emergency: { // 紧急联系方式                                                                               
       contact: {
@@ -40,16 +44,19 @@ Page({
     },
   },
 
-  onLoad: function(options) {
-    const self = this;
+  async onLoad(options) {
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
-    self.setData({
+    this.setData({
       userInfo: prevPage.data.userInfo,
       password: wx.getStorageSync("EmergencyPassword")
     })
     console.log("password: ", this.data.password)
-    self.data.oldNickName = self.data.userInfo.nickName
+    this.data.oldNickName = this.data.userInfo.nickName
+
+    // 直接load得到facecodes
+    let res = await dbPersons.doc(app.globalData.personid).get()
+    this.data.facecodes = res.data.facecodes ? res.data.facecodes:[]
 
     // dbPersons.doc(app.globalData.personid).get().then(res => {
     //   if (res.data.emergency) {
@@ -122,22 +129,20 @@ Page({
     }
   },
  
-  changeNickname: function(e) {
+  async changeNickname(e) {
     console.log(e)
-    const self = this
-    person.checkNickname(e.detail,app.globalData.personid, (errMsg,result)=>{
-      console.log("change name:" + result + ", " + errMsg)
-      if(!result) { // 不成功，强制回到最后一个合法的名字
-        e.detail = self.data.oldNickName
-      } 
-      self.setData({
-        hasModified: true,
-        "userInfo.nickName": e.detail,
-        userInfo: self.data.userInfo,
-        nickErrMsg: errMsg,
-      })
-      console.log("old name:" + self.data.oldNickName)
+    let res = await person.checkNickname(e.detail,app.globalData.personid) // , (errMsg,result)=>{
+    console.log("change name:" + res.result + ", " + res.msg)
+    if (!res.result) { // 不成功，强制回到最后一个合法的名字
+      e.detail = this.data.oldNickName
+    } 
+    this.setData({
+      hasModified: true,
+      "userInfo.nickName": e.detail,
+      userInfo: this.data.userInfo,
+      nickErrMsg: res.errMsg,
     })
+    console.log("old name:" + this.data.oldNickName)
   },
 
   changePhone: function(e) {
@@ -171,6 +176,137 @@ Page({
     // this.showAd()
   },
 
+  
+// 个人标准照片
+  // 增加照片
+  async addStandardPic(e) {
+    var self = this
+    var length = self.data.facecodes.length
+    
+    let resChoose = await promisify.chooseImage({
+      count: 1, // 
+      sizeType: ['original'], //['original', 'compressed'], // 必须用原图
+      sourceType: ['album', 'camera'], // ['album', 'camera'], 
+    })
+    console.log("chooseImage:", resChoose)
+
+    const item = resChoose.tempFiles[0]
+    if (item.size < 5000) { // 图片不能小于5kb
+      wx.showToast({
+        title: '图片不能小于5KB，防止脸部不够清晰',
+      })
+    } else {
+      wx.showLoading({title: "正在上传图片"})
+      console.log(item.path)
+      let resUpload = await wx.cloud.uploadFile({
+        cloudPath: util.buildPersonPhotoSrc(app.globalData.personid, length),
+        filePath: item.path
+      })// 小程序临时文件路径
+      console.log("fileID:", resUpload.fileID)
+      const resTemp = await wx.cloud.getTempFileURL({
+        fileList: [resUpload.fileID]
+      })
+      const tempUrl = resTemp.fileList[0].tempFileURL
+      console.log("url:", tempUrl)
+      
+      wx.showLoading({ title: "人脸识别中..." })
+      let code = await promisify.request({
+        url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url=" + tempUrl,
+        // method: "POST",
+      })
+      console.log("code:", code)
+      if (code.statusCode != 504) {
+        self.data.facecodes.push({ src: resUpload.fileID, code: code.data })
+        self.setData({
+          "facecodes": self.data.facecodes,
+        })
+        await cloudfun.opPersonItem(app.globalData.personid, "facecodes", self.data.facecodes)
+      } else{
+        wx.showToast({
+          title: '服务超时请重试',
+        })
+      }
+      wx.hideLoading()
+    }
+  },
+
+  async addStandardPic2(e) {
+    var self = this
+    var length = self.data.facecodes.length
+    const request = promisify(wx.request)
+    const chooseImage = promisify(wx.chooseImage)
+    wx.chooseImage({
+      count: 3 - length, // 
+      sizeType: ['original'], //['original', 'compressed'], // 必须用原图
+      sourceType: ['album', 'camera'], // ['album', 'camera'], 
+      async success(resChoose) {
+        resChoose.tempFiles.forEach(async (item, index) => {
+          if (item.size < 5000) { // 图片不能小于5kb
+            wx.showToast({
+              title: '图片不能小于5KB，防止脸部不够清晰',
+            })
+          } else {
+            wx.showLoading({
+              icon: "loading",
+              title: "正在上传图片"
+            })
+            console.log(item.path)
+            let resUpload = await wx.cloud.uploadFile({ 
+              cloudPath: util.buildPersonPhotoSrc(app.globalData.personid, index + length),
+              filePath: item.path })// 小程序临时文件路径
+            console.log("fileID:", resUpload.fileID)
+            const resTemp = await wx.cloud.getTempFileURL({
+              fileList: [resUpload.fileID]
+            })
+            const tempUrl = resTemp.fileList[0].tempFileURL
+            console.log("url:",tempUrl)
+            let code = await request({
+              url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url=" + tempUrl,
+              method: "POST",
+              // header: {
+              //   "content-type": "application/x-www-form-urlencoded"
+              // },
+            })
+            console.log("code:", code)
+            self.data.facecodes.push({src: resUpload.fileID,code:code.data})
+            self.setData({
+              "facecodes": self.data.facecodes,
+              })
+            await cloudfun.opPersonItem(app.globalData.personid, "facecodes", self.data.facecodes)
+            // self.data.pics.push({
+            //     src: resUpload.fileID
+            //   })
+            //   self.setData({
+            //     "pics": self.data.pics,
+            //   })
+            //   self.save()
+            // })
+            wx.hideLoading()
+          }
+        })
+      }
+    })
+  },
+
+// 删除照片
+  deleteStandardPic() {
+    console.log("CreateOutdoor.js in deletePic fun, pics count is:" + this.data.pics.length)
+    // 试着删除文件，要删不掉，则是用模板创建的活动，图片是别人的
+    var file = this.data.pics[this.data.pics.length - 1].src;
+    wx.cloud.deleteFile({
+      fileList: [file]
+    }).then(res => {
+      console.log("CreateOutdoor.js in deletePic fun, del pic ok: " + JSON.stringify(res, null, 2))
+    }).catch(err => {
+      console.error(err)
+    })
+
+    this.data.pics.pop(); // 去掉最后一个
+    this.save()
+  },
+
+
+// 紧急联系信息，暂时封存
   changeEmergency(e) {
     this.setData({
       showEmergency: e.detail,

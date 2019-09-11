@@ -20,7 +20,7 @@ Page({
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
     this.setData({
-      pics: prevPage.data.od.brief.pics,
+      pics: prevPage.data.od.brief.pics ? prevPage.data.od.brief.pics:[],
     })
 
     console.log(this.data.outdoorid)
@@ -88,7 +88,7 @@ Page({
     wx.cloud.deleteFile({
       fileList: [file]
     }).then(res => {
-      console.log("CreateOutdoor.js in deletePic fun, del pic ok: " + JSON.stringify(res, null, 2))
+      console.log("CreateOutdoor.js in deletePic fun, del pic ok, res: ",res)
     }).catch(err => {
       console.error(err)
     })

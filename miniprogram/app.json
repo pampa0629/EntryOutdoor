@@ -83,6 +83,10 @@
     "wx1599b7c8d1e2b4d4",
     "wxd45c635d754dbf59"
   ],
+  "networkTimeout": {
+    "request": 60000,
+    "downloadFile": 60000
+  },
   "sitemapLocation": "sitemap.json",
   "plugins": {
   }

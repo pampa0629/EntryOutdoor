@@ -1,6 +1,6 @@
 <!--路线途经点-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="途经点" label="预计到达时间"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="途经点及预计时间" label="行程安排仅供参考，领队根据实际情况，有变更的可能性"></van-cell>
   <van-cell wx:for="{{route.wayPoints}}" wx:key="place+time" title="{{index+1}}）{{item.place}}" value="{{item.date}}，{{item.time}}"/> 
 </van-panel>
 

@@ -18,7 +18,7 @@ Page({
     showMessage: "",
   },
 
-  onLoad: function(options) {
+  async onLoad(options) {
     console.log("onload")
     console.log(options)
     const self = this
@@ -36,38 +36,36 @@ Page({
         console.log(password)
       }
 
-      dbPersons.doc(self.data.personid).get().then(res => {
-        self.setData({
-          nickName: res.data.userInfo.nickName,
-          emergency: crypto.decrypt(res.data.emergency, password),
-          entriedOutdoors: res.data.entriedOutdoors,
-          myOutdoors: res.data.myOutdoors,
-        })
-        console.log(self.data.emergency)
-        if (self.data.emergency.entrust.open) {
-          var now = new Date()
-          cloudfun.getServerDate(time => {
-            now.setTime(time)
-            console.log(now.toLocaleDateString())
-            var start = new Date(self.data.emergency.entrust.start)
-            var end = new Date(self.data.emergency.entrust.end)
-            if ((now >= start && now <= end) || now.toLocaleDateString() == start.toLocaleDateString() || now.toLocaleDateString() == end.toLocaleDateString()) {
-              self.setData({
-                show: true,
-              })
-            }
-          })
-        }
-
-        if(!self.data.show) {
-          var message = self.data.nickName + "没有开启委托，或者不在可委托日期范围内。若确定有危险需要紧急联络，请报警并联系QQ：50463253，告知如下信息：1）数据库ID：" + self.data.personid + "；2）密钥：" + self.data.key
-          self.setData({
-            show: false,
-            showMessage: message,
-          })
-          console.log(self.data.showMessage)
-        }
+      let res = await dbPersons.doc(self.data.personid).get()
+      self.setData({
+        nickName: res.data.userInfo.nickName,
+        emergency: crypto.decrypt(res.data.emergency, password),
+        entriedOutdoors: res.data.entriedOutdoors,
+        myOutdoors: res.data.myOutdoors,
       })
+      console.log(self.data.emergency)
+      if (self.data.emergency.entrust.open) {
+        var now = new Date()
+        let time = cloudfun.getServerDate()
+        now.setTime(time)
+        console.log(now.toLocaleDateString())
+        var start = new Date(self.data.emergency.entrust.start)
+        var end = new Date(self.data.emergency.entrust.end)
+        if ((now >= start && now <= end) || now.toLocaleDateString() == start.toLocaleDateString() || now.toLocaleDateString() == end.toLocaleDateString()) {
+          self.setData({
+            show: true,
+          })
+        }
+      }
+
+      if(!self.data.show) {
+        var message = self.data.nickName + "没有开启委托，或者不在可委托日期范围内。若确定有危险需要紧急联络，请报警并联系QQ：50463253，告知如下信息：1）数据库ID：" + self.data.personid + "；2）密钥：" + self.data.key
+        self.setData({
+          show: false,
+          showMessage: message,
+        })
+        console.log(self.data.showMessage)
+      }
     }
   },
 

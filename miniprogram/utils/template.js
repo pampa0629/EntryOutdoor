@@ -33,7 +33,7 @@ const buildOneFormid = (formid) => {
 }
 
 // 把获得的formid给指定人员存起来，还有过期时间
-const savePersonFormid = (personid, formid, callback) => {
+const savePersonFormid = (personid, formid) => {
   console.log("savePersonFormid")
   var result = buildOneFormid(formid)
   if (result && personid) {
@@ -41,25 +41,16 @@ const savePersonFormid = (personid, formid, callback) => {
       data: {
         formids: _.push(result)
       }
-    }).then(res => {
-      console.log("savePersonFormid OK: " + formid)
-      if (callback) {
-        callback(result)
-      }
-    }).catch(err=>{
-      console.error(err)
     })
+    return result
   }
 }
 
 // 根据personid找到openid
-const personid2openid = (personid, callback) => {
-  dbPersons.doc(personid).get().then(res => {
-    console.log(res)
-    if (callback) {
-      callback(res.data._openid)
-    }
-  })
+const personid2openid = async(personid) => {
+  let res = await dbPersons.doc(personid).get()
+  console.log(res)
+  return res.data._openid
 }
 
 // 构建页面路径
@@ -107,8 +98,8 @@ const sendCreateMsg2Subscriber = async (personid, title, outdoorid, phone) => {
       },
     }
     var page = buildDefaultPage(outdoorid,personid)
-    var formid = fetchPersonFormid_a(personid, res.data.formids, formid)
-    return await sendMessage_a(openid, tempid, formid, page, data)
+    var formid = fetchPersonFormid(personid, res.data.formids, formid)
+    return await sendMessage(openid, tempid, formid, page, data)
   } catch (err) { console.error(err) }
 }
 
@@ -131,8 +122,8 @@ const sendCancelMsg2Member = async (personid, title, outdoorid, leader, reason) 
       },
     }
     var page = buildDefaultPage(outdoorid, personid)	
-    var formid = fetchPersonFormid_a(personid, res.data.formids)
-    return await sendMessage_a(openid, tempid, formid, page, data)
+    var formid = fetchPersonFormid(personid, res.data.formids)
+    return await sendMessage(openid, tempid, formid, page, data)
   } catch (err) { console.error(err) }
 }
 
@@ -171,8 +162,8 @@ const sendModifyMsg2Member = async (personid, outdoorid, title, leader, modifys)
       },
     }
     var page = buildDefaultPage(outdoorid, personid)
-    var formid = fetchPersonFormid_a(personid, res.data.formids)
-    return await sendMessage_a(openid, tempid, formid, page, data)
+    var formid = fetchPersonFormid(personid, res.data.formids)
+    return await sendMessage(openid, tempid, formid, page, data)
   } catch (err) { console.error(err) }
 }
 
@@ -198,8 +189,8 @@ const sendConfirmMsg2Member = async(personid, outdoorid, title, count, leader) =
       },
     }
     var page = buildDefaultPage(outdoorid, personid)
-    var formid = fetchPersonFormid_a(personid, res.data.formids)
-    return await sendMessage_a(openid, tempid, formid, page, data)
+    var formid = fetchPersonFormid(personid, res.data.formids)
+    return await sendMessage(openid, tempid, formid, page, data)
   } catch (err) { console.error(err) }
 }
 
@@ -222,8 +213,8 @@ const sendResetMsg2Member = async (outdoorid, personid, title, oldLeader, newLea
       },
     }
     var page = buildDefaultPage(outdoorid, personid, newLeaderid) 
-    var formid = fetchPersonFormid_a(personid, res.data.formids)
-    return await sendMessage_a(openid, tempid, formid, page, data)
+    var formid = fetchPersonFormid(personid, res.data.formids)
+    return await sendMessage(openid, tempid, formid, page, data)
   } catch (err) { console.error(err) }
 }
 
@@ -251,8 +242,8 @@ const sendPayMsg2Member= async (outdoorid, personid, title, cfo, money, member)=
       },
     }
     var page = buildPage2("AboutOutdoor", "PayOutdoor", outdoorid)
-    var formid = fetchPersonFormid_a(personid, res.data.formids)
-    return await sendMessage_a(openid, tempid, formid, page, data)
+    var formid = fetchPersonFormid(personid, res.data.formids)
+    return await sendMessage(openid, tempid, formid, page, data)
   }catch(err) {console.error(err)}
 }
 
@@ -277,9 +268,8 @@ const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid) 
       }
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
+    let formid = fetchPersonFormid(personid, res.data.formids)
+    sendMessage(openid, tempid, formid, page, data)
   })
 }
 
@@ -312,9 +302,8 @@ const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) =>
       }
     }
     var page = buildPage("CreateOutdoor", outdoorid)
-    fetchPersonFormid(leaderid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
+    let formid = fetchPersonFormid(leaderid, res.data.formids)
+    sendMessage(openid, tempid, formid, page, data)
   })
 }
 
@@ -335,10 +324,9 @@ const sendAppointMsg2CFO=(personid, outdoorid, title, nickName)=>{
       },
     }
     var page = buildPage2("AboutOutdoor", "PayOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      console.log(formid)
-      sendMessage(openid, tempid, formid, page, data)
-    })
+    let formid = fetchPersonFormid(personid, res.data.formids)
+    console.log(formid)
+    sendMessage(openid, tempid, formid, page, data)
   })
 }
  
@@ -364,10 +352,9 @@ const sendChatMsg2Member = (personid, title, outdoorid, nickName, phone, content
     } 
     var page = buildPage2("AboutOutdoor", "ChatOutdoor", outdoorid, [{key:"sendWxnotice",value:"true"},{key:"nickName",value:nickName}] )
 
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      console.log(formid)
-      sendMessage(openid, tempid, formid, page, data)
-    })
+    let formid = fetchPersonFormid(personid, res.data.formids)
+    console.log(formid)
+    sendMessage(openid, tempid, formid, page, data)
   })
 }
 
@@ -393,25 +380,21 @@ const sendRejectMsg2Member = (personid, title, outdoorid, nickName, phone, conte
     }
     var page = buildPage2("AboutOutdoor", "ChatOutdoor", outdoorid, [{ key: "sendWxnotice", value: "true" }])
 
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      console.log(formid)
-      sendMessage(openid, tempid, formid, page, data)
-    })
+    let formid = fetchPersonFormid(personid, res.data.formids)
+    console.log(formid)
+    sendMessage(openid, tempid, formid, page, data)
   })
 }
 
 // 清理过期的formids，回调返回可用的formids
-const clearPersonFormids = (personid, callback) => {
-  dbPersons.doc(personid).get().then(res => {
-    var oldCount = res.data.formids
-    var resFormids = findFirstFormid(res.data.formids, false)
-    if (oldCount > resFormids.formids.length) {
-      cloudfun.updatePersonFormids(personid, resFormids.formids)
-    }
-    if (callback) {
-      callback(resFormids.formids)
-    }
-  })
+const clearPersonFormids = async(personid) => {
+  let res = await dbPersons.doc(personid).get()
+  var oldCount = res.data.formids
+  var resFormids = findFirstFormid(res.data.formids, false)
+  if (oldCount > resFormids.formids.length) {
+    cloudfun.opPersonItem(personid, "formids", resFormids.formids, "")
+  }
+  return resFormids.formids
 }
 
 // 找到第一个能用的formid， 把前面没用的删掉
@@ -441,23 +424,7 @@ const findFirstFormid = (formids, isDelFind) => {
 }
 
 // 得到某人的form id
-const fetchPersonFormid_a = (personid, formids) => {
-  console.log("fetchPersonFormid")
-  var formid = null
-  // 这里得调用云函数才行了，拿到第一个合格的formid，不合格的全部删掉 
-  if (formids && formids.length > 0) {
-    var result = findFirstFormid(formids, true)
-    formid = result.formid
-    console.log("find result:")
-    console.log(result)
-    // 最后调用云函数写回去
-    cloudfun.updatePersonFormids(personid, result.formids)
-  }
-  return formid
-}
-
-// 得到某人的form id
-const fetchPersonFormid = (personid, formids, callback) => {
+const fetchPersonFormid = (personid, formids) => {
   console.log("fetchPersonFormid")
   var formid = null 
   // 这里得调用云函数才行了，拿到第一个合格的formid，不合格的全部删掉 
@@ -467,12 +434,10 @@ const fetchPersonFormid = (personid, formids, callback) => {
     console.log("find result:")
     console.log(result)
     // 最后调用云函数写回去
-    cloudfun.updatePersonFormids(personid, result.formids)
+    cloudfun.opPersonItem(personid, "formids", result.formids, "")
   }
 
-  if (callback) {
-    callback(formid)
-  }
+  return formid
  }
 
 // 给自己发报名退出消息
@@ -499,9 +464,8 @@ const sendQuitMsg2Self = (personid, outdoorid, title, date, leader, nickName, re
       },
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
+    let formid = fetchPersonFormid(personid, res.data.formids)
+    sendMessage(openid, tempid, formid, page, data)
   })
 }
 
@@ -550,9 +514,8 @@ const sendStatusChangeMsg2Member = (personid, outdoorid, title, nickName, status
 
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
+    let formid = fetchPersonFormid(personid, res.data.formids)
+    sendMessage(openid, tempid, formid, page, data)
   })
 }
 
@@ -580,14 +543,13 @@ const sendRemindMsg2Ocuppy = (personid, outdoorid, title, remain, leader, memCou
       },
     }
     var page = buildPage("EntryOutdoor", outdoorid)
-    fetchPersonFormid(personid, res.data.formids, formid => {
-      sendMessage(openid, tempid, formid, page, data)
-    })
+    let formid = fetchPersonFormid(personid, res.data.formids)
+    sendMessage(openid, tempid, formid, page, data)
   })
 }
 
 // 给特定openid发特定id的模板消息
-const sendMessage_a = async (openid, tempid, formid, page, data) => {
+const sendMessage = async (openid, tempid, formid, page, data) => {
   console.log("sendMessage")
   console.log("openid: " + openid)
   console.log("tempid: " + tempid)
@@ -613,44 +575,44 @@ const sendMessage_a = async (openid, tempid, formid, page, data) => {
 }
 
 // 给特定openid发特定id的模板消息
-const sendMessage = (openid, tempid, formid, page, data, callback) => {
-  console.log("sendMessage")
-  console.log("openid: " + openid)
-  console.log("tempid: " + tempid)
-  console.log("formid: " + formid)
-  console.log("page: " + page)
-  console.log(data)
-  if (formid) {
-    wx.cloud.callFunction({
-      name: 'getAccessToken', // 云函数名称
-    }).then(res => {
-      console.log(res)
-      wx.cloud.callFunction({
-        name: 'sendTemplate', // 云函数名称
-        data: {
-          openid: openid,
-          access_token: JSON.parse(res.result).access_token,
-          tempid: tempid,
-          formid: formid,
-          data: data,
-          page: page,
-        },
-      }).then(res => {
-        console.log(res)
-        if (callback) {
-          callback(res)
-        }
-      }).catch(err=>{
-        console.error(err)
-        if (callback) {
-          callback(err)
-        }
-      })
-    })
-  } else if (callback) {
-    callback()
-  }
-}
+// const sendMessage = (openid, tempid, formid, page, data, ) => {
+//   console.log("sendMessage")
+//   console.log("openid: " + openid)
+//   console.log("tempid: " + tempid)
+//   console.log("formid: " + formid)
+//   console.log("page: " + page)
+//   console.log(data)
+//   if (formid) {
+//     wx.cloud.callFunction({
+//       name: 'getAccessToken', // 云函数名称
+//     }).then(res => {
+//       console.log(res)
+//       wx.cloud.callFunction({
+//         name: 'sendTemplate', // 云函数名称
+//         data: {
+//           openid: openid,
+//           access_token: JSON.parse(res.result).access_token,
+//           tempid: tempid,
+//           formid: formid,
+//           data: data,
+//           page: page,
+//         },
+//       }).then(res => {
+//         console.log(res)
+//         if () {
+//           (res)
+//         }
+//       }).catch(err=>{
+//         console.error(err)
+//         if () {
+//           (err)
+//         }
+//       })
+//     })
+//   } else if () {
+//     ()
+//   }
+// }
 
 module.exports = {
   getDefaultNotice: getDefaultNotice,

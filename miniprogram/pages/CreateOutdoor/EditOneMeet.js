@@ -89,32 +89,28 @@ Page({
     })
   },
 
-  chooseMeetAddress() {
-    const self = this
-    if (self.data.meet.place) { // 之前有输入，则把输入拷贝到内存中，方便后面地图上搜索
+  async chooseMeetAddress() {
+    if (this.data.meet.place) { // 之前有输入，则把输入拷贝到内存中，方便后面地图上搜索
       wx.setClipboardData({　　　　　　
-        data: self.data.meet.place,
+        data: this.data.meet.place,
       })
     }
     var message = "同意授权“使用我的地理位置”才能调用微信地图；小程序不会记录您的位置，请放心"
-    util.authorize("userLocation", message, res => {
-      wx.chooseLocation({
-        success(res) {
-          console.log(res)
-          self.setData({
-            "meet.name": res.name,
-            "meet.latitude": res.latitude,
-            "meet.longitude": res.longitude,
-            hasModified: true,
-          })
-          if (!self.data.meet.place) {
-            self.setData({
-              "meet.place": res.name, // 帮着设置一下
-            })
-          }
-        }
-      })
+    await util.authorize("userLocation", message)
+    let res = await wx.chooseLocation({})
+        
+    console.log(res)
+    this.setData({
+      "meet.name": res.name,
+      "meet.latitude": res.latitude,
+      "meet.longitude": res.longitude,
+      hasModified: true,
     })
+    if (!this.data.meet.place) {
+      this.setData({
+        "meet.place": res.name, // 帮着设置一下
+      })
+    }
   },
 
   save: function (e) {

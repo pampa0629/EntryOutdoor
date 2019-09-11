@@ -36,7 +36,7 @@ Page({
   },
 
   copyDisclaimer: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId)
     const self = this
     wx.setClipboardData({
       data: self.data.disclaimer,
@@ -44,7 +44,7 @@ Page({
   },
 
   saveMyDisclaimer: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId)
     const self = this
     if (app.checkLogin()) {
       dbPersons.doc(app.globalData.personid).update({

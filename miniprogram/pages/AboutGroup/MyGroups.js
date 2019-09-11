@@ -50,7 +50,8 @@ Page({
     self.setData({
       groups: self.data.groups
     })
-    cloudfun.updatePersonGroups(app.globalData.personid, self.data.groups)
+    // cloudfun.updatePersonGroups(app.globalData.personid, self.data.groups)
+    cloudfun.opPersonItem(app.globalData.personid, "groups", self.data.groups, "")
   },
 
   onShow: function() {

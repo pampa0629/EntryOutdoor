@@ -134,7 +134,7 @@ Page({
     this.setData({
       "od.aaMembers":members
     })
-    cloudfun.updateOutdoorItem(this.data.od.outdoorid, "aaMembers", members)
+    cloudfun.opOutdoorItem(this.data.od.outdoorid, "aaMembers", members, "")
   },
 
   onUnload: function() {
@@ -222,7 +222,8 @@ Page({
           }
         }
       })
-      cloudfun.updateOutdoorMembers(self.data.od.outdoorid, res.data.members)
+      // cloudfun.updateOutdoorMembers(self.data.od.outdoorid, res.data.members)
+      cloudfun.opOutdoorItem(self.data.od.outdoorid, "members", res.data.members, "")
       self.setData({
         "od.members": res.data.members
       })
@@ -341,7 +342,7 @@ Page({
     })
   },
 
-  confirmRejectDlg(e) {
+  async confirmRejectDlg(e) {
     console.log(e)
     const self = this
 
@@ -370,20 +371,16 @@ Page({
         msg: content + " @" + item.nickName,
         who: app.globalData.userInfo.nickName
       }
-      // cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
       cloudfun.opOutdoorItem(self.data.od.outdoorid, "chat.messages", message, "push")
 
       // 从队员报名表中剔除
       var selfQuit = false
-      // let prevPage = pages[pages.length - 2];
-      // let od = pages[pages.length - 2].data.od; 
-      this.data.od.quit(item.personid, selfQuit, res=>{ // 这里面会发送微信消息
-        this.setData({
-          "od.members":res.members
-        })
-        console.log(res.members)
-        self.flushMembers()
+      let res = await this.data.od.quit(item.personid, selfQuit) // 这里面会发送微信消息
+      this.setData({
+        "od.members":res.members
       })
+      console.log(res.members)
+      self.flushMembers()
 
       this.setData({
         "rejectDlg.show": false
@@ -444,27 +441,22 @@ Page({
   },
 
   // 增加附加队员到列表中
-  addOneMember() {
-    const self = this
-    // let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
-    // let prevPage = pages[pages.length - 2];
-    // let od = pages[pages.length - 2].data.od;
-    this.data.od.entry4Add(this.data.addMember, res=>{
-      if(res.success) {
-        self.setData({
-          "od.addMembers":res.addMembers
-        })
-        self.flushAddMembers()
-        self.setData({
-          addMember: "" // 清空
-        })
-      } else if(res.failed) {
-        wx.showModal({
-          title: '无法增加',
-          content: '增加附加队员失败，估计是有队员抢先报名导致名额已满，请核实！领队可先放宽人员限制，从而增加附加队员。',
-        })
-      }
-    })
+  async addOneMember() { 
+    let res = await this.data.od.entry4Add(this.data.addMember)
+    if(res.success) {
+      this.setData({
+        "od.addMembers":res.addMembers
+      })
+      this.flushAddMembers()
+      this.setData({
+        addMember: "" // 清空
+      })
+    } else if(res.failed) {
+      wx.showModal({
+        title: '无法增加',
+        content: '增加附加队员失败，估计是有队员抢先报名导致名额已满，请核实！领队可先放宽人员限制，从而增加附加队员。',
+      })
+    }
   },
 
   // 删除 index位置的附加队员

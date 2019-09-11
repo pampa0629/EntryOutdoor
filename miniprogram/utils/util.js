@@ -1,7 +1,5 @@
-//console.log(".js in  fun, e is:" + JSON.stringify(e, null, 2))
-//console.log(".js in  fun, e is:" + e)
-
 const app = getApp()
+const promisify = require('./promisify.js')
 wx.cloud.init()
 const db = wx.cloud.database()
 const dbPersons = db.collection('Persons') 
@@ -269,70 +267,49 @@ const myParseInt = (str) => {
 }
 
 // 授权的统一函数
-const authorize = (which, message, callback) => {
+const authorize = async(which, message) => {
   var scope = 'scope.' + which
   console.log("scope is: " + scope)
-  wx.getSetting({
-    success(res) {
-      console.log("wx.getSetting")
-      if (!res.authSetting[scope]) { 
-        wx.authorize({
-          scope: scope,
-          success() {
-            console.log(scope + " OK")
-            if (callback) {
-              callback()
-            }
-          },
-          fail() {
-            wx.showModal({
-              title: '必须授权',
-              content: message,
-              cancelText: "暂不授权",
-              confirmText: "这就授权",
-              success(res) {
-                if (res.confirm) {
-                  console.log('用户点击确定')
-                  wx.openSetting({
-                    success(res){
-                      if (callback) {
-                        callback()
-                      }
-                    }
-                  })
-                } else if (res.cancel) {
-                  console.log('用户点击取消')
-                }
-              }
-            })
-          }
-        })
-      } else {
-        if (callback) {
-          callback()
-        }
+  let res = await promisify.getSetting({})
+  console.log("wx.getSetting")
+  if (!res.authSetting[scope]) { 
+    try {
+      let resAU = await promisify.authorize({scope: scope})
+      console.log(scope, resAU)
+    } catch(err) {
+      console.log(err)
+      let res = await promisify.showModal({
+        title: '必须授权',
+        content: message,
+        cancelText: "暂不授权",
+        confirmText: "这就授权"})
+      if (res.confirm) {
+        console.log('用户点击确定')
+        await promisify.openSetting({})
+      } else if (res.cancel) {
+        console.log('用户点击取消')
       }
     }
-  })
+  }
 }
 
 // 得到唯一的户外昵称
-const getUniqueNickname = (nickName, callback) => {
-  dbPersons.where({ 
-    "userInfo.nickName": nickName
-  }).get().then(res => {
-    console.log(res.data)
-    if(res.data.length == 0){
-      if(callback){
-        callback(nickName)
-      }
-    } else if (res.data.length > 0) { // 有了就得换一个名字
-      var time = (new Date()).getTime().toString() // 用时间毫秒数的最后四位做后缀
-      nickName += time.substring(time.length-4)
-      getUniqueNickname(nickName, callback)
-    }
-  })
-}
+// const getUniqueNickname = (nickName, callback) => {
+//   dbPersons.where({ 
+//     "userInfo.nickName": nickName
+//   }).get().then(res => {
+//     console.log(res.data)
+//     if(res.data.length == 0){
+//       if(callback){
+//         callback(nickName)
+//       }
+//     } else if (res.data.length > 0) { // 有了就得换一个名字
+//       var time = (new Date()).getTime().toString() // 用时间毫秒数的最后四位做后缀
+//       nickName += time.substring(time.length-4)
+//       getUniqueNickname(nickName, callback)
+//     }
+//   })
+// }
 
 // 拨打电话
 const phoneCall = (phone, isEmergency)=>{
@@ -437,21 +414,15 @@ const anyTrue = (obj) => {
 }
 
 // 装载Select表中的地区数据
-const loadArea=(callback)=>{
-  dbSelect.doc("5d1c0ea6f2b2dd50a6590416").get().then(res => {
-    if (callback) {
-      callback(res.data.area)
-    }
-  })
+const loadArea = async()=>{
+  let res = await dbSelect.doc("5d1c0ea6f2b2dd50a6590416").get()
+  return res.data.area
 }
 
 // 装载Select表中的车型数据
-const loadBrand = (callback) => {
-  dbSelect.doc("5d1c1150f2b2dd50a6592060").get().then(res => {
-    if (callback) {
-      callback(res.data.brand)
-    }
-  })
+const loadBrand = async() => {
+  let res = await dbSelect.doc("5d1c1150f2b2dd50a6592060").get().then()
+  return res.data.brand
 }
 
 // 判断是否为正确的手机号码

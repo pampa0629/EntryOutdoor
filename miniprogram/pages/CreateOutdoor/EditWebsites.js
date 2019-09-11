@@ -83,7 +83,7 @@ Page({
   },
 
   connetLvyeorg(e) {
-    const self = this
+    const self = this 
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.od.push2org(this.data.forum.id, tid=>{
       wx.showModal({
@@ -128,15 +128,12 @@ Page({
     })
   },
 
-  tapPostWaitings() {
+  async tapPostWaitings() {
     console.log("tapPostWaitings()")
-    const self = this
-    cloudfun.opOutdoorItem(this.data.od.outdoorid, "websites.lvyeorg.posting", false, "", res=>{
-      self.data.od.postWaitings(res=>{
-        self.setData({
-          "od.websites":self.data.od.websites,
-        })
-      })
+    await cloudfun.opOutdoorItem(this.data.od.outdoorid, "websites.lvyeorg.posting", false, "")
+    await this.data.od.postWaitings()
+    this.setData({
+      "od.websites": this.data.od.websites,
     }) 
   },
   

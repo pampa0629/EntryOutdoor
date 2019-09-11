@@ -32,14 +32,31 @@ Page({
   },
 
   async test1() {
+    
+    const res = await this.test1_1()
+    console.log("res:",res)
+  },
+
+  async test1_1() {
+    try {
+      var outdoorid = "2324"
+      let res = await dbOutdoors.doc(outdoorid).get()
+      console.log(res)
+      return true
+    } catch (err) {
+      console.log(err)
+      return false
+    }
+  },
+
+  async test12() {
     console.log("test1()")
     var ids = []
     ids.push("92390494")
     ids.push("W7Yse92AWotkW2-0")
     for (let id of ids) {
       console.log("id", id)
-      // const res = await person.getPersonData(id)
-      const res = await cloudfun.opPersonItem_a(id, "test", "nothing","push")
+      const res = await cloudfun.opPersonItem(id, "test", "nothing", "push")
       console.log("res", res)
     }
 
@@ -139,22 +156,22 @@ Page({
   async subscribers() {
     const res = await dbPersons.doc("W7bJGZ25dhqgC5GG").get()
     const subs = res.data.subscribers
-    console.log("subs:",subs)
+    console.log("subs:", subs)
     var arr = Object.getOwnPropertyNames(subs)
     console.log("arr:", arr)
     for (let id of arr) {
-      console.log("id:",id)
+      console.log("id:", id)
       console.log("sub:", subs[id])
     }
   },
 
-  tapUndefined(){
+  tapUndefined() {
     console.log("tapUndefined()")
     console.log("undef:", this.undef)
-    wx.setStorageSync("undef", decodeURIComponent(this.undef)) 
+    wx.setStorageSync("undef", decodeURIComponent(this.undef))
     var value = wx.getStorageSync("undef")
     console.log("value:", value)
-    
+
     if (value) {
       console.log("if undef:", this.undef, value)
     }
@@ -170,7 +187,7 @@ Page({
     // const location = await locationChange()
     // console.log("location:", location)
 
-    wx.onLocationChange(function (res) {
+    wx.onLocationChange(function(res) {
       console.log('location change', res)
     })
   },
@@ -179,11 +196,11 @@ Page({
     const request = promisify(wx.request)
 
     const env = "outdoor-entry"
-    const cloudUrl =  
-    "cloud://outdoor-entry.6f75-outdoor-entry-1257647001/Outdoors/25c59b425d50e53e1201b1f13f21aff3/1567070269630.jpg"
+    const cloudUrl =
+      // "cloud://outdoor-entry.6f75-outdoor-entry-1257647001/Outdoors/25c59b425d50e53e1201b1f13f21aff3/1567070269630.jpg"
 
-    // "cloud://outdoor-entry.6f75-outdoor-entry-1257647001/Outdoors/25c59b425d50e53e1201b1f13f21aff3/1567151954384.jpg"
-    
+      "cloud://outdoor-entry.6f75-outdoor-entry-1257647001/Outdoors/25c59b425d50e53e1201b1f13f21aff3/1567151954384.jpg"
+
     const resTemp = await wx.cloud.getTempFileURL({
       fileList: [cloudUrl]
     })
@@ -191,17 +208,101 @@ Page({
     console.log(resTemp)
     const tempUrl = resTemp.fileList[0].tempFileURL
     console.log(tempUrl)
-    
+
     let res = await request({
-      url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url="+tempUrl,
+      url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url=" + tempUrl,
       method: "POST",
+      // header: {
+      //   "content-type": "application/x-www-form-urlencoded"
+      // },
+    })
+    console.log(res.data)
+
+    let resPsn = await dbPersons.doc(app.globalData.personid).get()
+    const code = resPsn.data.facecodes[0].code
+    // var dist = this.getDist2(code, code)
+    var dist = this.getDist2(res.data, code)
+    console.log("dist:", dist)
+
+  },
+
+  async getDist(code1, code2) {
+    const request = promisify(wx.request)
+    const codes = {
+      code1: code1,
+      code2: code2
+    }
+    let res = await request({
+      url: "https://service-mev8pzq8-1258400438.gz.apigw.tencentcs.com/release/test",
+      method: "POST",
+      // body: JSON.stringify(codes)
+
+      // body: {
+      //   hehe:"hehe,body"
+      //   },
       header: {
         "content-type": "application/x-www-form-urlencoded"
       },
+      body: {
+        haha: "haha",
+      }
     })
-    console.log(res)
+    console.log("dist res:", res)
+    return res.data
+
+    // dist = np.sqrt(np.sum(np.square(np.subtract(emb1, emb2))))
 
   },
+
+  getDist2(code1, code2) {
+    // dist = np.sqrt(np.sum(np.square(np.subtract(emb1, emb2))))
+    var sum = 0
+    for (var i = 0; i < 512; i++) {
+      var sub = code1[i] - code2[i]
+      var square = sub * sub
+      sum += square
+    }
+    return Math.sqrt(sum)
+  },
+
+  async tapKET() {
+    const url = "http://order.etest.net.cn/order/mySignUp" // "http://order.etest.net.cn/13Index?articleId=3261"
+    if(!this.cookies) {
+      this.cookies = ""
+    }
+    const res = await promisify.request({
+      url: url,
+      method: "GET",
+      header: {
+        'content-type': 'text/html; charset=utf-8', // 默认值
+        'cookie': this.cookies,
+      },
+      data: {
+        username: "50463253@qq.com",
+        password: "xx123zzm"
+      },
+    })
+    console.log(res)
+    this.cookies = res.cookies
+  },
+
+  async tapCallback() {
+    // try {
+    //   let res = await promisify.showModal({
+    //     title: '',
+    //     content: '',
+    //   })
+    //   console.log("res:", res)
+    // }catch(err) {
+    //   console.log("err:",err)
+    // }
+    var res = this.testTwo()
+    console.log(res)
+  },
+
+  testTwo() {
+    return ("haha", 1)
+  }
 
 
 })

@@ -212,7 +212,7 @@ App({
     if (data.career && data.career.step && data.career.step.autoUpdate) {
       if ( (new Date()).toLocaleDateString() != data.career.step.update ) {
         console.log("update walk step")
-        person.updateWalkStep(self.globalData.personid, null)
+        person.updateWalkStep(self.globalData.personid)
       }
     }
     // 记录group id 和 openid， personid的对应关系
@@ -290,9 +290,9 @@ App({
   },
 
   // 登录绿野网站，用callback得到登录结果
-  loginLvyeOrg: function() { 
+  async loginLvyeOrg() { 
     const self = this
-    console.log("app.js loginLvyeOrg: function")
+    console.log("app.js loginLvyeOrg()")
     console.log(self.globalData.lvyeorgInfo)
     console.log(self.globalData.lvyeorgLogin)
 
@@ -304,17 +304,16 @@ App({
         }
       } else {
         var password = wx.getStorageSync("lvyeorg." + self.globalData.lvyeorgInfo.username)
-        lvyeorg.login(self.globalData.lvyeorgInfo.username, password, res => {
-          if (res.error && self.callbackLoginLvyeorg){
-            self.callbackLoginLvyeorg({ error: res.error })
-          }else {
-            self.globalData.lvyeorgLogin = true
-            // 回调函数，让外部知道是否登录了，哪个账号登录的
-            if (self.callbackLoginLvyeorg) {
-              self.callbackLoginLvyeorg({ username:res.username})
-            }
+        let res = await lvyeorg.login(self.globalData.lvyeorgInfo.username, password)
+        if (res.error && self.callbackLoginLvyeorg){
+          self.callbackLoginLvyeorg({ error: res.error })
+        }else {
+          self.globalData.lvyeorgLogin = true
+          // 回调函数，让外部知道是否登录了，哪个账号登录的
+          if (self.callbackLoginLvyeorg) {
+            self.callbackLoginLvyeorg({ username:res.username})
           }
-        })
+        }
       }
     }
   },

@@ -54,7 +54,7 @@ Page({
   save(e) {
     console.log("save()")
     if (e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+      template.savePersonFormid(app.globalData.personid, e.detail.formId)
     const self = this
     if (this.data.hasModified) {
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -72,7 +72,7 @@ Page({
 
   giveup(e) {
     console.log("giveup()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    template.savePersonFormid(app.globalData.personid, e.detail.formId)
     this.data.hasModified = false
     wx.navigateBack({})
   },
@@ -105,12 +105,10 @@ Page({
 
   addCount(e) {
     console.log(e.detail.formId)
-    const self = this
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, formid => {
-      self.data.formids.push(formid)
-      self.setData({
-        formids: self.data.formids
-      })
+    let formid = template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    this.data.formids.push(formid)
+    this.setData({
+      formids: this.data.formids
     })
   },
 

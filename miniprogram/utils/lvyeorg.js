@@ -3,78 +3,65 @@ const app = getApp()
 const qrcode = require('./qrcode.js')
 const util = require('./util.js')
 const cloudfun = require('./cloudfun.js')
-const promisify = require('./promisify')
+const promisify = require('./promisify.js')
 
 wx.cloud.init()
 const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
-  
+
 const LvyeOrgURL = 'https://www.lvye.net/panpa/'
 
-// 得到登录org网站所需要的token， 用callback传回
-const getToken = (callback) => {
-  wx.login({
-    success: function(res) {
-      if (res.code) {
-        var token = wx.getStorageSync("LvyeOrgToken")
-        console.log(token)
-        wx.request({
-          url: LvyeOrgURL + 'get_token.php',
-          method: 'POST',
-          header: {
-            "content-type": "application/x-www-form-urlencoded"
-          },
-          data: {
-            token: token,
-            code: res.code,
-          },
-          fail: function(error) {
-            // showModal("绿野ORG网站连接不上")
-            console.log(error)
-            if (callback) { // 连不上返回0
-              callback(0)
-            }
-          },
-          success: function(resp) {
-            console.log('Get token: ');
-            console.log(resp)
-            var resp_dict = resp.data;
-            if (resp_dict.err_code == 0) {
-              console.log(resp_dict.data.token);
-              if (callback) {
-                console.log("token callback");
-                callback(resp_dict.data.token)
-              }
-            } else {
-              console.log(resp_dict.data.err_msg)
-            }
-          }
-        })
+// 返回登录org网站所需要的token
+const getToken = async() => {
+  let res = await promisify.login()
+  if (res.code) {
+    var token = wx.getStorageSync("LvyeOrgToken")
+    console.log(token)
+    try {
+      let resp = await promisify.request({
+        url: LvyeOrgURL + 'get_token.php',
+        method: 'POST',
+        header: {
+          "content-type": "application/x-www-form-urlencoded"
+        },
+        data: {
+          token: token,
+          code: res.code,
+        }
+      })
+      console.log('Get lvye token: ', resp);
+      var resp_dict = resp.data;
+      if (resp_dict.err_code == 0) {
+        console.log(resp_dict.data.token);
+        return resp_dict.data.token
       } else {
-        console.log('微信登录失败！' + res.errMsg)
+        console.log(resp_dict.data.err_msg)
       }
+    } catch (err) {
+      console.log(error)
     }
-  })
+  }
+  return 0
 }
 
-// 登录绿野网站，用callback得到登录结果
-// 
-const login = (username, password, callback) => {
-  console.log("lvyeorg.js login fun")
+// 登录绿野网站
+const login = async(username, password) => {
+  console.log("lvyeorg.js login()")
   console.log(username)
   console.log(password)
 
-  getToken(token => {
-    if (!token && callback) {
-      callback({
-        error: "绿野ORG挂了",
-        username: ""
-      })
-    } else {
-      console.log("get token ok, is: " + token)
-      wx.setStorageSync('LvyeOrgToken', token)
+  let token = await getToken()
+  if (!token) {
+    return {
+      error: "绿野ORG挂了",
+      username: ""
+    }
+  } else {
+    console.log("get token ok, is: " + token)
+    wx.setStorageSync('LvyeOrgToken', token)
 
-      wx.request({
+    try {
+      let resp = await promisify.request({
         url: LvyeOrgURL + "login.php",
         method: "post",
         header: {
@@ -84,47 +71,37 @@ const login = (username, password, callback) => {
           token: token,
           username: encodeURI(username),
           password: password
-        },
-        fail: function(error) {
-          if (callback) { // 登录失败，返回空字符串
-            callback({
-              error: "绿野ORG挂了",
-              username: ""
-            })
-          }
-        },
-        success: function(resp) {
-          console.log("lvye org login ok")
-          var resp_dict = resp.data;
-          if (resp_dict.err_code == 0) {
-            wx.setStorageSync('LvyeOrgToken', resp_dict.data.token) // 这里必须把token存起来
-            if (callback) { // 回调函数，让外部知道是哪个账号登录的
-              callback({
-                username: username
-              })
-            }
-          } else {
-            getError(resp, error => {
-              if (callback) { // 登录失败，返回空字符串
-                callback({
-                  error: error,
-                  username: ""
-                })
-              }
-            })
-          }
         }
       })
+      console.log("lvye org login ok")
+      var resp_dict = resp.data
+      if (resp_dict.err_code == 0) {
+        wx.setStorageSync('LvyeOrgToken', resp_dict.data.token) // 这里必须把token存起来
+        return {
+          username: username
+        }
+      } else {
+        let error = await getError(resp)
+        return {
+          error: error,
+          username: ""
+        }
+      }
+    } catch (err) {
+      return {
+        error: "绿野ORG挂了",
+        username: ""
+      }
     }
-  })
+  }
 }
 
 // 退出登录
-const logout = (callback) => {
+const logout = async() => {
   var token = wx.getStorageSync("LvyeOrgToken")
   console.log(token)
 
-  wx.request({
+  await promisify.request({
     url: LvyeOrgURL + 'logout.php',
     method: 'POST',
     header: {
@@ -132,39 +109,28 @@ const logout = (callback) => {
     },
     data: {
       token: token,
-    },
-    success: function(resp) {
-      console.log(resp);
-      var resp_dict = resp.data;
-      if (resp_dict.err_code == 0) {
-        if (callback) {
-          callback()
-        }
-      } else {
-        showErrorModel(resp);
-      }
     }
   })
 }
 
 // 注册新账号
-const register = (email, username, password1, password2, callback) => {
+const register = async(email, username, password1, password2) => {
   if (!username) {
     showModal("账号不能为空");
-    return
+    return null
   }
   if (!email) {
     showModal("请输入正确的邮箱地址");
-    return
+    return null
   }
   if (!password1 || !password2 || !(password1 == password2)) {
     showModal("密码不能为空，且两次密码必须相同");
-    return
+    return null
   }
 
   var token = wx.getStorageSync("LvyeOrgToken")
   console.log(token)
-  wx.request({
+  let resp = await promisify.request({
     url: LvyeOrgURL + "register.php",
     method: "post",
     header: {
@@ -175,93 +141,76 @@ const register = (email, username, password1, password2, callback) => {
       username: username,
       password: password1,
       email: email
-    },
-    success: function(resp) {
-      console.log(resp);
-      var resp_dict = resp.data;
-      if (resp_dict.err_code == 0) {
-        // wx.setStorageSync('LvyeOrgToken', resp_dict.data.token)
-        // 注册成功后，把信息写入Person表，登录org，告知发帖时间限制，退回到上一页面
-        if (callback) {
-          callback()
-        }
-      } else {
-        showErrorModel(resp);
-      }
     }
   })
+
+  console.log(resp);
+  var resp_dict = resp.data;
+  if (resp_dict.err_code == 0) {
+    // wx.setStorageSync('LvyeOrgToken', resp_dict.data.token)
+    // 注册成功后，把信息写入Person表，登录org，告知发帖时间限制，退回到上一页面
+  } else {
+    showErrorModel(resp);
+  }
 }
 
 // 上传一张照片
-const uploadOneImage = (outdoorid, cloudPath, callback) => {
+const uploadOneImage = async (outdoorid, cloudPath) => {
   console.log("uploadOneImage fun")
   console.log("cloudPath is:" + cloudPath)
   // 步骤1：从 cloud中下载图片到临时文件
-  wx.cloud.downloadFile({
+  let res = await wx.cloud.downloadFile({
     fileID: cloudPath,
-  }).then(res => {
-    console.log(res.tempFilePath)
-    var token = wx.getStorageSync("LvyeOrgToken")
-    console.log(token)
-    // 步骤2：上传到 org网站，得到 file_url 和 aid
-    wx.uploadFile({
-      url: LvyeOrgURL + 'add_image.php',
-      filePath: res.tempFilePath,
-      name: "myfile",
-      formData: {
-        token: token,
-      },
-      success: function(resp) {
-        console.log(resp);
-        var resp_dict = JSON.parse(resp.data)
-        console.log(resp_dict)
-        if (resp_dict.err_code == 0) {
-          console.log(resp_dict.data.file_url)
-          if (callback) {
-            console.log("uploadOneImage OK, url is: " + resp_dict.data.aid)
-            callback({
-              aid: resp_dict.data.aid,
-              url: resp_dict.data.file_url
-            })
-          }
-        } else {
-          logError(resp)
-        }
-      }
-    })
   })
+  console.log(res.tempFilePath)
+  var token = wx.getStorageSync("LvyeOrgToken")
+  console.log(token)
+  // 步骤2：上传到 org网站，得到 file_url 和 aid
+  let resp = await promisify.uploadFile({
+    url: LvyeOrgURL + 'add_image.php',
+    filePath: res.tempFilePath,
+    name: "myfile",
+    formData: {
+      token: token,
+    }
+  })
+    
+  console.log(resp);
+  var resp_dict = JSON.parse(resp.data)
+  console.log(resp_dict)
+  if (resp_dict.err_code == 0) {
+    console.log(resp_dict.data.file_url)
+    console.log("uploadOneImage OK, url is: " + resp_dict.data.aid)
+    return ({
+      aid: resp_dict.data.aid,
+      url: resp_dict.data.file_url
+    })
+  } else {
+    logError(resp)
+  }
+  return resp_dict
 }
 
 // 上传二维码
-const uploadQrCode = (outdoorid, callback) => {
+const uploadQrCode = async (outdoorid) => {
   console.log("uploadQrCode, outdoorid is:" + outdoorid)
-  qrcode.getCloudPath(outdoorid, qrCode => {
-    console.log("qrCode is:" + qrCode)
-    uploadOneImage(outdoorid, qrCode, res => {
-      if (callback) {
-        console.log("uploadQrCode, res is:")
-        console.log(res)
-        callback(res)
-      }
-    })
-  })
+  let qrCode = await qrcode.getCloudPath(outdoorid)
+  console.log("qrCode is:" + qrCode)
+  let res = await uploadOneImage(outdoorid, qrCode)
+  console.log("uploadQrCode, res is:",res)
+  return res
 }
 
 // 上传活动图片
-const uploadImages = (outdoorid, pics, aids, callback) => {
+const uploadImages = async(outdoorid, pics) => {
   console.log("uploadImages fun")
-  console.log("pics are: ")
-  console.log(pics)
-  if (pics.length > 0) {
-    uploadOneImage(outdoorid, (pics.shift()).src, res => {
-      aids.push(res.aid)
-      uploadImages(outdoorid, pics, aids, callback)
-    })
-  } else {
-    if (callback) {
-      callback(aids)
-    }
-  }
+  console.log("pics are: ",pics)
+  var aids = []
+  for (let i in pics) {
+    var res = await uploadOneImage(outdoorid, pics[i].src)
+    aids.push(res.aid)
+  } 
+  return aids
 }
 
 // 这里确定活动应发布的版面 
@@ -340,7 +289,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
       // 活动人数限制xx人，现有多少人
       if (data.limits && data.limits.maxPerson) {
         message += "活动人数：限" + data.limits.personCount + "人" + NL
-        message += "已报名：" + (data.members.length+data.addMembers.length) + "人"
+        message += "已报名：" + (data.members.length + data.addMembers.length) + "人"
       } else {
         message += "活动人数不限人数" + NL
       }
@@ -499,7 +448,7 @@ const buildEntryNotice = (qrcode, first, allowSiteEntry) => {
 
 // 构建网站报名信息; isQuit:是否为退出活动； isPrint：是否为集中打印名单时调用
 const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
-  console.log("lvyeorg.buildEntryMessage()") 
+  console.log("lvyeorg.buildEntryMessage()")
   console.log(userInfo)
   var message = ""
   var title = ""
@@ -510,7 +459,7 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
     var temp = userInfo.nickName + " 因故退出活动，抱歉！"
     if (!selfQuit) {
       temp = userInfo.nickName + " 因故被领队清退"
-    } 
+    }
     message += temp
     title += temp
   } else {
@@ -539,116 +488,110 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
 }
 
 // 构建留言信息文本
-const buildChatMessage = (chat) =>{
-  console.log("lvyeorg.buildChatMessage()") 
-  console.log(chat) 
+const buildChatMessage = (chat) => {
+  console.log("lvyeorg.buildChatMessage()")
+  console.log(chat)
   var message = "（本内容由“户外报名”小程序自动发出，与发帖人无关；相应责权由“" + chat.who + "”承担）\r\n"
   message += chat.msg
-  return {title:chat.msg, message:message}
+  return {
+    title: chat.msg,
+    message: message
+  }
 }
 
-// 发布活动
-const addThread = function(outdoorid, data, fid, callback) {
+// 发布活动，成功返回帖子id（tid）
+const addThread = async (outdoorid, data, fid) =>{
   console.log("lvyeorg.addThread()")
   console.log("fid:" + fid)
   var temp = []
-  uploadImages(outdoorid, data.brief.pics, temp, resAids => {
-    console.log("resAids is:")
-    console.log(resAids)
-    uploadQrCode(outdoorid, resQrCode => {
-      console.log("resQrCode is:")
-      console.log(resQrCode)
-      resAids.push(resQrCode.aid)
-      console.log("图片地址：" + resQrCode.url)
-      data.websites.lvyeorg.qrcodeUrl = resQrCode.url // 记录下来
+  let resAids = await uploadImages(outdoorid, data.brief.pics, temp)
+  console.log("resAids is:", resAids)
 
-      // var fid = chooseForum(data.title, isTesting) // 要发帖的版面
-      var message = buildOutdoorMesage(data, true, null, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
-      // console.log(message)
-      var token = wx.getStorageSync("LvyeOrgToken")
-      console.log(token)
+  let resQrCode = await uploadQrCode(outdoorid)
+  console.log("resQrCode is:", resQrCode)
+  
+  resAids.push(resQrCode.aid)
+  console.log("图片地址：" + resQrCode.url)
+  data.websites.lvyeorg.qrcodeUrl = resQrCode.url // 记录下来
 
-      // 发帖
-      wx.request({
-        url: LvyeOrgURL + "add_thread.php",
-        method: "POST",
-        header: {
-          "content-type": "application/x-www-form-urlencoded"
-        },
-        data: {
-          token: token,
-          fid: fid,
-          subject: data.title.whole,
-          message: message,
-          aid_list: resAids,
-        },
-        fail: function(error) {
-          console.log(error)
-          wx.showModal({
-            title: '同步绿野ORG失败',
-            content: '原因是：' + error.toString() + "。请稍后对活动略做修改，点击“保存修改”即可重发。",
-            showCancel: false,
-            confirmText: "知道了",
-          })
-        },
-        success: function(resp) {
-          console.log(resp); // resp.data.data.tid 帖子id；resp.data.data.pid 跟帖id post id
-          var resp_dict = resp.data;
-          if (resp_dict.err_code == 0) {
-            wx.showToast({
-              title: 'ORG发帖成功',
-            });
-            data.websites.lvyeorg.tid = resp.data.data.tid // 帖子id 
-            data.websites.lvyeorg.fid = fid // 版面id 也记录下来
-            if (callback) {
-              callback(resp.data.data.tid)
-            }
-          } else if (resp.statusCode == 200) { // 最恐惧的在这里：请求成功，但绿野org后台出错，帖子有了，但tid没有
-            wx.showModal({
-              title: '同步绿野ORG异常',
-              content: "可能已发帖到绿野ORG网站，但得不到帖子ID，后续信息无法同步，请联系小程序作者解决。",
-              showCancel: false,
-              confirmText: "知道了",
-            })
-          } else if (resp_dict.err_code != 0) { // 发帖失败了
-            getError(resp, (error) => {
-              wx.showModal({
-                title: '同步绿野ORG失败',
-                content: '原因是：' + error + "。\r\n点击“再试一次”则再次尝试同步，点击“以后再发”则在您“保存修改”或再次进入本活动页面时重发。",
-                confirmText: "再试一次",
-                cancelText: "以后再发",
-                success(res) {
-                  if (res.confirm) {
-                    console.log('用户点击确定')
-                    addThread(outdoorid, data, fid, callback) // 立刻重发
-                  } else if (res.cancel) {
-                    console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
-                    // 这里要更新Outdoors表
-                    // data.websites.lvyeorg.fid = fid
-                    if (callback) { // 不成就返回null
-                      callback(null)
-                    }
-                  }
-                }
-              })
-            })
-          }
-          cloudfun.updateOutdoorWebsites(outdoorid, data.websites)
-        }
-      })
-    }) 
+  var message = buildOutdoorMesage(data, true, null, "", data.websites.lvyeorg.allowSiteEntry) // 构建活动信息
+  var token = wx.getStorageSync("LvyeOrgToken")
+  console.log("token:", token)
+
+try{
+  // 发帖
+  let resp = await promisify.request({
+    url: LvyeOrgURL + "add_thread.php",
+    method: "POST",
+    header: {
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    data: {
+      token: token,
+      fid: fid,
+      subject: data.title.whole,
+      message: message,
+      aid_list: resAids,
+    }
   })
+
+  console.log(resp); // resp.data.data.tid 帖子id；resp.data.data.pid 跟帖id post id
+  var resp_dict = resp.data;
+  if (resp_dict.err_code == 0) {
+    wx.showToast({
+      title: 'ORG发帖成功',
+    });
+    data.websites.lvyeorg.tid = resp.data.data.tid // 帖子id 
+    data.websites.lvyeorg.fid = fid // 版面id 也记录下来
+    return resp.data.data.tid
+  } 
+  // 最恐惧的在这里：请求成功，但绿野org后台出错，帖子有了，但tid没有
+  else if (resp.statusCode == 200) { 
+    wx.showModal({
+      title: '同步绿野ORG异常',
+      content: "可能已发帖到绿野ORG网站，但得不到帖子ID，后续信息无法同步，请联系小程序作者解决。",
+      showCancel: false,
+      confirmText: "知道了",
+    })
+  } 
+  else if (resp_dict.err_code != 0) { // 发帖失败了
+    let error = await getError(resp)
+    wx.showModal({
+      title: '同步绿野ORG失败',
+      content: '原因是：' + error + "。\r\n点击“再试一次”则再次尝试同步，点击“以后再发”则在您“保存修改”或再次进入本活动页面时重发。",
+      confirmText: "再试一次",
+      cancelText: "以后再发",
+      async success(res) {
+        if (res.confirm) {
+          console.log('用户点击确定')
+          await addThread(outdoorid, data, fid) // 立刻重发
+        } else if (res.cancel) {
+          console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
+        }
+      }
+    })
+  }
+  cloudfun.opOutdoorItem(outdoorid, "websites", data.websites, "")
+  } catch(err) {
+    console.log(err)
+    wx.showModal({
+      title: '同步绿野ORG失败',
+      content: '原因是：' + err.toString() + "。可进入“附加设置”--“户外网站同步”页面手动重发",
+      showCancel: false,
+      confirmText: "知道了",
+    })
+  }
 }
 
 // 即时发布一条消息到绿野org网站，发布失败则记录到数据库中
-const postMessage = (outdoorid, tid, title, message) => {
+const postMessage = async(outdoorid, tid, title, message) => {
   console.log("const postMessage")
   console.log(outdoorid)
   console.log(tid)
   console.log(message)
   var token = wx.getStorageSync("LvyeOrgToken")
 
-  wx.request({
+  let resp = await promisify.request({
     url: LvyeOrgURL + "add_post3.php",
     method: "POST",
     header: {
@@ -659,62 +602,30 @@ const postMessage = (outdoorid, tid, title, message) => {
       tid: tid,
       subject: title, // 
       message: encodeURI(message),
-    },
-    success: function(resp) {
-      console.log("跟帖成功：")
-      console.log(resp)
-      var resp_dict = resp.data;
-      if (resp_dict.err_code == 0) {
-        wx.showToast({
-          title: 'ORG同步成功',
-        });
-      } else {
-        getError(resp, (error) => {
-          cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
-          // 减少烦人
-          // wx.showModal({
-          //   title: '信息发布到绿野ORG失败',
-          //   content: '原因是：' + error + "。\r\n点击“再试一次”则再次尝试同步，点击“以后再发”则在下次进入本活动页面时自动重发。",
-          //   confirmText: "再试一次",
-          //   cancelText: "以后再发",
-          //   success(res) {
-          //     if (res.confirm) {
-          //       console.log('用户点击确定')
-          //       postMessage(outdoorid, tid, title, message) // 立刻重发
-          //     } else if (res.cancel) {
-          //       console.log('用户点击取消') // 取消则“保存修改”或再次进入本活动页面时重发
-          //       // 这里要更新Outdoors表
-                
-          //     }
-          //   }
-          // })
-        })
-      }
     }
   })
+ 
+  console.log("跟帖成功：", resp)
+  var resp_dict = resp.data;
+  if (resp_dict.err_code == 0) {
+    wx.showToast({
+      title: 'ORG同步成功',
+    })
+  } else {
+    let error = await getError(resp)
+    add2Waitings(outdoorid, message)
+  }
 }
 
 // 把未发布出去的信息加到waitings中
 const add2Waitings = (outdoorid, message) => {
-  console.log("lvyeorg.add2Waitings()",outdoorid, message)
-  // wx.showModal({
-  //   title: '请登录或注册绿野ORG',
-  //   content: '本活动被领队设置为同步到绿野ORG网站，建议您注册ORG账号。系统将自动跳转到“绿野ORG登录”页面，请登录或注册以便报名信息同步',
-  //   showCancel: false,
-  //   confirmText: "知道了",
-  //   success(res) {
-  //     wx.navigateTo({
-  //       url: '/pages/MyInfo/LvyeorgLogin',
-  //     })
-  //   }
-  // })
-
-  cloudfun.pushOutdoorLvyeWaiting(outdoorid, message)
+  console.log("lvyeorg.add2Waitings()", outdoorid, message)
+  cloudfun.opOutdoorItem(outdoorid, "websites.lvyeorg.waitings", message, "push")
 }
 
 // 同步绿野org网站等待要发送的信息
-const postWaitings_a = async (tid, waitings) => {
-  console.log("lvyeorg.postWaitings_a()")
+const postWaitings = async(tid, waitings) => {
+  console.log("lvyeorg.postWaitings()")
   console.log(tid)
   console.log(waitings.length)
   while (waitings.length > 0) {
@@ -724,9 +635,9 @@ const postWaitings_a = async (tid, waitings) => {
   }
 }
 
-// 发一条等待发布的信息，成功后用callback返回
-const postOneWaiting_a = async (tid, waiting) => {
-  console.log("lvyeorg.postOneWaiting_a()")
+// 发一条等待发布的信息
+const postOneWaiting = async(tid, waiting) => {
+  console.log("lvyeorg.postOneWaiting()")
   console.log(tid)
   console.log(waiting)
   var token = wx.getStorageSync("LvyeOrgToken")
@@ -747,66 +658,10 @@ const postOneWaiting_a = async (tid, waiting) => {
     }
   })
 }
- 
-// 同步绿野org网站等待要发送的信息
-const postWaitings = (tid, waitings, callback) => {
-  console.log("lvyeorg.postWaitings()")
-  console.log(tid)
-  console.log(waitings.length)
-  if (waitings.length > 0) {
-    var waiting = waitings.shift()
-    postOneWaiting(tid, waiting, () => {
-      console.log(waitings.length)
-      postWaitings(tid, waitings, callback) // 这么来保证顺序
-    })
-  } else if (waitings.length == 0) {
-    if (callback) {
-      callback()
-    }
-  }
-}
 
-// 发一条等待发布的信息，成功后用callback返回
-const postOneWaiting = (tid, waiting, callback) => {
-  console.log("postOneWaiting()")
-  console.log(tid)
-  console.log(waiting)
-  var token = wx.getStorageSync("LvyeOrgToken")
-  console.log(token)
-
-  wx.request({
-    url: LvyeOrgURL + "add_post.php",
-    method: "POST",
-    header: {
-      "content-type": "application/x-www-form-urlencoded"
-    },
-    data: {
-      token: token,
-      tid: tid,
-      message: encodeURI(waiting),
-    },
-    success: function(resp) {
-      var resp_dict = resp.data;
-      console.log(resp_dict)
-      if (resp_dict.err_code == 0) {
-      } else {
-        logError(resp)
-      }
-      if (callback) { // 必须回调
-        callback()
-      }
-    },
-    fail(err){
-      console.error(err)
-      if (callback) { // 必须回调
-        callback()
-      }
-    }
-  })
-}
-
-const loadPosts = (tid, begin, callback) => {
-  console.log("loadPosts")
+// 加载跟帖内容
+const loadPosts = async(tid, begin) => {
+  console.log("loadPosts()")
   console.log(begin)
   var page = {
     size: 100,
@@ -817,7 +672,7 @@ const loadPosts = (tid, begin, callback) => {
     page.index = 1
   }
   var token = wx.getStorageSync("LvyeOrgToken")
-  wx.request({
+  let resp = await promisify.request({
     url: LvyeOrgURL + "get_post_detail.php",
     method: "post",
     header: {
@@ -828,35 +683,30 @@ const loadPosts = (tid, begin, callback) => {
       tid: tid,
       page_size: page.size,
       page_index: page.index,
-    },
-    success: function(resp) {
-      console.log(resp)
-      let posts = resp.data.data.post_list
-      if (posts) {
-        console.log(posts)
-        if (page.index == 0) { // 只取一部分
-          posts = posts.slice(begin, posts.length);
-        }
-        if (callback) {
-          callback(posts)
-        }
-      }
     }
   })
+
+  console.log("get_post_detail: " ,resp)
+  let posts = resp.data.data.post_list
+  if (posts) {
+    console.log(posts)
+    if (page.index == 0) { // 只取一部分
+      posts = posts.slice(begin, posts.length);
+    }
+    return posts
+  }
 }
 
-// 得到绿野org网站反馈的错误信息，回调的方式传回
-const getError = (resp, callback) => {
+// 得到绿野org网站反馈的错误信息
+const getError = async(resp) => {
   if (resp.data.err_code != 0 && resp.data.err_msg) {
     console.log(resp.data.err_msg)
-    if (callback) {
-      callback(resp.data.err_msg)
-    }
+    return resp.data.err_msg
   } else {
     console.log(resp);
     var token = wx.getStorageSync("LvyeOrgToken")
     console.log(token)
-    wx.request({
+    let resp = await promisify.request({
       url: LvyeOrgURL + 'report_error.php',
       method: 'POST',
       header: {
@@ -866,30 +716,23 @@ const getError = (resp, callback) => {
         token: token,
         error_log: resp.data,
         svr_url: LvyeOrgURL,
-      },
-      success: function(resp) {
-        console.log("getError:");
-        console.log(resp.data.err_msg);
-        if (callback) {
-          callback(resp.data.err_msg)
-        }
       }
     })
+    console.log("getError:", resp.data.err_msg);
+    return resp.data.err_msg
   }
 }
 
 // 日志输出绿野org网站反馈的错误信息
-const logError = (resp) => {
-  getError(resp, error => {
-    console.log(error)
-  })
+const logError = async(resp) => {
+  let error = await getError(resp)
+  console.log(error)
 }
 
 // 弹窗绿野org网站反馈的错误信息
-const showErrorModel = (resp) => {
-  getError(resp, error => {
-    showModal(error)
-  })
+const showErrorModel = async(resp) => {
+  let error = await getError(resp)
+  showModal(error)
 }
 
 // 弹窗显示错误信息
@@ -903,7 +746,7 @@ const showModal = (error) => {
 }
 
 module.exports = {
-  getToken: getToken, // 得到token
+  // getToken: getToken, // 得到token
   login: login, // 登录
   logout: logout, // 退出登录
   register: register, // 注册
@@ -916,7 +759,6 @@ module.exports = {
   postMessage: postMessage, // 跟帖
   add2Waitings: add2Waitings, // 往waiting中增加一条信息
   postWaitings: postWaitings, // 把正在等待发布的信息发布出去
-  postWaitings_a: postWaitings_a, // async 版本
 
   loadPosts: loadPosts, // 从帖子中读取跟帖
   isTestForum: isTestForum, // 判断fid是否属于测试帖

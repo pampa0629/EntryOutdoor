@@ -1,6 +1,7 @@
 const cloudfun = require('../../utils/cloudfun.js')
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
+const promisify = require('../../utils/promisify.js')
 
 const app = getApp()
 wx.cloud.init()
@@ -71,7 +72,8 @@ Page({
                 "chat.qrcode": resUpload.fileID,
               })
               // 写入qrcode到数据库中
-              cloudfun.updateOutdoorChatQrcode(self.data.outdoorid, self.data.chat.qrcode)
+              // cloudfun.updateOutdoorChatQrcode(self.data.outdoorid, self.data.chat.qrcode)
+              cloudfun.opOutdoorItem(self.data.outdoorid, "chat.qrcode", self.data.chat.qrcode, "")
               // 构建留言信息
               var message = odtools.buildChatMessage("@所有人 领队设置了活动专用微信群，请在留言页面右上角点击查看并扫码入群。谢谢！")
               // cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
@@ -89,23 +91,18 @@ Page({
     })
   },
 
-  saveQrcode() {
+  async saveQrcode() {
     const self = this
     var message = "同意授权“保存到相册”才能保存二维码图片"
-    util.authorize("writePhotosAlbum", message, res => {
-      wx.cloud.downloadFile({
-        fileID: self.data.chat.qrcode
-      }).then(res => {
-        console.log(res.tempFilePath)
-        wx.saveImageToPhotosAlbum({
-          filePath: res.tempFilePath,
-          success(res) {
-            wx.showToast({
-              title: '已保存到相册',
-            })
-          }
-        })
-      })
+    await util.authorize("writePhotosAlbum", message)
+    let res = await wx.cloud.downloadFile({
+      fileID: self.data.chat.qrcode
+    })
+    console.log(res.tempFilePath)
+    await promisify.saveImageToPhotosAlbum({
+      filePath: res.tempFilePath})
+    wx.showToast({
+      title: '已保存到相册',
     })
   },
 

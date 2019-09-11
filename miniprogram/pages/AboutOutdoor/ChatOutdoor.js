@@ -78,46 +78,46 @@ Page({
   },
 
   // 把org上的留言消息刷新到留言上
-  flushLvyrorg2Chat(outdoorid, websites, leader) {
+  async flushLvyrorg2Chat(outdoorid, websites, leader) {
     console.log("ChatOutdoor.flushLvyrorg2Chat()")
     const self = this
     if (websites && websites.lvyeorg && websites.lvyeorg.tid) {
       self.data.tid = websites.lvyeorg.tid
       console.log("websites.lvyeorg.chatPosition is:" + websites.lvyeorg.chatPosition)
       var begin = websites.lvyeorg.chatPosition ? websites.lvyeorg.chatPosition : 0
-      lvyeorg.loadPosts(self.data.tid, begin, posts => {
-        if (posts.length > 0) {
-          posts.forEach((item, index) => {
-            // 确认不是小程序发的帖子，才能作为留言
-            // 先把 </div> 前面的内容去掉
-            var findDiv = item.message.indexOf("</div>")
-            if (findDiv >= 0) {
-              item.message = item.message.substring(findDiv)
-            }
-            // console.log(item)
-            if (item.message.indexOf("户外报名") < 0 && item.message.indexOf("小程序") < 0) {
-              var message = {
-                msg: "(来自绿野org)：" + item.subject + item.message + " @" + leader,
-                who: item.author,
-              }
-              self.data.chat.messages.push(message)
-            }
-          })
-          for (var i = 0; i < self.data.chat.messages.length; i++) {
-            let index = i // 还必须用let才行
-            this["copyMessage" + index] = () => {
-              self.copyMessage(index)
-            }
+      let posts = await lvyeorg.loadPosts(self.data.tid, begin)
+      if (posts.length > 0) {
+        posts.forEach((item, index) => {
+          // 确认不是小程序发的帖子，才能作为留言
+          // 先把 </div> 前面的内容去掉
+          var findDiv = item.message.indexOf("</div>")
+          if (findDiv >= 0) {
+            item.message = item.message.substring(findDiv)
           }
-          self.setData({
-            chat: self.data.chat
-          })
-          websites.lvyeorg.chatPosition = posts[posts.length - 1].position
-          cloudfun.updateOutdoorWebsites(outdoorid, websites)
-          // 更新最小单元，防止云数据库修改数据结构类型
-          cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", self.data.chat.messages, "")
+          // console.log(item)
+          if (item.message.indexOf("户外报名") < 0 && item.message.indexOf("小程序") < 0) {
+            var message = {
+              msg: "(来自绿野org)：" + item.subject + item.message + " @" + leader,
+              who: item.author,
+            }
+            self.data.chat.messages.push(message)
+          }
+        })
+        for (var i = 0; i < self.data.chat.messages.length; i++) {
+          let index = i // 还必须用let才行
+          this["copyMessage" + index] = () => {
+            self.copyMessage(index)
+          }
         }
-      })
+        self.setData({
+          chat: self.data.chat
+        })
+        websites.lvyeorg.chatPosition = posts[posts.length - 1].position
+        // cloudfun.updateOutdoorWebsites(outdoorid, websites)
+        cloudfun.opOutdoorItem(outdoorid, "websites", websites, "")
+        // 更新最小单元，防止云数据库修改数据结构类型
+        cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", self.data.chat.messages, "")
+      }
     }
   },
 
@@ -125,7 +125,7 @@ Page({
   onUnload() {
     console.log("onUnload")
     const self = this
-    cloudfun.updateOutdoorItem(self.data.outdoorid, "chat.seen." + app.globalData.personid, self.data.chat.messages.length)
+    cloudfun.opOutdoorItem(self.data.outdoorid, "chat.seen." + app.globalData.personid, self.data.chat.messages.length, "")
   }, 
 
   flushChats(addMessage, callback) {

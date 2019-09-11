@@ -111,19 +111,14 @@ Page({
     })
   },
 
-  saveFileQrcode(index) {
-    console.log("saveFileQrcode()")
-    console.log(index)
-    const self = this
+  async saveFileQrcode(index) {
+    console.log("saveFileQrcode()", index)
     var message = "同意授权“保存到相册”才能保存二维码图片"
-    util.authorize("writePhotosAlbum", message, res => {
-      self.data.fqrcodes[index].exportImage(function (path) {
-        wx.saveImageToPhotosAlbum({
-          filePath: path,
-        })
-      })
+    await util.authorize("writePhotosAlbum", message)
+    let path = this.data.fqrcodes[index].exportImage()
+    wx.saveImageToPhotosAlbum({
+      filePath: path,
     })
-
   },
 
   copyoutUrl(index) {
@@ -140,17 +135,13 @@ Page({
     })
   },
 
-  saveQrcode(index) {
-    console.log("saveQrcode")
-    console.log(index)
-    const self = this
+  async saveQrcode(index) {
+    console.log("saveQrcode()", index)
     var message = "同意授权“保存到相册”才能保存二维码图片"
-    util.authorize("writePhotosAlbum", message, res => {
-      self.data.qrcodes[index].exportImage(function(path) {
-        wx.saveImageToPhotosAlbum({
-          filePath: path,
-        })
-      })
+    await util.authorize("writePhotosAlbum", message)
+    let path = this.data.qrcodes[index].exportImage()
+    wx.saveImageToPhotosAlbum({
+      filePath: path,
     })
   },
 

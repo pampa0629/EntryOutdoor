@@ -87,27 +87,24 @@ Page({
 
   onShow: function () {
     console.log("CreateOutdoor.js onShow()")
-    const self = this
     var outdoorid = util.loadOutdoorID()
-    self.checkLogin()
+    this.checkLogin()
 
     console.log("outdoorid: " + outdoorid)
-    if (outdoorid && outdoorid != self.data.od.outdoorid) {
+    if (outdoorid && outdoorid != this.data.od.outdoorid) {
       // 缓存中有id，且还和od中加载的outdoorid不一样，则说明要重新加载
-      self.loadOutdoor(outdoorid)
+      this.loadOutdoor(outdoorid)
     } else if (!outdoorid) { // id为空，则新创建活动
-      self.newOutdoor()
+      this.newOutdoor()
     }
   },
 
   // 得到formids数量
-  loadFormids() {
-    const self = this
-    template.clearPersonFormids(app.globalData.personid, formids => {
-      self.data.formids = formids ? formids : []
-      self.setData({
-        formids: self.data.formids,
-      })
+  async loadFormids() {
+    let formids = await template.clearPersonFormids(app.globalData.personid)
+    this.data.formids = formids ? formids : []
+    this.setData({
+      formids: this.data.formids,
     })
   },
 
@@ -156,56 +153,48 @@ Page({
     console.log(this.data.myself)
   },
 
-  loadOutdoor: function(outdoorid,callback) {
-    console.log("CreateOutdoor.loadOutdoor()")
-    console.log("outdoorid: " + outdoorid)
+  
+  async loadOutdoor(outdoorid) {
+    console.log("CreateOutdoor.loadOutdoor() ", outdoorid)
+    
+    await this.data.od.load(outdoorid)
+    const od = this.data.od
 
-    const self = this
-    this.data.od.load(outdoorid, od => {
-      if(od) {
-        self.setData({
-          od: od,
-          startDate: util.formatDate(new Date()), // 起始日期，只能从今天开始
-          endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，不能发半年之后的活动
-          hasModified: false, // 刚load，没有修改
+    this.setData({
+      od: od,
+      startDate: util.formatDate(new Date()), // 起始日期，只能从今天开始
+      endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，不能发半年之后的活动
+      hasModified: false, // 刚load，没有修改
+    })
+    
+    this.setChat(od.chat) // 判断留言
+
+    // myself 得到自己的报名信息
+    od.members.forEach((item, index) => {
+      if (item.personid == app.globalData.personid) {
+        this.setData({
+          myself: item
         })
-        // console.log("1", JSON.stringify(od))
-
-        self.setChat(od.chat) // 判断留言
-
-        // myself 得到自己的报名信息
-        od.members.forEach((item, index) => {
-          if (item.personid == app.globalData.personid) {
-            self.setData({
-              myself: item
-            })
-            console.log("myself: " + JSON.stringify(self.data.myself))
-            if (item.entryInfo.status == "领队组") { // 判断自己是否为领队组成员
-              self.setData({
-                isLeaderGroup: true,
-              })
-            }
-          }
-        })
-
-        self.loadDisclaimer() // 还需要单独处理“免责条款”的内容
-        // 加载后就要构建画布生成分享图片文件
-        self.createCanvasFile()
-
-        // 队员以本活动为模板来创建活动
-        // console.log("1", JSON.stringify(od.leader))
-        // console.log("2", JSON.stringify(od))
-        if (((od.leader.personid != app.globalData.personid) && !self.data.isLeaderGroup) || app.globalData.newOutdoor) {
-          self.newOutdoor()
-          app.globalData.newOutdoor = false // 即时清空
-        }
-        self.createAutoInfo()
-        self.checkPublish() // 判断一下是否能发布活动
-        if (callback) {
-          callback()
+        console.log("myself: ",this.data.myself)
+        if (item.entryInfo.status == "领队组") { // 判断自己是否为领队组成员
+          this.setData({
+            isLeaderGroup: true,
+          })
         }
       }
     })
+
+    this.loadDisclaimer() // 还需要单独处理“免责条款”的内容
+    // 加载后就要构建画布生成分享图片文件
+    this.createCanvasFile()
+
+    // 队员以本活动为模板来创建活动
+    if (((od.leader.personid != app.globalData.personid) && !this.data.isLeaderGroup) || app.globalData.newOutdoor) {
+      this.newOutdoor()
+      app.globalData.newOutdoor = false // 即时清空
+    }
+    this.createAutoInfo()
+    this.checkPublish() // 判断一下是否能发布活动
   },
 
   // 清空活动内容
@@ -242,21 +231,19 @@ Page({
     wx.showModal({
       title: '确定删除？',
       content: '删除将从数据库中彻底活动信息，不可恢复。是否确定删除？',
-      success(res) {
+      async success(res) {
         if (res.confirm) {
           console.log('用户点击确定')
           var outdoorid = self.data.od.outdoorid
-          self.data.od.del(empty => {
-            self.setData({
-              od: empty
-            })
-            util.clearOutdoorID()
-            self.clearPersonMyoutdoors(outdoorid)
-            wx.switchTab({
-              url: "../MyInfo/MyInfo"
-            })
+          const empty = await self.data.od.del()
+          self.setData({
+            od: empty
           })
-
+          util.clearOutdoorID()
+          self.clearPersonMyoutdoors(outdoorid)
+          wx.switchTab({
+            url: "../MyInfo/MyInfo"
+          })
         } else if (res.cancel) {
           console.log('用户点击取消')
         }
@@ -308,7 +295,8 @@ Page({
               "od.limits.disclaimer": res.data.disclaimer,
             })
             // 同时还应该保存到数据库中
-            cloudfun.updateOutdoorDisclaimer(self.data.od.outdoorid, res.data.disclaimer)
+            // cloudfun.updateOutdoorDisclaimer(self.data.od.outdoorid, res.data.disclaimer)
+            cloudfun.opOutdoorItem(self.data.od.outdoorid, "limits.disclaimer", res.data.disclaimer, "")
           }
         })
     }
@@ -575,26 +563,23 @@ Page({
     }
   },
 
-  publishOutdoorInner() {
+  async publishOutdoorInner() {
     console.log("publishOutdoorInner()")
-    const self = this
     // 第一步：修改status
     this.setData({
       "od.status": "已发布"
     })
     // 第二步：调用 od 的publish
-    console.log("this.data.myself:")
-    console.log(this.data.myself)
-    this.data.od.publish(this.data.myself, res => {
-      console.log(this.data.od)
-      // 第三步：更新到persons表
-      self.updatePersonMyoutdoors()
-      // 第四步：给自己的订阅者发通知
-      self.post2Subscriber()
-      self.createCanvasFile() // 把图片更新一下
-      self.setData({
-        hasModified:false, // 发布时，已经保存过了
-      })
+    console.log("this.data.myself:", this.data.myself)
+    await this.data.od.publish(this.data.myself)
+    console.log(this.data.od)
+    // 第三步：更新到persons表
+    this.updatePersonMyoutdoors()
+    // 第四步：给自己的订阅者发通知
+    this.post2Subscriber()
+    this.createCanvasFile() // 把图片更新一下
+    this.setData({
+      hasModified:false, // 发布时，已经保存过了
     })
   },
 
@@ -609,7 +594,7 @@ Page({
       console.log(res.data.subscribers)
       var ids = Object.getOwnPropertyNames(res.data.subscribers)
       for (let id of ids) {
-        await cloudfun.opPersonItem_a(id, "caredOutdoors", { id: this.data.od.outdoorid, title: this.data.od.title.whole }, "unshift")
+        await cloudfun.opPersonItem(id, "caredOutdoors", { id: this.data.od.outdoorid, title: this.data.od.title.whole }, "unshift")
         await template.sendCreateMsg2Subscriber(id, this.data.od.title.whole, this.data.od.outdoorid, app.globalData.userInfo.phone)
       }
     }
@@ -632,7 +617,7 @@ Page({
     this.data.od.saveItem("status")
   },
 
-  saveOutdoor: function() {
+  async saveOutdoor() {
     console.log("CreateOutdoor.saveOutdoor()")
     const self = this
 
@@ -640,34 +625,31 @@ Page({
     var isCreated = self.data.od.outdoorid ? true : false
 
     // od.save 内部会判断处理是update还是create
-    this.data.od.save(self.data.myself, this.data.modifys, od => {
-      self.setData({
-        "od.members": od.members, // 队员信息要设置一下
-        hasModified: false,
-      })
-      self.setModifys(false)
-      util.saveOutdoorID(self.data.od.outdoorid)
-
-      // 在成功保存outdoor之后，相应的一些处理
-      if (self.data.od.status != "拟定中") { // 正在草拟中的活动，这里面的事情就都可以省略了
-        self.createCanvasFile() // 把图片更新一下
-      }
-
-      // 这里处理 Person表中对应的MyOutdoors
-      self.dealMyoutdoors()
+    const od = await this.data.od.save(self.data.myself, this.data.modifys)
+    this.setData({
+      "od.members": od.members, // 队员信息要设置一下
+      hasModified: false,
     })
+    this.setModifys(false)
+    util.saveOutdoorID(this.data.od.outdoorid)
+
+    // 在成功保存outdoor之后，相应的一些处理
+    if (this.data.od.status != "拟定中") { // 正在草拟中的活动，这里面的事情就都可以省略了
+      this.createCanvasFile() // 把图片更新一下
+    }
+
+    // 这里处理 Person表中对应的MyOutdoors
+    this.dealMyoutdoors()
   },
 
-  dealMyoutdoors() {
+  async dealMyoutdoors() {
     console.log("CreateOutdoor.dealMyoutdoors()")
-    const self = this
     var value = {
       id: this.data.od.outdoorid,
       title: this.data.od.title.whole
     }
-    person.dealOutdoors(app.globalData.personid, "myOutdoors", value, false, res => {
-      self.data.myOutdoors = res
-    })
+    let res = person.dealOutdoors(app.globalData.personid, "myOutdoors", value, false)
+    this.data.myOutdoors = res
   },
   
   // 发布成功，就需要往person表中追加活动id
@@ -707,15 +689,13 @@ Page({
   },
 
   // 删除活动后，需要把活动记录，在person表中删除
-  clearPersonMyoutdoors(outdoorid) {
+  async clearPersonMyoutdoors(outdoorid) {
     console.log("CreateOutdoor.clearPersonMyoutdoors()", outdoorid)
-    const self = this
     var value = {
       id: outdoorid,
     }
-    person.dealOutdoors(app.globalData.personid, "myOutdoors", value, true, res => {
-      self.data.myOutdoors = res
-    })
+    let res = await person.dealOutdoors(app.globalData.personid, "myOutdoors", value, true)
+    this.data.myOutdoors = res
   },
 
   // 查看报名情况，同时可以截屏保存起来
@@ -743,46 +723,32 @@ Page({
   },
 
   // 页面相关事件处理函数--监听用户下拉动作  
-  onPullDownRefresh: function() {
+  async onPullDownRefresh() {
     console.log("onPullDownRefresh()")
     const self = this
     wx.showNavigationBarLoading()
     // 全刷一遍
-    this.loadOutdoor(this.data.od.outdoorid, res=>{
-      wx.hideNavigationBarLoading()
-      wx.stopPullDownRefresh()
-    })
-    
-    // 主要就刷新队员和留言信息
-    // dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
-    //   self.setData({
-    //     "od.members": res.data.members,
-    //   })
-    //   self.setChat(res.data.chat)
-    //   self.createCanvasFile() // 把图片更新一下
-    //   wx.hideNavigationBarLoading()
-    //   wx.stopPullDownRefresh()
-    // })
+    await this.loadOutdoor(this.data.od.outdoorid)
+    wx.hideNavigationBarLoading()
+    wx.stopPullDownRefresh()
   },
 
   // 判断是否有新留言
   setChat(chat) {
-    const self = this
-    odtools.getChatStatus(app.globalData.personid, app.globalData.userInfo.nickName, chat, status => {
-      self.setData({
-        chatStatus: status,
-      })
-      console.log(self.data.chatStatus)
-      if (self.data.chatStatus == "atme") {
-        self.data.interval = setInterval(function() {
-          this.setData({
-            chatChange: !this.data.chatChange,
-          })
-        }.bind(this), 800)
-      } else {
-        clearInterval(self.data.interval)
-      }
+    let status = odtools.getChatStatus(app.globalData.personid, app.globalData.userInfo.nickName, chat)
+    this.setData({
+      chatStatus: status,
     })
+    console.log(this.data.chatStatus)
+    if (this.data.chatStatus == "atme") {
+      this.data.interval = setInterval(function() {
+        this.setData({
+          chatChange: !this.data.chatChange,
+        })
+      }.bind(this), 800)
+    } else {
+      clearInterval(this.data.interval)
+    }
   },
 
   onPopup() {

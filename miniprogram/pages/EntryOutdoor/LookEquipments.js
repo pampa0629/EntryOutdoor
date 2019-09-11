@@ -26,7 +26,7 @@ Page({
     showPopup: false, // 是否显示弹窗
   },
 
-  onLoad: function(options) {
+  async onLoad(options) {
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
@@ -39,10 +39,9 @@ Page({
       // areaList: select.area, // 系统默认
     }) 
 
-    util.loadArea(area => {
-      self.setData({
-        areaList: area,
-      })
+    let area = util.loadArea()
+    self.setData({
+      areaList: area,
     })
 
     var hasEquipments = od.limits && od.limits.equipments && (od.limits.equipments.must.length || od.limits.equipments.can.length ||od.limits.equipments.no.length)
@@ -64,30 +63,27 @@ Page({
     }
   },
 
-  loadEquipments(area, date, isLoadEquipments) {
-    const self = this
-    odtools.getWeather(area, date, weather => {
-      if (weather.result) {
-        self.setData({
-          weather: weather.weather,
-          weatherText: odtools.buildWeatherMessage(weather.weather),
-        })
-        if (isLoadEquipments){
-          var area = self.data.equipments.area
-          odtools.loadEquipments(self.data.loaded, self.data.date, weather.weather, equipments => {
-            self.setData({
-              equipments: equipments,
-              "equipments.area": area,
-              leaderDo: false,
-            })
-          })
-        }
-      } else {
-        self.setData({
-          weatherText: weather.msg,
+  async loadEquipments(area, date, isLoadEquipments) {
+    let weather = await odtools.getWeather(area, date)
+    if (weather.result) {
+      this.setData({
+        weather: weather.weather,
+        weatherText: odtools.buildWeatherMessage(weather.weather),
+      })
+      if (isLoadEquipments){
+        var area = this.data.equipments.area
+        let equipments = odtools.loadEquipments(this.data.loaded, this.data.date, weather.weather)
+        this.setData({
+          equipments: equipments,
+          "equipments.area": area,
+          leaderDo: false,
         })
       }
-    })
+    } else {
+      this.setData({
+        weatherText: weather.msg,
+      })
+    }
   },
 
   onPopup() {

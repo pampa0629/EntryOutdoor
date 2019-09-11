@@ -110,7 +110,8 @@ Page({
             })
             // self.perpareResults()
             // 写入 pay 到数据库中
-            cloudfun.updateOutdoorPay(self.data.outdoorid, self.data.pay)
+            // cloudfun.updateOutdoorPay(self.data.outdoorid, self.data.pay)
+            cloudfun.opOutdoorItem(self.data.outdoorid, "pay", self.data.pay, "")
             if (oldpath) { // 删除原来的二维码文件
               wx.cloud.deleteFile({
                 fileList: [oldpath]
@@ -179,7 +180,8 @@ Page({
         "pay.alreadyCount": count
       })
       self.statLacks()
-      cloudfun.updateOutdoorPay(self.data.outdoorid, self.data.pay)
+      // cloudfun.updateOutdoorPay(self.data.outdoorid, self.data.pay)
+      cloudfun.opOutdoorItem(self.data.outdoorid, "pay", self.data.pay, "")
     })
   },
 

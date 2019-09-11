@@ -4,6 +4,7 @@ const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
+const promisify = require('../../utils/promisify.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -72,24 +73,20 @@ Page({
 
   },
 
-  downloadQrcode() {
+  async downloadQrcode() {
     const self = this
     var message = "同意授权“保存到相册”才能保存收款二维码；也可自行截屏保存"
-    util.authorize("writePhotosAlbum", message, res => {
-      wx.cloud.downloadFile({
-        fileID: self.data.pay.qrcode
-      }).then(res => {
-        console.log(res.tempFilePath)
-        wx.saveImageToPhotosAlbum({
-          filePath: res.tempFilePath,
-          success(res) {
-            wx.showToast({
-              title: '已保存',
-            })
-          }
-        })
-      })
+    await util.authorize("writePhotosAlbum", message)
+    let res = await wx.cloud.downloadFile({
+      fileID: self.data.pay.qrcode
     })
+    console.log(res.tempFilePath)
+    await promisify.saveImageToPhotosAlbum({
+      filePath: res.tempFilePath})
+    wx.showToast({
+      title: '已保存',
+    })
+    
   },
 
   bindNum(e) {

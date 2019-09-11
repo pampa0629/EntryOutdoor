@@ -14,6 +14,20 @@
   <van-field value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="请输入手机号码（真实有效方便领队联系）" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" />
 </van-panel>
 
+<!-- 个人照片 -->
+<van-panel>
+  <van-button  size="large" disabled="{{facecodes.length>=30}}" type="primary" bind:click='addStandardPic'>上传个人照片</van-button> 
+  <van-button disabled="{{facecodes.length==0}}" size="large" type="warning" bind:click='deleteStandardPic'>删除个人照片</van-button> 
+  <view wx:for="{{facecodes}}" wx:key="src"> 
+    <van-row>
+      <van-col span="20" offset="2">
+        <image mode="widthFix" src="{{item.src}}"></image>
+      </van-col>
+    </van-row>
+  </view> 
+</van-panel>
+
+
   <!--紧急联系信息-->
 <van-switch-cell wx:if="{{false}}" title="紧急联系信息已{{showEmergency?'显示':'隐藏'}}" checked="{{showEmergency}}" bind:change="changeEmergency"/>
 <block wx:if="{{showEmergency}}">

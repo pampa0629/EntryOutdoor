@@ -418,7 +418,7 @@ Page({
     self.setData({
       nickErrMsg: self.data.userInfo.nickName ? "" : "昵称不能为空",
     })
-    let uniqueName = await person.getUniqueNickname(nickName)
+    let uniqueName = await person.getUniqueNickname(nickName, app.globalData.personid)
     if (nickName != uniqueName) {
       wx.showModal({
         title: '昵称已被占用',

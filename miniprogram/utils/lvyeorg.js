@@ -9,7 +9,7 @@ wx.cloud.init()
 const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
 
-const LvyeOrgURL = 'https://www.lvye.net/panpa/'
+const LvyeOrgURL = 'https://www.lvye.net/panpa/' 
 
 // 返回登录org网站所需要的token
 const getToken = async() => {
@@ -73,7 +73,7 @@ const login = async(username, password) => {
           password: password
         }
       })
-      console.log("lvye org login ok")
+      console.log("lvyeorg login,res:",resp)
       var resp_dict = resp.data
       if (resp_dict.err_code == 0) {
         wx.setStorageSync('LvyeOrgToken', resp_dict.data.token) // 这里必须把token存起来
@@ -82,6 +82,7 @@ const login = async(username, password) => {
         }
       } else {
         let error = await getError(resp)
+        console.log("lvyeorg login error:", error)
         return {
           error: error,
           username: ""
@@ -693,8 +694,8 @@ const loadPosts = async(tid, begin) => {
     if (page.index == 0) { // 只取一部分
       posts = posts.slice(begin, posts.length);
     }
-    return posts
   }
+  return posts
 }
 
 // 得到绿野org网站反馈的错误信息

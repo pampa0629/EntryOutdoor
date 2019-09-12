@@ -140,7 +140,7 @@ Page({
       hasModified: true,
       "userInfo.nickName": e.detail,
       userInfo: this.data.userInfo,
-      nickErrMsg: res.errMsg,
+      nickErrMsg: res.msg,
     })
     console.log("old name:" + this.data.oldNickName)
   },

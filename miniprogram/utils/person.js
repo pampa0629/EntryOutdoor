@@ -51,13 +51,13 @@ const updateWalkStep = async(personid) => {
   return step
 }
 
-const getUniqueNickname = async(nickName) => {
+const getUniqueNickname = async(nickName, personid) => {
   let res = await dbPersons.where({
     "userInfo.nickName": nickName
   }).get()
   console.log(res.data)
   // 如果数据库中没有这个名字，或者只有一个，且是自己，则返回
-  if (res.data.length == 0 || (res.data.length == 1 && res.data[0]._id == app.globalData.personid)) {
+  if (res.data.length == 0 || (res.data.length == 1 && res.data[0]._id == personid)) {
     return nickName
   }
 
@@ -65,7 +65,26 @@ const getUniqueNickname = async(nickName) => {
   var time = new Date().getTime().toString()
   var autoName = "驴友" + time.substr(-4)
   return getUniqueNickname(autoName)
+}
 
+// 这里判断昵称的唯一性和不能为空
+const checkNickname = async (nickName, personid) => {
+  var nickErrMsg = ""
+  if (!nickName) {
+    nickErrMsg = "昵称不能为空，已自动恢复旧名"
+    return { msg: nickErrMsg, result: false }
+  } else {
+    let res = await dbPersons.where({
+      "userInfo.nickName": nickName
+    }).get()
+    console.log(res.data)
+    if (res.data.length > 1) {
+      nickErrMsg = "修改后的昵称已被占用不能使用，已自动恢复旧名"
+    } else if (res.data.length == 1 && res.data[0]._id != personid) {
+      nickErrMsg = "修改后的昵称已被占用不能使用，已自动恢复旧名"
+    }
+    return { msg: nickErrMsg, result: nickErrMsg == "" }
+  }
 }
 
 // 在Persons表中创建一条记录（个人账号）
@@ -75,6 +94,7 @@ const createRecord = async(userInfo, openid) => {
   let res = await dbPersons.where({
     _openid: openid,
   }).get()
+
   if (res.data.length == 0) { // 确认没有才加新的记录
     // 从微信登录信息中获取昵称和性别，不过不能与原有昵称重名
     let nickName = await getUniqueNickname(userInfo.nickName)
@@ -129,26 +149,6 @@ const adjustGroup = (personid, groupOpenid) => {
     // cloudfun.updatePersonGroups(personid, groups)
     cloudfun.opPersonItem(personid, "groups", groups, "")
   })
-}
-
-// 这里判断昵称的唯一性和不能为空
-const checkNickname = async(nickName, personid) => {
-  var nickErrMsg = ""
-  if (!nickName) {
-    nickErrMsg = "昵称不能为空，已自动恢复旧名"
-    return {msg:nickErrMsg, result:false}
-  } else {
-    let res = await dbPersons.where({
-      "userInfo.nickName": nickName
-    }).get()
-    console.log(res.data)
-    if (res.data.length > 1) {
-      nickErrMsg = "修改后的昵称已被占用不能使用，已自动恢复旧名"
-    } else if (res.data.length == 1 && res.data[0]._id != personid) {
-      nickErrMsg = "修改后的昵称已被占用不能使用，已自动恢复旧名"
-    }
-    return {msg:nickErrMsg, result:nickErrMsg == ""}
-  }
 }
 
 // 处理 Persons表中Outdoors内容

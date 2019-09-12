@@ -59,11 +59,6 @@ Page({
     }
 
     self.flushChats(null, res => {
-      // console.log("leader: ",res.data.leader)
-      // if (res.data.leader) {
-      //   self.data.members.push(res.data.leader.userInfo.nickName)
-      //   self.data.personids.push(res.data.leader.personid)
-      // }
       res.data.members.forEach((item, index) => {
         self.data.members.push(item.userInfo.nickName)
         self.data.personids.push(item.personid)
@@ -86,7 +81,7 @@ Page({
       console.log("websites.lvyeorg.chatPosition is:" + websites.lvyeorg.chatPosition)
       var begin = websites.lvyeorg.chatPosition ? websites.lvyeorg.chatPosition : 0
       let posts = await lvyeorg.loadPosts(self.data.tid, begin)
-      if (posts.length > 0) {
+      if (posts && posts.length > 0) {
         posts.forEach((item, index) => {
           // 确认不是小程序发的帖子，才能作为留言
           // 先把 </div> 前面的内容去掉

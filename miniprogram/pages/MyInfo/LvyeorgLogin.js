@@ -9,7 +9,7 @@ const dbPersons = db.collection('Persons')
 Page({
 
   data: {
-    lvyeorgInfo: { 
+    lvyeorgInfo: {  
       username: "",
       // 所有队员都必须遵守的代报名要求
       helpEntry: true, // 为尚未注册org的队员代报名
@@ -119,7 +119,6 @@ Page({
     console.log(this.data.lvyeorgInfo)
     let res = await lvyeorg.login(this.data.lvyeorgInfo.username, this.data.password)
     if(res.username){
-      console.log("loginLvyeOrg callback")
       // 并存储到数据库中
       this.save2Person()
       this.setData({
@@ -129,6 +128,11 @@ Page({
       // 记得把全局的设置上
       app.globalData.lvyeorgInfo = this.data.lvyeorgInfo
       app.globalData.lvyeorgLogin = true
+    } else if(res.error) {
+      wx.showModal({
+        title: '登录失败',
+        content: res.error+'，请检查账号或密码是否正确。',
+      })
     }
     // 修改MyInfo中的按钮中的username名称
     this.setMyInfoUsername(res)

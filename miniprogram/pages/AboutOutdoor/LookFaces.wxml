@@ -1,0 +1,54 @@
+<van-tabs active="{{currentTab}}" bind:change="changeTab">
+  <van-tab title="风景"></van-tab>
+  <van-tab title="合影"></van-tab>
+  <van-tab title="自己"></van-tab>
+</van-tabs>
+
+<swiper current="{{currentTab}}" duration="200" style="height:{{screenHeight}}px" bindchange="swiperTab">
+  <!--风景-->
+  <swiper-item>
+    <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
+      <view wx:for="{{landscape}}" wx:key="url">
+        <van-row>
+          <van-col span="20" offset="2">
+            <image mode="widthFix" src="{{item.url}}"></image>
+          </van-col>
+        </van-row>
+      </view>
+    </scroll-view>
+  </swiper-item>
+
+  <!--合影-->
+  <swiper-item>
+    <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
+      <view wx:for="{{group}}" wx:key="url">
+        <van-row>
+          <van-col span="20" offset="2">
+            <image mode="widthFix" src="{{item.url}}"></image>
+          </van-col>
+        </van-row>
+        <text>{{item.names}}</text>
+      </view>
+    </scroll-view>
+  </swiper-item>
+
+  <!--自己-->
+  <swiper-item>
+    <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
+      <van-tag wx:if="{{myFaceCount == 0}}" type="primary" plain>请上传一张“只有您”的人脸像，以便识别出您自己的照片</van-tag>
+      <van-tag wx:else type="primary" plain>您还可以登记更多人脸，以便更精确的识别出您的照片</van-tag>
+      <!-- <van-tag type="primary" plain>小程序不会保存您登记的人脸照片，请放心</van-tag> -->
+      <!-- todo 删除登记的人脸照片和特征码 -->
+      <form bindsubmit="uploadMyFace" report-submit="true">
+        <button form-type="submit" type="primary">上传人脸照片</button>
+      </form>
+      <view wx:for="{{myself}}" wx:key="url">
+        <van-row>
+          <van-col span="20" offset="2">
+            <image mode="widthFix" src="{{item.url}}"></image>
+          </van-col>
+        </van-row>
+      </view>
+    </scroll-view>
+  </swiper-item>
+</swiper>

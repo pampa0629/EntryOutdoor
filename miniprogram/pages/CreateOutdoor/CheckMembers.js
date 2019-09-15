@@ -268,17 +268,19 @@ Page({
     const self = this
 
     var content = ""
-    self.data.chatDlg.selects.forEach((item, index) => {
-      var temp = self.data.chatDlg.Options[item]
-      if (temp == "其它") {
-        temp = self.data.chatDlg.content
-      }
-      content += temp
-      if (index != self.data.chatDlg.selects.length - 1) {
-        content += "，"
-      }
-    })
-
+    if (self.data.chatDlg.selects) {
+      self.data.chatDlg.selects.forEach((item, index) => {
+        var temp = self.data.chatDlg.Options[item]
+        if (temp == "其它") {
+          temp = self.data.chatDlg.content
+        }
+        content += temp
+        if (index != self.data.chatDlg.selects.length - 1) {
+          content += "，"
+        }
+      })
+    }
+    
     console.log(content)
     if (content) {
       const item = self.data.members[self.data.index]
@@ -347,16 +349,18 @@ Page({
     const self = this
 
     var content = ""
-    self.data.rejectDlg.selects.forEach((item, index) => {
-      var temp = self.data.rejectDlg.Options[item]
-      if (temp == "其它") {
-        temp = self.data.rejectDlg.content
-      }
-      content += temp
-      if (index != self.data.rejectDlg.selects.length - 1) {
-        content += "，"
-      }
-    })
+    if (self.data.rejectDlg.selects) {
+      self.data.rejectDlg.selects.forEach((item, index) => {
+        var temp = self.data.rejectDlg.Options[item]
+        if (temp == "其它") {
+          temp = self.data.rejectDlg.content
+        }
+        content += temp
+        if (index != self.data.rejectDlg.selects.length - 1) {
+          content += "，"
+        }
+      })
+    }
     console.log(content)
 
     if (content) {

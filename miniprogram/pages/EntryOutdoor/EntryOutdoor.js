@@ -7,6 +7,7 @@ const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
+const facetools = require('../../utils/facetools.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -850,6 +851,28 @@ Page({
     var url = app.globalData.hasUserInfo ? "../AboutOutdoor/HallOutdoor" : "../MyInfo/MyInfo"
     wx.switchTab({
       url: url,
+    })
+  },
+
+  // 上传活动中的拍照
+  async uploadFaces(e) {
+    console.log("uploadFaces()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+
+    let resChoose = await promisify.chooseImage({
+      sizeType: ['original', 'compressed'], //['original', 'compressed'], 
+      sourceType: ['album', 'camera'], // ['album', 'camera'], 
+    })
+    console.log("chooseImage:", resChoose)
+    let faces = await facetools.uploadOdFaces(this.data.od.outdoorid, app.globalData.personid, resChoose.tempFiles)
+    console.log("faces:", faces)
+    facetools.aiOdFaces(this.data.od.outdoorid, faces)
+  },
+
+  lookFaces(e) {
+    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    wx.navigateTo({
+      url: "../AboutOutdoor/LookFaces?outdoorid=" + this.data.od.outdoorid,
     })
   },
 

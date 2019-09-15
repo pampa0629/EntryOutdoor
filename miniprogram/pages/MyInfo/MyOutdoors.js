@@ -6,7 +6,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 
-Page({ 
+Page({  
   data: {
     currentTab: 1, // 默认是我参加的
     myOutdoors: [], // 我创建的活动列表
@@ -61,20 +61,15 @@ Page({
 
   //滑动切换
   swiperTab: function(e) {
-    var that = this;
-    that.setData({
+    this.setData({
       currentTab: e.detail.current
-    });
+    })
   },
 
   //点击切换
   changeTab: function(e) {
-    //console.log(e)
-    var that = this;
-    if (this.data.currentTab === e.detail.index) {
-      return false;
-    } else {
-      that.setData({
+    if (this.data.currentTab != e.detail.index) {
+      this.setData({
         currentTab: e.detail.index
       })
     }

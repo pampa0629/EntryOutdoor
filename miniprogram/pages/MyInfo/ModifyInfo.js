@@ -218,7 +218,7 @@ Page({
       if (code.statusCode != 504) {
         self.data.facecodes.push({ src: resUpload.fileID, code: code.data })
         self.setData({
-          "facecodes": self.data.facecodes,
+          "facecodes": self.data.facecodes, 
         })
         await cloudfun.opPersonItem(app.globalData.personid, "facecodes", self.data.facecodes)
       } else{

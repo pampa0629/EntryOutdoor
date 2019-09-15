@@ -4,7 +4,7 @@ var bmap = require('../libs/bmap-wx.min.js')
 const cloudfun = require('./cloudfun.js')
 const template = require('./template.js')
 const promisify = require('./promisify.js')
-
+ 
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -676,6 +676,8 @@ const isNeedAA = (od, entryStatus) => {
   }
   return result
 }
+
+
 
 module.exports = {
   createTitle: createTitle, // 生成活动标题

@@ -141,7 +141,7 @@
   <van-cell slot="header" title-class="redtitle" title="图文介绍"></van-cell>
   <van-field label="文字介绍" value="{{od.brief.disc}}" autosize type="textarea" placeholder="请输入活动介绍" bind:confirm="bindBriefText" bind:change="bindBriefText" icon="arrow-left" bind:click-icon="pasteBriefDisc" />
   <van-tag type="danger" plain wx:if="{{!outdoorid}}">必须先“保存草稿”或“发布活动”，才能“上传照片”</van-tag>
-  <van-cell title="活动照片" label="好照片胜过千言万语" value="点击上传/删除活动照片" border="{{false}}" clickable="{{outdoorid}}" is-link bind:click="clickUploadPics" />
+  <van-cell title="活动照片" wx:if="{{!od.begin}}" label="好照片胜过千言万语" value="点击上传/删除活动照片" border="{{false}}" clickable="{{outdoorid}}" is-link bind:click="clickUploadPics" />
   <view wx:for="{{od.brief.pics}}" wx:key="src">
     <van-row>
       <van-col span="20" offset="2">
@@ -175,13 +175,13 @@
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
-<block>
+<block wx:if="{{od.status=='拟定中' || (od.status=='已发布' && od.expired)}}">
 <!--故意空白，防止遮挡-->
   <van-cell title="  " border="{{false}}" />
   <van-cell title="  " border="{{false}}" />
   <van-cell title="  " border="{{false}}" />
 
-  <van-row class="fix2" wx:if="{{od.status=='拟定中' || (od.status=='已发布' && od.expired)}}">
+  <van-row class="fix2">
     <van-col span="6" offset="1" wx:if="{{od.status=='拟定中'}}"> 
       <form bindsubmit="publishOutdoor" report-submit="true" >
         <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布</button>
@@ -207,7 +207,23 @@
       <button form-type="submit" disabled="{{!hasModified}}" type="primary">保存修改</button>
     </form>
   </van-col>
-</van-row>
+</van-row> 
+
+<!-- 上传照片 -->
+<block wx:if="{{od.status=='已发布' ||od.status=='已成行' && od.begin}}">
+  <van-row class="fix">
+    <van-col span="10" offset="1">
+      <form bindsubmit="uploadFaces" report-submit="true">
+        <button form-type="submit" type="primary">上传活动照片</button>
+      </form>
+    </van-col>
+    <van-col span="11" offset="1">
+      <form bindsubmit="lookFaces" report-submit="true">
+        <button form-type="submit" type="primary">查看活动照片({{od.facecount}})</button>
+      </form>
+    </van-col>
+  </van-row> 
+</block>
 
 <!--保证formid数量对话框-->
 <van-dialog use-slot show="{{showFormidDlg}}" show-cancel-button  bind:cancel="cancelFormidDlg" bind:confirm="confirmFormidDlg" title="微信消息数量" confirmButtonText="够数了" cancelButtonText="不报了">

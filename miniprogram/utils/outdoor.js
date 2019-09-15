@@ -8,7 +8,7 @@ const lvyeorg = require('./lvyeorg.js')
 const person = require('./person.js')
 
 wx.cloud.init()
-const db = wx.cloud.database({})
+const db = wx.cloud.database({}) 
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
@@ -143,6 +143,11 @@ OD.prototype.copy = function(od) {
 
   // 增加对活动是否过期的判断
   this.expired = (new Date()) > new Date(this.title.date + ",24:00") ? true : false
+  this.begin = (new Date()) > new Date(this.title.date + ",0:00") ? true : false
+
+  // 活动中拍摄上传的照片
+  this.faces = od.faces ? od.faces:null
+  this.facecount = Object.keys(this.faces).length
 
   // next 
 

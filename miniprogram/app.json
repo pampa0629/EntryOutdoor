@@ -39,7 +39,8 @@
     "pages/AboutOutdoor/PayOutdoor",
     "pages/AboutOutdoor/CfoOutdoor",
     "pages/CreateOutdoor/EditWebsites",
-    "pages/Test/Test1"
+    "pages/Test/Test1",
+    "pages/AboutOutdoor/LookFaces"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -88,6 +89,5 @@
     "downloadFile": 60000
   },
   "sitemapLocation": "sitemap.json",
-  "plugins": {
-  }
+  "plugins": {}
 }

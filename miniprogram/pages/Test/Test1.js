@@ -296,13 +296,19 @@ Page({
     // }catch(err) {
     //   console.log("err:",err)
     // }
-    var res = this.testTwo()
-    console.log(res)
+    var faces = {}
+    faces["a"] = {a:"a",d:"d"}
+    faces["b"] = "b"
+    var c = "cc"
+    faces.c = "c"
+    faces[c] = "ccc"
+    console.log("faces:", faces)
+    console.log("length1:", Object.getOwnPropertyNames(faces).length)
+    console.log("length2:", Object.keys(faces).length)
+    
+    
   },
 
-  testTwo() {
-    return ("haha", 1)
-  }
 
 
 })

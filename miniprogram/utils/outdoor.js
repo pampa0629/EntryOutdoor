@@ -146,8 +146,8 @@ OD.prototype.copy = function(od) {
   this.begin = (new Date()) > new Date(this.title.date + ",0:00") ? true : false
 
   // 活动中拍摄上传的照片
-  this.faces = od.faces ? od.faces:null
-  this.facecount = Object.keys(this.faces).length
+  this.photos = od.photos ? od.photos:null
+  this.photocount = Object.keys(this.photos).length
 
   // next 
 

@@ -21,66 +21,105 @@ const getDist = (code1, code2) => {
   return Math.sqrt(sum)
 }
 
+// 根据特征值距离，推算概率百分比
+const getMaybe = (dist) =>{
+  var temp = 1-dist
+  temp = Math.sqrt(temp)
+  temp = Math.sqrt(temp)
+  return Math.floor(temp*100)
+}
+
 // 调用ai，出错自动重复
-const aiOneFace = async(imageUrl, count) => {
+const aiOnePhoto = async(imageUrl, count) => {
   console.log("facetools.aiOneFace() ", imageUrl, count)
   let res = await promisify.request({
     url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url=" + imageUrl
   })
   console.log("ai face res:", res)
-  if (res.statusCode == 504) {
+  if (res.statusCode == 504) { // 超时，多试几次
     if (count >= 0) {
-      return await aiOneFace(imageUrl, count - 1)
+      return await aiOnePhoto(imageUrl, count - 1)
     }
   }
   return res.data
 }
 
 // ai识别一张照片
-const aiOdFace = async(outdoorid, face, id, count) => {
-  console.log("facetools.aiOdFace() ", outdoorid, face, id, count)
+const aiOdPhoto = async(outdoorid, photo, id, count) => {
+  console.log("facetools.aiOdPhoto() ", outdoorid, photo, id, count)
 
   const resTemp = await wx.cloud.getTempFileURL({
-    fileList: [face.url]
+    fileList: [photo.src]
   })
   const imageUrl = resTemp.fileList[0].tempFileURL
   console.log("url:", imageUrl)
 
-  let data = await aiOneFace(imageUrl, 5)
+  let data = await aiOnePhoto(imageUrl, 5)
 
   // 结果写入数据库
   if (data.errorCode) {
-    face.error = data.errorMessage
-  } else {
-    face.id = id
-    face.count = data[0].length
-    face.boxes = data[0]
-    face.codes = data[1]
-    face.persons = {} 
+    photo.error = { code: data.errorCode, message:data.errorMessage}
+    wx.showModal({
+      title: 'AI识别出错',
+      content: '有照片AI识别出错，请重新上传或压缩后上传。错误信息为：' + photo.error.message,
+      showCancel:face,
+    })
+  } else { 
+    delete photo.error
+    photo.id = id
+    photo.facecount = data[0].length // 有length么?
+    photo.faces = []
+    for (var i in data[0]) {
+      var face = {
+        box: data[0][i],
+        code: data[1][i],
+        personid:null, 
+        nickName:"",
+        dist:1
+      }
+      photo.faces.push(face)
+    }
   }
-  cloudfun.opOutdoorItem(outdoorid, "faces." + id, face, "")
+  cloudfun.opOutdoorItem(outdoorid, "photos." + id, photo, "")
+  return photo
 }
 
 // 得到一个活动中，所有成员的人脸特征码集合
-const getMemFacecodes = async(outdoorid)=>{
-  console.log("facetools.getMemFacecodes()", outdoorid)
-  let resOd = await dbOutdoors.doc(outdoorid).get()
+const getMemsFacecodes = async(outdoorid) => {
+  console.log("facetools.getMemsFacecodes()", outdoorid)
+  let resOd = await dbOutdoors.doc(outdoorid).field({members: true,}).get()
   var memsCodes = {}
-  for (var i in resOd.data.members) {
-    const item = resOd.data.members[i]
-    let resPsn = await dbPersons.doc(item.personid).get()
-    memsCodes[item.personid] = {
-      personid: item.personid,
-      nickName:resPsn.data.userInfo.nickName,
-      facecodes: resPsn.data.facecodes
+  var personids = []
+  for (var i = 0; i < resOd.data.members.length; i++) {
+    personids.push(resOd.data.members[i].personid)
+    if (personids.length == 20 || i == resOd.data.members.length - 1) {
+      let resPsns = await dbPersons.where({
+        _id: _.in(personids)
+      }).field({
+        userInfo: true,
+        facecodes: true,
+      }).get()
+      // console.log("resPsns:", resPsns)
+      for (var j in resPsns.data) {
+        const resPsn = resPsns.data[j]
+        memsCodes[resPsn._id] = {
+          personid: resPsn._id,
+          nickName: resPsn.userInfo.nickName,
+          facecodes: resPsn.facecodes
+        }
+      }
+      personids = []
     }
   }
+
   return memsCodes
 }
 
-const findMinDist = (code, memsCodes, oldDist) =>{
+// 把照片中的一个人脸，与mems个人的所登记的特征码进行计算，得到最小值
+// 找到返回最小值和对应的人员id，没找到返回null
+const findMinDist = (code, memsCodes, oldDist) => {
   console.log("facetools.findMinDist()", oldDist)
-  var minDist = oldDist ?oldDist:1.0
+  var minDist = oldDist ? oldDist : 1.0
   console.log("minDist", minDist)
   var personid = null
   for (var pid in memsCodes) {
@@ -98,97 +137,129 @@ const findMinDist = (code, memsCodes, oldDist) =>{
     }
   }
   return {
-    personid: personid, 
+    personid: personid,
     dist: minDist
   }
 }
 
-const matchOdFaces = async(outdoorid, faces)=>{
-  console.log("facetools.matchOdFaces()", outdoorid, faces)
-  let memsCodes = await getMemFacecodes(outdoorid)
-  for(var id in faces) {
-    const face = faces[id]
-    for(var i in face.codes) {
-      var oldDist = 1.0
-      if (faces[id].persons && faces[id].persons[i] ) {
-        oldDist = faces[id].persons[i].dist
-      }
-      var res = findMinDist(face.codes[i], memsCodes, oldDist)
-      if (res.personid) {
-        console.log("res:", res)
-        if (!face.persons) {
-          face.persons = {}
-        }
-        face.persons[i] = {
-          personid: res.personid,
-          nickName: memsCodes[res.personid].nickName,
-          dist:res.dist
-        }
-        let name = "faces." + id + ".persons." + i
-        await cloudfun.opOutdoorItem(outdoorid, name, face.persons[i], "")
+// 匹配一张照片，与一个code
+const matchOnePhoto = (outdoorid, photo, code, personid, nickName)=>{
+  console.log("facetools.matchOnePhoto()")
+  var changed = false
+  var most = {dist:1} // 只记录最好的一个
+  for (var i in photo.faces) { // 每个人脸
+    const face = photo.faces[i]
+    var oldDist = face.dist ? face.dist:1.0
+    var dist = facetools.getDist(item.codes[i], mycode)
+    if (dist < oldDist) { // 首先得比原来的好
+      changed = true
+      if (dist<most.dist) { // 假设：一张照片中只有一个自己
+        most.id = i
+        most.dist = dist
+        most.personid = personid
+        most.nickName = nickName
       }
     }
   }
+  if(changed) {
+    const face = photo.faces[most.id]
+    face.dist = most.dist
+    face.personid = most.personid
+    face.nickName = most.nickName
+
+    cloudfun.opOutdoorItem(outdoorid, "photos." + photo.id, photo, "")
+  }
+  return changed
+}
+
+// 把一个活动中的所有成员，和 faces照片做匹配
+const matchOdPhotos = async(outdoorid, photos) => {
+  console.log("facetools.matchOdPhotos()", outdoorid, photos)
+  wx.showLoading({ title: "正在匹配队员" })
+  let memsCodes = await getMemsFacecodes(outdoorid)
+  for (var pid in photos) {
+    const photo = photos[pid]
+    var changed = false
+    for (var i in photo.faces) {
+      var face = photo.faces[i]
+      var res = findMinDist(face.code, memsCodes, face.dist)
+      if (res.personid) {
+        console.log("res:", res)
+        face.personid = res.personid
+        face.nickName = memsCodes[res.personid].nickName,
+        face.dist = res.dist
+        changed = true
+      }
+    }
+    if (changed) {
+      await cloudfun.opOutdoorItem(outdoorid, "photos." + pid, photo, "")
+    }
+  }
+  wx.hideLoading()
 }
 
 // 识别一组照片
-const aiOdFaces = async(outdoorid, faces) => {
-  console.log("facetools.aiOdFaces()", outdoorid, faces)
-  for (var id in faces) {
-    var face = faces[id]
-    await aiOdFace(outdoorid, face, id, 5)
+const aiOdPhotos = async(outdoorid, photos) => {
+  console.log("facetools.aiOdFaces()", outdoorid, photos)
+  wx.showLoading({title: "正在AI识别中"})
+  for (var id in photos) {
+    var photo = photos[id]
+    await aiOdPhoto(outdoorid, photo, id, 5)
   }
-  matchOdFaces(outdoorid, faces)
+  wx.hideLoading()
+  matchOdPhotos(outdoorid, photos)
 }
 
 // 上传选择的相册照片，返回云存储地址
-const uploadOdFaces = async(outdoorid, owner, tempFiles) => {
-  console.log("facetools.uploadOdFaces()", outdoorid, owner, tempFiles)
-  var faces = {}
-  wx.showLoading({
-    title: "正在上传照片"
-  })
+const uploadOdPhotos = async(outdoorid, owner, tempFiles) => {
+  console.log("facetools.uploadOdPhotos()", outdoorid, owner, tempFiles)
+  var photos = {}
+  wx.showLoading({title: "正在上传照片"})
   for (var i in tempFiles) {
-    var id = tempFiles[i].size // 以文件大小（size）作为文件名
+    var id = tempFiles[i].size // 以文件大小（size）作为文件名，避免重复上传同一张照片
     let resUpload = await wx.cloud.uploadFile({
-      cloudPath: util.buildOutdoorFace(outdoorid, id),
+      cloudPath: util.buildOutdoorPhoto(outdoorid, id),
       filePath: tempFiles[i].path
     })
-    const face = {
-      url: resUpload.fileID,
+    const photo = {
+      id:id, 
+      src: resUpload.fileID,
       owner: owner,
-      count: -1  // -1代表尚未进行ai识别
-    } 
-    faces[id] = face
-    await cloudfun.opOutdoorItem(outdoorid, "faces." + id, face, "")
+      facecount: -1 // -1代表尚未进行ai识别
+    }
+    photos[id] = photo
+    await cloudfun.opOutdoorItem(outdoorid, "photos." + id, photo, "")
   }
   wx.hideLoading()
-  return faces
+  return photos
 }
 
-const calcCodeID = (code)=>{
+const calcCodeID = (code) => {
   console.log("facetools.calcCodeID()")
   var id = 0
-  for(var i=0; i<512; i++) {
+  for (var i = 0; i < 512; i++) {
     id += Math.abs(code[i])
   }
-  id = Math.floor(id*1000000)
+  id = Math.floor(id * 1000000)
   console.log("code id:", id)
   return id
 }
 
 module.exports = {
-  
-  uploadOdFaces: uploadOdFaces, // 上传活动照片
-  aiOdFaces: aiOdFaces, // 识别人脸照片，并存储到Outdoors中
-  aiOdFace: aiOdFace, // 识别一张人脸，并存储到Outdoors中
 
-  aiOneFace: aiOneFace, // 识别一张人脸
+  uploadOdPhotos: uploadOdPhotos, // 上传活动照片
+  aiOdPhotos: aiOdPhotos, // 识别人脸照片，并存储到Outdoors中
+  aiOdPhoto: aiOdPhoto, // 识别一张人脸，并存储到Outdoors中
+
+  aiOnePhoto: aiOnePhoto, // 识别一张人脸
 
   getDist: getDist, // 计算人脸特征码距离
+  getMaybe: getMaybe, // 根据特征码距离，计算可能性的百分比
 
   calcCodeID: calcCodeID, // 计算特征码的id
-  matchOdFaces: matchOdFaces, // 匹配od中所有人员
+  matchOdPhotos: matchOdPhotos, // 匹配od中所有人员
+  getMemsFacecodes: getMemsFacecodes, // 得到一个活动中，所有成员的人脸特征码集合
 
+  matchOnePhoto: matchOnePhoto, // 
 
 }

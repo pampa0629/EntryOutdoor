@@ -5,6 +5,7 @@ const person = require('../../utils/person.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const util = require('../../utils/util.js')
 const promisify = require('../../utils/promisify.js')
+const facetools = require('../../utils/facetools.js')
 // const tencentcloud = require("../../../../tencentcloud-sdk-nodejs");
 // const tencentcloud = require("tencentcloud-sdk-nodejs");
 
@@ -296,18 +297,65 @@ Page({
     // }catch(err) {
     //   console.log("err:",err)
     // }
-    var faces = {}
-    faces["a"] = {a:"a",d:"d"}
-    faces["b"] = "b"
-    var c = "cc"
-    faces.c = "c"
-    faces[c] = "ccc"
-    console.log("faces:", faces)
-    console.log("length1:", Object.getOwnPropertyNames(faces).length)
-    console.log("length2:", Object.keys(faces).length)
+
+    // var faces = {}
+    // faces["a"] = {a:"a",d:"d"}
+    // faces["b"] = "b"
+    // var c = "cc"
+    // faces.c = "c"
+    // faces[c] = "ccc"
+    // console.log("faces:", faces)
+    // console.log("length1:", Object.getOwnPropertyNames(faces).length)
+    // console.log("length2:", Object.keys(faces).length)
+
+    // this.query()
+    this.calc2()
+  },
+
+  calc2() {
+    var num = 0.2
+    var counts = [1,2,3]
+    for(var i in counts) {
+      num = Math.sqrt(num)
+      console.log("i:", num)
+    }
+  },
+
+  
+
+  async calc() {
+    let res = await dbPersons.doc("W7cw8J25dhqgDMHA").get()
+    console.log("res:",res)
+    const code1 = res.data.facecodes["17921638"].code
+    console.log("code1:", code1)
+
+    let resOd = await dbOutdoors.doc("5d262bd45d7796f7173307fc634918a4").get()
     
+    // console.log("code2:", code2)
+
+    var t1 = new Date().getTime()
+    for (var id in resOd.data.faces["9555734"].codes) {
+      const code2 = resOd.data.faces["9555734"].codes[id]
+      var dist = facetools.getDist(code1, code2)
+      console.log("dist:", dist)
+    }
+    
+    var t2 = new Date().getTime()
+    
+    console.log("time:", t2 - t1)
     
   },
+
+  async query() {
+    var t1 = new Date().getTime()
+    // "5d262bd45d7796f7173307fc634918a4"
+    let codes = await facetools.getMemFacecodes("5d262bd45d7796f7173307fc634918a4")
+    var t2 = new Date().getTime()
+    console.log("codes:", codes)
+    console.log("time:", t2-t1)
+  }
+
+  // _id: 
 
 
 

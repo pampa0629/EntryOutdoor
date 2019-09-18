@@ -15,7 +15,7 @@
 </van-panel>
 
 <!-- 个人照片 -->
-<van-panel>
+<!-- <van-panel>
   <van-button  size="large" disabled="{{facecodes.length>=30}}" type="primary" bind:click='addStandardPic'>上传个人照片</van-button> 
   <van-button disabled="{{facecodes.length==0}}" size="large" type="warning" bind:click='deleteStandardPic'>删除个人照片</van-button> 
   <view wx:for="{{facecodes}}" wx:key="src"> 
@@ -25,7 +25,7 @@
       </van-col>
     </van-row>
   </view> 
-</van-panel>
+</van-panel> -->
 
 
   <!--紧急联系信息-->

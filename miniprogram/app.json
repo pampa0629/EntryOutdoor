@@ -38,9 +38,10 @@
     "pages/AboutGroup/OneGroup",
     "pages/AboutOutdoor/PayOutdoor",
     "pages/AboutOutdoor/CfoOutdoor",
+    "pages/AboutOutdoor/LookPhotos",
     "pages/CreateOutdoor/EditWebsites",
     "pages/Test/Test1",
-    "pages/AboutOutdoor/LookFaces"
+    "pages/MyInfo/EditFaces"
   ],
   "window": {
     "backgroundTextStyle": "dark",

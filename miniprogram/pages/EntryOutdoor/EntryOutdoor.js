@@ -855,7 +855,7 @@ Page({
   },
 
   // 上传活动中的拍照
-  async uploadFaces(e) {
+  async uploadPhotos(e) {
     console.log("uploadFaces()")
     template.savePersonFormid(app.globalData.personid, e.detail.formId)
 
@@ -864,15 +864,19 @@ Page({
       sourceType: ['album', 'camera'], // ['album', 'camera'], 
     })
     console.log("chooseImage:", resChoose)
-    let faces = await facetools.uploadOdFaces(this.data.od.outdoorid, app.globalData.personid, resChoose.tempFiles)
-    console.log("faces:", faces)
-    facetools.aiOdFaces(this.data.od.outdoorid, faces)
+    var owner = { personid: app.globalData.personid, nickName:app.globalData.userInfo.nickName}
+    let photos = await facetools.uploadOdPhotos(this.data.od.outdoorid, owner, resChoose.tempFiles)
+    console.log("photos:", photos)
+    facetools.aiOdPhotos(this.data.od.outdoorid, photos)
+    this.setData({
+      "od.photocount": this.data.od.photocount + Object.keys(photos).length
+    })
   },
 
-  lookFaces(e) {
+  lookPhotos(e) {
     template.savePersonFormid(app.globalData.personid, e.detail.formId)
     wx.navigateTo({
-      url: "../AboutOutdoor/LookFaces?outdoorid=" + this.data.od.outdoorid,
+      url: "../AboutOutdoor/LookPhotos?outdoorid=" + this.data.od.outdoorid,
     })
   },
 

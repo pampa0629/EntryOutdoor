@@ -177,133 +177,133 @@ Page({
   },
 
   
-// 个人标准照片
-  // 增加照片
-  async addStandardPic(e) {
-    var self = this
-    var length = self.data.facecodes.length
+// // 个人标准照片
+//   // 增加照片
+//   async addStandardPic(e) {
+//     var self = this
+//     var length = self.data.facecodes.length
     
-    let resChoose = await promisify.chooseImage({
-      count: 1, // 
-      sizeType: ['original'], //['original', 'compressed'], // 必须用原图
-      sourceType: ['album', 'camera'], // ['album', 'camera'], 
-    })
-    console.log("chooseImage:", resChoose)
+//     let resChoose = await promisify.chooseImage({
+//       count: 1, // 
+//       sizeType: ['original'], //['original', 'compressed'], // 必须用原图
+//       sourceType: ['album', 'camera'], // ['album', 'camera'], 
+//     })
+//     console.log("chooseImage:", resChoose)
 
-    const item = resChoose.tempFiles[0]
-    if (item.size < 5000) { // 图片不能小于5kb
-      wx.showToast({
-        title: '图片不能小于5KB，防止脸部不够清晰',
-      })
-    } else {
-      wx.showLoading({title: "正在上传图片"})
-      console.log(item.path)
-      let resUpload = await wx.cloud.uploadFile({
-        cloudPath: util.buildPersonPhotoSrc(app.globalData.personid, length),
-        filePath: item.path
-      })// 小程序临时文件路径
-      console.log("fileID:", resUpload.fileID)
-      const resTemp = await wx.cloud.getTempFileURL({
-        fileList: [resUpload.fileID]
-      })
-      const tempUrl = resTemp.fileList[0].tempFileURL
-      console.log("url:", tempUrl)
+//     const item = resChoose.tempFiles[0]
+//     if (item.size < 5000) { // 图片不能小于5kb
+//       wx.showToast({
+//         title: '图片不能小于5KB，防止脸部不够清晰',
+//       })
+//     } else {
+//       wx.showLoading({title: "正在上传图片"})
+//       console.log(item.path)
+//       let resUpload = await wx.cloud.uploadFile({
+//         cloudPath: util.buildPersonPhotoSrc(app.globalData.personid, length),
+//         filePath: item.path
+//       })// 小程序临时文件路径
+//       console.log("fileID:", resUpload.fileID)
+//       const resTemp = await wx.cloud.getTempFileURL({
+//         fileList: [resUpload.fileID]
+//       })
+//       const tempUrl = resTemp.fileList[0].tempFileURL
+//       console.log("url:", tempUrl)
       
-      wx.showLoading({ title: "人脸识别中..." })
-      let code = await promisify.request({
-        url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url=" + tempUrl,
-        // method: "POST",
-      })
-      console.log("code:", code)
-      if (code.statusCode != 504) {
-        self.data.facecodes.push({ src: resUpload.fileID, code: code.data })
-        self.setData({
-          "facecodes": self.data.facecodes, 
-        })
-        await cloudfun.opPersonItem(app.globalData.personid, "facecodes", self.data.facecodes)
-      } else{
-        wx.showToast({
-          title: '服务超时请重试',
-        })
-      }
-      wx.hideLoading()
-    }
-  },
+//       wx.showLoading({ title: "人脸识别中..." })
+//       let code = await promisify.request({
+//         url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url=" + tempUrl,
+//         // method: "POST",
+//       })
+//       console.log("code:", code)
+//       if (code.statusCode != 504) {
+//         self.data.facecodes.push({ src: resUpload.fileID, code: code.data })
+//         self.setData({
+//           "facecodes": self.data.facecodes, 
+//         })
+//         await cloudfun.opPersonItem(app.globalData.personid, "facecodes", self.data.facecodes)
+//       } else{
+//         wx.showToast({
+//           title: '服务超时请重试',
+//         })
+//       }
+//       wx.hideLoading()
+//     }
+//   },
 
-  async addStandardPic2(e) {
-    var self = this
-    var length = self.data.facecodes.length
-    const request = promisify(wx.request)
-    const chooseImage = promisify(wx.chooseImage)
-    wx.chooseImage({
-      count: 3 - length, // 
-      sizeType: ['original'], //['original', 'compressed'], // 必须用原图
-      sourceType: ['album', 'camera'], // ['album', 'camera'], 
-      async success(resChoose) {
-        resChoose.tempFiles.forEach(async (item, index) => {
-          if (item.size < 5000) { // 图片不能小于5kb
-            wx.showToast({
-              title: '图片不能小于5KB，防止脸部不够清晰',
-            })
-          } else {
-            wx.showLoading({
-              icon: "loading",
-              title: "正在上传图片"
-            })
-            console.log(item.path)
-            let resUpload = await wx.cloud.uploadFile({ 
-              cloudPath: util.buildPersonPhotoSrc(app.globalData.personid, index + length),
-              filePath: item.path })// 小程序临时文件路径
-            console.log("fileID:", resUpload.fileID)
-            const resTemp = await wx.cloud.getTempFileURL({
-              fileList: [resUpload.fileID]
-            })
-            const tempUrl = resTemp.fileList[0].tempFileURL
-            console.log("url:",tempUrl)
-            let code = await request({
-              url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url=" + tempUrl,
-              method: "POST",
-              // header: {
-              //   "content-type": "application/x-www-form-urlencoded"
-              // },
-            })
-            console.log("code:", code)
-            self.data.facecodes.push({src: resUpload.fileID,code:code.data})
-            self.setData({
-              "facecodes": self.data.facecodes,
-              })
-            await cloudfun.opPersonItem(app.globalData.personid, "facecodes", self.data.facecodes)
-            // self.data.pics.push({
-            //     src: resUpload.fileID
-            //   })
-            //   self.setData({
-            //     "pics": self.data.pics,
-            //   })
-            //   self.save()
-            // })
-            wx.hideLoading()
-          }
-        })
-      }
-    })
-  },
+//   async addStandardPic2(e) {
+//     var self = this
+//     var length = self.data.facecodes.length
+//     const request = promisify(wx.request)
+//     const chooseImage = promisify(wx.chooseImage)
+//     wx.chooseImage({
+//       count: 3 - length, // 
+//       sizeType: ['original'], //['original', 'compressed'], // 必须用原图
+//       sourceType: ['album', 'camera'], // ['album', 'camera'], 
+//       async success(resChoose) {
+//         resChoose.tempFiles.forEach(async (item, index) => {
+//           if (item.size < 5000) { // 图片不能小于5kb
+//             wx.showToast({
+//               title: '图片不能小于5KB，防止脸部不够清晰',
+//             })
+//           } else {
+//             wx.showLoading({
+//               icon: "loading",
+//               title: "正在上传图片"
+//             })
+//             console.log(item.path)
+//             let resUpload = await wx.cloud.uploadFile({ 
+//               cloudPath: util.buildPersonPhotoSrc(app.globalData.personid, index + length),
+//               filePath: item.path })// 小程序临时文件路径
+//             console.log("fileID:", resUpload.fileID)
+//             const resTemp = await wx.cloud.getTempFileURL({
+//               fileList: [resUpload.fileID]
+//             })
+//             const tempUrl = resTemp.fileList[0].tempFileURL
+//             console.log("url:",tempUrl)
+//             let code = await request({
+//               url: "https://service-q0d7fjgg-1258400438.gz.apigw.tencentcs.com/release/helloworld?url=" + tempUrl,
+//               method: "POST",
+//               // header: {
+//               //   "content-type": "application/x-www-form-urlencoded"
+//               // },
+//             })
+//             console.log("code:", code)
+//             self.data.facecodes.push({src: resUpload.fileID,code:code.data})
+//             self.setData({
+//               "facecodes": self.data.facecodes,
+//               })
+//             await cloudfun.opPersonItem(app.globalData.personid, "facecodes", self.data.facecodes)
+//             // self.data.pics.push({
+//             //     src: resUpload.fileID
+//             //   })
+//             //   self.setData({
+//             //     "pics": self.data.pics,
+//             //   })
+//             //   self.save()
+//             // })
+//             wx.hideLoading()
+//           }
+//         })
+//       }
+//     })
+//   },
 
-// 删除照片
-  deleteStandardPic() {
-    console.log("CreateOutdoor.js in deletePic fun, pics count is:" + this.data.pics.length)
-    // 试着删除文件，要删不掉，则是用模板创建的活动，图片是别人的
-    var file = this.data.pics[this.data.pics.length - 1].src;
-    wx.cloud.deleteFile({
-      fileList: [file]
-    }).then(res => {
-      console.log("CreateOutdoor.js in deletePic fun, del pic ok: " + JSON.stringify(res, null, 2))
-    }).catch(err => {
-      console.error(err)
-    })
+// // 删除照片
+//   deleteStandardPic() {
+//     console.log("CreateOutdoor.js in deletePic fun, pics count is:" + this.data.pics.length)
+//     // 试着删除文件，要删不掉，则是用模板创建的活动，图片是别人的
+//     var file = this.data.pics[this.data.pics.length - 1].src;
+//     wx.cloud.deleteFile({
+//       fileList: [file]
+//     }).then(res => {
+//       console.log("CreateOutdoor.js in deletePic fun, del pic ok: " + JSON.stringify(res, null, 2))
+//     }).catch(err => {
+//       console.error(err)
+//     })
 
-    this.data.pics.pop(); // 去掉最后一个
-    this.save()
-  },
+//     this.data.pics.pop(); // 去掉最后一个
+//     this.save()
+//   },
 
 
 // 紧急联系信息，暂时封存

@@ -225,13 +225,13 @@
 <block wx:if="{{od.status=='已发布' ||od.status=='已成行' && od.begin}}">
   <van-row class="fix">
     <van-col span="10" offset="1">
-      <form bindsubmit="uploadFaces" report-submit="true">
+      <form bindsubmit="uploadPhotos" report-submit="true">
         <button form-type="submit" type="primary">上传活动照片</button>
       </form>
     </van-col>
     <van-col span="11" offset="1">
-      <form bindsubmit="lookFaces" report-submit="true">
-        <button form-type="submit" type="primary">查看活动照片({{od.facecount}})</button>
+      <form bindsubmit="lookPhotos" report-submit="true">
+        <button form-type="submit" type="primary">查看活动照片({{od.photocount}})</button>
       </form>
     </van-col>
   </van-row> 

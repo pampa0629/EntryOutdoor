@@ -214,8 +214,8 @@ const buildPicSrc = (outdoorid, index) => { // index:0,1,2 图片顺序
 }
 
 // 上传活动中拍摄的照片
-const buildOutdoorFace = (outdoorid, id) => { 
-  return "Outdoors/" + outdoorid + "/Faces/" + id + ".jpg"
+const buildOutdoorPhoto = (outdoorid, id) => { 
+  return "Outdoors/" + outdoorid + "/Photos/" + id + ".jpg"
 }
 
 // 构建轨迹文件存储的路径
@@ -482,7 +482,7 @@ module.exports = {
   // 图片在云存储上的位置
   buildPicSrc: buildPicSrc,
   buildRouteSrc: buildRouteSrc, // 轨迹文件在云上的存储位置
-  buildOutdoorFace: buildOutdoorFace, // 活动时拍照的存储位置
+  buildOutdoorPhoto: buildOutdoorPhoto, // 活动摄影照片的存储位置
 
   buildChatQrcode: buildChatQrcode, // 活动专用群二维码
   buildPayQrcode: buildPayQrcode, // 收款二维码

@@ -4,16 +4,17 @@ const odtools = require('../../utils/odtools.js')
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
+const promisify = require('../../utils/promisify.js')
 
 wx.cloud.init()
-const db = wx.cloud.database({}) 
+const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
- 
+
 Page({
 
-  data: { 
+  data: {
     outdoorid: null,
     title: null,
     message: {
@@ -39,7 +40,7 @@ Page({
     console.log(options)
     const self = this
     self.data.outdoorid = options.outdoorid
-    options.tid = options.tid ? options.tid:null
+    options.tid = options.tid ? options.tid : null
     self.setData({
       tid: options.tid
     })
@@ -121,7 +122,7 @@ Page({
     console.log("onUnload")
     const self = this
     cloudfun.opOutdoorItem(self.data.outdoorid, "chat.seen." + app.globalData.personid, self.data.chat.messages.length, "")
-  }, 
+  },
 
   flushChats(addMessage, callback) {
     console.log("flushChats()")
@@ -132,7 +133,7 @@ Page({
         if (!self.data.chat.messages) {
           self.data.chat.messages = []
         }
-        
+
         for (var i = 0; i < self.data.chat.messages.length; i++) {
           const message = self.data.chat.messages[i]
           // 通过personid判断哪些消息是自己的
@@ -209,24 +210,22 @@ Page({
     })
   },
 
-  changeSendWxnotice(e) {
+  async changeSendWxnotice(e) {
     console.log("changeSendWxnotice()")
     const self = this
-    if (!this.data.sendWxnotice) {
-      wx.showModal({
+    if (e.detail) {
+      let res = await promisify.showModal({
         title: '请确认开启',
         content: '开启该选项将导致@成员的留言同时也发送微信消息，可能给对方造成打扰，也不能保证一定送达。请慎重开启！',
-        success(res) {
-          if (res.confirm) {
-            self.setData({
-              sendWxnotice: !self.data.sendWxnotice
-            })
-          }
-        }
       })
+      if (res.confirm) {
+        self.setData({
+          sendWxnotice: true
+        })
+      }
     } else {
       self.setData({
-        sendWxnotice: !self.data.sendWxnotice
+        sendWxnotice: false
       })
     }
   },
@@ -248,11 +247,11 @@ Page({
       // push 到数据库中 
       cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", message, "push")
       // push 到org网站 
-      if( self.data.tid) {
+      if (self.data.tid) {
         var chatMessage = lvyeorg.buildChatMessage(message)
         lvyeorg.postMessage(self.data.outdoorid, self.data.tid, chatMessage.title, chatMessage.message)
       }
- 
+
       // 输入框清空
       self.setData({
         "message.msg": "",

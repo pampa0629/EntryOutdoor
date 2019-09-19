@@ -1,15 +1,15 @@
 <!--弹出分享按钮-->
 <van-popup show="{{ showPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closePopup">
-  <van-row> 
+  <van-row>
     <van-col span="20" offset="2">
-      <button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</button> 
+      <button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</button>
     </van-col>
-  </van-row>       
-  <van-row> 
+  </van-row>
+  <van-row>
     <van-col span="9" offset="2">
       <form bindsubmit="onShare2Circle" report-submit="true">
         <button form-type="submit" plain size="large">分享到朋友圈</button>
-      </form> 
+      </form>
     </van-col>
     <van-col span="9" offset="2">
       <form bindsubmit="onCancelShare" report-submit="true">
@@ -17,11 +17,11 @@
       </form>
     </van-col>
   </van-row>
-</van-popup> 
+</van-popup>
 
 <!--图标按钮-->
 <van-row>
-  <!--分享--> 
+  <!--分享-->
   <van-col span="2" offset="1">
     <view wx:if="{{od.status!='已取消'}}" style="flex-direction:column">
       <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
@@ -57,7 +57,7 @@
   </van-col>
   <!--领队、打印详情与回到首页-->
   <van-col wx:if="{{entryInfo.status=='领队组'}}" span="2" offset="1">
-    <view style="flex-direction:column"> 
+    <view style="flex-direction:column">
       <van-icon name="flag-o" size="24px" color="#1aad19" bind:click="editOutdoor"></van-icon>
       <view class="icon_tip">领队</view>
     </view>
@@ -68,7 +68,7 @@
       <view class="icon_tip">详情</view>
     </view>
   </van-col>
-  <van-col span="2" offset="1" wx:if="{{od.pay&& od.status != '拟定中'}}"> 
+  <van-col span="2" offset="1" wx:if="{{od.pay&& od.status != '拟定中'}}">
     <view style="flex-direction:column">
       <van-icon name="gold-coin-o" size="24px" color="#1aad19" bind:click="clickPay"></van-icon>
       <view class="icon_tip">支付</view>
@@ -95,7 +95,7 @@
 </van-row>
 
 <van-row wx:if="{{od.expired}}">
-  <van-col  span="16" offset="1">
+  <van-col span="16" offset="1">
     <view style="flex-direction:column">
       <view style="color:#F65959;font-size:20pt">本活动已过期</view>
     </view>
@@ -145,7 +145,7 @@
     <van-icon wx:if="{{entryInfo.meetsIndex>=0 &&meets[entryInfo.meetsIndex].latitude }}" slot="right-icon" name="map-marked" bind:click="lookMeetMap" />
   </van-cell>
   <van-radio-group wx:for="{{od.meets}}" wx:key="place" value="{{entryInfo.meetsIndex}}">
-    <van-row> 
+    <van-row>
       <van-col span="20" offset="0">
         <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="80%" border="{{index<meets.length-1}}">
           <van-radio name="{{index}}" />
@@ -165,21 +165,21 @@
 <!--免责条款与是否认路-->
 <block wx:if="{{!od.expired}}">
   <van-cell title="免责条款与活动规则" title-class="redtitle" value="点击查看详细内容" clickable is-link url="LookDisclaimer" />
-  <van-cell required title="我已阅读并同意条款和规则内容" title-width="70%" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer" >
-    <van-checkbox value="{{entryInfo.agreedDisclaimer}}"/>
-  </van-cell> 
-
-  <van-cell title="{{entryInfo.knowWay?'认路':'不认路'}}" title-class="redtitle" label="是否认路" clickable bind:click="checkKnowWay" border="{{false}}">
-    <van-checkbox value="{{entryInfo.knowWay}}"/>
+  <van-cell required title="我已阅读并同意条款和规则内容" title-width="70%" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
+    <van-checkbox value="{{entryInfo.agreedDisclaimer}}" />
   </van-cell>
+
+  <van-switch-cell checked="{{entryInfo.knowWay}}" bind:change="checkKnowWay">
+    <view slot="title" class="redtitle">我认路</view>
+  </van-switch-cell>
 </block>
-  
+
 <!--状态提示-->
 <van-tag type="primary" plain>活动状态：{{od.status}}</van-tag>
 <van-tag type="primary" plain>报名状态：{{entryInfo.status}}</van-tag>
 <van-tag wx:if="{{entryInfo.meetsIndex<0}}" plain type="danger">\n请选择集合地点，然后才能报名。</van-tag>
 <van-tag wx:if="{{!entryInfo.agreedDisclaimer}}" plain type="danger">\n请勾选免责条款，然后才能报名。</van-tag>
-<!--截止时间提示--> 
+<!--截止时间提示-->
 <van-tag wx:if="{{remains.occupy.time<0}}" plain type="danger">\n已过占坑截止时间</van-tag>
 <van-tag wx:else plain type="primary">\n距离占坑截止时间还剩：{{remains.occupy.text}}</van-tag>
 <van-tag wx:if="{{remains.entry.time<0}}" plain type="danger">\n已过报名截止时间</van-tag>
@@ -193,9 +193,9 @@
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
-<!--报名按钮-->  
+<!--报名按钮-->
 <van-row class="fix" wx:if="{{od.status=='已发布'||od.status=='已成行'}}">
-  <!--替补--> 
+  <!--替补-->
   <van-col span="9" offset="2">
     <form bindsubmit="tapBench" report-submit="true" wx:if="{{entryFull && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
       <button form-type="submit">替补</button>
@@ -203,8 +203,8 @@
   </van-col>
   <!--占坑-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapOcuppy" report-submit="true"  wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
-      <button form-type="submit" >占坑</button>
+    <form bindsubmit="tapOcuppy" report-submit="true" wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
+      <button form-type="submit">占坑</button>
     </form>
   </van-col>
   <!--报名-->
@@ -222,7 +222,7 @@
 </van-row>
 
 <!-- 上传照片 -->
-<block wx:if="{{od.status=='已发布' ||od.status=='已成行' && od.begin}}">
+<block wx:if="{{(od.status=='已发布' ||od.status=='已成行') && od.begin}}">
   <van-row class="fix">
     <van-col span="10" offset="1">
       <form bindsubmit="uploadPhotos" report-submit="true">
@@ -234,21 +234,21 @@
         <button form-type="submit" type="primary">查看活动照片({{od.photocount}})</button>
       </form>
     </van-col>
-  </van-row> 
+  </van-row>
 </block>
-  
+
 
 <!--快速注册对话框-->
-<van-dialog use-slot show="{{showLoginDlg}}" show-cancel-button  bind:cancel="cancelLoginDlg" bind:confirm="confirmLoginDlg" title="请填写个人信息" confirmButtonText="确定" cancelButtonText="取消">
-  
-    <van-field required value="{{userInfo.nickName}}" label="户外昵称：" placeholder="好听、易记、非真名"  bind:change="changeNickname" bind:blur="blurNickname" error-message="{{nickErrMsg}}"/>
+<van-dialog use-slot show="{{showLoginDlg}}" show-cancel-button bind:cancel="cancelLoginDlg" bind:confirm="confirmLoginDlg" title="请填写个人信息" confirmButtonText="确定" cancelButtonText="取消">
+
+  <van-field required value="{{userInfo.nickName}}" label="户外昵称：" placeholder="好听、易记、非真名" bind:change="changeNickname" bind:blur="blurNickname" error-message="{{nickErrMsg}}" />
 
   <van-field required label="性别：" value="{{userInfo.gender}}" error-message="{{genderErrMsg}}" disabled/>
   <van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">
-      <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender">
-        <van-radio name="{{item}}"/>
-      </van-cell>
-  </van-radio-group> 
+    <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender">
+      <van-radio name="{{item}}" />
+    </van-cell>
+  </van-radio-group>
   <van-button open-type="getUserInfo" type="primary" size="large" plain bindgetuserinfo="dlgGetUserinfo">填入微信昵称和性别</van-button>
 
   <van-field required value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="真实、有效、方便领队联系" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" />
@@ -257,7 +257,7 @@
 </van-dialog>
 
 <!--保证formid数量对话框-->
-<van-dialog use-slot show="{{showFormidDlg}}" show-cancel-button  bind:cancel="cancelFormidDlg" bind:confirm="confirmFormidDlg" title="微信消息数量" confirmButtonText="够数了" cancelButtonText="不报了">
+<van-dialog use-slot show="{{showFormidDlg}}" show-cancel-button bind:cancel="cancelFormidDlg" bind:confirm="confirmFormidDlg" title="微信消息数量" confirmButtonText="够数了" cancelButtonText="不报了">
   <text>为保证您能及时收到活动的消息提醒，包括：活动内容变更、活动成行与取消、领队审核等。请点击按钮，直到消息数量不小于六个。\n</text>
   <text>您当前的微信消息数量为：\n</text>
   <van-row>
@@ -265,7 +265,7 @@
       <text class='bigtip'>{{formids.length}}个</text>
     </van-col>
   </van-row>
-  <form bindsubmit="tapAddFormid" report-submit="true" >
+  <form bindsubmit="tapAddFormid" report-submit="true">
     <button form-type="submit" type="primary">增加微信消息</button>
   </form>
 </van-dialog>

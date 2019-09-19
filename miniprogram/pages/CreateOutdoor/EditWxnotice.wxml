@@ -1,9 +1,7 @@
 <!--微信服务通知-->
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="微信服务通知"></van-cell>
-  <van-cell title="{{wxnotice.accept?'接收通知':'不接收通知'}}" clickable bind:click="checkAccept" border="{{wxnotice.accept}}">
-    <van-checkbox value="{{wxnotice.accept}}"/>
-  </van-cell>
+  <van-switch-cell title="接收通知" checked="{{wxnotice.accept}}" bind:change="checkAccept"/>
    
   <block wx:if="{{wxnotice.accept}}">
     <!--接收前几位的报名通知-->

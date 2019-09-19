@@ -7,7 +7,7 @@ const _ = db.command
 Page({
 
   data: {
-    evaluation: {
+    evaluation: { 
       level: null,
       campEquipment: false,
       campExperience: false,
@@ -54,34 +54,33 @@ Page({
     ],
   },
 
-  onLoad: function(options) {
-    const self = this
-    for (var i = 0; i < self.data.Questions.length; i++) {
+  async onLoad(options) {
+    console.log("onLoad()", options)
+    for (var i = 0; i < this.data.Questions.length; i++) {
       let index = i
       this["clickAnsweer" + index] = (e) => {
-        self.clickAnsweer(index, e)
+        this.clickAnsweer(index, e)
       }
       this["changeAnswer" + index] = (e) => {
-        self.changeAnswer(index, e)
+        this.changeAnswer(index, e)
       }
       this["clickNext" + index] = () => {
-        self.clickNext(index)
+        this.clickNext(index)
       }
     }
 
     // 读取数据库
     if (app.checkLogin()) {
-      dbPersons.doc(app.globalData.personid).get().then(res => {
-        if (res.data.career) {
-          self.setData({
-            evaluation: res.data.career.evaluation
-          })
-        }
-        console.log(self.data.evaluation)
-        if (!self.data.evaluation) { // 没有记录，则自动重新测评
-          self.evaluateAgain()
-        }
-      })
+      let res = await dbPersons.doc(app.globalData.personid).get()
+      if (res.data.career) {
+        this.setData({
+          evaluation: res.data.career.evaluation
+        })
+      }
+      console.log(this.data.evaluation)
+      if (!this.data.evaluation) { // 没有记录，则自动重新测评
+        this.evaluateAgain()
+      }
     }
   },
 
@@ -106,7 +105,7 @@ Page({
     console.log(index)
     console.log(e.target.dataset.name)
     this.setData({
-      ["Questions[" + index + "].select"]: e.target.dataset.name,
+      ["Questions[" + index + "].select"]: e.target.dataset.name.toString(),
     })
   },
 
@@ -159,15 +158,17 @@ Page({
 
   // 重新测评
   evaluateAgain() {
-    // 设置level为null
-    this.setData({ // 体力情况
-      "evaluation.level": null
+    console.log("evaluateAgain()")
+    // 设置null
+    this.setData({
+      evaluation: null
     })
 
     // 设置第一题可见
     this.setData({
       ["Questions[" + 0 + "].show"]: true,
     })
+    console.log(this.data.Questions)
   },
 
 })

@@ -26,55 +26,58 @@ Page({
   dealSites() {
     console.log("dealSites()")
     const self = this
-    self.data.route.trackSites.forEach((item, index) => {
-      let i = index
-      this["copyoutUrl" + i] = () => {
-        this.copyoutUrl(i)
-      }
-      this["saveQrcode" + i] = () => {
-        this.saveQrcode(i)
-      }
-      if (!self.data.route.trackSites[i].qrcode) {
-        self.data.route.trackSites[i].qrcode = self.data.route.trackSites[i].url
-      }
-      self.data.qrcodes[i] = new QRCode('canvas' + i, {
-        text: self.data.route.trackSites[i].qrcode,
-        width: 128,
-        height: 128,
-        colorDark: "#1CA4FC",
-        colorLight: "white",
-        correctLevel: QRCode.CorrectLevel.H,
-      })
-      console.log(self.data.route.trackSites[i], self.data.qrcodes[i])
-    })
-  },
-
-  dealFiles() {
-    console.log("dealFiles()")
-    const self = this
-    console.log(self.data.route.trackFiles)
-  
-    self.data.route.trackFiles.forEach((item, index) => {
-      let i = index; // 还必须用let才行 
-      this["copyFileUrl" + i] = () => {
-        this.copyFileUrl(i)
-      }
-      this["saveFileQrcode" + i] = () => {
-        this.saveFileQrcode(i)
-      }
-      this.getFileUrl(i, url => {
-        console.log("url: " + url)
-        self.data.furls[i] = url
-        self.data.fqrcodes[i] = new QRCode('fcanvas' + i, {
-          text: url,
+    if (self.data.route.trackSites) {
+      self.data.route.trackSites.forEach((item, index) => {
+        let i = index
+        this["copyoutUrl" + i] = () => {
+          this.copyoutUrl(i)
+        }
+        this["saveQrcode" + i] = () => {
+          this.saveQrcode(i)
+        }
+        if (!self.data.route.trackSites[i].qrcode) {
+          self.data.route.trackSites[i].qrcode = self.data.route.trackSites[i].url
+        }
+        self.data.qrcodes[i] = new QRCode('canvas' + i, {
+          text: self.data.route.trackSites[i].qrcode,
           width: 128,
           height: 128,
           colorDark: "#1CA4FC",
           colorLight: "white",
           correctLevel: QRCode.CorrectLevel.H,
         })
+        console.log(self.data.route.trackSites[i], self.data.qrcodes[i])
       })
-    })
+    }
+  },
+
+  dealFiles() {
+    console.log("dealFiles()")
+    const self = this
+    console.log(self.data.route.trackFiles)
+    if (self.data.route.trackFiles) {
+      self.data.route.trackFiles.forEach((item, index) => {
+        let i = index; // 还必须用let才行 
+        this["copyFileUrl" + i] = () => {
+          this.copyFileUrl(i)
+        }
+        this["saveFileQrcode" + i] = () => {
+          this.saveFileQrcode(i)
+        }
+        this.getFileUrl(i, url => {
+          console.log("url: " + url)
+          self.data.furls[i] = url
+          self.data.fqrcodes[i] = new QRCode('fcanvas' + i, {
+            text: url,
+            width: 128,
+            height: 128,
+            colorDark: "#1CA4FC",
+            colorLight: "white",
+            correctLevel: QRCode.CorrectLevel.H,
+          })
+        })
+      })
+    }
   },
 
   copyFileUrl(index, callback) {

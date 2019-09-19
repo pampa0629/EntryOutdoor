@@ -1,66 +1,63 @@
-// miniprogram/pages/MyInfo/EditFaces.js
+const app = getApp()
+const util = require('../../utils/util.js')
+const odtools = require('../../utils/odtools.js')
+const outdoor = require('../../utils/outdoor.js')
+const template = require('../../utils/template.js')
+const cloudfun = require('../../utils/cloudfun.js')
+const person = require('../../utils/person.js')
+const promisify = require('../../utils/promisify.js')
+const facetools = require('../../utils/facetools.js')
+
+wx.cloud.init()
+const db = wx.cloud.database({})
+const dbOutdoors = db.collection('Outdoors')
+const dbPersons = db.collection('Persons')
+const _ = db.command
+
 Page({
 
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    facecodes:{}, 
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-
+  async onLoad(options) {
+    let res = await dbPersons.doc(app.globalData.personid).get()
+    this.setData({
+      facecodes: res.data.facecodes?res.data.facecodes:{}
+    })
+    this.buildFaceFun()
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
+  buildFaceFun() {
+    for (var id in this.data.facecodes) {
+      this["deleteFace" + id] = (e) => {
+        this.deleteFace(e,id)
+      }
+    }
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
+  async deleteFace(e,fid) {
+    console.log("LookPhotos.managerMyFaces()")
+    template.savePersonFormid(app.globalData.personid, e.detail.formId)
 
+    let res = await promisify.showModal({
+      title:"确认删除",
+      content:"删除后无法恢复，只能从活动照片页面重新上传照片"
+    })
+    if (res.confirm) {
+      const facecode = this.data.facecodes[fid]
+      wx.cloud.deleteFile({
+        fileList: [facecode.src]
+      })
+      await cloudfun.opPersonItem(app.globalData.personid, "facecodes", null, "remove")
+      this.setData({
+        facecodes: this.data.facecodes
+      })
+    }
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
   onUnload: function () {
 
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
-  }
 })

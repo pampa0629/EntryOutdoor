@@ -143,7 +143,7 @@ OD.prototype.copy = function(od) {
 
   // 增加对活动是否过期的判断
   this.expired = (new Date()) > new Date(this.title.date + ",24:00") ? true : false
-  this.begin = (new Date()) > new Date(this.title.date + ",0:00") ? true : false
+  this.begin = (new Date()) > new Date(this.title.date + ",10:00") ? true : false
 
   // 活动中拍摄上传的照片
   this.photos = od.photos ? od.photos:null

@@ -383,5 +383,13 @@ Page({
       url: '../Test/Test1',
     })
   },
+
+
+  managerMyFaces(e) {
+    console.log("managerMyFaces()")
+    wx.navigateTo({
+      url: "../MyInfo/EditFaces",
+    })
+  },
   
 })

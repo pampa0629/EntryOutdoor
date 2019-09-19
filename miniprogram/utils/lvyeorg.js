@@ -38,7 +38,7 @@ const getToken = async() => {
         console.log(resp_dict.data.err_msg)
       }
     } catch (err) {
-      console.log(error)
+      console.log(err)
     }
   }
   return 0

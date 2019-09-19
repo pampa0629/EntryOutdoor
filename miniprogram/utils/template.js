@@ -55,9 +55,10 @@ const personid2openid = async(personid) => {
 
 // 构建页面路径
 const buildDefaultPage = (outdoorid,personid,leaderid) => {
+  console.log("template.buildDefaultPage()", outdoorid, personid, leaderid)
+  console.log("app.globalData.personid", app.globalData.personid)
   // 给了领队id，就用；没给，就用发起者作为领队
-  leaderid = leaderid ? leaderid : app.globalData.personid
-  if (leaderid)
+  leaderid = leaderid ? leaderid : app.globalData.personid  
   if(personid == leaderid) {
     return "pages/CreateOutdoor/CreateOutdoor?outdoorid=" + outdoorid
   }else {
@@ -511,7 +512,6 @@ const sendStatusChangeMsg2Member = (personid, outdoorid, title, nickName, status
       "keyword4": { // 备注
         "value": remark
       },
-
     }
     var page = buildPage("EntryOutdoor", outdoorid)
     let formid = fetchPersonFormid(personid, res.data.formids)
@@ -545,6 +545,31 @@ const sendRemindMsg2Ocuppy = (personid, outdoorid, title, remain, leader, memCou
     var page = buildPage("EntryOutdoor", outdoorid)
     let formid = fetchPersonFormid(personid, res.data.formids)
     sendMessage(openid, tempid, formid, page, data)
+  })
+}
+
+const sendPhotoMsg2Member = async (personid, outdoorid, title, photor, count, leaderid) =>{
+  console.log("template.sendPhotoMsg2Member()")
+  dbPersons.doc(personid).get().then(res => {
+    var openid = res.data._openid
+    var tempid = "LRaqHLcofDaVW7IMDpD11QLXoOJKZF61Lr_gEYCkG7M"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "keyword1": { // 相册名(活动主题)
+        "value": title
+      },
+      "keyword2": { // 添加照片人
+        "value": photor
+      },
+      "keyword3": { // 添加照片数
+        "value": count
+      },
+      "keyword4": { // 时间：占坑截止时间
+        "value": "为避免过多打扰，后续上传照片将不再提示；您可自行随时点击进入活动页面查看和上传活动照片"
+      }
+    }
+    var page = buildDefaultPage("EntryOutdoor", outdoorid, personid, leaderid)
+    let formid = fetchPersonFormid(personid, res.data.formids)
+    sendMessage(openid, tempid, formid, page, data) 
   })
 }
 
@@ -640,6 +665,7 @@ module.exports = {
   sendRemindMsg2Ocuppy: sendRemindMsg2Ocuppy, // 给占坑队员发占坑截止时间临近的消息提醒
   sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况
   sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息
+  sendPhotoMsg2Member: sendPhotoMsg2Member, // 给全体队员发送有照片上传的消息
 
   // 给领队/领队组/财务官等发消息
   sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息

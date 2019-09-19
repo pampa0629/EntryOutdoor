@@ -7,7 +7,8 @@
     "doc": "doc"
   },
   "dependencies": {
-    "regenerator-runtime": "^0.13.3"
+    "regenerator-runtime": "^0.13.3",
+    "vant-weapp": "^0.5.21"
   },
   "devDependencies": {},
   "scripts": {

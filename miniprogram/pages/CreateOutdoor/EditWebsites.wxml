@@ -11,7 +11,7 @@
   </van-radio-group> 
 </van-panel>
 
-<!-- 是否允许网址跟帖报名 -->
+<!-- 是否允许网址跟帖报名 --> 
  <van-panel>
   <van-cell slot="header" title-class="redtitle" title="选项设置"></van-cell>
   <van-cell title="{{od.websites.lvyeorg.allowSiteEntry?'允许':'不允许'}}网站直接跟帖报名" label="{{od.websites.lvyeorg.allowSiteEntry?'不建议允许，允许则领队要自行整理两边的报名名单，且无法发送微信消息提示':''}}" clickable bind:click="checkAllowSiteEntry">

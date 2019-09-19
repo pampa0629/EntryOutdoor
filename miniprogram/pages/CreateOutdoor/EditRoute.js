@@ -124,46 +124,52 @@ Page({
     console.log("dealCompatibility()")
     const self = this
     console.log(self.data.route.trackSites)
-    self.data.route.trackSites.forEach((item, index)=>{
-      if (item.name == "六只脚") {
-        item.urlpre="http://www.foooooot.com/trip/"
-        item.urlpost= "/"
-        item.qrcodepre= "http://foooooot.com/trip/"
-        item.qrcodepost= "/nav_to/"
-      } else if (item.name == "两步路"){
-        item.urlpre= "http://www.2bulu.com/track/t-"
-        item.urlpost= ".htm"
-        item.qrcodepre="http://www.2bulu.com/track/t-"
-        item.qrcodepost= ".htm"
-      }
-    })
+    if (self.data.route.trackSites) {
+      self.data.route.trackSites.forEach((item, index) => {
+        if (item.name == "六只脚") {
+          item.urlpre = "http://www.foooooot.com/trip/"
+          item.urlpost = "/"
+          item.qrcodepre = "http://foooooot.com/trip/"
+          item.qrcodepost = "/nav_to/"
+        } else if (item.name == "两步路") {
+          item.urlpre = "http://www.2bulu.com/track/t-"
+          item.urlpost = ".htm"
+          item.qrcodepre = "http://www.2bulu.com/track/t-"
+          item.qrcodepost = ".htm"
+        }
+      })
+    }
   },
 
   rebuildSitesFun() {
     const self = this
-    for (var i = 0; i < self.data.route.trackSites.length; i++) {
-      let index = i
-      this["checkTrackSites" + index] = () => {
-        this.checkTrackSites(index)
-      }
-      this["changeTrackid" + index] = (e) => {
-        this.changeTrackid(index, e)
-      }
-      this["copyinUrl" + index] = () => {
-        this.copyinUrl(index)
-      }
-      this["copyoutUrl" + index] = () => {
-        this.copyoutUrl(index)
+    if (self.data.route && self.data.route.trackSites) {
+      for (var i = 0; i < self.data.route.trackSites.length; i++) {
+        let index = i
+        this["checkTrackSites" + index] = () => {
+          this.checkTrackSites(index)
+        }
+        this["changeTrackid" + index] = (e) => {
+          this.changeTrackid(index, e)
+        }
+        this["copyinUrl" + index] = () => {
+          this.copyinUrl(index)
+        }
+        this["copyoutUrl" + index] = () => {
+          this.copyoutUrl(index)
+        }
       }
     }
   },
 
   rebuildClickStopFun: function() {
-    for (var i = 0; i < this.data.route.wayPoints.length; i++) {
-      // 这里动态创建给click cell的函数
-      let index = i; // 还必须用let才行
-      this["clickStop" + index] = (e) => {
-        this.clickStop(index, e)
+    if (this.data.route && this.data.route.wayPoints) {
+      for (var i = 0; i < this.data.route.wayPoints.length; i++) {
+        // 这里动态创建给click cell的函数
+        let index = i; // 还必须用let才行
+        this["clickStop" + index] = (e) => {
+          this.clickStop(index, e)
+        }
       }
     }
   },

@@ -1,3 +1,15 @@
-<!--miniprogram/pages/MyInfo/EditFaces.wxml-->
-<text>miniprogram/pages/MyInfo/EditFaces.wxml</text>
- 
+<van-tag type="primary" plain>删除人脸照片后，上传的活动照片将无法识别出您来。建议至少保留一张本人的高清照片。</van-tag> 
+<van-panel wx:for="{{facecodes}}" wx:key="id">
+  <van-row>
+    <van-col span="20" offset="2">
+      <image mode="widthFix" src="{{item.src}}"></image>
+    </van-col>
+  </van-row>
+  <van-row>
+    <van-col span="20" offset="2">
+      <form bindsubmit="deleteFace{{item.id}}" report-submit="true">
+        <button form-type="submit" type="warn">删除人脸照片</button>
+      </form>
+    </van-col>
+  </van-row>
+</van-panel>

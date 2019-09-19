@@ -11,7 +11,7 @@ exports.main = async (event, context) => {
   let item = event.item
   try {
     const doc = db.collection(event.table).doc(event.id)
-    if (!event.command) {
+    if (!event.command) { 
       return await doc.update({
         data: {
           [item]: event.value //更新 
@@ -41,10 +41,22 @@ exports.main = async (event, context) => {
           [item]: _.unshift(event.value) 
         }
       })
+    } else if (event.command == "remove") {
+      return await doc.update({
+        data: {
+          [item]: _.remove()
+        }
+      })
     } else if (event.command == "inc") {
       return await doc.update({
         data: {
           [item]: _.inc(event.value)
+        }
+      })
+    } else if (event.command == "mul") {
+      return await doc.update({
+        data: {
+          [item]: _.mul(event.value)
         }
       })
     } else {

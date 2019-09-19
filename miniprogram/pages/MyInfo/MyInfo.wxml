@@ -71,6 +71,7 @@
 <!--测试页面-->
 <block wx:if="{{isTesting}}"> 
   <van-button size="large" bind:click="bindTest1">Test1</van-button>
+  <!-- <van-button size="large" bind:click="managerMyFaces">管理人脸</van-button> -->
   <!-- <van-button size="large" bind:click="bindTest2">测试</van-button> -->
 </block>
 

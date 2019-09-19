@@ -125,9 +125,9 @@
 </van-panel>
 
 <!-- 领队是否认路 -->
-<van-cell title="{{myself.entryInfo.knowWay?'认路':'不认路'}}" title-class="redtitle" label="是否认路" clickable bind:click="checkKnowWay" border="{{false}}">
-  <van-checkbox value="{{myself.entryInfo.knowWay}}"/>
-</van-cell>
+<van-switch-cell checked="{{myself.entryInfo.knowWay}}" bind:change="checkKnowWay">
+  <view slot="title" class="redtitle">我认路</view>
+</van-switch-cell>
 
 <!--交通方式-->
 <van-cell wx:if="{{od.traffic}}" title="交通方式" title-class="redtitle" title-width="60%" label="{{od.traffic.mode}}；{{od.traffic.carInfo}}；{{od.traffic.costInfo}}" value="点击编辑交通方式" is-link url="EditTraffic" />
@@ -210,7 +210,7 @@
 </van-row> 
 
 <!-- 上传照片 -->
-<block wx:if="{{od.status=='已发布' ||od.status=='已成行' && od.begin}}">
+<block wx:if="{{(od.status=='已发布' ||od.status=='已成行') && od.begin}}">
   <van-row class="fix">
     <van-col span="10" offset="1">
       <form bindsubmit="uploadPhotos" report-submit="true">

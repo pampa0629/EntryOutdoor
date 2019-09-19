@@ -731,16 +731,28 @@ Page({
     }
   },
 
+  // changeMeets(e) {
+  //   console.log(e)
+  //   const self = this
+  //   this.setData({
+  //     "entryInfo.meetsIndex": e.detail,
+  //   })
+  //   // 如果已经报名，则需要修改集合地点
+  //   if (odtools.isEntriedStatus(self.data.entryInfo.status)) {
+  //     self.entryOutdoorInner(self.data.entryInfo.status)
+  //   }
+  // },
+
   // 选择或改变集合地点选择
   clickMeets: function(e) {
     console.log(e)
-    const self = this
-    this.setData({
-      "entryInfo.meetsIndex": parseInt(e.target.dataset.name),
+    this.setData({ 
+      "entryInfo.meetsIndex": e.target.dataset.name.toString(),
     })
+    console.log("entryInfo.meetsIndex:", this.data.entryInfo.meetsIndex)
     // 如果已经报名，则需要修改集合地点
-    if (odtools.isEntriedStatus(self.data.entryInfo.status)) {
-      self.entryOutdoorInner(self.data.entryInfo.status)
+    if (odtools.isEntriedStatus(this.data.entryInfo.status)) {
+      this.entryOutdoorInner(this.data.entryInfo.status)
     }
   },
 
@@ -865,11 +877,9 @@ Page({
     })
     console.log("chooseImage:", resChoose)
     var owner = { personid: app.globalData.personid, nickName:app.globalData.userInfo.nickName}
-    let photos = await facetools.uploadOdPhotos(this.data.od.outdoorid, owner, resChoose.tempFiles)
-    console.log("photos:", photos)
-    facetools.aiOdPhotos(this.data.od.outdoorid, photos)
+    let count = await facetools.dealOdPhotos(this.data.od, owner, resChoose.tempFiles)
     this.setData({
-      "od.photocount": this.data.od.photocount + Object.keys(photos).length
+      "od.photocount": this.data.od.photocount + count
     })
   },
 

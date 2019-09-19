@@ -15,6 +15,18 @@
           </van-col>
         </van-row>
       </view>
+
+      <!--故意空白，防止遮挡-->
+      <van-cell title="  " border="{{false}}" />
+      <van-cell title="  " border="{{false}}" />
+      <van-cell title="  " border="{{false}}" />
+      <van-row class="fix" wx:if="{{landscapes.length}}">
+        <van-col span="20" offset="2">
+          <form bindsubmit="downLandscapes" report-submit="true">
+            <button form-type="submit" type="primary">下载风景照片</button>
+          </form>
+        </van-col>
+      </van-row>
     </scroll-view>
   </swiper-item>
 
@@ -22,35 +34,51 @@
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
       <van-tag wx:if="{{myFaceCount == 0}}" type="primary" plain>在“自己”中上传一张“只有您”的人脸像，即可从合影中标识出您的昵称，以便队友认出您来</van-tag>
-      <view wx:for="{{multis}}" wx:key="src">
+      <van-panel wx:for="{{multis}}" wx:key="src">
         <van-row>
           <van-col span="20" offset="2">
             <image mode="widthFix" src="{{item.src}}"></image>
           </van-col>
         </van-row>
         <text>{{item.names}}</text>
-      </view>
+      </van-panel>
+
+      <!--故意空白，防止遮挡-->
+      <van-cell title="  " border="{{false}}" />
+      <van-cell title="  " border="{{false}}" />
+      <van-cell title="  " border="{{false}}" />
+      <van-row class="fix" wx:if="{{multis.length}}">
+        <van-col span="20" offset="2">
+          <form bindsubmit="downMultis" report-submit="true">
+            <button form-type="submit" type="primary">下载合影照片</button>
+          </form>
+        </van-col>
+      </van-row>
     </scroll-view>
   </swiper-item>
 
   <!--自己-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-tag wx:if="{{myFaceCount == 0}}" type="primary" plain>请上传一张“只有您”的人脸像，以便识别出您自己的照片</van-tag>
-      <van-tag wx:else type="primary" plain>您还可以登记更多人脸，以便更精确的识别出您的照片</van-tag>
-      <!-- <van-tag type="primary" plain>小程序不会保存您登记的人脸照片，请放心</van-tag> -->
-      <van-row>
-        <van-col span="10" offset="1">
-          <form bindsubmit="uploadMyFace" report-submit="true">
-            <button form-type="submit" type="primary">登记人脸照片</button>
-          </form>
-        </van-col>
-        <van-col span="11" offset="1">
-          <form bindsubmit="managerMyFaces" report-submit="true">
-            <button form-type="submit">管理人脸照片</button>
-          </form>
-        </van-col>
-      </van-row>
+      <van-panel>
+        <van-tag wx:if="{{myFaceCount == 0}}" type="primary" plain>请上传一张“只有您”的人脸像，以便识别出您自己的照片</van-tag>
+        <van-tag wx:else type="primary" plain>您还可以登记更多人脸，以便更精确的识别出您的照片</van-tag>
+        <van-tag type="primary" plain>您登记的人脸照片，请点击“管理人脸照片”予以查看和管理</van-tag>
+        <!-- <van-tag type="primary" plain>小程序不会保存您登记的人脸照片，请放心</van-tag> -->
+        <van-row>
+          <van-col span="10" offset="1">
+            <form bindsubmit="uploadMyFace" report-submit="true">
+              <button form-type="submit" type="primary">登记人脸照片</button>
+            </form>
+          </van-col>
+          <van-col span="11" offset="1">
+            <form bindsubmit="managerMyFaces" report-submit="true">
+              <button form-type="submit">管理人脸照片</button>
+            </form>
+          </van-col>
+        </van-row>
+      </van-panel>
+      <van-cell title="  " border="{{false}}" />
 
       <view wx:for="{{mines}}" wx:key="src">
         <van-row>
@@ -59,6 +87,18 @@
           </van-col>
         </van-row>
       </view>
+
+      <!--故意空白，防止遮挡-->
+      <van-cell title="  " border="{{false}}" />
+      <van-cell title="  " border="{{false}}" />
+      <van-cell title="  " border="{{false}}" />
+      <van-row class="fix" wx:if="{{mines.length}}">
+        <van-col span="20" offset="2">
+          <form bindsubmit="downMines" report-submit="true">
+            <button form-type="submit" type="primary">下载个人照片</button>
+          </form>
+        </van-col>
+      </van-row>
     </scroll-view>
   </swiper-item>
 </swiper>

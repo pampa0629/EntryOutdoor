@@ -12,6 +12,7 @@
     "van-row": "/vant-weapp/row/index",
     "van-col": "/vant-weapp/col/index",
     "van-panel": "/vant-weapp/panel/index",
+    "van-switch-cell": "/vant-weapp/switch-cell/index",
     "van-notice-bar": "/vant-weapp/notice-bar/index",
     "van-popup": "/vant-weapp/popup/index",
     "van-picker": "/vant-weapp/picker/index",

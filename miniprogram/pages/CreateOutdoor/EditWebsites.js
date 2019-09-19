@@ -19,16 +19,16 @@ Page({
     //  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游; 93：技术小组
     Forums: [{
       name: "周末户外活动",
-      id: 67
+      id: "67"
     }, {
       name: "周末休闲活动",
-      id: 90
+      id: "90"
     }, {
       name: "远期自助旅游",
-      id: 91
+      id: "91"
     }, {
       name: "技术小组",
-      id: 93
+      id: "93"
     }]
   },
 
@@ -75,7 +75,7 @@ Page({
 
   clickForum(e) {
     console.log("clickForum(),e:", e)
-    this.flushForm(parseInt(e.target.dataset.name))
+    this.flushForm(e.target.dataset.name)
   },
 
   onUnload: function() {

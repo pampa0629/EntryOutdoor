@@ -818,9 +818,9 @@ Page({
   },
 
   clickMeets: function(e) {
-    console.log(e)
+    console.log("clickMeets()",e)
     this.setData({
-      "myself.entryInfo.meetsIndex": parseInt(e.target.dataset.name),
+      "myself.entryInfo.meetsIndex": e.target.dataset.name.toString(),
       hasModified: true,
     })
     this.checkPublish()
@@ -830,7 +830,8 @@ Page({
   checkKnowWay: function(e) {
     console.log(e)
     this.setData({
-      "myself.entryInfo.knowWay": !this.data.myself.entryInfo.knowWay,
+      // "myself.entryInfo.knowWay": !this.data.myself.entryInfo.knowWay,
+      "myself.entryInfo.knowWay": e.detail,
       hasModified: true,
     })
     console.log(this.data.myself.entryInfo.knowWay)
@@ -890,11 +891,9 @@ Page({
     })
     console.log("chooseImage:", resChoose)
     var owner = { personid: app.globalData.personid, nickName: app.globalData.userInfo.nickName }
-    let photos = await facetools.uploadOdPhotos(this.data.od.outdoorid, owner, resChoose.tempFiles)
-    console.log("photos:", photos)
-    facetools.aiOdPhotos(this.data.od.outdoorid, photos)
+    let count = await facetools.dealOdPhotos(this.data.od, owner, resChoose.tempFiles)
     this.setData({
-      "od.photocount": this.data.od.photocount + Object.keys(photos).length
+      "od.photocount": this.data.od.photocount + count
     })
   },
 

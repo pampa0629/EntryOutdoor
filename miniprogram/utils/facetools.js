@@ -150,7 +150,7 @@ const matchOnePhoto = (outdoorid, photo, code, personid, nickName)=>{
   for (var i in photo.faces) { // 每个人脸
     const face = photo.faces[i]
     var oldDist = face.dist ? face.dist:1.0
-    var dist = facetools.getDist(item.codes[i], mycode)
+    var dist = getDist(face.code, code)
     if (dist < oldDist) { // 首先得比原来的好
       changed = true
       if (dist<most.dist) { // 假设：一张照片中只有一个自己
@@ -234,6 +234,24 @@ const uploadOdPhotos = async(outdoorid, owner, tempFiles) => {
   return photos
 }
 
+const dealOdPhotos = async (od, owner, tempFiles) => {
+  console.log("facetools.dealOdPhotos()")
+  let photos = await uploadOdPhotos(od.outdoorid, owner, tempFiles)
+  console.log("photos:", photos)
+  const count = Object.keys(photos).length
+  aiOdPhotos(od.outdoorid, photos)
+  let res = await dbOutdoors.doc(od.outdoorid).field({ sendPhoto: true, }).get()
+  if (!res.data.sendPhoto) {
+    await cloudfun.opOutdoorItem(od.outdoorid, "sendPhoto", true, "")
+    for (var i in od.members) {
+      const member = od.members[i]
+      template.sendPhotoMsg2Member(member.personid, od.outdoorid, od.title.whole, owner.nickName, count, od.leader.personid)
+    }
+  }
+
+  return count
+}
+
 const calcCodeID = (code) => {
   console.log("facetools.calcCodeID()")
   var id = 0
@@ -246,7 +264,7 @@ const calcCodeID = (code) => {
 }
 
 module.exports = {
-
+  dealOdPhotos: dealOdPhotos, // 上传，识别，通知，一条龙服务
   uploadOdPhotos: uploadOdPhotos, // 上传活动照片
   aiOdPhotos: aiOdPhotos, // 识别人脸照片，并存储到Outdoors中
   aiOdPhoto: aiOdPhoto, // 识别一张人脸，并存储到Outdoors中

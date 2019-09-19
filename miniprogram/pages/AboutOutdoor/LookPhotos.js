@@ -45,7 +45,7 @@ Page({
     
     this.loadFacecodes()
 
-    var div = Math.min(this.data.od.members.length / 2, 5) // 活动人数的一半，或者有5人，即认为是合影
+    var div = Math.min(Math.max(this.data.od.members.length / 2,2), 5) // 活动人数的一半(至少2人），或者有5人，即认为是合影
     this.dividePhotos(this.data.od.photos, div)
 
   },
@@ -210,6 +210,67 @@ Page({
     wx.navigateTo({
       url: "../MyInfo/EditFaces",
     })
+  },
+
+  changeUnit(size) {
+    console.log("LookPhotos.changeUnit()", size)
+    const units = ["字节","KB","MB","GB"]
+    var unit = ""
+    for(var i in units) {
+      unit = units[i]
+      if(size>1024) {
+        size = size/1024.0
+      } else {
+        break
+      }
+    }
+    return {size:Math.floor(size), unit:unit}
+  },
+
+  async downPhotos(e, photos) {
+    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    
+    var size = 0
+    for(var i in photos) {
+      console.log("photos.id", photos[i].id)
+      size += parseInt(photos[i].id)
+      console.log("size", size)
+    }
+    const sizeUnit = this.changeUnit(size)
+    console.log("sizeUnit", sizeUnit)
+    let res = await promisify.showModal({
+      title: "请确认下载",
+      content: "准备下载的照片有" + photos.length + "个，大小共约为：" + sizeUnit.size + sizeUnit.unit
+    })
+    if (res.confirm) {
+      var temps = []
+      wx.showLoading({title: '照片下载中'})
+      for (var id in photos) {
+        const photo = photos[id]
+        let resDown = await wx.cloud.downloadFile({
+          fileID: photo.src
+        })
+        temps.push(resDown.tempFilePath)
+      }
+      wx.hideLoading()
+      for (var i in temps) {
+        promisify.saveImageToPhotosAlbum({
+          filePath: temps[i],
+        })
+      }
+    }
+  },
+
+  downLandscapes(e) {
+    this.downPhotos(e, this.data.landscapes)
+  },
+
+  downMultis(e) {
+    this.downPhotos(e, this.data.multis)
+  },
+
+  downMines(e) {
+    this.downPhotos(e, this.data.mines)
   },
 
   onShareAppMessage: function(e) {

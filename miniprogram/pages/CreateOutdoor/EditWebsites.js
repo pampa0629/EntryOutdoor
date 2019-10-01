@@ -11,7 +11,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 
 Page({ 
-
+ 
   data: {
     od: null,
     lvyeorgInfo: null, // 绿野org账户信息
@@ -19,15 +19,19 @@ Page({
     //  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游; 93：技术小组
     Forums: [{
       name: "周末户外活动",
+      label:"强度>=1.0，或重装负重",
       id: "67"
     }, {
       name: "周末休闲活动",
+      label: "强度<=0.8，或休闲类型",
       id: "90"
     }, {
       name: "远期自助旅游",
+      label: "活动时间在30天之后",
       id: "91"
     }, {
       name: "技术小组",
+      label: "测试类活动",
       id: "93"
     }]
   },

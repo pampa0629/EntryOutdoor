@@ -1,12 +1,12 @@
-module.exports = (api) => {
-  return (options, ...params) => {
-    return new Promise((resolve, reject) => {
-      api(Object.assign({}, options, { success: resolve, fail: reject }), ...params);
-    });
-  }
-} 
+// module.exports = (api) => {
+//   return (options, ...params) => {
+//     return new Promise((resolve, reject) => {
+//       api(Object.assign({}, options, { success: resolve, fail: reject }), ...params);
+//     });
+//   }
+// } 
 
-const promisify=(api) => {
+const promise=(api) => {
   return (options, ...params) => {
     return new Promise((resolve, reject) => {
       api(Object.assign({}, options, { success: resolve, fail: reject }), ...params);
@@ -15,30 +15,32 @@ const promisify=(api) => {
 } 
 
 module.exports = {
+  promise:promise,
+
   // abcd
-  authorize:promisify(wx.authorize),
-  chooseImage: promisify(wx.chooseImage),
-  chooseLocation:promisify(wx.chooseLocation),
-  canvasToTempFilePath:promisify(wx.canvasToTempFilePath),
+  authorize: promise(wx.authorize),
+  chooseImage: promise(wx.chooseImage),
+  chooseLocation: promise(wx.chooseLocation),
+  canvasToTempFilePath: promise(wx.canvasToTempFilePath),
 
   // efg
-  getLocation: promisify(wx.getLocation),
-  getSetting: promisify(wx.getSetting),
-  getWeRunData:promisify(wx.getWeRunData),
+  getLocation: promise(wx.getLocation),
+  getSetting: promise(wx.getSetting),
+  getWeRunData: promise(wx.getWeRunData),
 
   // hijklmn
-  login: promisify(wx.login),
+  login: promise(wx.login),
   
   
   // opqrst
-  openSetting:promisify(wx.openSetting),
-  request: promisify(wx.request),
-  saveImageToPhotosAlbum:promisify(wx.saveImageToPhotosAlbum),
-  showModal:promisify(wx.showModal),
+  openSetting: promise(wx.openSetting),
+  request: promise(wx.request),
+  saveImageToPhotosAlbum: promise(wx.saveImageToPhotosAlbum),
+  showModal: promise(wx.showModal),
   
 
   // uvwxyz
-  uploadFile: promisify(wx.uploadFile),
+  uploadFile: promise(wx.uploadFile),
 
 }
 

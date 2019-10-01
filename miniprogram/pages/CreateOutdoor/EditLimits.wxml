@@ -1,7 +1,7 @@
 <!--活动人数限制-->
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="活动人数限制"></van-cell>
-  <van-cell title="{{limits.maxPerson?'限制人数':'不限制人数'}}" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
+  <van-cell title-width="90%" title="限制人数" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
     <van-checkbox value="{{limits.maxPerson}}"/>
   </van-cell>    
   <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}">
@@ -19,7 +19,7 @@
   </block>
 
   <block wx:if="{{!limits.maxPerson}}">
-    <van-cell title="{{limits.allowPopup?'允许空降':'不允许空降'}}" clickable bind:click="checkAllowPopup" border="{{false}}">
+    <van-cell title-width="90%" title="允许空降" clickable bind:click="checkAllowPopup" border="{{false}}">
         <van-checkbox value="{{limits.allowPopup}}"/>
     </van-cell>
   </block>
@@ -29,11 +29,11 @@
 <van-panel>
   <van-cell slot="header" title-class="redtitle" title="活动性质选项"></van-cell>
 <!--活动大厅-->
-  <van-cell title="{{limits.intoHall?'':'不'}}进入活动大厅" label="活动大厅能被所有人看到" clickable bind:click="checkIntoHall">
+  <van-cell title="进入活动大厅" title-width="90%" label="活动大厅能被所有人看到" clickable bind:click="checkIntoHall">
     <van-checkbox value="{{limits.intoHall}}"/>
   </van-cell>
   <!--测试发帖-->
-  <van-cell title="{{limits.isTest?'测试发帖':'正式活动'}}" title-width="80%" label="测试发帖不进入活动大厅，不纳入统计" clickable bind:click="checkTest">
+  <van-cell title="测试活动"  title-width="90%" label="测试发帖仅作为学习体验使用，不发送微信消息通知，不纳入统计" clickable bind:click="checkTest">
     <van-checkbox value="{{limits.isTest}}"/>
   </van-cell>
 </van-panel>
@@ -53,13 +53,13 @@
 <!--活动规则-->
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="活动规则"></van-cell>
-  <van-cell title="AA" title-width="80%" label="公共费用所有成员AA；领队确认活动成行后再退出，若无人替补，费用也要分摊" clickable bind:click="checkAA"> 
+  <van-cell title="AA" title-width="90%" label="公共费用所有成员AA；领队确认活动成行后再退出，若无人替补，费用也要分摊" clickable bind:click="checkAA"> 
     <van-checkbox value="{{limits.isAA}}"/>
   </van-cell>
-  <van-cell title="环保" title-width="80%" label="带走自己不可降解的垃圾，不摘一花一叶" clickable bind:click="checkEnvironment">
+  <van-cell title="环保" title-width="90%" label="带走自己不可降解的垃圾，不摘一花一叶" clickable bind:click="checkEnvironment">
     <van-checkbox value="{{limits.isEnvironment}}"/>
   </van-cell>
-  <van-cell title="守时" title-width="80%" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime">
+  <van-cell title="守时" title-width="90%" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime">
       <van-checkbox value="{{limits.isKeepTime}}"/>
   </van-cell>
 </van-panel>

@@ -241,6 +241,7 @@ const dealOdPhotos = async (od, owner, tempFiles) => {
   const count = Object.keys(photos).length
   aiOdPhotos(od.outdoorid, photos)
   let res = await dbOutdoors.doc(od.outdoorid).field({ sendPhoto: true, }).get()
+  console.log("sendPhoto:", res.data.sendPhoto)
   if (!res.data.sendPhoto) {
     await cloudfun.opOutdoorItem(od.outdoorid, "sendPhoto", true, "")
     for (var i in od.members) {

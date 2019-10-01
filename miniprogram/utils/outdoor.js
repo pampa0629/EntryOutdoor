@@ -68,8 +68,10 @@ OD.prototype.load = async function(outdoorid) {
     this.postWaitings()
     // 处理占坑队员（移除或提醒）
     this.dealOcuppy()
+    console.log("return true")
     return true
   } catch(e){
+    console.log("e",e)
     return false
   }
 }
@@ -146,7 +148,7 @@ OD.prototype.copy = function(od) {
   this.begin = (new Date()) > new Date(this.title.date + ",10:00") ? true : false
 
   // 活动中拍摄上传的照片
-  this.photos = od.photos ? od.photos:null
+  this.photos = od.photos ? od.photos:{}
   this.photocount = Object.keys(this.photos).length
 
   // next 

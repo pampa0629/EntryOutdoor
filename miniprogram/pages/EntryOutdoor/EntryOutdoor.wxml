@@ -140,19 +140,16 @@
 
 <!--集合地点-->
 <van-panel wx:if="{{!od.expired}}">
-  <van-cell slot="header" title-class="redtitle" title="集合点选择"></van-cell>
-  <van-cell required title="必须选择集合地点" clickable value="已选择第{{entryInfo.meetsIndex+1}}集合点" bind:click="lookMeetMap">
-    <van-icon wx:if="{{entryInfo.meetsIndex>=0 &&meets[entryInfo.meetsIndex].latitude }}" slot="right-icon" name="map-marked" bind:click="lookMeetMap" />
-  </van-cell>
+  <van-cell slot="header" title-class="redtitle" title="集合点选择" required></van-cell>
   <van-radio-group wx:for="{{od.meets}}" wx:key="place" value="{{entryInfo.meetsIndex}}">
     <van-row>
       <van-col span="20" offset="0">
-        <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="80%" border="{{index<meets.length-1}}">
+        <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="90%" border="{{index<meets.length-1}}">
           <van-radio name="{{index}}" />
         </van-cell>
       </van-col>
-      <!-- <van-col span="3" offset="1" wx:if="{{index==entryInfo.meetsIndex && od.meets[index].latitude}}"> -->
-      <van-col span="3" offset="1" wx:if="{{od.meets[index].latitude}}">
+      
+      <van-col span="2" offset="1" wx:if="{{od.meets[index].latitude}}">
         <van-button type="primary" plain size="small" bind:click="lookMeetMap{{index}}">地图</van-button>
       </van-col>
     </van-row>
@@ -165,13 +162,14 @@
 <!--免责条款与是否认路-->
 <block wx:if="{{!od.expired}}">
   <van-cell title="免责条款与活动规则" title-class="redtitle" value="点击查看详细内容" clickable is-link url="LookDisclaimer" />
-  <van-cell required title="我已阅读并同意条款和规则内容" title-width="70%" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
+  <van-cell required title="我已阅读并同意条款和规则内容" title-width="90%" label="必须勾选同意才能报名" clickable bind:click="checkDisclaimer">
     <van-checkbox value="{{entryInfo.agreedDisclaimer}}" />
   </van-cell>
 
-  <van-switch-cell checked="{{entryInfo.knowWay}}" bind:change="checkKnowWay">
-    <view slot="title" class="redtitle">我认路</view>
-  </van-switch-cell>
+  <van-cell title="认路与否" title-class="redtitle" title-width="90%" label="勾选即为认路" clickable bind:click="checkKnowWay">
+    <van-checkbox value="{{entryInfo.knowWay}}" />
+  </van-cell>
+
 </block>
 
 <!--状态提示-->

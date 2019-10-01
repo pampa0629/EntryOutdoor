@@ -52,8 +52,8 @@ Page({
 
   // 给合影照片标注人名
   addMultiLabel(multi) {
-    multi.names = "摄影师：" + multi.owner.nickName+"；"
-    multi.names += "从左到右分别是："
+    // multi.names = "摄影师：" + multi.owner.nickName+"；"
+    multi.names = "从左到右为："
     for (var i in multi.faces) {
       var face = multi.faces[i]
       if (face.personid && face.nickName) {

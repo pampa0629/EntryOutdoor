@@ -11,7 +11,7 @@
       <view wx:else>取消订阅</view>
     </button>
   </view>
-</form>
+</form> 
 
 <form bindsubmit="SubscribeLeader" report-submit="true">
   <view class="fix" style="left:50rpx">
@@ -40,7 +40,7 @@
 <van-panel wx:if="{{hasSubscribed}}">
 	<van-cell slot="header" title-class="redtitle" title="微信服务通知"></van-cell>
   <van-switch-cell title="接收通知" checked="{{mine.acceptNotice}}" bind:change="checkAccept"/>
-</van-panel>
+</van-panel> 
 
 <!--该领队发起的活动列表-->
 <van-panel>

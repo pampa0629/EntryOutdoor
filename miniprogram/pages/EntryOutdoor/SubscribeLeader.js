@@ -28,9 +28,10 @@ Page({
     console.log(options)
     this.data.leaderid = options.leaderid
     let res = await dbPersons.doc(this.data.leaderid).get()
+    // todo 这里应该过滤掉领队发布的测试活动，取消的活动，以及未来的私密活动
     this.setData({
       outdoors: res.data.myOutdoors,
-    })
+    }) 
     if (res.data.subscribers && res.data.subscribers[app.globalData.personid]) {
       this.setData({
         mine: res.data.subscribers[app.globalData.personid], // 得到自己的订阅信息

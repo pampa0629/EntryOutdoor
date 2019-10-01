@@ -34,8 +34,10 @@
 <van-tag wx:if="{{!hasPullFlush}}" size="large" type="success">下拉即时刷新留言</van-tag>
 
 <!-- 留言是否发送微信服务消息 -->
-<van-switch-cell title="@ 留言是否发送微信消息" title-width="80%" size="20px" checked="{{sendWxnotice}}" bind:change="changeSendWxnotice"/>
-
+<van-cell title="@昵称同时发送微信消息"  title-width="90%"  clickable bind:click="checkSendWxnotice">
+  <van-checkbox value="{{sendWxnotice}}"/>
+</van-cell>
+ 
 <!--活动留言--> 
 <van-row wx:for="{{chat.messages}}" wx:key="who+msg">
   <block wx:if="{{!item.self}}">

@@ -8,13 +8,18 @@
   <!--风景-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <view wx:for="{{landscapes}}" wx:key="src">
+      <van-panel wx:for="{{landscapes}}" wx:key="src">
         <van-row>
           <van-col span="20" offset="2">
             <image mode="widthFix" src="{{item.src}}"></image>
           </van-col>
         </van-row>
-      </view>
+        <van-row>
+          <van-col span="20" offset="1">
+            <text>摄影师：{{item.owner.nickName}}</text>
+          </van-col>
+        </van-row>
+      </van-panel>
 
       <!--故意空白，防止遮挡-->
       <van-cell title="  " border="{{false}}" />
@@ -40,7 +45,16 @@
             <image mode="widthFix" src="{{item.src}}"></image>
           </van-col>
         </van-row>
-        <text>{{item.names}}</text>
+        <van-row>
+          <van-col span="20" offset="1">
+            <text>摄影师：{{item.owner.nickName}}</text>
+          </van-col>
+        </van-row>
+        <van-row>
+          <van-col span="20" offset="1">
+            <text>{{item.names}}</text>
+          </van-col>
+        </van-row>
       </van-panel>
 
       <!--故意空白，防止遮挡-->
@@ -80,13 +94,19 @@
       </van-panel>
       <van-cell title="  " border="{{false}}" />
 
-      <view wx:for="{{mines}}" wx:key="src">
+      <!-- 自己的照片 -->
+      <van-panel wx:for="{{mines}}" wx:key="src">
         <van-row>
           <van-col span="20" offset="2">
             <image mode="widthFix" src="{{item.src}}"></image>
           </van-col>
         </van-row>
-      </view>
+        <van-row>
+          <van-col span="20" offset="1">
+            <text>摄影师：{{item.owner.nickName}}</text>
+          </van-col>
+        </van-row>
+      </van-panel>
 
       <!--故意空白，防止遮挡-->
       <van-cell title="  " border="{{false}}" />

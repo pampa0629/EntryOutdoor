@@ -11,7 +11,7 @@ const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
 const facetools = require('../../utils/facetools.js')
 
-wx.cloud.init()
+wx.cloud.init() 
 const db = wx.cloud.database({})  
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -830,8 +830,8 @@ Page({
   checkKnowWay: function(e) {
     console.log(e)
     this.setData({
-      // "myself.entryInfo.knowWay": !this.data.myself.entryInfo.knowWay,
-      "myself.entryInfo.knowWay": e.detail,
+      "myself.entryInfo.knowWay": !this.data.myself.entryInfo.knowWay,
+      // "myself.entryInfo.knowWay": e.detail,
       hasModified: true,
     })
     console.log(this.data.myself.entryInfo.knowWay)

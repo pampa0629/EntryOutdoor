@@ -118,19 +118,3 @@
   </van-field> 
 </block>
  
-<!-- <!-- <block wx:if="{{openAdd || addMembers.length>0 || hasModified}}"> -->
-  <!-- 保存和返回按钮 -->
-  <!-- <van-row>
-    <van-col span="9" offset="2">
-      <form bindsubmit="save" report-submit="true">
-        <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
-      </form>
-    </van-col>
-    <van-col span="9" offset="2">
-      <form bindsubmit="giveup" report-submit="true">
-        <button form-type="submit" size="large" type="warn">放弃</button>
-      </form>
-    </van-col>
-  </van-row>
-</block> -->
-

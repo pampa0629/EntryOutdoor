@@ -84,7 +84,7 @@ Page({
         knowWay: knowWay,
         status: s[i].entryInfo.status,
         personid: s[i].personid,
-        meetsIndex:"第"+(s[i].entryInfo.meetsIndex+1)+"集合点",
+        meetsIndex: "第" + (parseInt(s[i].entryInfo.meetsIndex)+1)+"集合点",
       }
       self.data.members.push(member)
  

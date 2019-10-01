@@ -284,6 +284,7 @@ Page({
     var outdoorid = util.loadOutdoorID()
     var od = new outdoor.OD()
     const res = await od.load(outdoorid)
+    console.log("res:",res)
     if(!res) {
       wx.showModal({
         title: '查找活动ID失败',

@@ -309,7 +309,13 @@ Page({
     // console.log("length2:", Object.keys(faces).length)
 
     // this.query()
-    this.calc2()
+    // this.calc2()
+    const myModel = promisify.promise(wx.showModal)
+    let res = await myModel({
+      title: 'hehe',
+      content: 'dasd',
+    })
+    console.log(res)
   },
 
   calc2() {

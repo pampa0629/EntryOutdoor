@@ -3,7 +3,7 @@
 	<van-cell slot="header" title-class="redtitle" title="交通方式：{{traffic.mode}}"></van-cell>
   <van-radio-group value="{{traffic.mode}}" >
     <van-cell-group>
-      <van-cell wx:for="{{Modes}}" wx:key="{{item}}" data-value="{{item}}" title="{{item}}"  clickable bind:click="clickMode" border="{{index<Modes.length-1}}">
+      <van-cell wx:for="{{Modes}}" wx:key="{{item}}" data-value="{{item}}" title="{{item}}" title-width="90%" clickable bind:click="clickMode" border="{{index<Modes.length-1}}">
         <van-radio  name="{{item}}"/>
       </van-cell>
     </van-cell-group>
@@ -12,10 +12,10 @@
  
 <!--费用承担-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="费用承担：{{traffic.cost}}"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="费用承担：{{traffic.cost}}"/>
   <van-radio-group value="{{traffic.cost}}" >
     <van-cell-group>
-      <van-cell wx:for="{{Costs}}" wx:key="{{item}}" data-value="{{item}}" title="{{item}}"  clickable bind:click="clickCost" border="{{index<Costs.length-1}}">
+      <van-cell wx:for="{{Costs}}" wx:key="{{item}}" data-value="{{item}}" title="{{item}}" title-width="90%" clickable bind:click="clickCost" border="{{index<Costs.length-1}}">
         <van-radio  name="{{item}}"/>
       </van-cell>
     </van-cell-group>

@@ -125,12 +125,12 @@
 </van-panel>
 
 <!-- 领队是否认路 -->
-<van-switch-cell checked="{{myself.entryInfo.knowWay}}" bind:change="checkKnowWay">
-  <view slot="title" class="redtitle">我认路</view>
-</van-switch-cell>
+<van-cell title="认路与否" title-class="redtitle" title-width="90%" label="勾选即为认路" clickable bind:click="checkKnowWay">
+  <van-checkbox value="{{myself.entryInfo.knowWay}}"/>
+</van-cell>
 
 <!--交通方式-->
-<van-cell wx:if="{{od.traffic}}" title="交通方式" title-class="redtitle" title-width="60%" label="{{od.traffic.mode}}；{{od.traffic.carInfo}}；{{od.traffic.costInfo}}" value="点击编辑交通方式" is-link url="EditTraffic" />
+<van-cell wx:if="{{od.traffic}}" title="交通方式" title-class="redtitle" title-width="60%" label="{{od.traffic.mode}}；车辆信息{{od.traffic.carInfo}}；{{od.traffic.costInfo}}" value="点击编辑交通方式" is-link url="EditTraffic" />
 <van-cell wx:else title="交通方式" label="从集合地到出发地" value="点击设置交通方式" is-link url="EditTraffic" />
 
 <!--活动路线-->

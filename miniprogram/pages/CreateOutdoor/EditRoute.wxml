@@ -41,7 +41,7 @@
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="户外网站轨迹"></van-cell>
   <block wx:for="{{route.trackSites}}" wx:key="name">
-    <van-cell title="{{item.name}}" clickable bind:click="checkTrackSites{{index}}" border="{{item.useit}}">
+    <van-cell title="{{item.name}}" title-width="90%" clickable bind:click="checkTrackSites{{index}}" border="{{item.useit}}">
       <van-checkbox value="{{item.useit}}"/>
     </van-cell>
     <block wx:if="{{item.useit}}">

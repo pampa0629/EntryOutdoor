@@ -13,7 +13,7 @@ const _ = db.command
 Page({
 
   data: {
-    equipments: { 
+    equipments: {
       mustRes: [],
       canRes: [],
       noRes: [],
@@ -27,7 +27,7 @@ Page({
     date: null, // 活动日期
     day: null, // 活动是周几
     hasModified: false,
-    od:null, // 活动对象
+    od: null, // 活动对象
 
     areaList: null, // 地区列表
     showPopup: false, // 是否显示弹窗
@@ -58,7 +58,7 @@ Page({
 
     let area = await util.loadArea()
     self.setData({
-      areaList:area,
+      areaList: area,
     })
 
     console.log(limits)
@@ -75,28 +75,30 @@ Page({
         weatherText: "活动过期，无法获取天气预报，系统也无法推荐装备",
       })
     } else if (self.data.equipments.area) { // 没过期，有活动地区，则查询天气预报
-      let weather = await odtools.getWeather(self.data.equipments.area, self.data.date)
-      if (weather.result) {
-        self.setData({
-          weather: weather.weather,
-          weatherText: odtools.buildWeatherMessage(weather.weather),
-        })
-      } else {
-        self.setData({
-          weatherText: weather.msg,
-        })
-      }
-    }
-
-    var hasEquipments = limits && limits.equipments && (limits.equipments.must.length || limits.equipments.can.length || limits.equipments.no.length)
-    if (hasEquipments) { // 有就直接读取
-      console.log(limits.equipments)
-      self.setData({
-        equipments: limits.equipments,
+      await odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
+        console.log("weather:", weather)
+        if (weather.result) {
+          self.setData({
+            weather: weather.weather,
+            weatherText: odtools.buildWeatherMessage(weather.weather),
+          })
+        } else {
+          self.setData({
+            weatherText: weather.msg,
+          })
+        }
       })
-      self.createButtonFun()
-    } else if (self.data.weather) { // 没有装备，有天气预报，就默认推荐一下
-      self.loadEquipments(self.data.weather)
+
+      var hasEquipments = limits && limits.equipments && (limits.equipments.must.length || limits.equipments.can.length || limits.equipments.no.length)
+      if (hasEquipments) { // 有就直接读取
+        console.log(limits.equipments)
+        self.setData({
+          equipments: limits.equipments,
+        })
+        self.createButtonFun()
+      } else if (self.data.weather) { // 没有装备，有天气预报，就默认推荐一下
+        self.loadEquipments(self.data.weather)
+      }
     }
   },
 
@@ -116,18 +118,20 @@ Page({
     const self = this
     // 没有天气预报，又没有过期，就查询一下
     if (!this.data.od.expired) { // 没过期，又没有给天气预报，则查询天气预报
-      let weather = await odtools.getWeather(self.data.equipments.area, self.data.date)
-      if (weather.result) {
-        self.setData({
-          weather: weather.weather,
-          weatherText: odtools.buildWeatherMessage(weather.weather),
-        })
-        self.loadEquipments(self.data.weather)
-      } else {
-        self.setData({
-          weatherText: weather.msg,
-        })
-      }
+      await odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
+        console.log("weather:", weather)
+        if (weather.result) {
+          self.setData({
+            weather: weather.weather,
+            weatherText: odtools.buildWeatherMessage(weather.weather),
+          })
+          self.loadEquipments(self.data.weather)
+        } else {
+          self.setData({
+            weatherText: weather.msg,
+          })
+        }
+      })
     }
   },
 
@@ -364,7 +368,7 @@ Page({
     })
   },
 
-  onClose(event) { 
+  onClose(event) {
     const self = this
     console.log(event)
     if (event.detail === 'confirm') {
@@ -388,11 +392,11 @@ Page({
       }
 
       // setTimeout(() => {
-        self.setData({
-          hasModified: true,
-          "dialog.show": false
-        })
-        // self.onShow()
+      self.setData({
+        hasModified: true,
+        "dialog.show": false
+      })
+      // self.onShow()
       // }, 100);
     } else {
       this.setData({

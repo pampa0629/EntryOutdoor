@@ -210,21 +210,20 @@ Page({
     })
   },
 
-  async changeSendWxnotice(e) {
-    console.log("changeSendWxnotice()")
-    const self = this
-    if (e.detail) {
+  async checkSendWxnotice(e) {
+    console.log("checkSendWxnotice()",e)
+    if (!this.data.sendWxnotice) {
       let res = await promisify.showModal({
         title: '请确认开启',
         content: '开启该选项将导致@成员的留言同时也发送微信消息，可能给对方造成打扰，也不能保证一定送达。请慎重开启！',
       })
       if (res.confirm) {
-        self.setData({
+        this.setData({
           sendWxnotice: true
         })
       }
     } else {
-      self.setData({
+      this.setData({
         sendWxnotice: false
       })
     }

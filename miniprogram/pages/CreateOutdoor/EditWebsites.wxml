@@ -5,16 +5,16 @@
  <van-panel>
   <van-cell slot="header" title-class="redtitle" title="活动发布到：" value="{{forum.name}}论坛"></van-cell>
   <van-radio-group wx:for="{{Forums}}" wx:key="id" value="{{forum.id}}" wx:if="{{!od.websites.lvyeorg.tid}}">
-      <van-cell title="{{item.name}}" data-name="{{item.id}}" clickable bind:click="clickForum">
+      <van-cell title="{{item.name}}" title-width="90%" data-name="{{item.id}}" label="{{item.label}}" clickable bind:click="clickForum">
         <van-radio name="{{item.id}}"/>
       </van-cell> 
   </van-radio-group> 
-</van-panel>
+</van-panel> 
 
 <!-- 是否允许网址跟帖报名 --> 
  <van-panel>
   <van-cell slot="header" title-class="redtitle" title="选项设置"></van-cell>
-  <van-cell title="{{od.websites.lvyeorg.allowSiteEntry?'允许':'不允许'}}网站直接跟帖报名" label="{{od.websites.lvyeorg.allowSiteEntry?'不建议允许，允许则领队要自行整理两边的报名名单，且无法发送微信消息提示':''}}" clickable bind:click="checkAllowSiteEntry">
+  <van-cell title-width="90%" title="允许网站直接跟帖报名" label="不建议允许，允许则领队要自行整理两边的报名名单，且无法发送微信消息提示" clickable bind:click="checkAllowSiteEntry">
     <van-checkbox value="{{od.websites.lvyeorg.allowSiteEntry}}" />
   </van-cell>
 </van-panel>

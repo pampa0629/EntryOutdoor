@@ -552,7 +552,7 @@ const sendPhotoMsg2Member = async (personid, outdoorid, title, photor, count, le
   console.log("template.sendPhotoMsg2Member()")
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
-    var tempid = "LRaqHLcofDaVW7IMDpD11QLXoOJKZF61Lr_gEYCkG7M"
+    var tempid = "LRaqHLcofDaVW7IMDpD11Tqv4W5FW5H9jG5BaUQgMco"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
       "keyword1": { // 相册名(活动主题)
         "value": title
@@ -563,11 +563,11 @@ const sendPhotoMsg2Member = async (personid, outdoorid, title, photor, count, le
       "keyword3": { // 添加照片数
         "value": count
       },
-      "keyword4": { // 时间：占坑截止时间
+      "keyword4": { // 温馨提示
         "value": "为避免过多打扰，后续上传照片将不再提示；您可自行随时点击进入活动页面查看和上传活动照片"
       }
     }
-    var page = buildDefaultPage("EntryOutdoor", outdoorid, personid, leaderid)
+    var page = buildDefaultPage(outdoorid, personid, leaderid)
     let formid = fetchPersonFormid(personid, res.data.formids)
     sendMessage(openid, tempid, formid, page, data) 
   })

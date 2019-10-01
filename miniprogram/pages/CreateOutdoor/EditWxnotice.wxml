@@ -9,10 +9,10 @@
       <van-stepper value="{{wxnotice.entryCount}}" min="1" max="{{wxnotice.formids.length}}" bind:change="bindAddEntry" /> 
     </van-cell>
     <!--是否接收满员通知-->
-    <van-cell title="{{wxnotice.fullNotice?'满员时通知':'满员时不通知'}}" clickable bind:click="checkFullNotice" border="{{false}}">
+    <van-cell title="满员时接收通知" clickable bind:click="checkFullNotice" border="{{false}}">
       <van-checkbox value="{{wxnotice.fullNotice}}"/>
     </van-cell>
-  </block>
+  </block> 
 </van-panel>  
 
 <van-cell title="  " border="{{false}}" />

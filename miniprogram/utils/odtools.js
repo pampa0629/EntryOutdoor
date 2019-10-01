@@ -4,7 +4,7 @@ var bmap = require('../libs/bmap-wx.min.js')
 const cloudfun = require('./cloudfun.js')
 const template = require('./template.js')
 const promisify = require('./promisify.js')
- 
+
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
@@ -113,92 +113,72 @@ const getLocation = async() => {
   return res
 }
 
-// let res = await promisify.getSetting({})
-// if (!res.authSetting['scope.userLocation']) {
-//   wx.authorize({
-//     scope: 'scope.userLocation',
-//     success() {
-//       console.log('scope.userLocationv OK')
-//       wx.getLocation({
-//         type: 'wgs84',
-//         success: function(res) {
-//           if (callback) {
-//             callback(res)
-//           }
-//         }
-//       })
-//     },
-//     fail() {
-//       wx.showModal({
-//         title: '请给予授权',
-//         content: '授权获取大致位置，才能通过所在城市的天气预报推荐装备，不然装备推荐不准。小程序不会记录您的位置',
-//       })
-//     }
-//   })
-// } else {
-//   wx.getLocation({
-//     type: 'wgs84',
-//     success: function(res) {
-//       if (callback) {
-//         callback(res)
-//       }
-//     }
-//   })
-// }
-// }
-
 // 根据地区和日期，查看天气预报
-const getWeather = async(area, date) => {
-var ak = "zGuNHdYow4wGhrC1IytHDweHPWGxdbaX"
-try {
-  let resLocation = await promisify.request({ // 通过area得到经纬度
-    url: "https://api.map.baidu.com/geocoder/v2/?address=" + area + "&output=json&ak=" + ak
-  })
-  console.log(resLocation);
-  var latitude = resLocation.data.result.location.lat //维度
-  var longitude = resLocation.data.result.location.lng //经度
+const getWeather = async(area, date, callback) => {
+  console.log("odtools.getWeather()")
+  var ak = "zGuNHdYow4wGhrC1IytHDweHPWGxdbaX"
+  try {
+    let resLocation = await promisify.request({ // 通过area得到经纬度
+      url: "https://api.map.baidu.com/geocoder/v2/?address=" + area + "&output=json&ak=" + ak
+    })
+    console.log(resLocation);
+    var latitude = resLocation.data.result.location.lat //维度
+    var longitude = resLocation.data.result.location.lng //经度
 
-  var BMap = new bmap.BMapWX({
-    ak: ak
-  })
-  const promise_weather = promisify(BMap.weather)
-
-  let resWeather = promise_weather({
-    location: longitude + "," + latitude
-  })
-  console.log(resWeather)
-  let forecast = resWeather.originalData.results[0].weather_data
-  console.log(forecast)
-  var nowDay = new Date()
-  var lastDay = new Date()
-  lastDay.setDate(nowDay.getDate() + forecast.length)
-  var outdoorDay = new Date(date)
-  var index = forecast.length - 1 // 用哪天的数据
-  if (lastDay >= outdoorDay) {
-    index = Math.ceil((outdoorDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24));
-    if (index >= forecast.length) {
-      index = forecast.length - 1
-    }
-  }
-  console.log("outdoorDay is:" + outdoorDay)
-  console.log("nowDay is:" + nowDay)
-  console.log("lastDay is:" + lastDay)
-  console.log(index)
-  var weather = null
-  if (index >= 0 && index < forecast.length) {
-    weather = forecast[index]
-    weather.area = area
-  }
-  console.log(weather)
-  return {
-      result: true,
-      weather: weather
-    }
-  }catch (err) {
-  console.log(err)
-  return {
-      result: false,
-      msg: "获取天气预报或转化经纬度失败，具体原因是：" + err
+    var BMap = new bmap.BMapWX({
+      ak: ak
+    })
+    BMap.weather({
+      location: longitude + "," + latitude,
+      fail: function(error) {
+        console.log(error)
+        if (callback) {
+          callback({
+            result: false,
+            msg: "获取天气预报失败，具体原因是：" + error
+          })
+        }
+      },
+      success: function(res) {
+        console.log(res)
+        let forecast = res.originalData.results[0].weather_data
+        console.log(forecast)
+        var nowDay = new Date()
+        var lastDay = new Date()
+        lastDay.setDate(nowDay.getDate() + forecast.length)
+        var outdoorDay = new Date(date)
+        var index = forecast.length - 1 // 用哪天的数据
+        if (lastDay >= outdoorDay) {
+          index = Math.ceil((outdoorDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24));
+          if (index >= forecast.length) {
+            index = forecast.length - 1
+          }
+        }
+        console.log("outdoorDay is:" + outdoorDay)
+        console.log("nowDay is:" + nowDay)
+        console.log("lastDay is:" + lastDay)
+        console.log(index)
+        var weather = null
+        if (index >= 0 && index < forecast.length) {
+          weather = forecast[index]
+          weather.area = area
+        }
+        console.log(weather)
+        if (callback) {
+          callback({
+            result: true,
+            weather: weather
+          })
+        }
+      }
+    })
+  } catch (err) {
+    console.log(err)
+    if (callback) {
+      callback({
+        result: false,
+        msg: "获取天气预报或转化经纬度失败，具体原因是：" + err
+      })
     }
   }
 }
@@ -676,7 +656,6 @@ const isNeedAA = (od, entryStatus) => {
   }
   return result
 }
-
 
 
 module.exports = {

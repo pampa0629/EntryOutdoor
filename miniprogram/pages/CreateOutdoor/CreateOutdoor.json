@@ -18,6 +18,7 @@
     "van-slider":"/vant-weapp/slider/index",
     "van-panel": "/vant-weapp/panel/index",
     "van-popup": "/vant-weapp/popup/index",
+    "van-steps": "/vant-weapp/steps/index",
     "van-tag": "/vant-weapp/tag/index"
   }
 }

@@ -108,12 +108,22 @@ Page({
     this.loadOutdoor(outdoorid)
   },
 
+  // 设置活动状态进程条
+  setSteps(status) {
+    const res = odtools.getSteps(status)
+    this.setData({
+      steps: res.steps,
+      active: res.index,
+    })
+  },
+
   // 从数据库中装载信息 
   async loadOutdoor(outdoorid) {
     console.log("loadOutdoor(),  ",outdoorid)
     // 这里读取数据库，加载各类信息
     await this.data.od.load(outdoorid)
     const od = this.data.od
+    this.setSteps(od.status)
     // 设置活动信息
     this.setData({
       od: od,

@@ -29,7 +29,8 @@ Page({
 
     // 常量定义
     Loadeds: ["轻装", "重装", "休闲"], // 枚举型：轻装、重装、休闲装
-    Durings: ["一日", "两日", "三日", "四日", "五日", "多日"], // 活动时长枚举
+    // Durings: ["一日", "两日", "三日", "四日", "五日", "多日"], // 活动时长枚举
+    Durings:odtools.Durings, 
 
     startDate: util.formatDate(new Date()), // 起始日期，格式化为字符串；只能从今天开始
     endDate: util.formatDate(util.nextDate(new Date(), 180)), // 截止日期，格式化为字符串，不保存；不能发半年之后的活动
@@ -155,6 +156,14 @@ Page({
     console.log(this.data.myself)
   },
 
+  // 设置活动状态进程条
+  setSteps(status){
+    const res = odtools.getSteps(status)
+    this.setData({
+      steps:res.steps,
+      active: res.index,
+    })
+  },
   
   async loadOutdoor(outdoorid) {
     console.log("CreateOutdoor.loadOutdoor() ", outdoorid)
@@ -162,6 +171,7 @@ Page({
     await this.data.od.load(outdoorid)
     const od = this.data.od
     console.log("od:",od)
+    this.setSteps(od.status)
 
     this.setData({
       od: od,

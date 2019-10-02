@@ -9,11 +9,13 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 
+const Durings= ["一日", "两日", "三日", "四日", "五日", "多日"] // 活动时长枚举
+
 // 根据各类信息，生成活动主题信息，修改whole
 const createTitle = (title, nickName) => {
   var result = "" // 2018.09.16（周日）大觉寺一日轻装1.0强度休闲游； 
   // 日期 
-  if (title.date) {
+  if (title.date) { 
     result += title.date
     result += "(" + util.getDay(title.date) + ")"
   } else {
@@ -657,8 +659,36 @@ const isNeedAA = (od, entryStatus) => {
   return result
 }
 
+// 根据活动当前状态，得到活动步骤，以及当前状态的index
+const getSteps = (status) =>{
+  var steps = [
+    {
+      text: '拟定中',
+    },
+    {
+      text: '已发布',
+    },
+    {
+      text: '已成行',
+    },
+    {
+      text: '进行中',
+    },
+    {
+      text: '已结束',
+    }
+  ]
+  if (status == "已取消") {
+    steps[0] = { text: status }
+  }
+
+  var index = util.findIndex(steps, "text", status)
+  return {steps:steps, index:index}
+}
 
 module.exports = {
+  getSteps: getSteps, // 
+  Durings: Durings, // 活动时长
   createTitle: createTitle, // 生成活动标题
   calcLevel: calcLevel, // 计算活动强度
   buildWeatherMessage: buildWeatherMessage, // 构建天气预报字符串

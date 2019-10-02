@@ -18,6 +18,7 @@
     "van-notice-bar": "/vant-weapp/notice-bar/index",
     "van-action-sheet": "/vant-weapp/action-sheet/index",
     "van-popup": "/vant-weapp/popup/index",
+    "van-steps": "/vant-weapp/steps/index",
     "van-tag": "/vant-weapp/tag/index"
   }
 }

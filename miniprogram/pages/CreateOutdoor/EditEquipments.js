@@ -70,9 +70,9 @@ Page({
 
     console.log(self.data.equipments.area)
     // 处理过期活动
-    if (od.expired) { // 过期活动，不能用天气预报，也就无法推荐装备了
-      self.setData({
-        weatherText: "活动过期，无法获取天气预报，系统也无法推荐装备",
+    if (od.status == '已结束') { // 过期活动，不能用天气预报，也就无法推荐装备了
+      self.setData({ 
+        weatherText: "活动已结束，无法获取天气预报，系统也无法推荐装备",
       })
     } else if (self.data.equipments.area) { // 没过期，有活动地区，则查询天气预报
       await odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
@@ -117,7 +117,7 @@ Page({
   async loadDefault() {
     const self = this
     // 没有天气预报，又没有过期，就查询一下
-    if (!this.data.od.expired) { // 没过期，又没有给天气预报，则查询天气预报
+    if (this.data.od.status!='已结束') { // 没过期，又没有给天气预报，则查询天气预报
       await odtools.getWeather(self.data.equipments.area, self.data.date, weather => {
         console.log("weather:", weather)
         if (weather.result) {
@@ -235,6 +235,7 @@ Page({
       this.setData({
         hasModified: false
       })
+      
     }
   },
 

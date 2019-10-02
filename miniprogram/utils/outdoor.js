@@ -101,8 +101,7 @@ OD.prototype.copy = function(od) {
   this.leader = od.leader ? od.leader : od.members[0]
   this.addMembers = od.addMembers ? od.addMembers : this.addMembers
   this.aaMembers = od.aaMembers ? od.aaMembers : this.aaMembers
-  this.status = od.status
-
+  
   // brief 文字加图片 
   this.brief = od.brief ? od.brief : this.brief
 
@@ -143,16 +142,32 @@ OD.prototype.copy = function(od) {
   this.QcCode = od.QcCode
   this.pay = od.pay ? od.pay : this.pay
 
-  // 增加对活动是否过期的判断
-  this.expired = (new Date()) > new Date(this.title.date + ",24:00") ? true : false
-  this.begin = (new Date()) > new Date(this.title.date + ",10:00") ? true : false
-
+  // 增加对活动状态的判断，例如是否进行中，是否已结束等
+  this.checkStatus(od.status)
+  
   // 活动中拍摄上传的照片
   this.photos = od.photos ? od.photos:{}
   this.photocount = Object.keys(this.photos).length
 
   // next 
 
+}
+
+// 判断处理活动状态
+OD.prototype.checkStatus = function (status) {
+  console.log("OD.prototype.checkStatus()", status)
+  this.status = status
+  if (this.status != "拟定中" || this.status != "已取消") { // 拟定中或已取消的活动，不做时间线的判断
+    if (new Date() > new Date(this.title.date + "," + this.meets[0].time)) {
+      this.status = "进行中"
+      var days = odtools.Durings.indexOf(this.title.during) + 1
+      var endDay = new Date(this.title.date + ",24:00")
+      endDay.setDate(endDay.getDate() + days)
+      if (new Date() > endDay) {
+        this.status = "已结束"
+      }
+    }
+  }
 }
 
 // 把当前活动设置为可供后续创建新活动的样子
@@ -172,7 +187,6 @@ OD.prototype.setDefault4New = function(leader) {
   this.QcCode = null
   this.pay = null
   this.status = "拟定中"
-  this.expired = false
 }
 
 // 保存（更新）od到数据库中，若之前没有保存过，则新建一条记录
@@ -183,8 +197,8 @@ OD.prototype.save = async function(myself, modifys) {
   console.log("outdoorid: " + this.outdoorid)
   console.log(myself, modifys)
   if (this.outdoorid) {
-    // 已发布且过期的活动，不允许保存
-    if (!this.expired || this.status == "拟定中") {
+    // 进行中或已结束的活动，不能保存
+    if (this.status != '进行中' && this.status != '已结束') {
       // 必须先刷新一下成员，不然容易覆盖
       let res = await dbOutdoors.doc(this.outdoorid).get()
       this.members = res.data.members
@@ -206,6 +220,7 @@ OD.prototype.save = async function(myself, modifys) {
       this.postModify2Websites(modifys)
       // 信息修改要发送给队员
       this.sendModify2Members(modifys)
+      wx.showToast({title: '保存成功',})
     }
   } else { // 若之前没有保存过，则创建活动记录
     await this.create(myself)
@@ -223,6 +238,7 @@ OD.prototype.publish = async function(leader) {
   // 确定绿野org版面，发布出去
   var fid = lvyeorg.chooseForum(this.title, this.limits.isTest)
   this.push2org(fid)
+  wx.showToast({ title: '发布成功'})
 }
 
 // 删除活动，删除后不得再调用任何内容 
@@ -233,6 +249,7 @@ OD.prototype.del = async function() {
   await dbOutdoors.doc(this.outdoorid).remove()
   this.clear() // 清空内容
   this.outdoorid = null // id设置为null
+  wx.showToast({ title: '已删除' })
   return this
 }
 
@@ -247,6 +264,7 @@ OD.prototype.clear = function() {
     this[key] = empty[key]
   }
   this.outdoorid = temp
+  wx.showToast({ title: '已清空' })
 }
 
 // 删除云存储上的内容，主要是照片和轨迹文件
@@ -354,8 +372,8 @@ OD.prototype.copyTrackFiles = async function() {
 OD.prototype.saveItem = async function(name) {
   console.log("OD.prototype.saveItem()" + name)
   console.log("outdoorid: " + this.outdoorid)
-  // 已发布且过期的活动，不允许保存
-  if (!this.expired || this.status == "拟定中") {
+  // 进行中或已结束的活动，不允许保存
+  if (this.status != '进行中' && this.status != '已结束') {
     var value = util.getValue(this, name)
     console.log(value)
     // 存储到数据库中

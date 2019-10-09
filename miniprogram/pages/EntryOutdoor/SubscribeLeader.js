@@ -22,10 +22,9 @@ Page({
   },
 
   async onLoad(options) {
-    const self = this
-  
+    console.log("SubscribeLeader.onLoad()",options)
+    
     // 读取领队信息
-    console.log(options)
     this.data.leaderid = options.leaderid
     let res = await dbPersons.doc(this.data.leaderid).get()
     // todo 这里应该过滤掉领队发布的测试活动，取消的活动，以及未来的私密活动
@@ -41,49 +40,46 @@ Page({
 
     if (app.checkLogin()) {
       // 得到过滤后的formids
-      let formids = template.clearPersonFormids(app.globalData.personid)
+      let formids = await template.clearPersonFormids(app.globalData.personid)
       this.setData({
         formids: formids,
       })
-      console.log(this.data.formids.length)
+      console.log("formids.length:", this.data.formids.length)
     }
   },
 
   onUnload() {
-    const self = this
+    console.log("SubscribeLeader.onUnload()")
     // 领队用云函数
-    console.log(self.data.mine)
-    // cloudfun.updatePersonSubscriber(self.data.leaderid, app.globalData.personid, self.data.mine)
-    cloudfun.opPersonItem(self.data.leaderid, "subscribers."+app.globalData.personid, self.data.mine, "")
+    console.log(this.data.mine)
+    cloudfun.opPersonItem(this.data.leaderid, "subscribers." + app.globalData.personid, this.data.mine, "")
   },
 
   // 订阅领队/取消订阅
-  SubscribeLeader(e) {
-    console.log("SubscribeLeader")
-    const self = this
+  subscribeLeader(e) {
+    console.log("subscribeLeader()")
     this.addCount(e)
-    self.setData({
-      hasSubscribed: !self.data.hasSubscribed,
+    this.setData({
+      hasSubscribed: !this.data.hasSubscribed,
     })
-    console.log("Subscribed is: " + self.data.hasSubscribed)
+    console.log("Subscribed is: " + this.data.hasSubscribed)
   },
 
   checkAccept() {
-    console.log("checkAccept")
-    const self = this
-    self.setData({
-      "mine.acceptNotice": !self.data.mine.acceptNotice,
+    console.log("SubscribeLeader.checkAccept()")
+    this.setData({
+      "mine.acceptNotice": !this.data.mine.acceptNotice,
     })
-    console.log(self.data.mine.acceptNotice)
+    console.log(this.data.mine.acceptNotice)
   },
 
   addCount(e) {
-    console.log("addCount: " + e.detail.formId)
-    const self = this
+    console.log("SubscribeLeader.addCount(): " + e.detail.formId)
     template.savePersonFormid(app.globalData.personid, e.detail.formId)
-    self.data.formids.push(e.detail.formId)
-    self.setData({
-      formids: self.data.formids
+    console.log("formids: " + this.data.formids)
+    this.data.formids.push(e.detail.formId)
+    this.setData({
+      formids: this.data.formids
     })
   },
 

@@ -217,7 +217,7 @@
 </block>
 
 <!-- 保存修改 -->
-<van-row class="fix" wx:if="{{od.status!='已结束' || od.status!='进行中'}}">
+<van-row class="fix" wx:if="{{od.status!='已结束' && od.status!='进行中'}}">
   <van-col span="22" offset="1">
     <form bindsubmit="saveModified" report-submit="true">
       <button form-type="submit" disabled="{{!hasModified}}" type="primary">保存修改</button>

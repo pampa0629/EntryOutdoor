@@ -7,18 +7,18 @@ const _ = db.command
 const dbGroups = db.collection('Groups')
 
 const ensureMember=(groupOpenid, openid, personid, userInfo)=>{
-  console.log("group.ensureMember")
+  console.log("group.ensureMember()", groupOpenid, openid, personid, userInfo)
   console.log(groupOpenid)
   const member = { openid: openid, personid: personid, userInfo: userInfo}
   dbGroups.where({
     groupOpenid: _.eq(groupOpenid)
   }).get().then(res => {
-    console.log(res)
+    // console.log(res)
     if(res.data.length > 0) {
       dbGroups.doc(res.data[0]._id).get().then(res=>{
         res.data.members[openid] = member
-        console.log("group id: "+res.data._id)
-        console.log(res.data.members)
+        // console.log("group id: "+res.data._id)
+        // console.log(res.data.members)
         // cloudfun.updateGroupMembers(res.data._id, res.data.members)
         cloudfun.opGroupItem(res.data._id, "members", res.data.members, "")
       })
@@ -31,8 +31,8 @@ const ensureMember=(groupOpenid, openid, personid, userInfo)=>{
           members:{},
         }
       }).then(res=>{
-        console.log("add one group:")
-        console.log(res)
+        // console.log("add one group:")
+        // console.log(res)
         var members = {}
         members[openid] = member
         // cloudfun.updateGroupMembers(res._id, members)

@@ -11,7 +11,7 @@ const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
 const facetools = require('../../utils/facetools.js')
 
-wx.cloud.init() 
+wx.cloud.init()  
 const db = wx.cloud.database({})  
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -292,6 +292,7 @@ Page({
       canPublish: false, // 判断是否可发布
       hasModified: true, // 新建之后，马上可以保存
     })
+    this.setSteps(this.data.od.status)
     
     this.createAutoInfo() // 做必要的自动计算
     this.saveOutdoor() // 必须存起来，修改才不会丢失
@@ -479,7 +480,7 @@ Page({
   // 把取消的事情通告所有人，包括自己
   async postCancel2Template() {
     for (let item of this.data.od.members) {
-      await template.sendCancelMsg2Member(item.personid, self.data.od.title.whole, self.data.od.outdoorid, self.data.myself.userInfo.nickName, self.data.cancelDlg.reason)
+      await template.sendCancelMsg2Member(item.personid, this.data.od.title.whole, this.data.od.outdoorid, this.data.myself.userInfo.nickName, this.data.cancelDlg.reason)
     }
   },
 
@@ -497,32 +498,26 @@ Page({
   },
 
   // 活动成行
-  confirmOutdoor() {
-    const self = this
-    wx.showModal({
+  async confirmOutdoor() {
+    let res = await wx.showModal({
       title: '成行确认',
-      content: '确认活动成行将给所有队员发送微信消息提醒',
-      success(res) {
-        if (res.confirm) {
-          self.updateStatus("已成行")
-          // 成行的活动通知，只发一次
-          var key = self.data.od.outdoorid + ".confirmOutdoor"
-          if (!wx.getStorageSync(key)) {
-            console.log(key)
-            wx.setStorageSync(key, true)
-            self.sendConfirmMsg2Member()
-          }
-        } else if (res.cancel) {
-          console.log('用户点击取消')
+      content: '确认活动成行将给所有队员发送微信消息提醒'
+    })
+    
+    if (res.confirm) {
+      this.updateStatus("已成行")
+      // 成行的活动通知，只发一次
+      var key = this.data.od.outdoorid + ".confirmOutdoor"
+      if (!wx.getStorageSync(key)) {
+        console.log(key)
+        wx.setStorageSync(key, true)
+        // 给所有队员发活动成行通知
+        for (let item of this.data.od.members) { 
+          await template.sendConfirmMsg2Member(item.personid, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.members.length, this.data.myself.userInfo.nickName, this.data.od.limits.isAA)
         }
       }
-    })
-  },
-
-  async sendConfirmMsg2Member() {
-    // 给所有队员发活动成行通知
-    for (let item of this.data.od.members) {
-      await template.sendConfirmMsg2Member(item.personid, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.members.length, this.data.myself.userInfo.nickName)
+    } else if (res.cancel) {
+      console.log('用户点击取消')
     }
   },
 
@@ -579,21 +574,28 @@ Page({
   async publishOutdoorInner() {
     console.log("publishOutdoorInner()")
     // 第一步：修改status
+    var oldStatus = this.data.od.status
     this.setData({
       "od.status": "已发布"
     })
-    // 第二步：调用 od 的publish
+    // 第二步：调用 od 的publish 
     console.log("this.data.myself:", this.data.myself)
-    await this.data.od.publish(this.data.myself)
-    console.log(this.data.od)
-    // 第三步：更新到persons表
-    this.updatePersonMyoutdoors()
-    // 第四步：给自己的订阅者发通知
-    this.post2Subscriber()
-    this.createCanvasFile() // 把图片更新一下
-    this.setData({
-      hasModified:false, // 发布时，已经保存过了
-    })
+    if(await this.data.od.publish(this.data.myself)){
+      console.log(this.data.od)
+      // 第三步：更新到persons表
+      this.updatePersonMyoutdoors()
+      // 第四步：给自己的订阅者发通知
+      this.post2Subscriber()
+      this.createCanvasFile() // 把图片更新一下
+      this.setData({
+        hasModified: false, // 发布时，已经保存过了
+      })
+    } else {
+      this.setData({
+        "od.status": oldStatus
+      })
+    }
+    
   },
 
   // 给自己的订阅者发消息
@@ -627,32 +629,31 @@ Page({
     this.setData({
       "od.status": status
     })
+    this.setSteps(status)
     this.data.od.saveItem("status")
   },
 
   async saveOutdoor() {
     console.log("CreateOutdoor.saveOutdoor()")
-    const self = this
-
-    // 活动记录是否已经创建了
-    var isCreated = self.data.od.outdoorid ? true : false
-
     // od.save 内部会判断处理是update还是create
-    const od = await this.data.od.save(self.data.myself, this.data.modifys)
-    this.setData({
-      "od.members": od.members, // 队员信息要设置一下
-      hasModified: false,
-    })
-    this.setModifys(false)
-    util.saveOutdoorID(this.data.od.outdoorid)
+    const od = await this.data.od.save(this.data.myself, this.data.modifys)
+    console.log("od:", od)
+    if(od) { // 审核不过的话，od为null
+      this.setData({
+        "od.members": od.members, // 队员信息要设置一下
+        hasModified: false,
+      })
+      this.setModifys(false)
+      util.saveOutdoorID(this.data.od.outdoorid)
 
-    // 在成功保存outdoor之后，相应的一些处理
-    if (this.data.od.status != "拟定中") { // 正在草拟中的活动，这里面的事情就都可以省略了
-      this.createCanvasFile() // 把图片更新一下
+      // 在成功保存outdoor之后，相应的一些处理
+      if (this.data.od.status != "拟定中") { // 正在草拟中的活动，这里面的事情就都可以省略了
+        this.createCanvasFile() // 把图片更新一下
+      }
+
+      // 这里处理 Person表中对应的MyOutdoors
+      this.dealMyoutdoors()
     }
-
-    // 这里处理 Person表中对应的MyOutdoors
-    this.dealMyoutdoors()
   },
 
   async dealMyoutdoors() {
@@ -797,17 +798,21 @@ Page({
   },
 
   onShareAppMessage: function(options) {
-    console.log(options)
+    console.log("CreateOutdoor.onShareAppMessage()",options)
     const self = this
     this.closePopup()
-    console.log(self.data.shareCanvasFile)
-    // options.from == "menu" &&     // options.type = "tap" from="button"
+    var path = 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.od.outdoorid + "&leaderid=" + self.data.od.leader.personid
+    if(this.data.od.limits.private) {
+      var uuid = (new Date()).getTime()
+      path += "&private=true" +"&uuid="+uuid
+    }
+
     if (self.data.od.outdoorid) { // 数据库里面有，才能分享出去
       return {
-        title: self.data.od.title.whole,
+        title: self.data.od.title.whole, 
         desc: '分享活动',
         imageUrl: self.data.shareCanvasFile,
-        path: 'pages/EntryOutdoor/EntryOutdoor?outdoorid=' + self.data.od.outdoorid + "&leaderid=" + self.data.od.leader.personid
+        path: path,
       }
     }
   },

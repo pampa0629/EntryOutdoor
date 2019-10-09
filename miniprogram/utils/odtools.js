@@ -339,7 +339,12 @@ const buildCarInfo = (traffic) => {
 const buildCostInfo = (traffic) => {
   var costInfo = traffic.cost
   if (costInfo != '免费') {
-    costInfo += "，大致费用：" + traffic.money + '元'
+    costInfo += "，大致费用："
+    if (traffic.money) {
+      costInfo += traffic.money + '元'
+    } else {
+      costInfo += "未定"
+    }
   }
   console.log(costInfo)
   return costInfo

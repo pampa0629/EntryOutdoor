@@ -234,22 +234,24 @@ const uploadOdPhotos = async(outdoorid, owner, tempFiles) => {
   return photos
 }
 
-const dealOdPhotos = async (od, owner, tempFiles) => {
+const dealOdPhotos = async (od, owner, tempFiles) => { 
   console.log("facetools.dealOdPhotos()")
   let photos = await uploadOdPhotos(od.outdoorid, owner, tempFiles)
   console.log("photos:", photos)
   const count = Object.keys(photos).length
-  aiOdPhotos(od.outdoorid, photos)
-  let res = await dbOutdoors.doc(od.outdoorid).field({ sendPhoto: true, }).get()
-  console.log("sendPhoto:", res.data.sendPhoto)
-  if (!res.data.sendPhoto) {
-    await cloudfun.opOutdoorItem(od.outdoorid, "sendPhoto", true, "")
-    for (var i in od.members) {
-      const member = od.members[i]
-      template.sendPhotoMsg2Member(member.personid, od.outdoorid, od.title.whole, owner.nickName, count, od.leader.personid)
+  if (count>0) {
+    aiOdPhotos(od.outdoorid, photos)
+    let res = await dbOutdoors.doc(od.outdoorid).field({ sendPhoto: true, }).get()
+    console.log("sendPhoto:", res.data.sendPhoto)
+    if (!res.data.sendPhoto) {
+      await cloudfun.opOutdoorItem(od.outdoorid, "sendPhoto", true, "")
+      owner.nickName = owner.nickName ? owner.nickName : "游客"
+      for (var i in od.members) {
+        const member = od.members[i]
+        template.sendPhotoMsg2Member(member.personid, od.outdoorid, od.title.whole, owner.nickName, count, od.leader.personid)
+      }
     }
   }
-
   return count
 }
 

@@ -12,7 +12,7 @@
 </van-popup> 
 
 <!--群主是谁-->
-<block wx:if="{{isOwner}}">
+<block wx:if="{{isOwner}}"> 
   <van-cell title="我是群主" title-class="redtitle"/>
   <van-row>
     <van-col span="9" offset="2">

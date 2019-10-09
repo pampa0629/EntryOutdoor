@@ -359,9 +359,46 @@ Page({
     var t2 = new Date().getTime()
     console.log("codes:", codes)
     console.log("time:", t2-t1)
-  }
+  },
 
   // _id: 
+
+  async tapCheck() {
+    console.log("tapCheck()")
+    var text = "特3456书yuuo莞6543李zxcz蒜7782法fgnv级"
+    var text2 = "完2347全dfji试3726测asad感3847知qwez到"
+    var text3 = "特3456书yuuo莞6543李zxcz蒜7782法fgnv级天安门约架健德桥东北角，地铁十号线健德桥A口或C口出至路对面（马兰拉面前）地铁6号线五路居站对面，即地铁西北口（A出口）出，过街天桥到四环对面（四环西侧）活动性质及职责定位"
+    var res = await cloudfun.checkMsg(text3)
+    console.log("res:",res)
+  },
+
+  async tapCheck2() {
+    const res = await wx.cloud.callFunction({ name: 'getAccessToken' })
+    console.log("res:",res)
+    var token = JSON.parse(res.result).access_token
+    console.log("token:", token)
+
+    var text = "特3456书yuuo莞6543李zxcz蒜7782法fgnv级"
+    var text2 = "完2347全dfji试3726测asad感3847知qwez到"
+  
+    var url = "https://api.weixin.qq.com/wxa/msg_sec_check?access_token=" + token
+    let res2 = await promisify.request({
+      url: url,
+      method: 'POST',
+      // header: {
+      //   "content-type": "application/x-www-form-urlencoded"
+      // },
+      data: {
+        content: text2,
+      },
+      // content: text,
+      // data: {
+      //   token: token,
+      //   code: res.code,
+      // }
+    })
+    console.log("res2:", res2)
+  },
 
 
 

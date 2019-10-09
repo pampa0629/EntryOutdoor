@@ -22,7 +22,7 @@
 <!--图标按钮-->
 <van-row>
   <!--分享-->
-  <van-col span="2" offset="1">
+  <van-col span="2" offset="1" wx:if="{{!od.limits.private}}">
     <view wx:if="{{od.status!='已取消'}}" style="flex-direction:column">
       <van-icon name="share" size="24px" color="#1aad19" bind:click="onPopup"></van-icon>
       <view class="icon_tip">分享</view>
@@ -170,7 +170,7 @@
     <van-checkbox value="{{entryInfo.knowWay}}" />
   </van-cell>
 
-</block>
+</block> 
 
 <!--活动当前状态-->
 <van-tag type="primary" plain>活动当前状态：{{od.status}}</van-tag>
@@ -239,7 +239,7 @@
         <button form-type="submit" type="primary">上传活动照片</button>
       </form>
     </van-col>
-    <van-col span="11" offset="1">
+    <van-col span="11" offset="1" wx:if="{{od.photocount}}">
       <form bindsubmit="lookPhotos" report-submit="true">
         <button form-type="submit" type="primary">查看活动照片({{od.photocount}})</button>
       </form>

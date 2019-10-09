@@ -135,7 +135,7 @@ const createRecord = async(userInfo, openid) => {
 }
 
 const adjustGroup = (personid, groupOpenid) => {
-  console.log("person.adjustGroup")
+  console.log("person.adjustGroup()", personid, groupOpenid)
   dbPersons.doc(personid).get().then(res => {
     var groups = res.data.groups ? res.data.groups : []
     groups.forEach((item, index) => {

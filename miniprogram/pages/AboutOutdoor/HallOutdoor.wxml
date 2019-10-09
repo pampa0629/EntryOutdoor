@@ -33,7 +33,7 @@
 
 <!--弹出设置按钮-->
 <van-popup show="{{ setting.show }}" overlay="{{true}}" position="top" custom-class="center" bind:close="closeSetting">
-  <van-cell title="显示过期活动" clickable bind:click="onShowOutdate">
+  <van-cell title="显示过期活动" title-width="90%" clickable bind:click="onShowOutdate">
     <van-checkbox value="{{setting.showOutdate}}"/>
   </van-cell>
   <van-field label="活动搜索" required value="{{setting.keyword}}" clearable placeholder="请输入活动地点关键字" bindinput="inputKeyword"/>

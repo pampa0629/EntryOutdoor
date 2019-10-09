@@ -168,13 +168,17 @@ const sendModifyMsg2Member = async (personid, outdoorid, title, leader, modifys)
   } catch (err) { console.error(err) }
 }
 
-// 给所有队员发活动成行通知
-const sendConfirmMsg2Member = async(personid, outdoorid, title, count, leader) => {
-  console.log("template.sendConfirmMsg2Member()")
+// 给所有队员发活动成行通知 
+const sendConfirmMsg2Member = async(personid, outdoorid, title, count, leader,isAA) => {
+  console.log("template.sendConfirmMsg2Member()", personid, outdoorid, title, count, leader, isAA)
   try{
     const res = await dbPersons.doc(personid).get()
     var openid = res.data._openid
     var tempid = "Eh_ODLoKykVkGGjJPLEmKkkrK5tRlPC8i7O-yhrT5xc"
+    var msg = "领队已确认活动成行，请按时达到选定集合地点"
+    if(isAA){
+      msg += "；若退出活动又无人替补，请主动联系领队分摊车费等共同费用"
+    }
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
       "keyword1": { // 活动名称
         "value": title
@@ -186,7 +190,7 @@ const sendConfirmMsg2Member = async(personid, outdoorid, title, count, leader) =
         "value": leader
       },
       "keyword4": { // 组团信息
-        "value": "领队已确认活动成行；若退出活动又无人替补，请主动联系领队分摊车费等共同费用"
+        "value": msg
       },
     }
     var page = buildDefaultPage(outdoorid, personid)
@@ -299,7 +303,7 @@ const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) =>
         "value": (entryInfo.knowWay ? "认路" : "不认路")
       },
       "keyword6": { // 集合地点
-        "value": "第" + (entryInfo.meetsIndex + 1) + "集合地点"
+        "value": "第" + (parseInt(entryInfo.meetsIndex) + 1) + "集合地点"
       }
     }
     var page = buildPage("CreateOutdoor", outdoorid)
@@ -401,12 +405,12 @@ const clearPersonFormids = async(personid) => {
 // 找到第一个能用的formid， 把前面没用的删掉
 // isDelFind： 是否删除找到的id
 const findFirstFormid = (formids, isDelFind) => {
-  console.log("findFirstFormid")
+  // console.log("findFirstFormid")
 
   var formid = null
   if (formids) {
-    console.log("before find, formids are: ")
-    console.log(formids)
+    // console.log("before find, formids are: ")
+    // console.log(formids)
     for(var i in formids) {
       if (formids[i].expire > (new Date()).getTime()) {
         formid = formids[i].formid

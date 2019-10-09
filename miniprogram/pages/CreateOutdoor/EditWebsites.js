@@ -45,14 +45,13 @@ Page({
       od: od,
       lvyeorgInfo: app.globalData.lvyeorgInfo
     })
-
-    if (this.data.od.websites.lvyeorg.fid) {
-      this.flushForm(this.data.od.websites.lvyeorg.fid)
-    } else {
+ 
+    var fid = this.data.od.websites.lvyeorg.fid
+    if (!fid) { // 选择合适的论坛
       console.log("limits.isTest:", this.data.od.limits.isTest)
-      // console.log("lvyeorg.isTesting:", this.data.od.websites.lvyeorg.isTesting)
-      this.flushForm(lvyeorg.chooseForum(this.data.od.title, this.data.od.limits.isTest))
+      fid = lvyeorg.chooseForum(this.data.od.title, this.data.od.limits.isTest)
     }
+    this.flushForm(fid.toString())
 
     if (this.data.od.websites.lvyeorg.tid) {
       this.flushUrl(this.data.od.websites.lvyeorg.tid)
@@ -86,22 +85,19 @@ Page({
 
   },
 
-  connetLvyeorg(e) {
-    const self = this 
+  async connetLvyeorg(e) {
     template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    this.data.od.push2org(this.data.forum.id, tid=>{
-      wx.showModal({
-        title: '同步绿野org成功',
-        content:"网址已拷贝到内存中，可打开浏览器核实信息",
-        showCancel:false, 
-      })
-      self.copyLvyeUrl()
-      self.setData({
-        "od.websites":self.data.od.websites, 
-      })
-      self.flushUrl(tid)
-
+    let tid = await this.data.od.push2org(this.data.forum.id)
+    wx.showModal({
+      title: '同步绿野org成功',
+      content:"网址已拷贝到内存中，可打开浏览器核实信息",
+      showCancel:false, 
     })
+    this.copyLvyeUrl()
+    this.setData({
+      "od.websites": this.data.od.websites, 
+    })
+    this.flushUrl(tid)
   },
 
   disconnetLvyeorg(e) {

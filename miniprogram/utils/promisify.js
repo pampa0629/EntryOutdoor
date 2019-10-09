@@ -25,9 +25,10 @@ module.exports = {
 
   // efg
   getLocation: promise(wx.getLocation),
-  getSetting: promise(wx.getSetting),
+  getSetting: promise(wx.getSetting), 
+  getShareInfo: promise(wx.getShareInfo),
   getWeRunData: promise(wx.getWeRunData),
-
+  
   // hijklmn
   login: promise(wx.login),
   

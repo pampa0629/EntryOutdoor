@@ -204,10 +204,9 @@ Page({
   // 勾选是否允许空降
   checkAllowPopup: function(e) {
     console.log(e)
-    const self = this;
-    console.log(self.data.limits.allowPopup)
-    self.setData({
-      "limits.allowPopup": !self.data.limits.allowPopup,
+    console.log(this.data.limits.allowPopup)
+    this.setData({
+      "limits.allowPopup": !this.data.limits.allowPopup,
       hasModified: true
     })
   },
@@ -215,10 +214,9 @@ Page({
   // 勾选是否要求环保
   checkEnvironment: function(e) {
     console.log(e)
-    const self = this;
-    console.log(self.data.limits.isEnvironment)
-    self.setData({
-      "limits.isEnvironment": !self.data.limits.isEnvironment,
+    console.log(this.data.limits.isEnvironment)
+    this.setData({
+      "limits.isEnvironment": !this.data.limits.isEnvironment,
       hasModified: true
     })
   },
@@ -226,34 +224,43 @@ Page({
   // 是否进入活动大厅
   checkIntoHall: function(e) {
     console.log(e)
-    const self = this;
-    console.log(self.data.limits.intoHall)
-    self.setData({
-      "limits.intoHall": !self.data.limits.intoHall,
-      hasModified: true
-    })
-  },
-
-  // 是否进入活动大厅
-  checkIntoHall: function(e) {
-    console.log(e)
-    const self = this;
-    console.log(self.data.limits.intoHall)
-    self.setData({
-      "limits.intoHall": !self.data.limits.intoHall,
-      hasModified: true
-    })
+    console.log(this.data.limits.intoHall)
+    if (this.data.limits.private) {
+      wx.showModal({
+        title: '不能修改',
+        content: '您已勾选“私约活动”，不能进入活动大厅',
+      })
+    } else {
+      this.setData({
+        "limits.intoHall": !this.data.limits.intoHall,
+        hasModified: true
+      })
+    }
   },
 
   // 是否为测试发帖
   checkTest: function(e) {
     console.log(e)
-    const self = this;
-    console.log(self.data.limits.isTest)
-    self.setData({
-      "limits.isTest": !self.data.limits.isTest,
+    console.log(this.data.limits.isTest)
+    this.setData({
+      "limits.isTest": !this.data.limits.isTest,
       hasModified: true
     })
+  },
+
+  // 是否为私约活动
+  checkPrivate: function(e) {
+    console.log(e)
+    console.log(this.data.limits.private)
+    this.setData({
+      "limits.private": !this.data.limits.private,
+      hasModified: true
+    })
+    if (this.data.limits.private) {
+      this.setData({
+        "limits.intoHall": false,
+      })
+    }
   },
 
   // 勾选是否要求守时

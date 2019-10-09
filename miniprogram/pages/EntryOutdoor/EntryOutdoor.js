@@ -11,7 +11,7 @@ const facetools = require('../../utils/facetools.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
-const dbOutdoors = db.collection('Outdoors') 
+const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
 
@@ -58,19 +58,65 @@ Page({
     formids: [],
   },
 
-  onLoad: function(options) {
-    console.log("EntryOutdoor.js onLoad()")
-    this.setData({
-      od: new outdoor.OD()
-    })
+  // 处理私约活动
+  async dealPrivate(outdoorid, options) {
+    console.log("EntryOutdoor.dealPrivate()", outdoorid, options)
+    console.log("options.private：", options.private)
+    if (options.private || options.private == true || options.private=="true") {
+      // 默认用openid，但如果发现有群，则用群id；避免有人在小程序启动后点击分享到群中的活动，从而用自己的openid把群id给占了
+      // 存在的不足是：个人收到后，可以再次分享到一个群中
+      var id = app.globalData.openid
+      var name = "openid"
+      if (app.globalData.options.scene == 1044) {
+        if (!app.globalData.groupOpenid) {
+          app.globalData.groupOpenid = await app.getGroupId(app.globalData.options.shareTicket)
+        }
+        console.log("app.globalData.groupOpenid:", app.globalData.groupOpenid)
+        id = app.globalData.groupOpenid
+        name = "groupid"
+      }
+      console.log("id:", id)
+      if (id) {
+        let resOD = await dbOutdoors.doc(outdoorid).get()
+        resOD.data.matchs = resOD.data.matchs ? resOD.data.matchs : {} // 不能为null
+        console.log("resOD.data.matchs:", resOD.data.matchs)
+        resOD.data.matchs[options.uuid] = resOD.data.matchs[options.uuid] ? resOD.data.matchs[options.uuid]:{}
+        let resID = resOD.data.matchs[options.uuid][name]
+        if (!resID) {
+          cloudfun.opOutdoorItem(outdoorid, "matchs." + options.uuid+"."+name, id, "")
+          resID = id
+        }
+        if (resID == id) {
+          return true  
+        }
+      }
+      await promisify.showModal({
+        title: '不能查看',
+        content: '此活动为私约活动，只有领队直接转发才能查看；系统将自动转到活动大厅。您还可以试试从内存中杀掉小程序，然后直接点击群里的分享进入活动。',
+      })
+      wx.switchTab({ // 跳转到活动大厅
+        url: '../AboutOutdoor/HallOutdoor',
+      })
+      return false
+    }
+    return true
+  },
 
-    console.log(options)
+  async onLoad(options) {
+    console.log("EntryOutdoor.onLoad()", options)
     var outdoorid = util.getIDFromOptions(options)
     console.log(outdoorid)
     var leaderid = options.leaderid ? options.leaderid : null
-    console.log(leaderid)
-    // 存起来，以便其他地方能回到该活动
-    util.saveOutdoorID(outdoorid)
+    console.log("leaderid:", leaderid)
+
+    // 登录
+    var isLogin = await app.ensureLogin()
+    if (isLogin) {
+      this.setData({
+        userInfo: app.globalData.userInfo,
+      })
+      this.loadFormids()
+    }
 
     // 发现是领队是自己，则自动切换到发起活动页面
     if (leaderid && leaderid == app.globalData.personid) {
@@ -78,11 +124,20 @@ Page({
         url: '../CreateOutdoor/CreateOutdoor',
       })
     }
-    this.checkLogin(outdoorid)
 
-    wx.showShareMenu({ // 处理分享到群的情况
-      withShareTicket: true
-    })
+    // 加载活动内容前，如果设置了私约活动，需要单独处理
+    await this.dealPrivate(outdoorid, options)
+    
+    // 加载活动内容
+    await this.loadOutdoor(outdoorid)
+    
+    if(this.data.od.limits.private) {
+      wx.hideShareMenu()
+    } else {
+      wx.showShareMenu({ // 处理分享到群的情况
+        withShareTicket: true
+      })
+    }
   },
 
   // 得到formids数量
@@ -92,20 +147,6 @@ Page({
     this.setData({
       formids: this.data.formids,
     })
-  },
-
-  // 处理是否登录的问题
-  async checkLogin(outdoorid) {
-    console.log("checkLogin, outdoorid is:" + outdoorid)
-    console.log(app.globalData)
-    var isLogin = await app.ensureLogin()
-    if (isLogin) {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-      })
-      this.loadFormids()
-    }
-    this.loadOutdoor(outdoorid)
   },
 
   // 设置活动状态进程条
@@ -119,7 +160,10 @@ Page({
 
   // 从数据库中装载信息 
   async loadOutdoor(outdoorid) {
-    console.log("loadOutdoor(),  ",outdoorid)
+    console.log("loadOutdoor(),  ", outdoorid)
+    this.setData({
+      od: new outdoor.OD()
+    })
     // 这里读取数据库，加载各类信息
     await this.data.od.load(outdoorid)
     const od = this.data.od
@@ -141,6 +185,8 @@ Page({
     this.createCanvasFile()
     // 判断本活动是否已经被关注
     this.dealCared()
+    // 存起来，以便其他地方能回到该活动
+    util.saveOutdoorID(outdoorid)
   },
 
   // 判断本活动是否已经被关注
@@ -237,7 +283,7 @@ Page({
     const shareCanvas = wx.createCanvasContext('shareCanvas', self)
     // todo 分享到朋友圈的图片
     odtools.drawShareCanvas(shareCanvas, self.data.od, shareCanvasFile => {
-        self.data.shareCanvasFile =  shareCanvasFile
+      self.data.shareCanvasFile = shareCanvasFile
     })
   },
 
@@ -294,7 +340,7 @@ Page({
         title: '替补通知',
         content: '由于有人抢先点击报名了，报名人数已满，您不得不变为替补。若不愿替补，可随时退出；若前面队员退出或领队扩编，您将自动转为报名',
       })
-    } 
+    }
 
     // Person表中，还要把当前outdoorid记录下来
     this.updateEntriedOutdoors(false)
@@ -394,7 +440,7 @@ Page({
           nickErrMsg: "昵称不能为空",
         })
         result = false
-      } 
+      }
       if (!self.data.userInfo.phone || self.data.userInfo.phone.length != 11) { // 电话号码不合格
         self.setData({
           phoneErrMsg: "手机号码不能为空且必须是11位有效号码",
@@ -625,9 +671,9 @@ Page({
         title: '不能退出',
         content: '您是本活动领队，不能退出活动。您可以在“审核队员”页面转让领队，然后再退出；或者点击最上面的“取消”图标来取消活动。',
       })
-      return 
+      return
     }
-    
+
     var content = '您已经点击“退出”按钮，是否确定退出本活动？'
     if (odtools.isNeedAA(this.data.od, this.data.entryInfo.status)) {
       content += "本活动已成行，退出若无人替补，则需要A共同费用，请慎重操作。"
@@ -635,8 +681,9 @@ Page({
 
     let resModel = await promisify.showModal({
       title: '确定退出？',
-      content: content})
-  
+      content: content
+    })
+
     if (resModel.confirm) {
       console.log('用户点击确定')
       var selfQuit = true
@@ -756,7 +803,7 @@ Page({
   // 选择或改变集合地点选择
   clickMeets: function(e) {
     console.log(e)
-    this.setData({ 
+    this.setData({
       "entryInfo.meetsIndex": e.target.dataset.name.toString(),
     })
     console.log("entryInfo.meetsIndex:", this.data.entryInfo.meetsIndex)
@@ -767,7 +814,7 @@ Page({
   },
 
   // 构造查看地图的函数
-  buildLookMapFun() { 
+  buildLookMapFun() {
     for (var i = 0; i < this.data.od.meets.length; i++) {
       let j = i; // 还必须用let才行
       this["lookMeetMap" + j] = () => {
@@ -775,10 +822,10 @@ Page({
       }
     }
   },
-  
+
   // 查看集合地点的地图设置，并可导航
   async lookMeetMap(index) {
-    console.log("lookMeetMap()",index)
+    console.log("lookMeetMap()", index)
     const self = this
     // const index = self.data.entryInfo.meetsIndex
     // 选中了集合地点，并且有经纬度，才开启选择地图
@@ -886,7 +933,10 @@ Page({
       sourceType: ['album', 'camera'], // ['album', 'camera'], 
     })
     console.log("chooseImage:", resChoose)
-    var owner = { personid: app.globalData.personid, nickName:app.globalData.userInfo.nickName}
+    var owner = {
+      personid: app.globalData.personid,
+      nickName: app.globalData.userInfo.nickName
+    }
     let count = await facetools.dealOdPhotos(this.data.od, owner, resChoose.tempFiles)
     this.setData({
       "od.photocount": this.data.od.photocount + count

@@ -9,4 +9,5 @@
 <van-button size="large"  bind:click="tapPython">python</van-button>
 <van-button size="large"  bind:click="tapKET">KET</van-button>
 <van-button size="large"  bind:click="tapCallback">去回调</van-button>
+<van-button size="large"  bind:click="tapCheck">审核</van-button>
 

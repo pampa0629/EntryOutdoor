@@ -34,7 +34,7 @@ Page({
         }
       })
     }
-  },
+  }, 
 
   tapGroup(index, e) {
     const self = this

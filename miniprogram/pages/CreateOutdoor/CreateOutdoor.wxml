@@ -13,7 +13,7 @@
     <van-col span="20" offset="2">
       <van-button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</van-button>
     </van-col>
-  </van-row>
+  </van-row> 
   <van-row>
     <van-col span="9" offset="2">
       <van-button plain size="large" bind:click="onShare2Circle">分享到朋友圈</van-button>
@@ -23,7 +23,7 @@
     </van-col>
   </van-row>
 </van-popup>
-
+ 
 <!--图标按钮-->
 <van-row>
   <!--成行-->
@@ -118,7 +118,7 @@
   <van-cell slot="header" title-class="redtitle" title="集合地点"></van-cell>
   <van-cell title="必须选择集合地点" value="点击编辑集合地点" required is-link url="EditMeets" />
   <van-radio-group wx:for="{{od.meets}}" wx:key="place" value="{{myself.entryInfo.meetsIndex}}" bind:change="changeMeets">
-    <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="80%" border="{{index<meets.length-1}}">
+    <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="90%" border="{{index<meets.length-1}}">
       <van-radio name="{{index}}" />
     </van-cell>
   </van-radio-group>
@@ -130,7 +130,7 @@
 </van-cell>
 
 <!--交通方式-->
-<van-cell wx:if="{{od.traffic}}" title="交通方式" title-class="redtitle" title-width="60%" label="{{od.traffic.mode}}；车辆信息{{od.traffic.carInfo}}；{{od.traffic.costInfo}}" value="点击编辑交通方式" is-link url="EditTraffic" />
+<van-cell wx:if="{{od.traffic}}" title="交通方式" title-class="redtitle" title-width="60%" label="{{od.traffic.mode}}；车辆信息：{{od.traffic.carInfo}}；{{od.traffic.costInfo}}" value="点击编辑交通方式" is-link url="EditTraffic" />
 <van-cell wx:else title="交通方式" label="从集合地到出发地" value="点击设置交通方式" is-link url="EditTraffic" />
 
 <!--活动路线-->
@@ -191,7 +191,7 @@
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
-<block wx:if="{{od.status=='拟定中' || od.status=='已结束'}}">
+<block wx:if="{{od.status=='拟定中' || od.status=='已结束' || od.status=='已取消'}}">
   <!--故意空白，防止遮挡-->
   <van-cell title="  " border="{{false}}" />
   <van-cell title="  " border="{{false}}" />
@@ -208,7 +208,7 @@
         <button form-type="submit" type="warn">清空</button>
       </form>
     </van-col>
-    <van-col span="6" offset="2" wx:if="{{od.status=='拟定中' || (od.status=='已结束' && od.members.length==1)}}">
+    <van-col span="6" offset="2" wx:if="{{od.status=='拟定中' || ((od.status=='已结束'||od.status=='已取消') && od.members.length==1)}}">
       <form bindsubmit="deleteOutdoor" report-submit="true">
         <button form-type="submit" type="warn">删除</button>
       </form>
@@ -217,7 +217,7 @@
 </block>
 
 <!-- 保存修改 -->
-<van-row class="fix" wx:if="{{od.status!='已结束'}}">
+<van-row class="fix" wx:if="{{od.status!='已结束' || od.status!='进行中'}}">
   <van-col span="22" offset="1">
     <form bindsubmit="saveModified" report-submit="true">
       <button form-type="submit" disabled="{{!hasModified}}" type="primary">保存修改</button>

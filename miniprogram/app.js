@@ -12,7 +12,7 @@ const dbPersons = db.collection('Persons')
 const dbOutdoors = db.collection('Outdoors')
    
 App({ 
-  globalData: {
+  globalData: { 
     openid: null, // 每个微信用户的内部唯一id
     personid: "", // Persons表中的当前用户_id
 
@@ -42,38 +42,6 @@ App({
 
     await this.ensureLogin()
 
-    // const self = this
-    // // 尝试从本地缓存中读取openid
-    // self.globalData.openid = util.loadOpenID()
-    // // 从本地缓存中读取到openid，则尝试从Persons表读取用户信息
-    // console.log("app.js in onLaunch fun, self.globalData.openid:" + self.globalData.openid)
-    // if (self.globalData.openid != null && self.globalData.openid.length > 0) {
-    //   if (self.openidCallback) {
-    //     self.openidCallback(self.globalData.openid);
-    //   }
-    //   console.log("app.js in onLaunch fun, openid is ok:" + self.globalData.openid)
-    //   self.getPersonInfo()
-    // } else { // 要是本地缓存中没有OpenID，就调用云函数来获取
-    //   console.log("app.js in onLaunch fun, openid is null:" + self.globalData.openid)
-    //   wx.showLoading({ // 保证获取OpenID成功
-    //     title: '加载用户ID中...',
-    //   })
-
-    //   wx.cloud.callFunction({
-    //     name: 'getUserInfo', // 云函数名称
-    //     complete: res => {
-    //       self.globalData.openid = res.result.openId
-    //       if (self.openidCallback) {
-    //         self.openidCallback(self.globalData.openid);
-    //       }
-    //       console.log("app.js in onLaunch fun, cloud function get openid:" + res.result.openId)
-    //       // 缓存到本地
-    //       util.saveOpenID(self.globalData.openid)
-    //       self.getPersonInfo()
-    //       wx.hideLoading()
-    //     }
-    //   })
-    // }
   },
 
   // 用await确保登录
@@ -132,133 +100,53 @@ App({
     this.dealCompatibility(data) // 处理兼容性问题
   },
 
-  // 试图从Person数据库中读取当前用户的基本信息
-  // getPersonInfo: function() {
-  //   const self = this;
-  //   wx.showLoading({ // 保证获取OpenID成功
-  //     title: '加载用户信息中...',
-  //   })
-  //   // 读取数据库
-  //   self.globalData.personid = util.loadPersonID();
-  //   console.log("app.js in getPersonInfo fun, loadPersonID is:" + self.globalData.personid)
-  //   if (self.globalData.personid) {
-  //   dbPersons.doc(self.globalData.personid).get()
-  //     .then(res => { // 顺利读取到，万事大吉
-  //       self.globalData.userInfo = res.data.userInfo;
-  //       self.globalData.hasUserInfo = true
-  //       self.dealCompatibility(res.data) // 处理兼容性问题
-  //       // callback 第一种情况：数据库直接读取personid成功
-  //       console.log("app.js in getPersonInfo fun, 1 callback personid is:" + self.globalData.personid)
-  //       // console.log("app.js in getPersonInfo fun, 1 callback fun is:" + self.personidCallback)
-  //       if (self.personidCallback) {
-  //         self.personidCallback(self.globalData.personid, self.globalData.userInfo);
-  //       }
-  //     })
-  //     .catch(err => {
-  //       console.error(err)
-  //       self.findIDbyOpenid()
-  //     })
-  //   } else {
-  //     self.findIDbyOpenid()
-  //   }
-  //   wx.hideLoading()
-  // },
-
-  // personid 为空或数据库doc不到时，通过openid来查找personid
-  // findIDbyOpenid() {
-  //   console.log("app.findIDbyOpenid()")
-  //   const self = this
-  //   //直接用person id读取不到，则尝试是否能通过openid读取到 person id
-  //   dbPersons.where({
-  //     _openid: self.globalData.openid
-  //   }).get().then(res => {
-  //     if (res.data.length > 0) { // 找到了
-  //       self.globalData.userInfo = res.data[0].userInfo;
-  //       self.globalData.hasUserInfo = true;
-  //       self.dealCompatibility(res.data[0]) // 处理兼容性问题
-  //       // 同时设置到globalData中
-  //       self.globalData.personid = res.data[0]._id;
-  //       util.savePersonID(self.globalData.personid);
-  //       // callback 第二种情况：通过openid找回正确的personid成功
-  //       console.log("app.js in getPersonInfo fun, 2 callback personid is:" + self.globalData.personid)
-  //       console.log("app.js in getPersonInfo fun, 2 callback fun is:" + self.personidCallback)
-  //       if (self.personidCallback) {
-  //         self.personidCallback(self.globalData.personid, self.globalData.userInfo);
-  //       }
-  //     } else { // 这是没有找到
-  //       // 这里最重要的是把 personid的缓存清除掉，别下次登录继续害人
-  //       self.globalData.personid = null;
-  //       util.clearPersonID();
-  //       // callback 第三种情况：就是找不到当前用户的personid，说明还没有登录了
-  //       console.log("app.js in getPersonInfo fun, 3 callback personid is:" + self.globalData.personid)
-  //       console.log("app.js in getPersonInfo fun, 3 callback fun is:" + self.personidCallback)
-  //       if (self.personidCallback) {
-  //         self.personidCallback(self.globalData.personid, null);
-  //       }
-  //     }
-  //   })
-  // },
-
   // 处理Person表的兼容性问题，关键是与网站的对接信息
-  dealCompatibility: function(data) {
-    const self = this
+  async dealCompatibility(data) {
     // www.lvye.org
     if (data.websites && data.websites.lvyeorgInfo) {
       console.log(data.websites)
-      self.globalData.lvyeorgInfo = data.websites.lvyeorgInfo
-      self.loginLvyeOrg()
+      this.globalData.lvyeorgInfo = data.websites.lvyeorgInfo
+      this.loginLvyeOrg()
     }
     // walk step autoUpdate
     if (data.career && data.career.step && data.career.step.autoUpdate) {
       if ( (new Date()).toLocaleDateString() != data.career.step.update ) {
         console.log("update walk step")
-        person.updateWalkStep(self.globalData.personid)
+        person.updateWalkStep(this.globalData.personid)
       }
     }
     // 记录group id 和 openid， personid的对应关系
-    self.dealGroup()
+    await this.dealGroup()
 
     // next 
   },
 
-  // 根据分享的群，得到群id
-  getGroupId(shareTicket, callback) {
-    console.log("getGroupId")
-    console.log(shareTicket)
-    wx.getShareInfo({
-      shareTicket: shareTicket,
-      success: function (res) {
-        console.log(res)
-        var encryptedData = res.encryptedData;
-        var iv = res.iv;
-        wx.login({
-          success: function (res) {
-            var code = res.code;
-            console.log(code)
-            cloudfun.decrypt(encryptedData, iv, code, group => {
-              console.log("openGId:")
-              console.log(group)
-              if (callback) {
-                callback(group.openGId)
-              }
-            })
-          }
-        })
-      }
-    })
-  },
-
   // 记录group id 和 openid， personid的对应关系
-  dealGroup(){
-    console.log("dealGroup")
-    const self = this
+  async dealGroup() {
+    console.log("app.dealGroup()")
     if (this.globalData.options.scene == 1044) {
-      self.getGroupId(this.globalData.options.shareTicket, groupOpenid=>{
-        group.ensureMember(groupOpenid, self.globalData.openid, self.globalData.personid, self.globalData.userInfo)
-        person.adjustGroup(self.globalData.personid, groupOpenid)
-      })
+      let groupOpenid = await this.getGroupId(this.globalData.options.shareTicket)
+      this.globalData.groupOpenid = groupOpenid
+      console.log("app.globalData.groupOpenid:", this.globalData.groupOpenid)
+      group.ensureMember(groupOpenid, this.globalData.openid, this.globalData.personid, this.globalData.userInfo)
+      person.adjustGroup(this.globalData.personid, groupOpenid)
     }
   }, 
+
+  // 根据分享的群，得到群id
+  async getGroupId(shareTicket) {
+    console.log("app.getGroupId()",shareTicket)
+    let res = await promisify.getShareInfo({shareTicket: shareTicket})
+    // console.log("res:", res)
+    var encryptedData = res.encryptedData
+    var iv = res.iv
+    let resLogin = await promisify.login()
+    var code = resLogin.code
+    // console.log("code:", code)
+    let group = await cloudfun.decrypt(encryptedData, iv, code)
+    // console.log("group:", group)
+    return group.openGId
+  },
  
   checkLogin(title, content, showCancel) {
     console.log('app.checkLogin()')

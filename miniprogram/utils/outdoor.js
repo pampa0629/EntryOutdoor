@@ -160,7 +160,7 @@ OD.prototype.checkStatus = function (status) {
   if (this.status != "拟定中" || this.status != "已取消") { // 拟定中或已取消的活动，不做时间线的判断
     if (new Date() > new Date(this.title.date + "," + this.meets[0].time)) {
       this.status = "进行中"
-      var days = odtools.Durings.indexOf(this.title.during) + 1
+      var days = odtools.Durings.indexOf(this.title.during) 
       var endDay = new Date(this.title.date + ",24:00")
       endDay.setDate(endDay.getDate() + days)
       if (new Date() > endDay) {
@@ -189,13 +189,32 @@ OD.prototype.setDefault4New = function(leader) {
   this.status = "拟定中"
 }
 
+// 内容审查，若不通过，返回false
+OD.prototype.check = async function () {
+  var content = this.brief.disc
+  content += this.title.place
+  for(var i in this.meets) {
+    content += this.meets[i].place
+  }
+  // content += this.limits.disclaimer
+  var result = await cloudfun.checkMsg(content)
+  if (!result) {
+    wx.showToast({ title: '内容审查失败'})
+  }
+  return result
+}
+
+
 // 保存（更新）od到数据库中，若之前没有保存过，则新建一条记录
 // myself：自己的报名信息
 // modifys: 修改了哪些项目 
 OD.prototype.save = async function(myself, modifys) {
-  console.log("OD.prototype.save()")
+  console.log("OD.prototype.save()",myself, modifys)
   console.log("outdoorid: " + this.outdoorid)
-  console.log(myself, modifys)
+   // 先进行内容审查
+  if (!await this.check()) {
+    return null
+  }
   if (this.outdoorid) {
     // 进行中或已结束的活动，不能保存
     if (this.status != '进行中' && this.status != '已结束') {
@@ -228,17 +247,23 @@ OD.prototype.save = async function(myself, modifys) {
   return this
 }
 
-// 发布活动
+// 发布活动，失败返回false
 OD.prototype.publish = async function(leader) {
   console.log("OD.prototype.publish()")
   const self = this
   // 保存到数据库中
   this.leader = leader
-  await this.save(leader, {})
-  // 确定绿野org版面，发布出去
-  var fid = lvyeorg.chooseForum(this.title, this.limits.isTest)
-  this.push2org(fid)
-  wx.showToast({ title: '发布成功'})
+  if(await this.save(leader, {})){
+    if (!this.limits.private) { // 私约活动默认不发布到org网站
+      // 确定绿野org版面，发布出去
+      var fid = lvyeorg.chooseForum(this.title, this.limits.isTest)
+      this.push2org(fid)
+    }
+    wx.showToast({ title: '发布成功' })
+    return true
+  }
+  // wx.showToast({ title: '发布失败' })
+  return false
 }
 
 // 删除活动，删除后不得再调用任何内容 
@@ -276,6 +301,9 @@ OD.prototype.deleteClouds = async function() {
   }
   for (var i in this.brief.trackFiles) {
     dels.push(this.brief.trackFiles[i].src)
+  }
+  for (var i in this.photos) {
+    dels.push(this.photos[i].src)
   }
 
   await wx.cloud.deleteFile({
@@ -690,7 +718,7 @@ OD.prototype.getTid = function() {
 
 // 把活动同步到org网站上，只提供领队明确发布
 OD.prototype.push2org = async function(fid) {
-  console.log("OD.prototype.push2org()")
+  console.log("OD.prototype.push2org()",fid)
   const lvyeobj = this.websites.lvyeorg // 当前只对接了lvye org网址
   console.log(lvyeobj)
   // 第一步，得登录网址

@@ -9,7 +9,7 @@
         <van-radio name="{{item.id}}"/>
       </van-cell> 
   </van-radio-group> 
-</van-panel> 
+</van-panel>  
 
 <!-- 是否允许网址跟帖报名 --> 
  <van-panel>

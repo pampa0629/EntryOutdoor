@@ -36,6 +36,10 @@
   <van-cell title="测试活动"  title-width="90%" label="测试发帖仅作为学习体验使用，不发送微信消息通知，不纳入统计" clickable bind:click="checkTest">
     <van-checkbox value="{{limits.isTest}}"/>
   </van-cell>
+  <!--私约活动-->
+  <van-cell title="私约活动"  title-width="90%" label="私约活动只限领队分享，不进入活动大厅" clickable bind:click="checkPrivate">
+    <van-checkbox value="{{limits.private}}"/>
+  </van-cell>
 </van-panel>
 
 <!--截止时间-->

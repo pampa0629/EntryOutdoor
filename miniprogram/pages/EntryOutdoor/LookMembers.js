@@ -24,7 +24,7 @@ Page({
       } else {
         item.entryInfo.knowWay = "不认路"
       }
-      item.entryInfo.meetsIndex = parseInt(item.entryInfo.meetsIndex) + 1
+      item.entryInfo.meetsIndex = parseInt(item.entryInfo.meetsIndex)
     })
     self.setData({
       members: self.data.members,

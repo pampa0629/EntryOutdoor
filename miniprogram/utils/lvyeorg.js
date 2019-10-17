@@ -8,7 +8,7 @@ const promisify = require('./promisify.js')
 wx.cloud.init()
 const db = wx.cloud.database()
 const dbOutdoors = db.collection('Outdoors')
-
+ 
 const LvyeOrgURL = 'https://www.lvye.net/panpa/'
 
 // 返回登录org网站所需要的token
@@ -539,9 +539,7 @@ const addThread = async(outdoorid, data, fid) => {
     console.log("resp:", resp) // resp.data.data.tid 帖子id；resp.data.data.pid 跟帖id post id
     var resp_dict = resp.data
     if (resp_dict.err_code == 0) {
-      wx.showToast({
-        title: 'ORG发帖成功',
-      });
+      wx.showToast({title: 'ORG发帖成功'})
       data.websites.lvyeorg.tid = resp.data.data.tid // 帖子id 
       data.websites.lvyeorg.fid = fid // 版面id 也记录下来
       cloudfun.opOutdoorItem(outdoorid, "websites", data.websites, "")

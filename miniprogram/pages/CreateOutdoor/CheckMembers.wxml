@@ -82,7 +82,7 @@
 
 <!--审核与授权-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人）"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人，其中占坑{{occupyCount}}人，替补{{benchCount}}人）"></van-cell>
   <van-tag type="primary" plain>审核与授权结果即时生效，无需保存</van-tag> 
   <van-cell wx:if="{{cfo.nickName}}" title="当前财务官（CFO）为：{{cfo.nickName}}" title-width="90%" />
   <van-field wx:for="{{members}}" title-width="60%" wx:key="item.personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.meetsIndex}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot>
@@ -101,6 +101,14 @@
   </van-field> 
 </van-panel> 
 
+<van-panel wx:if="{{od.operations}}">
+	<van-cell slot="header" title-class="redtitle"  title="退出队员名单" title-width="40%" />
+  <van-cell-group>
+    <van-cell wx:for="{{od.operations}}" wx:key="*this" title-width="40%" title="{{item.nickName}}" /> 
+  </van-cell-group>   
+</van-panel> 
+
+
 <!--领队编辑附加队员-->
 <van-switch-cell title="开启附加队员" wx:if="{{od.addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
 <block wx:if="{{openAdd || od.addMembers.length>0 || hasModified}}">
@@ -117,4 +125,4 @@
     <van-button slot="button" disabled="{{!addMember || entryFull}}" plain size="small" type="primary" bind:click="addOneMember">增加</van-button>
   </van-field> 
 </block>
- 
+  

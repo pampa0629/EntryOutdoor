@@ -16,34 +16,29 @@ Page({
     hasModified: false,
   },
 
-  onLoad: function(options) {
-    const self = this;
+  async onLoad(options) {
+    let formids = await template.clearPersonFormids(app.globalData.personid)
+    this.setData({
+      formids: formids
+    })
+
     let pages = getCurrentPages() //获取当前页面js里面的pages里的所有信息。
     let data = pages[pages.length - 3].data
-    self.setData({
+    this.setData({
       outdoorid: data.od.outdoorid,
     })
 
     let prevPage = pages[pages.length - 2]
     if (prevPage.data.limits.wxnotice) {
-      self.setData({
+      this.setData({
         wxnotice: prevPage.data.limits.wxnotice,
       })
     } else {
-      self.setData({
+      this.setData({
         wxnotice: template.getDefaultNotice(),
         hasModified: true,
       })
     }
-
-    dbPersons.doc(app.globalData.personid).get().then(res => {
-      if (res.data.formids) {
-        self.setData({
-          formids: res.data.formids
-        })
-      }
-    })
-    console.log(self.data)
   },
 
   onUnload: function() {
@@ -55,12 +50,12 @@ Page({
     console.log("save()")
     if (e)
       template.savePersonFormid(app.globalData.personid, e.detail.formId)
-    const self = this
+    
     if (this.data.hasModified) {
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
       let prevPage = pages[pages.length - 2];
       prevPage.setData({
-        "limits.wxnotice": self.data.wxnotice,
+        "limits.wxnotice": this.data.wxnotice,
       })
       let od = pages[pages.length - 3].data.od
       od.saveItem("limits.wxnotice")
@@ -87,11 +82,11 @@ Page({
   },
 
   bindAddEntry(e) {
+    console.log("bindAddEntry(e),",e)
     this.setData({
       "wxnotice.entryCount": e.detail,
       hasModified: true
     })
-    console.log(this.data.wxnotice.entryCount)
   },
 
   checkFullNotice() {

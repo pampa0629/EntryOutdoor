@@ -190,7 +190,7 @@
     <van-tag wx:else plain type="primary">\n距离占坑截止时间还剩：{{remains.occupy.text}}</van-tag>
     <van-tag wx:if="{{remains.entry.time<0}}" plain type="danger">\n已过报名截止时间</van-tag>
     <van-tag wx:else plain type="primary">\n距离报名截止时间还剩：{{remains.entry.text}}</van-tag>
-  </van-row>
+  </van-row> 
   <van-row>
     <van-tag wx:if="{{entryFull}}" plain type="danger">\n报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
     <van-tag wx:if="{{remains.entry.time<0 && limits.allowPopup}}" plain type="primary">\n该活动允许空降</van-tag>
@@ -216,7 +216,7 @@
     <form bindsubmit="tapOcuppy" report-submit="true" wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
       <button form-type="submit">占坑</button>
     </form>
-  </van-col>
+  </van-col> 
   <!--报名-->
   <van-col span="9" offset="2">
     <form bindsubmit="tapEntry" report-submit="true" wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">

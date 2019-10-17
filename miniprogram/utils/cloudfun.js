@@ -95,7 +95,7 @@ const checkMsg = async(text)=>{
   console.log("cloudfun.checkMsg()",text)
   let res = await wx.cloud.callFunction({
     name: 'msgCheck', // 云函数名
-    data: {
+    data: { 
       content: text,
     }
   })

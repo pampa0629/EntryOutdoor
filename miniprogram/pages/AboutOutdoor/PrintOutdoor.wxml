@@ -27,7 +27,7 @@
   <text>\n{{od.traffic.mode}}；{{od.traffic.carInfo}}；{{od.traffic.costInfo}}</text>
 </block>
 
-<!--集合地点-->
+<!--集合地点--> 
 <text class="tip">\n集合地点</text>
 <view wx:for="{{od.meets}}" wx:key="place" data-pos='{{index}}'>{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
 

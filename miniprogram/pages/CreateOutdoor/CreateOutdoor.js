@@ -103,11 +103,11 @@ Page({
   },
 
   // 得到formids数量
-  async loadFormids() {
+  async loadFormids() { 
     let formids = await template.clearPersonFormids(app.globalData.personid)
-    this.data.formids = formids ? formids : []
+    // this.data.formids = formids ? formids : []
     this.setData({
-      formids: this.data.formids,
+      formids: formids,
     })
   },
 
@@ -499,10 +499,11 @@ Page({
 
   // 活动成行
   async confirmOutdoor() {
-    let res = await wx.showModal({
+    let res = await promisify.showModal({
       title: '成行确认',
       content: '确认活动成行将给所有队员发送微信消息提醒'
     })
+    console.log("res:",res)
     
     if (res.confirm) {
       this.updateStatus("已成行")
@@ -538,10 +539,7 @@ Page({
     if (this.checkFormids()) {
       this.publishOutdoorInner()
     } else {
-      wx.showModal({
-        title: '请确认',
-        content: '您确定数量够六个了吗？',
-      })
+      wx.showToast({ title: '数量不够六个' })
     }
   },
 
@@ -590,6 +588,7 @@ Page({
       this.setData({
         hasModified: false, // 发布时，已经保存过了
       })
+      this.setSteps(this.data.od.status) // 还得更新活动进程
     } else {
       this.setData({
         "od.status": oldStatus

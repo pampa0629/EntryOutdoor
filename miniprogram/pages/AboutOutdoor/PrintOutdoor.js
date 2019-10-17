@@ -10,7 +10,7 @@ const dbPersons = db.collection('Persons')
 const _ = db.command
   
 Page({  
- 
+  
   data: {    
     od:null, 
     meetMembers: [], // 按照集合地点分组的队员名单
@@ -95,10 +95,16 @@ Page({
 
       // 遍历所有队员
       for (var j = 0; j < self.data.od.members.length; j++) {
-        if (!self.data.od.members[j].entryInfo.meetsIndex) { // 防止领队没有选择集合地点
+        const entryInfo = self.data.od.members[j].entryInfo
+        // console.log("member:", self.data.od.members[j])
+        if (!entryInfo.meetsIndex) { // 防止领队没有选择集合地点
           self.data.od.members[j].entryInfo.meetsIndex = 0
+        } 
+        if (entryInfo.meetsIndex < self.data.od.meets.length) {
+          self.data.meetMembers[entryInfo.meetsIndex].push(self.data.od.members[j])
+        } else {
+          console.error("集合地点索引越界", self.data.od.members[j])
         }
-        self.data.meetMembers[self.data.od.members[j].entryInfo.meetsIndex].push(self.data.od.members[j])
       }
 
       for (var i = 0; i < self.data.od.meets.length; i++){

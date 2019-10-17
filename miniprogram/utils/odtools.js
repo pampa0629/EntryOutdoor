@@ -611,7 +611,7 @@ const isEntriedStatus = (status) => {
   if (status == "占坑中" || status == "报名中" || status == "替补中") {
     return true
   }
-  return false
+  return false 
 }
 
 const getDefaultWebsites = () => {

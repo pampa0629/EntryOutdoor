@@ -135,7 +135,7 @@ Page({
     this.setData({
       "od.websites": this.data.od.websites,
     }) 
-  },
+  }, 
   
   checkAllowSiteEntry: function(e) {
     console.log(e)

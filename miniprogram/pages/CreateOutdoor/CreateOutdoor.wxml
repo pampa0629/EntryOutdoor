@@ -21,7 +21,7 @@
     <van-col span="9" offset="2">
       <van-button plain size="large" bind:click="onCancelShare">取消</van-button>
     </van-col>
-  </van-row>
+  </van-row> 
 </van-popup>
  
 <!--图标按钮-->
@@ -103,7 +103,7 @@
     <van-cell title="活动强度" label="自动计算" value="{{od.title.level}}" />
     <van-cell title="累积距离：{{od.title.addedLength}}公里">
       <van-stepper value="{{od.title.addedLength}}" min="1" max="100" bind:change="bindAddedLength" />
-    </van-cell>
+    </van-cell> 
     <van-cell title="累积上升：{{od.title.addedUp}}00米">
       <van-stepper value="{{od.title.addedUp}}" min="1" max="100" bind:change="bindAddedUp" />
     </van-cell>

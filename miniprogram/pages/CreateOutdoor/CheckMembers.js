@@ -43,7 +43,7 @@ Page({
     const self = this
     let pages = getCurrentPages() //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2]
-    let od = pages[pages.length - 2].data.od
+    let od = pages[pages.length - 2].data.od 
     self.setData({
       od:od, // od 存起来，方便使用
       entryFull:odtools.entryFull(od.limits, od.members, od.addMembers)
@@ -71,6 +71,8 @@ Page({
   },
 
   flushMembers() {
+    var benchCount = 0 // 替补队员人数
+    var occupyCount = 0 // 占坑队员人数
     const members = this.data.od.members
     const self = this
     self.data.members = []
@@ -87,6 +89,11 @@ Page({
         meetsIndex: "第" + (parseInt(s[i].entryInfo.meetsIndex)+1)+"集合点",
       }
       self.data.members.push(member)
+      if (member.status == "占坑中") {
+        occupyCount += 1
+      } else if (member.status == "替补中") {
+        benchCount += 1
+      }
  
       // 增加函数
       let index = i // 还必须用let才行
@@ -101,6 +108,8 @@ Page({
       } 
     }
     self.setData({
+      occupyCount: occupyCount, 
+      benchCount: benchCount, 
       members: self.data.members,
       entryFull:odtools.entryFull(self.data.od.limits, self.data.od.members, self.data.od.addMembers)
     })

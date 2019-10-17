@@ -11,7 +11,7 @@ wx.cloud.init()
 const db = wx.cloud.database({}) 
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
-const _ = db.command
+const _ = db.command 
 
 // 创建函数，使用者必须： var od = new outdoor.OD() 来获得活动对象，并设置默认值
 // 内存中的对象，为最新格式，和界面表现内容； 从数据库中load时，应注意做兼容性处理
@@ -149,6 +149,8 @@ OD.prototype.copy = function(od) {
   this.photos = od.photos ? od.photos:{}
   this.photocount = Object.keys(this.photos).length
 
+  this.operations = od.operations && od.operations.length>0 ? od.operations:null
+
   // next 
 
 }
@@ -186,6 +188,7 @@ OD.prototype.setDefault4New = function(leader) {
   }
   this.QcCode = null
   this.pay = null
+  this.operations = null
   this.status = "拟定中"
 }
 
@@ -402,21 +405,11 @@ OD.prototype.saveItem = async function(name) {
   console.log("outdoorid: " + this.outdoorid)
   // 进行中或已结束的活动，不允许保存
   if (this.status != '进行中' && this.status != '已结束') {
+  // if (true) {
     var value = util.getValue(this, name)
     console.log(value)
     // 存储到数据库中
     let res = await cloudfun.opOutdoorItem(this.outdoorid, name, value, "")
-    // let res = await wx.cloud.callFunction({ // 用cloudfun 岂不是更好
-    //   name: 'dbSimpleUpdate', // 云函数名称
-    //   // table,id,item,command(push,pop,shift,unshift,""),value
-    //   data: {
-    //     table: "Outdoors",
-    //     id: this.outdoorid,
-    //     item: name,
-    //     command: "",
-    //     value: value
-    //   }
-    // })
     console.log(res)
 
     var modifys = {} // 提取修改的第一级子项的名字
@@ -427,9 +420,9 @@ OD.prototype.saveItem = async function(name) {
     // 同步到网站
     this.postModify2Websites(modifys)
 
-    wx.showToast({
-      title: '保存成功',
-    })
+    wx.showToast({title: '保存成功'})
+  } else {
+    wx.showToast({ title: '不能保存'})
   }
 }
 
@@ -477,6 +470,8 @@ OD.prototype.entry = async function(member) {
 
   // 更新Outdoors数据库
   cloudfun.opOutdoorItem(this.outdoorid, "members", this.members, "")
+  // 记录报名操作历史
+  // this.recordOperation(member.entryInfo.status, member.userInfo.nickName)
   // 报名信息同步到网站
   this.postEntry2Websites(member, false, false)
   return {
@@ -485,11 +480,16 @@ OD.prototype.entry = async function(member) {
   }
 }
 
+// 记录报名退出等重要操作
+OD.prototype.recordOperation = function (action, nickName) {
+  cloudfun.opOutdoorItem(this.outdoorid, "operations", {action, nickName}, "push")
+}
+
 // 有人新报名时，需要处理AA名单
 OD.prototype.dealAaMembers = function(member) {
   console.log("OD.prototype.dealAaMembers()")
   if (this.aaMembers && this.aaMembers.length > 0) {
-    index = util.findIndex(this.aaMembers, "personid", member.personid)
+    var index = util.findIndex(this.aaMembers, "personid", member.personid)
     // 首先从AA名单中剔除自己（即退出后又报名的情况）
     if (index > -1) { //找到自己，则删掉即可
       this.aaMembers.splice(index, 1)
@@ -624,6 +624,8 @@ OD.prototype.quit = async function(personid, selfQuit) {
     var deleted = this.members.splice(index, 1) // 别忘了删除自己
     // 第四步：新成员列表写入数据库
     cloudfun.opOutdoorItem(this.outdoorid, "members", this.members, "")
+    // 退出记录一下
+    this.recordOperation("退出", member.userInfo.nickName)
     if (isAfee) { // 要A费用的时候，单独开一个名单列表
       this.aaMembers.push(deleted)
       cloudfun.opOutdoorItem(this.outdoorid, "aaMembers", deleted, "push")

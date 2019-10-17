@@ -143,9 +143,9 @@ Page({
   // 得到formids数量
   async loadFormids() {
     let formids = await template.clearPersonFormids(app.globalData.personid)
-    this.data.formids = formids ? formids : []
+    // this.data.formids = formids ? formids : []
     this.setData({
-      formids: this.data.formids,
+      formids: formids,
     })
   },
 
@@ -366,7 +366,7 @@ Page({
 
     console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
-      if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && this.data.od.entryFull())) { // 前几个报名，或者接收最后一个报名，才发送微信消息
+      if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && this.data.entryFull)) { // 前几个报名，或者接收最后一个报名，才发送微信消息
         var key = this.data.od.outdoorid + "." + this.data.entryInfo.personid
         var count = parseInt(wx.getStorageSync(key))
         if (!count) {
@@ -614,13 +614,10 @@ Page({
 
   confirmFormidDlg() {
     console.log("confirmFormidDlg()")
-    if (this.checkFormids()) {
+    if (this.checkFormids()) { 
       this.entryOutdoorInner(this.data.entryTemp.status)
     } else {
-      wx.showModal({
-        title: '请确认',
-        content: '您确定数量够六个了吗？',
-      })
+      wx.showToast({ title: '数量不够六个' })
     }
   },
 
@@ -677,7 +674,7 @@ Page({
     var content = '您已经点击“退出”按钮，是否确定退出本活动？'
     if (odtools.isNeedAA(this.data.od, this.data.entryInfo.status)) {
       content += "本活动已成行，退出若无人替补，则需要A共同费用，请慎重操作。"
-    }
+    } 
 
     let resModel = await promisify.showModal({
       title: '确定退出？',

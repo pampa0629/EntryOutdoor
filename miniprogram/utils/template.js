@@ -603,45 +603,6 @@ const sendMessage = async (openid, tempid, formid, page, data) => {
   }
 }
 
-// 给特定openid发特定id的模板消息
-// const sendMessage = (openid, tempid, formid, page, data, ) => {
-//   console.log("sendMessage")
-//   console.log("openid: " + openid)
-//   console.log("tempid: " + tempid)
-//   console.log("formid: " + formid)
-//   console.log("page: " + page)
-//   console.log(data)
-//   if (formid) {
-//     wx.cloud.callFunction({
-//       name: 'getAccessToken', // 云函数名称
-//     }).then(res => {
-//       console.log(res)
-//       wx.cloud.callFunction({
-//         name: 'sendTemplate', // 云函数名称
-//         data: {
-//           openid: openid,
-//           access_token: JSON.parse(res.result).access_token,
-//           tempid: tempid,
-//           formid: formid,
-//           data: data,
-//           page: page,
-//         },
-//       }).then(res => {
-//         console.log(res)
-//         if () {
-//           (res)
-//         }
-//       }).catch(err=>{
-//         console.error(err)
-//         if () {
-//           (err)
-//         }
-//       })
-//     })
-//   } else if () {
-//     ()
-//   }
-// }
 
 module.exports = {
   getDefaultNotice: getDefaultNotice,

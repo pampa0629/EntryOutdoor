@@ -273,6 +273,7 @@ const myParseInt = (str) => {
 
 // 授权的统一函数
 const authorize = async(which, message) => {
+  console.log("util.authorize()", which, message)
   var scope = 'scope.' + which
   console.log("scope is: " + scope)
   let res = await promisify.getSetting({})

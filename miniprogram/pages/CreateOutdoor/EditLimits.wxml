@@ -54,6 +54,10 @@
 <!--户外网站同步-->
 <van-cell title="户外网站同步" wx:if="{{lvyeorgInfo}}" title-class="redtitle" label="" value="点击同步户外网站" is-link url="EditWebsites" border="{{true}}"/>
 
+<!--查看报名记录-->
+<!-- <van-cell title="查看退出记录" wx:if="{{od.operations}}" title-class="redtitle" label="" value="点击查看退出历史记录" is-link url="../AboutOutdoor/LookOutdoorOp" border="{{true}}"/> -->
+
+
 <!--活动规则-->
 <van-panel>
 	<van-cell slot="header" title-class="redtitle" title="活动规则"></van-cell>

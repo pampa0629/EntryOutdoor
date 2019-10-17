@@ -41,7 +41,8 @@
     "pages/AboutOutdoor/LookPhotos",
     "pages/CreateOutdoor/EditWebsites",
     "pages/Test/Test1",
-    "pages/MyInfo/EditFaces"
+    "pages/MyInfo/EditFaces",
+    "pages/AboutOutdoor/LookOutdoorOp"
   ],
   "window": {
     "backgroundTextStyle": "dark",

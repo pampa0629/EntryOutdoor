@@ -6,10 +6,10 @@
   <block wx:if="{{wxnotice.accept}}">
     <!--接收前几位的报名通知-->
     <van-cell title="接收前{{wxnotice.entryCount}}位队员报名的微信通知" border="{{false}}">
-      <van-stepper value="{{wxnotice.entryCount}}" min="1" max="{{wxnotice.formids.length}}" bind:change="bindAddEntry" /> 
-    </van-cell>
+      <van-stepper value="{{wxnotice.entryCount}}" min="1" max="{{formids.length}}" bind:change="bindAddEntry"/> 
+    </van-cell> 
     <!--是否接收满员通知-->
-    <van-cell title="满员时接收通知" clickable bind:click="checkFullNotice" border="{{false}}">
+    <van-cell title="满员时接收通知" title-width="90%" clickable bind:click="checkFullNotice" border="{{false}}">
       <van-checkbox value="{{wxnotice.fullNotice}}"/>
     </van-cell>
   </block> 

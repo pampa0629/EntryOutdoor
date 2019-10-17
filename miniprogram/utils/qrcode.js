@@ -62,7 +62,7 @@ const getCloudPath = async(outdoorid) => {
   let resDB = await dbOutdoors.doc(outdoorid).get()
   if (resDB.data.QcCode) {
     console.log("Outdoors is:" + resDB.data.QcCode)
-    callback(resDB.data.QcCode)
+    return resDB.data.QcCode
   } else { 
     let resToken = await wx.cloud.callFunction({
       name: 'getAccessToken', // 云函数名称

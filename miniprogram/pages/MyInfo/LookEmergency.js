@@ -18,6 +18,12 @@ Page({
     showMessage: "",
   },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+  
   async onLoad(options) {
     console.log("onload")
     console.log(options)

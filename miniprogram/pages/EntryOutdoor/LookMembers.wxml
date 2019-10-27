@@ -1,16 +1,16 @@
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人）"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人）" size="{{size}}"/>
 
   <van-cell-group>
-    <van-cell title="户外昵称（性别）" title-width="40%" value="是否认路/集合点（报名状态）"/>
-    <van-cell wx:for="{{members}}" wx:key="personid" title-width="40%" title="{{item.userInfo.nickName}}（{{item.userInfo.gender}}）" value="{{item.entryInfo.knowWay}}/第{{item.entryInfo.meetsIndex+1}}集合点({{item.entryInfo.status}})"/> 
+    <van-cell title="户外昵称（性别）" title-width="40%" value="是否认路/集合点（报名状态）" size="{{size}}"/>
+    <van-cell wx:for="{{members}}" wx:key="personid" title-width="40%" title="{{item.userInfo.nickName}}（{{item.userInfo.gender}}）" value="{{item.entryInfo.knowWay}}/第{{item.entryInfo.meetsIndex+1}}集合点({{item.entryInfo.status}})" size="{{size}}"/> 
   </van-cell-group>   
 </van-panel> 
 
 <van-panel wx:if="{{addMembers.length>0}}">
-	<van-cell slot="header" title-class="redtitle" title="附加队员名单（共{{addMembers.length}}人）"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="附加队员名单（共{{addMembers.length}}人）" size="{{size}}"/>
  
   <van-cell-group>
-    <van-cell wx:for="{{addMembers}}" wx:key="*this" title-width="80%" title="{{item}}"/> 
+    <van-cell wx:for="{{addMembers}}" wx:key="*this" title-width="80%" title="{{item}}" size="{{size}}"/> 
   </van-cell-group>   
 </van-panel>   

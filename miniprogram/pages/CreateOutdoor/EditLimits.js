@@ -27,6 +27,7 @@ Page({
       isAA:true, // 费用AA
       intoHall: true, // 活动是否进入活动大厅
       isTest: false, // 是否为测试发帖
+      private: false, // 是否为私约活动
     },
     hasModified: false,
 
@@ -40,6 +41,14 @@ Page({
     oldPersonCount: null,
 
     lvyeorgInfo:null, // 绿野org信息
+
+    size: app.globalData.setting.size, // 界面大小
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function(options) {
@@ -225,17 +234,12 @@ Page({
   checkIntoHall: function(e) {
     console.log(e)
     console.log(this.data.limits.intoHall)
-    if (this.data.limits.private) {
-      wx.showModal({
-        title: '不能修改',
-        content: '您已勾选“私约活动”，不能进入活动大厅',
-      })
-    } else {
-      this.setData({
-        "limits.intoHall": !this.data.limits.intoHall,
-        hasModified: true
-      })
-    }
+    this.setData({
+      "limits.intoHall": true,
+      "limits.isTest":false,
+      "limits.private":false,
+      hasModified: true
+    })
   },
 
   // 是否为测试发帖
@@ -243,7 +247,9 @@ Page({
     console.log(e)
     console.log(this.data.limits.isTest)
     this.setData({
-      "limits.isTest": !this.data.limits.isTest,
+      "limits.isTest": true,
+      "limits.intoHall": false,
+      "limits.private": false,
       hasModified: true
     })
   },
@@ -253,14 +259,11 @@ Page({
     console.log(e)
     console.log(this.data.limits.private)
     this.setData({
-      "limits.private": !this.data.limits.private,
+      "limits.private": true,
+      "limits.intoHall": false,
+      "limits.isTest": false,
       hasModified: true
     })
-    if (this.data.limits.private) {
-      this.setData({
-        "limits.intoHall": false,
-      })
-    }
   },
 
   // 勾选是否要求守时

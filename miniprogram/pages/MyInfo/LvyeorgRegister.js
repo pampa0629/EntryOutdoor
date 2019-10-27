@@ -13,6 +13,12 @@ Page({
     emailMessage: "",
   },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+
   onLoad: function(options) {
   },
 

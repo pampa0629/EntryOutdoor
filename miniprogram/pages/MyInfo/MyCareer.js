@@ -11,6 +11,8 @@ const _ = db.command
 Page({
 
   data: {
+    size: app.globalData.setting.size, // 界面大小
+    
     career: {
       evaluation: { level:0}, // career.evaluation.level
       step: {
@@ -39,6 +41,12 @@ Page({
       desc: '嘚瑟一下',
       path: 'pages/MyInfo/LookCareer?personid=' + app.globalData.personid
     }
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function(options) {

@@ -17,6 +17,13 @@ Page({
     od:null,
 
     action: null, // 发起这个页面的行为
+    size: app.globalData.setting.size, // 界面大小
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function (options) {

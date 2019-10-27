@@ -1,12 +1,27 @@
 <!--紧急电话-->
 <van-action-sheet show="{{showCalls}}" actions="{{Calls}}" bind:close="closeCalls" bind:select="selectCalls" />
 
+<!--设置-->
+<van-popup show="{{ setting.show }}" overlay="{{true}}" position="top" custom-class="center" bind:close="closeSetting">
+  <van-cell title="开启大字体" title-width="90%" size="{{setting.size}}" clickable bind:click="onLargeSize">
+    <van-checkbox value="{{setting.size}}"/>
+  </van-cell>  
+  <van-row>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" type="primary" bind:click="onConfirmSetting">确定</van-button>
+    </van-col>
+    <van-col span="9" offset="2">
+      <van-button plain size="large" bind:click="closeSetting">取消</van-button>
+    </van-col>
+  </van-row>
+</van-popup>
+
 <!--头像&帮助-->
 <van-row>
   <van-col span="4" offset="1">
     <open-data type="userAvatarUrl"></open-data>
   </van-col>
-  <van-col span="3" offset="6">
+  <van-col span="3" offset="3">
     <view style="flex-direction:column">
       <van-icon size='32px' name="phone-o" bind:click="bindEmergencyCall"/>
       <view style='font-family:黑体;font-size:11pt'>紧急</view>
@@ -20,22 +35,28 @@
   </van-col>
   <van-col span="3" offset="1">
     <view style="flex-direction:column">
+      <van-icon size='32px' name="setting-o" bind:click="bindSetting"/>
+      <view style='font-family:黑体;font-size:11pt'>设置</view>
+    </view>
+  </van-col>
+  <van-col span="3" offset="1">
+    <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>1.1.4</view>
+      <view style='font-family:黑体;font-size:11pt'>1.1.7</view>
     </view>
   </van-col>
 </van-row>
 
 <!--个人信息-->
 <van-cell-group>
-  <van-cell title="户外昵称" value="{{userInfo.nickName}}" label="好听、易记、非真名" is-link bind:click="clickModify" />
-  <van-cell title="性别" value="{{userInfo.gender}}" is-link bind:click="clickModify" />
-  <van-cell title="手机号码" value="{{userInfo.phone}}" label="真实有效、方便领队联系" is-link bind:click="clickModify" border="{{ false }}" />
+  <van-cell title="户外昵称" value="{{userInfo.nickName}}" label="好听、易记、非真名" size="{{size}}" is-link bind:click="clickModify" />
+  <van-cell title="性别" value="{{userInfo.gender}}" size="{{size}}" is-link bind:click="clickModify" />
+  <van-cell title="手机号码" value="{{userInfo.phone}}" label="真实有效、方便领队联系" size="{{size}}" is-link bind:click="clickModify" border="{{ false }}" />
 </van-cell-group>
  
 <!--微信登录-->
 <view wx:if="{{!hasLogin}}">
-  <van-tag type="danger">首次使用请点击“微信登录”按钮，并请允许微信授权\n</van-tag>
+  <van-tag size="{{size}}" type="danger">首次使用请点击“微信登录”按钮，并请允许微信授权\n</van-tag>
   <van-row>
     <van-col span="20" offset="2">
       <van-button size="large" type="primary" open-type="getUserInfo" bindgetuserinfo="loginWeixin">微信登录</van-button>

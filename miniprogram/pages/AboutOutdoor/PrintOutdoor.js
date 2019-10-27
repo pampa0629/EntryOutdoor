@@ -15,6 +15,7 @@ Page({
     od:null, 
     meetMembers: [], // 按照集合地点分组的队员名单
     isLeader: false, // 是否是领队：领队能看到队员的电话，非领队看不到；领队按照集合地点排列名单，队员不需要
+    size: app.globalData.setting.size, // 界面大小
   },
  
   async onLoad(options) {
@@ -54,6 +55,12 @@ Page({
     // 设置活动信息
     this.setData({
       od: this.data.od,
+    })
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
     })
   },
 
@@ -152,7 +159,7 @@ Page({
   dealChecked: function() {
     //if (this.data.isLeader) {//非领队也让具备点名保存功能
       var checks = this.getChecksFromStorage(this.data.od.outdoorid)
-      console.log("PrintOutdoor.js in onShow fun, checked is:" + JSON.stringify(checks, null, 2))
+      console.log("PrintOutdoor.js, checked is:" + JSON.stringify(checks, null, 2))
       for (var i = 0; i < this.data.meetMembers.length; i++) {
         for (var j = 0; j < this.data.meetMembers[i].length; j++) {
           checks.forEach((item, index) => {

@@ -3,7 +3,7 @@
  
  <!-- 版面选择 -->
  <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="活动发布到：" value="{{forum.name}}论坛"></van-cell>
+  <van-cell slot="header" title-class="redtitle" title="活动发布到：" value="{{forum.name}}论坛" size="{{size}}"/>
   <van-radio-group wx:for="{{Forums}}" wx:key="id" value="{{forum.id}}" wx:if="{{!od.websites.lvyeorg.tid}}">
       <van-cell title="{{item.name}}" title-width="90%" data-name="{{item.id}}" label="{{item.label}}" clickable bind:click="clickForum">
         <van-radio name="{{item.id}}"/>
@@ -13,8 +13,8 @@
 
 <!-- 是否允许网址跟帖报名 --> 
  <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="选项设置"></van-cell>
-  <van-cell title-width="90%" title="允许网站直接跟帖报名" label="不建议允许，允许则领队要自行整理两边的报名名单，且无法发送微信消息提示" clickable bind:click="checkAllowSiteEntry">
+  <van-cell slot="header" title-class="redtitle" title="选项设置" size="{{size}}"/>
+  <van-cell title-width="90%" title="允许网站直接跟帖报名" label="不建议允许，允许则领队要自行整理两边的报名名单，且无法发送微信消息提示" clickable bind:click="checkAllowSiteEntry" size="{{size}}">
     <van-checkbox value="{{od.websites.lvyeorg.allowSiteEntry}}" />
   </van-cell>
 </van-panel>
@@ -28,25 +28,25 @@
  </block> 
  <block wx:else>
   <!-- 复制网址 -->
-  <van-field label="活动网址：{{orgUrl}}"  title-width="70%" disabled use-button-slot>
+  <van-field label="活动网址：{{orgUrl}}"  title-width="70%" disabled use-button-slot size="{{size}}">
     <van-button slot="button" size="small" plain bind:click='copyLvyeUrl'>复制</van-button>
   </van-field>
 
   <!-- 断开按钮-->
   <form bindsubmit="disconnetLvyeorg" report-submit="true">
-    <van-tag plain type="danger">断开后，所有操作将无法同步到原帖子中；再同步将发布新贴。</van-tag>
+    <van-tag size="{{size}}" plain type="danger">断开后，所有操作将无法同步到原帖子中；再同步将发布新贴。</van-tag>
     <button plain form-type="submit" type="warn">断开绿野org</button>
   </form>
   
   <!-- 列出等待同步的信息（报名和内容修改） -->
   <van-panel wx:if="{{od.websites.lvyeorg.waitings.length>0}}">
-    <van-cell slot="header" title-class="redtitle" title="待同步信息"/>
+    <van-cell slot="header" title-class="redtitle" title="待同步信息" size="{{size}}"/>
     <van-button size="large" bindtap='tapPostWaitings'>一键同步</van-button>
-    <van-cell wx:for="od.websites.lvyeorg.waitings" title="{{item}}" title-width="100%"/>
+    <van-cell wx:for="od.websites.lvyeorg.waitings" title="{{item}}" title-width="100%" size="{{size}}"/>
   </van-panel>
 
  </block> 
  
-
+ 
 <van-button size="large" bindtap='tapOrgHall'>跳转：绿野ORG小程序</van-button>
 

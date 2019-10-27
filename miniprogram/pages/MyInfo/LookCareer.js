@@ -11,6 +11,12 @@ Page({
     entriedOutdoors:null,
   }, 
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+
   onLoad: function (options) {
     console.log(options)
     const self = this

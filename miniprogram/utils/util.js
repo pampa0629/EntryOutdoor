@@ -36,6 +36,15 @@ const formatDate = date => {
   return [year, month, day].map(formatNumber).join('-')
 }
 
+// 按照日期，07:15 的方式设置时间
+const setDateTime = (date,time)=>{
+  var res = new Date(date)
+  var hour_minute = time.split(":")
+  res.setHours(hour_minute[0])
+  res.setMinutes(hour_minute[0])
+  return res
+}
+
 const formatNumber = n => {
   n = n.toString()
   return n[1] ? n : '0' + n
@@ -455,6 +464,7 @@ module.exports = {
   Ymd2Mdy: Ymd2Mdy,
   formatDate: formatDate,
   nextDate: nextDate,
+  setDateTime: setDateTime, // 按照 日期 时:分 的方式设置时间
   // openid
   saveOpenID: saveOpenID,
   loadOpenID: loadOpenID,

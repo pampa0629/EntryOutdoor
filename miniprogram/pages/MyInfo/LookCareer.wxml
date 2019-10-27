@@ -15,12 +15,12 @@
 
 <!--发起的活动-->
 <van-panel title="发起过的活动" wx:if="{{myOutdoors && myOutdoors.length>0}}">
-  <van-cell wx:for="{{myOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<myOutdoors.length-1}}" bind:click="clickMy{{index}}"/>
+  <van-cell wx:for="{{myOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<myOutdoors.length-1}}" bind:click="clickMy{{index}}" size="{{size}}"/>
 </van-panel>
 
 <!--参加的活动-->
 <van-panel title="参加过的活动" wx:if="{{entriedOutdoors && entriedOutdoors.length>0}}">
-  <van-cell wx:for="{{entriedOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<entriedOutdoors.length-1}}" bind:click="clickEntried{{index}}"/>
+  <van-cell wx:for="{{entriedOutdoors}}" wx:key="item.title" title="{{item.title}}" border="{{index<entriedOutdoors.length-1}}" bind:click="clickEntried{{index}}" size="{{size}}"/>
 </van-panel>
 
 <!--活动统计-->

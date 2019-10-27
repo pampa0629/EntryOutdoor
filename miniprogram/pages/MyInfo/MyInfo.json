@@ -7,8 +7,10 @@
     "van-cell": "/vant-weapp/cell/index",
     "van-cell-group": "/vant-weapp/cell-group/index",
     "van-action-sheet": "/vant-weapp/action-sheet/index",
+    "van-checkbox": "/vant-weapp/checkbox/index",
     "van-row": "/vant-weapp/row/index",
     "van-col": "/vant-weapp/col/index",
+    "van-popup": "/vant-weapp/popup/index",
     "van-tag": "/vant-weapp/tag/index"
   }
 }

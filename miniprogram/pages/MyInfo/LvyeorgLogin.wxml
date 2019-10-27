@@ -2,25 +2,25 @@
  
 <!--登录--> 
 <van-cell-group wx:if="{{!hasLogin}}">
-  <van-field value="{{lvyeorgInfo.username}}" label="账号：" placeholder="请输入绿野ORG账号" required bind:change="changeUsername"/>
-  <van-field value="{{password}}" label="密码：" placeholder="请输入对应的密码" required type="{{showPwd?'text':'password'}}" bind:change="changePassword" border="{{false}}" icon="{{showPwd?'closed-eye':'eye-o'}}" bind:click-icon="clickPwdIcon"/>
+  <van-field value="{{lvyeorgInfo.username}}" label="账号：" placeholder="请输入绿野ORG账号" required bind:change="changeUsername" size="{{size}}"/>
+  <van-field value="{{password}}" label="密码：" placeholder="请输入对应的密码" required type="{{showPwd?'text':'password'}}" bind:change="changePassword" border="{{false}}" icon="{{showPwd?'closed-eye':'eye-o'}}" bind:click-icon="clickPwdIcon" size="{{size}}"/>
   <van-button size="large" type="primary" bindtap='tapLvyeorgLogin'>登录</van-button>
   <van-button size="large" bindtap='tapLvyeorgRegister'>新用户注册</van-button>
 </van-cell-group>
 
 <!--所有人设置-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="所有人选项设置"></van-cell>
-  <van-tag type="primary" plain>为符合绿野ORG网站要求其活动不得在其他网站重复发布的规定，对于领队设定同步到org网站的活动，将自动为您的报名同步到网站。</van-tag>
-  <van-tag type="primary" plain>为保证网站上跟帖报名顺序不变，已登录org的队员，将为之前未登录队员代报名；活动责任由原队员自负。</van-tag>
-  <van-tag type="primary" plain>若您不登录，其他已登录队员或领队将为您代报名。</van-tag>
-  <van-tag color="#ff976a" plain>若上述内容您不认可，请不要在标注“本活动将自动同步到绿野ORG网站”的活动报名。</van-tag>
-    <van-cell title="为非ORG用户跟帖代报名" label="必须代报名，不能取消" clickable bind:click="checkHelpEntry"  border="{{false}}">
+	<van-cell slot="header" title-class="redtitle" title="所有人选项设置" size="{{size}}"/>
+  <van-tag size="{{size}}" type="primary" plain>为符合绿野ORG网站要求其活动不得在其他网站重复发布的规定，对于领队设定同步到org网站的活动，将自动为您的报名同步到网站。</van-tag>
+  <van-tag size="{{size}}" type="primary" plain>为保证网站上跟帖报名顺序不变，已登录org的队员，将为之前未登录队员代报名；活动责任由原队员自负。</van-tag>
+  <van-tag size="{{size}}" type="primary" plain>若您不登录，其他已登录队员或领队将为您代报名。</van-tag>
+  <van-tag size="{{size}}" color="#ff976a" plain>若上述内容您不认可，请不要在标注“本活动将自动同步到绿野ORG网站”的活动报名。</van-tag>
+    <van-cell title="为非ORG用户跟帖代报名" label="必须代报名，不能取消" clickable bind:click="checkHelpEntry"  border="{{false}}" size="{{size}}">
       <van-checkbox value="{{lvyeorgInfo.helpEntry}}" />
     </van-cell>
 </van-panel>
 
-<van-tag type="primary" plain>活动同步到ORG网站的功能，已放到“发起活动”--“附加设置”--“户外网站同步”中。请先确保您已在本页面登录绿野org。</van-tag>
+<van-tag size="{{size}}" type="primary" plain>活动同步到ORG网站的功能，已放到“发起活动”--“附加设置”--“户外网站同步”中。请先确保您已在本页面登录绿野org。</van-tag>
 
 <!--领队设置-->
 <!-- <van-panel>

@@ -3,15 +3,15 @@
 
 <!--户外评测--> 
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="户外评测"></van-cell>
-  <van-cell wx:if="{{!career.evaluation}}" title="新人户外评测"  value="点击进行户外评测" is-link url="MyEvaluate" border="{{false}}" />
-  <van-cell wx:else title="户外评测" label="户外达人指数为：{{career.evaluation.level}}" value="点击再次评测" is-link url="MyEvaluate" border="{{false}}" />
+	<van-cell slot="header" title-class="redtitle" title="户外评测" size="{{size}}"/>
+  <van-cell wx:if="{{!career.evaluation}}" title="新人户外评测"  value="点击进行户外评测" is-link url="MyEvaluate" border="{{false}}" size="{{size}}"/>
+  <van-cell wx:else title="户外评测" label="户外达人指数为：{{career.evaluation.level}}" value="点击再次评测" is-link url="MyEvaluate" border="{{false}}" size="{{size}}"/>
 </van-panel>  
 
 <!--最近运动步数-->
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="最高运动步数" label="最后更新时间：{{career.step.update}}"></van-cell>
-  <van-cell title="最近七天为：{{career.step.topLast7}}步，最近三十天为：{{career.step.topLast30}}步">
+  <van-cell slot="header" title-class="redtitle" title="最高运动步数" label="最后更新时间：{{career.step.update}}" size="{{size}}"/>
+  <van-cell title="最近七天为：{{career.step.topLast7}}步，最近三十天为：{{career.step.topLast30}}步" size="{{size}}">
     <van-button plain type="primary" size="normal" bind:click="clickFetchWalk">获取</van-button>
   </van-cell>
   <van-switch-cell title="是否自动更新步数" checked="{{career.step.autoUpdate}}" bind:change="changeAutoUpdate"/>
@@ -19,7 +19,7 @@
 
 <!--活动统计-->
 <van-panel use-footer-slot>
-  <van-cell slot="header" title-class="redtitle" title="活动统计"></van-cell>
+  <van-cell slot="header" title-class="redtitle" title="活动统计" size="{{size}}"/>
   <van-radio-group wx:for="{{StatisticsModes}}" wx:key="item.mode" value="{{career.statistics.mode}}" bind:change="changeStatMode">
     <van-radio name="{{item.mode}}">{{item.disc}}：{{career.statistics.mode==item.mode?career.statistics.option:""}}</van-radio>
   </van-radio-group>
@@ -37,13 +37,13 @@
 
 <!--Top N 活动-->
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="我的最佳战绩（Top 3）"></van-cell>
-  <van-cell wx:for="{{career.topn}}" wx:key="item.title" title="Top{{index+1}}路线：{{item.title}}" label="说明：{{item.disc}}"  value="成绩：{{item.result}}" is-link url="EditTopN?n={{index}}" border="{{index<career.topn.length-1}}" />
+  <van-cell slot="header" title-class="redtitle" title="我的最佳战绩（Top 3）" size="{{size}}"/>
+  <van-cell wx:for="{{career.topn}}" wx:key="item.title" title="Top{{index+1}}路线：{{item.title}}" label="说明：{{item.disc}}"  value="成绩：{{item.result}}" is-link url="EditTopN?n={{index}}" border="{{index<career.topn.length-1}}" size="{{size}}"/>
 </van-panel>
 
 <!--文字描述-->
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="参加的其它户外活动" label="非小程序报名"></van-cell>
+  <van-cell slot="header" title-class="redtitle" title="参加的其它户外活动" label="非小程序报名" size="{{size}}"/>
   <van-row>
     <van-col span="22" offset="1">
       <view><text style="font-size:12pt">{{career.other}}</text></view>

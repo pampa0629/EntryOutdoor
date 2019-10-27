@@ -10,19 +10,19 @@
   <!--我发起的-->  
   <swiper-item>  
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-    <van-cell  wx:for="{{myOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable data-pos='{{index}}' title="{{item.title}}" bind:click="tapMyOutdoors" bindlongpress="longTap"/>
+    <van-cell wx:for="{{myOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable data-pos='{{index}}' title="{{item.title}}" bind:click="tapMyOutdoors" bindlongpress="longTap" size="{{size}}"/>
     </scroll-view>
   </swiper-item>
   <!--我参加的-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-cell wx:for="{{entriedOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable catchtap="tapEntriedOutdoors" title="{{item.title}}" data-pos='{{index}}' bindlongpress="longTap" />
+      <van-cell wx:for="{{entriedOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable catchtap="tapEntriedOutdoors" title="{{item.title}}" data-pos='{{index}}' bindlongpress="longTap" size="{{size}}"/>
       </scroll-view>
   </swiper-item> 
   <!--我关注的-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-cell wx:for="{{caredOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable catchtap="tapCaredOutdoors" data-pos='{{index}}' title="{{item.title}}" bindlongpress="longTap"/>
+      <van-cell wx:for="{{caredOutdoors}}" wx:if="{{!item.invisible}}" wx:key="id" clickable catchtap="tapCaredOutdoors" data-pos='{{index}}' title="{{item.title}}" bindlongpress="longTap" size="{{size}}"/>
       </scroll-view>
   </swiper-item>
 </swiper>

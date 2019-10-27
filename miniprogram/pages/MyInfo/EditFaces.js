@@ -20,6 +20,12 @@ Page({
     facecodes:{}, 
   },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+
   async onLoad(options) {
     let res = await dbPersons.doc(app.globalData.personid).get()
     this.setData({

@@ -11,6 +11,13 @@ Page({
     disclaimer: "", //免责条款
     isEnvironment: null, // 环保
     isKeepTime: null, // 守时
+    size: app.globalData.setting.size, // 界面大小
+  },
+  
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function(options) {

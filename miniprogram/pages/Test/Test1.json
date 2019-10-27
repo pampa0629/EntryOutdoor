@@ -1,5 +1,9 @@
 {
   "usingComponents": {
-    "van-button": "/vant-weapp/button/index"
+    "van-button": "/vant-weapp/button/index",
+    "van-cell": "/vant-weapp/cell/index",
+    "van-row": "/vant-weapp/row/index",
+    "van-col": "/vant-weapp/col/index",
+    "van-count-down": "/vant-weapp/count-down/index"
   }
 }

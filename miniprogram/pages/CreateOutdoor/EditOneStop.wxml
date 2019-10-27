@@ -1,14 +1,14 @@
 
-<van-field label="途经点" required value="{{stop.place}}" placeholder="请输入途经点" bindinput="inputStopPlace"/>
+<van-field label="途经点" required value="{{stop.place}}" placeholder="请输入途经点" bindinput="inputStopPlace" size="{{size}}"/>
 
 <!--日期，如：当天-->
 <picker bindchange="changStopDate" range="{{RouteDates}}">
-    <van-field label="预计日期" disabled  value="{{stop.date}}" placeholder="请选择预计到达日期"/>
+    <van-field label="预计日期" disabled  value="{{stop.date}}" placeholder="请选择预计到达日期" size="{{size}}"/>
   </picker>
  
 <!--时间点：8:00-->
 <picker mode="time" value="{{stop.time}}" start="00:00" end="24:00" bindchange="changStopTime">
-  <van-field label="预计时间" disabled  value="{{stop.time}}" placeholder="请选择预计到达时间"/>
+  <van-field label="预计时间" disabled  value="{{stop.time}}" placeholder="请选择预计到达时间" size="{{size}}"/>
 </picker>
 
 <!-- 保存和返回按钮 --> 

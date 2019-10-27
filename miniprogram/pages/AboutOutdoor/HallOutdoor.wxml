@@ -6,7 +6,7 @@
     </view>
   </van-col>
 </van-row>
- 
+  
 <!--没有活动的提示-->
 <view wx:if="{{outdoors.length == 0 && !isPulldown}}">居然没有活动。可以修改设置，看看过期的活动；或者点击“发起活动”可以创建并发布自己的活动。
 </view>
@@ -14,7 +14,7 @@
 <!--活动列表--> 
 <view wx:for="{{outdoors}}" wx:key="id">
   <van-cell-group>
-    <van-cell title="{{item.title}}（{{item.memCount}}/{{item.maxCount}}）" title-width="80%" value="{{item.status}}" border="{{false}}" bindtap="intoOutdoor{{index}}"/> 
+    <van-cell title="{{item.title}}（{{item.memCount}}/{{item.maxCount}}）" size="{{size}}" title-width="80%" value="{{item.status}}" border="{{false}}" bindtap="intoOutdoor{{index}}"/> 
     <van-row wx:if="{{item.pic}}">
       <van-col span="20" offset="2">
         <image mode="widthFix" src="{{item.pic}}" bindtap="intoOutdoor{{index}}"></image>
@@ -33,10 +33,10 @@
 
 <!--弹出设置按钮-->
 <van-popup show="{{ setting.show }}" overlay="{{true}}" position="top" custom-class="center" bind:close="closeSetting">
-  <van-cell title="显示过期活动" title-width="90%" clickable bind:click="onShowOutdate">
+  <van-cell title="显示过期活动" title-width="90%" size="{{size}}" clickable bind:click="onShowOutdate">
     <van-checkbox value="{{setting.showOutdate}}"/>
   </van-cell>
-  <van-field label="活动搜索" required value="{{setting.keyword}}" clearable placeholder="请输入活动地点关键字" bindinput="inputKeyword"/>
+  <van-field label="活动搜索" required value="{{setting.keyword}}" size="{{size}}" clearable placeholder="请输入活动地点关键字" bindinput="inputKeyword"/>
   <van-row>
     <van-col span="9" offset="2">
       <van-button plain size="large" type="primary" bind:click="onConfirmSetting">确定</van-button>

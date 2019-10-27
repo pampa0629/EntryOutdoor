@@ -22,6 +22,12 @@ Page({
     }) 
   },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+
   save(e) {
     console.log("save()")
     if (e)

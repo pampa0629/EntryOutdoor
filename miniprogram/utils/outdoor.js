@@ -6,7 +6,7 @@ const template = require('./template.js')
 const cloudfun = require('./cloudfun.js')
 const lvyeorg = require('./lvyeorg.js')
 const person = require('./person.js')
-
+ 
 wx.cloud.init()
 const db = wx.cloud.database({}) 
 const dbOutdoors = db.collection('Outdoors')
@@ -46,10 +46,11 @@ function OD() {
     disclaimer: "", //免责条款
     allowPopup: false, // 是否允许空降
     maxPerson: false, // 是否限制人数
+    intoHall: true, 
   }
   this.chat = {
-    messages: []
-  } // 必须先把数组结构定义出来，这样后面保存才不会把数组变对象（坑死人的微信云数据库）
+    messages: [] // 必须先把数组结构定义出来，这样后面保存才不会把数组变对象（坑死人的微信云数据库）
+  } 
   this.leader = null // 领队，save时确定，或者领队转让时修改
   this.status = "拟定中" // 活动本身的状态，分为：拟定中，已发布，已成行，报名截止，已取消
 
@@ -159,13 +160,18 @@ OD.prototype.copy = function(od) {
 OD.prototype.checkStatus = function (status) {
   console.log("OD.prototype.checkStatus()", status)
   this.status = status
-  if (this.status != "拟定中" || this.status != "已取消") { // 拟定中或已取消的活动，不做时间线的判断
-    if (new Date() > new Date(this.title.date + "," + this.meets[0].time)) {
+  if (this.status != "拟定中" && this.status != "已取消") { // 拟定中或已取消的活动，不做时间线的判断
+    var now = new Date()
+    // console.log("now:", now)
+    var begin = util.setDateTime(this.title.date, this.meets[0].time)
+    // console.log("begin:", begin)
+    if ( now > begin) {
       this.status = "进行中"
       var days = odtools.Durings.indexOf(this.title.during) 
-      var endDay = new Date(this.title.date + ",24:00")
+      var endDay = util.setDateTime(this.title.date, "24:00")
       endDay.setDate(endDay.getDate() + days)
-      if (new Date() > endDay) {
+      // console.log("endDay:", endDay)
+      if (now > endDay) {
         this.status = "已结束"
       }
     }

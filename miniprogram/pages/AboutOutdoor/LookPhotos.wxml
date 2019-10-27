@@ -38,7 +38,7 @@
   <!--合影-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-tag wx:if="{{myFaceCount == 0}}" type="primary" plain>在“自己”中上传一张“只有您”的人脸像，即可从合影中标识出您的昵称，以便队友认出您来</van-tag>
+      <van-tag size="{{size}}" wx:if="{{myFaceCount == 0}}" type="primary" plain>在“自己”中上传一张“只有您”的人脸像，即可从合影中标识出您的昵称，以便队友认出您来</van-tag>
       <van-panel wx:for="{{multis}}" wx:key="src">
         <van-row>
           <van-col span="20" offset="2">
@@ -75,9 +75,9 @@
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
       <van-panel>
-        <van-tag wx:if="{{myFaceCount == 0}}" type="primary" plain>请上传一张“只有您”的人脸像，以便识别出您自己的照片</van-tag>
-        <van-tag wx:else type="primary" plain>您还可以登记更多人脸，以便更精确的识别出您的照片</van-tag>
-        <van-tag type="primary" plain>您登记的人脸照片，请点击“管理人脸照片”予以查看和管理</van-tag>
+        <van-tag wx:if="{{myFaceCount == 0}}" type="primary" size="{{size}}" plain>请上传一张“只有您”的人脸像，以便识别出您自己的照片</van-tag>
+        <van-tag wx:else type="primary" size="{{size}}" plain>您还可以登记更多人脸，以便更精确的识别出您的照片</van-tag>
+        <van-tag type="primary" size="{{size}}" plain>您登记的人脸照片，请点击“管理人脸照片”予以查看和管理</van-tag>
         <!-- <van-tag type="primary" plain>小程序不会保存您登记的人脸照片，请放心</van-tag> -->
         <van-row>
           <van-col span="10" offset="1">

@@ -3,8 +3,8 @@
   <van-panel title="请选择留言询问内容">
     <van-checkbox-group value="{{chatDlg.selects}}" bind:change="changeChatSelects">
       <van-checkbox wx:for="{{chatDlg.Options}}" wx:key="item" name="{{index}}">{{chatDlg.Options[index]}}</van-checkbox>
-    </van-checkbox-group>
-    <van-field wx:if="{{chatDlg.Options[chatDlg.selects[chatDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体留言内容" border="{{false}}" bind:change="changeChatContent" value="{{ chatDlg.content }}"/>
+    </van-checkbox-group> 
+    <van-field wx:if="{{chatDlg.Options[chatDlg.selects[chatDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体留言内容" border="{{false}}" bind:change="changeChatContent" value="{{ chatDlg.content }}" size="{{size}}"/>
   </van-panel> 
 </van-dialog>    
 
@@ -14,7 +14,7 @@
     <van-checkbox-group value="{{rejectDlg.selects}}" bind:change="changeRejectSelects">
       <van-checkbox wx:for="{{rejectDlg.Options}}" wx:key="item" name="{{index}}">{{rejectDlg.Options[index]}}</van-checkbox>
     </van-checkbox-group> 
-    <van-field wx:if="{{rejectDlg.Options[rejectDlg.selects[rejectDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体驳回理由" border="{{false}}" bind:change="changeRejectContent" value="{{ rejectDlg.content }}"/>
+    <van-field wx:if="{{rejectDlg.Options[rejectDlg.selects[rejectDlg.selects.length-1]]=='其它'}}" placeholder="请输入具体驳回理由" border="{{false}}" bind:change="changeRejectContent" value="{{ rejectDlg.content }}" size="{{size}}"/>
   </van-panel>
 </van-dialog>
  
@@ -82,10 +82,10 @@
 
 <!--审核与授权-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人，其中占坑{{occupyCount}}人，替补{{benchCount}}人）"></van-cell>
-  <van-tag type="primary" plain>审核与授权结果即时生效，无需保存</van-tag> 
-  <van-cell wx:if="{{cfo.nickName}}" title="当前财务官（CFO）为：{{cfo.nickName}}" title-width="90%" />
-  <van-field wx:for="{{members}}" title-width="60%" wx:key="item.personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.meetsIndex}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot>
+	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人，其中占坑{{occupyCount}}人，替补{{benchCount}}人）" size="{{size}}"/>
+  <van-tag size="{{size}}" type="primary" plain>审核与授权结果即时生效，无需保存</van-tag> 
+  <van-cell wx:if="{{cfo.nickName}}" title="当前财务官（CFO）为：{{cfo.nickName}}" title-width="90%" size="{{size}}"/>
+  <van-field wx:for="{{members}}" title-width="60%" wx:key="item.personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.meetsIndex}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot size="{{size}}">
     <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onCheckPopup{{index}}">审核</van-button>
     <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onAppointPopup{{index}}">授权</van-button>
   </van-field> 
@@ -93,18 +93,18 @@
 
 <!--领队编辑退出后需A费用名单-->
 <van-panel wx:if="{{od.aaMembers.length>0}}">
-	<van-cell slot="header" title-class="redtitle" title="需要A费用名单（共{{od.aaMembers.length}}人）"></van-cell>
-  <van-tag type="primary" plain>操作结果即时生效，无需保存</van-tag> 
-  <van-field wx:for="{{od.aaMembers}}" title-width="60%" wx:key="item.personid" label="{{item.userInfo.nickName}}/{{item.userInfo.gender}}/{{item.userInfo.phone}}" value="{{item.result}}" disabled use-button-slot>
+	<van-cell slot="header" title-class="redtitle" title="需要A费用名单（共{{od.aaMembers.length}}人）" size="{{size}}"/>
+  <van-tag size="{{size}}" type="primary" plain>操作结果即时生效，无需保存</van-tag> 
+  <van-field wx:for="{{od.aaMembers}}" title-width="60%" wx:key="item.personid" label="{{item.userInfo.nickName}}/{{item.userInfo.gender}}/{{item.userInfo.phone}}" value="{{item.result}}" disabled use-button-slot size="{{size}}">
     <van-button slot="button" plain size="small" type="primary" bind:click="onPhoneAA{{index}}">电话</van-button>
     <van-button slot="button" plain size="small" type="primary" bind:click="onDeleteAA{{index}}">删除</van-button>
   </van-field> 
 </van-panel> 
 
 <van-panel wx:if="{{od.operations}}">
-	<van-cell slot="header" title-class="redtitle"  title="退出队员名单" title-width="40%" />
+	<van-cell slot="header" title-class="redtitle"  title="退出队员名单" title-width="40%" size="{{size}}"/>
   <van-cell-group>
-    <van-cell wx:for="{{od.operations}}" wx:key="*this" title-width="40%" title="{{item.nickName}}" /> 
+    <van-cell wx:for="{{od.operations}}" wx:key="*this" title-width="40%" title="{{item.nickName}}" size="{{size}}"/> 
   </van-cell-group>   
 </van-panel> 
 
@@ -113,15 +113,15 @@
 <van-switch-cell title="开启附加队员" wx:if="{{od.addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
 <block wx:if="{{openAdd || od.addMembers.length>0 || hasModified}}">
   <van-panel>
-  	<van-cell slot="header" title-class="redtitle" title="附加队员名单（共{{od.addMembers.length}}人）" label="领队可增删非小程序报名队员"></van-cell>
-    <van-tag type="primary" plain>增加和删除结果即时生效，无需保存</van-tag> 
-    <van-field wx:for="{{od.addMembers}}" wx:key="*this" value="{{item}}" readonly use-button-slot>
+  	<van-cell slot="header" title-class="redtitle" title="附加队员名单（共{{od.addMembers.length}}人）" label="领队可增删非小程序报名队员" size="{{size}}"/>
+    <van-tag size="{{size}}" type="primary" plain>增加和删除结果即时生效，无需保存</van-tag> 
+    <van-field wx:for="{{od.addMembers}}" wx:key="*this" value="{{item}}" readonly use-button-slot size="{{size}}">
       <van-button slot="button" plain size="small" type="warning" bind:click="delAddMembers{{index}}">删除</van-button>
     </van-field>
   </van-panel>
 
-  <van-tag type="danger" plain wx:if="{{entryFull}}">活动人数已满，领队可放宽人数限制来添加新队员</van-tag>
-  <van-field label="队员信息" placeholder="请输入要增加的队员信息" value="{{addMember}}" clearable bind:change="changeOneMember" use-button-slot icon="arrow-left" bind:click-icon="copyAddMember">
+  <van-tag size="{{size}}" type="danger" plain wx:if="{{entryFull}}">活动人数已满，领队可放宽人数限制来添加新队员</van-tag>
+  <van-field label="队员信息" placeholder="请输入要增加的队员信息" value="{{addMember}}" clearable bind:change="changeOneMember" use-button-slot icon="arrow-left" bind:click-icon="copyAddMember" size="{{size}}">
     <van-button slot="button" disabled="{{!addMember || entryFull}}" plain size="small" type="primary" bind:click="addOneMember">增加</van-button>
   </van-field> 
 </block>

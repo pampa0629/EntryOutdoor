@@ -337,7 +337,7 @@ const sendAppointMsg2CFO=(personid, outdoorid, title, nickName)=>{
  
 // 给报名者发消息，询问情况
 const sendChatMsg2Member = (personid, title, outdoorid, nickName, phone, content) => {
-  console.log("sendChatMsg2Member")
+  console.log("template.sendChatMsg2Member()", personid, title, outdoorid, nickName, phone, content)
   dbPersons.doc(personid).get().then(res => {
     var openid = res.data._openid
     var tempid = "n97BC6ch3RGsOgmmJeDIvi1Auo830o1A-qr44ZZeg68"
@@ -360,6 +360,8 @@ const sendChatMsg2Member = (personid, title, outdoorid, nickName, phone, content
     let formid = fetchPersonFormid(personid, res.data.formids)
     console.log(formid)
     sendMessage(openid, tempid, formid, page, data)
+  }).catch(err => {
+    console.error("sendChatMsg2Member(),personid:", personid,err)
   })
 }
 

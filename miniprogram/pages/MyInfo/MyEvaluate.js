@@ -54,6 +54,12 @@ Page({
     ],
   },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+  
   async onLoad(options) {
     console.log("onLoad()", options)
     for (var i = 0; i < this.data.Questions.length; i++) {

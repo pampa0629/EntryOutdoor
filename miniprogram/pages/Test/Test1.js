@@ -22,14 +22,19 @@ Page({
    * 页面的初始数据
    */
   data: {
-
+    // size: app.globalData.size,
+    
+    size: wx.getStorageSync("globalSize"),
+    // time: 30 * 60 * 60 * 1000,
+    time: 425856000.0000894
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   async onReady(options) {
-
+    wx.setStorageSync("globalSize", "large")
+    console.log("size:", this.data.size)
   },
 
   async test1() {
@@ -398,6 +403,31 @@ Page({
       // }
     })
     console.log("res2:", res2)
+  },
+
+  tapDate() {
+    var str2 = "2019-10-19"
+    var date2 = new Date(str2)
+    console.log("date2:", date2)
+    var hm = "05:16"
+
+    date2.setHours(hm.split(":")[0])
+    date2.setMinutes(hm.split(":")[1])
+    console.log("date2:", date2)
+
+  },
+
+  tapNotice() {
+    console.log("tapNotice()")
+    wx.requestSubscribeMessage({
+      tmplIds: ['gQtSQmltmXrOFeAcvOfXFVsRGv7v9S6YX6467rDoSMc', "CjoAXZpefhPo6IFgxvPWlx8xoFn08tGe4ijcZE-2Cdk"],
+      success(res) { 
+        console.log("success: ", res)
+      }, 
+      complete(res){
+        console.log("complete: ", res)
+      }
+    })
   },
 
 

@@ -11,6 +11,8 @@ Page({
     ocuppy: null, // 占坑截止时间
     entry: null, // 报名截止时间
     hasModified: false,
+
+    size: app.globalData.setting.size, // 界面大小
   },
 
   onLoad: function(options) {
@@ -50,6 +52,12 @@ Page({
     }
 
     console.log(self.data)
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   save: function(e) {

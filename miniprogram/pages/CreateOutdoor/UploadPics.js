@@ -1,4 +1,4 @@
-// pages/CreateOutdoor/UploadPics.js
+const app = getApp()
 const util = require('../../utils/util.js')
 wx.cloud.init()
 
@@ -7,6 +7,13 @@ Page({
   data: {
     pics: [], // {src:string} 云存储路径
     outdoorid:null, // 活动id 
+    size: app.globalData.setting.size, // 界面大小
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function (options) {

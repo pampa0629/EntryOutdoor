@@ -23,7 +23,7 @@
 <!-- 留言是否同步到org网站 -->
 <van-row wx:if="{{tid}}">
   <van-col span="16" offset=""> 
-    <van-tag  size="large" plain>留言将被同步到绿野org网站</van-tag>
+    <van-tag size="{{size}}" plain>留言将被同步到绿野org网站</van-tag>
   </van-col>
   <van-col span="7" offset="1"> 
     <van-button size="small" bind:click="gotoLvyeOrg">跳转：绿野org</van-button>
@@ -31,10 +31,10 @@
 </van-row>
 
 <!--刷新提示-->
-<van-tag wx:if="{{!hasPullFlush}}" size="large" type="success">下拉即时刷新留言</van-tag>
+<van-tag wx:if="{{!hasPullFlush}}" size="{{size}}" type="success">下拉即时刷新留言</van-tag>
 
 <!-- 留言是否发送微信服务消息 -->
-<van-cell title="@昵称同时发送微信消息"  title-width="90%"  clickable bind:click="checkSendWxnotice">
+<van-cell title="@昵称同时发送微信消息"  title-width="90%"  clickable bind:click="checkSendWxnotice" size="{{size}}">
   <van-checkbox value="{{sendWxnotice}}"/>
 </van-cell>
  
@@ -42,7 +42,7 @@
 <van-row wx:for="{{chat.messages}}" wx:key="who+msg">
   <block wx:if="{{!item.self}}">
     <van-col span="4" offset=""> 
-      <van-tag bindtap="tapWho{{index}}" plain size="large" type="primary">{{item.who}}</van-tag>
+      <van-tag size="{{size}}" bindtap="tapWho{{index}}" plain size="large" type="primary">{{item.who}}</van-tag>
     </van-col>
     <van-col span="20" offset="">
       <view bindlongpress="copyMessage{{index}}" style='font-size:14pt;color:#ef9284;background-color:#fffbe8' wx:if="{{item.atme}}">{{item.msg}}</view>
@@ -54,7 +54,7 @@
       <view style='font-size:14pt;text-align:right'>{{item.msg}}</view>
     </van-col>
     <van-col span="4" offset="0">
-      <van-tag plain size="large" type="primary">{{item.who}}</van-tag>
+      <van-tag size="{{size}}" plain size="large" type="primary">{{item.who}}</van-tag>
     </van-col>
   </block>
 </van-row>

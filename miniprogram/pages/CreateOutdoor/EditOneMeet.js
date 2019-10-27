@@ -1,6 +1,7 @@
 const app = getApp()
 const template = require('../../utils/template.js')
-const util = require('../..//utils/util.js')
+const util = require('../../utils/util.js')
+const promisify = require('../../utils/promisify.js')
 
 Page({
 
@@ -21,6 +22,13 @@ Page({
     od:null,
 
     action: null, // 发起这个页面的行为
+    size: app.globalData.setting.size, // 界面大小
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function(options) {
@@ -97,7 +105,7 @@ Page({
     }
     var message = "同意授权“使用我的地理位置”才能调用微信地图；小程序不会记录您的位置，请放心"
     await util.authorize("userLocation", message)
-    let res = await wx.chooseLocation({})
+    let res = await promisify.chooseLocation({})
         
     console.log(res)
     this.setData({

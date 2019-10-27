@@ -25,6 +25,7 @@ Page({
     rank:{},
     currentTab: 0, 
     screenHeight: 736, // 默认可用屏幕高度
+    size: app.globalData.setting.size, // 界面大小
   },
 
   onLoad: function(options) {
@@ -86,8 +87,10 @@ Page({
     })
   },
 
-  onShow: function() {
-
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onUnload: function() {

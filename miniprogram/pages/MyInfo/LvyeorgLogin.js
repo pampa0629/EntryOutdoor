@@ -27,6 +27,12 @@ Page({
     outdoorid:"", // 活动id
   },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+
   onLoad: function(options) {
     const self = this;
     self.setDefaultCheck()

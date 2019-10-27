@@ -3,7 +3,7 @@
 
 <!--选择地区--> 
 <block wx:if="{{!isOutDate && !leaderDo}}">
-  <van-field value="{{equipments.area}}" center disabled label="活动所在地区" placeholder="请选择区县" border="{{ false }}" use-button-slot>
+  <van-field value="{{equipments.area}}" center disabled label="活动所在地区" placeholder="请选择区县" border="{{ false }}" use-button-slot size="{{size}}">
     <van-button slot="button" size="small" round plain type="primary" bind:click="onPopup">选择地区</van-button>
   </van-field>
   <van-popup show="{{ showPopup }}" position="bottom" custom-class="center" bind:close="closePopup">
@@ -15,18 +15,18 @@
 <van-notice-bar wx:else text="领队好像忘记推荐装备了，系统推荐如下（仅供参考）"/>
 <!--最好有的装备--> 
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="必须有的装备"></van-cell>
-  <van-cell  wx:for="{{equipments.mustRes}}" wx:key="{{item}}" title="{{item}}" />
+	<van-cell slot="header" title-class="redtitle" title="必须有的装备" size="{{size}}"/>
+  <van-cell  wx:for="{{equipments.mustRes}}" wx:key="{{item}}" title="{{item}}" size="{{size}}"/>
 </van-panel>
  
 <!--可以有的装备-->
 <van-panel>
- 	<van-cell slot="header" title-class="redtitle" title="可以有的装备"></van-cell>
-  <van-cell  wx:for="{{equipments.canRes}}" wx:key="{{item}}" title="{{item}}" />
+ 	<van-cell slot="header" title-class="redtitle" title="可以有的装备" size="{{size}}"/>
+  <van-cell  wx:for="{{equipments.canRes}}" wx:key="{{item}}" title="{{item}}" size="{{size}}"/>
 </van-panel>
 
 <!--不能有的装备-->
 <van-panel>
- 	<van-cell slot="header" title-class="redtitle" title="不能有的装备"></van-cell>
-  <van-cell  wx:for="{{equipments.noRes}}" wx:key="{{item}}" title="{{item}}" />
+ 	<van-cell slot="header" title-class="redtitle" title="不能有的装备" size="{{size}}"/>
+  <van-cell  wx:for="{{equipments.noRes}}" wx:key="{{item}}" title="{{item}}" size="{{size}}"/>
 </van-panel>

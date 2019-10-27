@@ -1,4 +1,4 @@
-<van-tag type="primary" plain>删除人脸照片后，上传的活动照片将无法识别出您来。建议至少保留一张本人的高清照片。</van-tag> 
+<van-tag type="primary" size="{{size}}" plain>删除人脸照片后，上传的活动照片将无法识别出您来。建议至少保留一张本人的高清照片。</van-tag> 
 <van-panel wx:for="{{facecodes}}" wx:key="id">
   <van-row>
     <van-col span="20" offset="2">

@@ -12,7 +12,7 @@ const dbPersons = db.collection('Persons')
 Page({ 
 
   data: { 
-    isTesting: false, // for test  false true
+    isTesting: true, // for test  false true
 
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
     userInfo: {
@@ -30,6 +30,10 @@ Page({
     hasLoginLvyeorg: false, // 是否已经登录了org网站
     lvyeOrgUsername: "", // 绿野org 登录用户名
     lvyeOrgButton: "绿野ORG登录", // 按钮上显示的文字
+
+    // 全局设置
+    setting: {},
+    size:app.globalData.setting.size, // 当前页面界面元素大小
 
     showCalls: false,
     Calls: [{
@@ -81,17 +85,12 @@ Page({
   },
 
   onLoad: function() { 
+    console.log("MyInfo.onLoad()")
     this.loginWeixin(null) // 参数为null，说明是启动时主动调用，则无需重复调用app的函数
 
-    // const self = this
-    // if (app.globalData.openid == null || app.globalData.openid.length == 0) {
-    //   app.openidCallback = (openid) => {
-    //     app.globalData.openid = openid // 其实屁事没有，就是要等到app的onLaunch中得到openid
-    //     this.loginWeixin(null) // 参数为null，说明是启动时主动调用，则无需重复调用app的函数
-    //   }
-    // } else {
-    //   this.loginWeixin(null)
-    // }
+    this.setData({
+      setting: app.globalData.setting,
+    })
   },
 
   // 点击 > 图标想修改信息，主要看是否登录了
@@ -176,7 +175,8 @@ Page({
     const self = this
     // 就看看有无最近的活动
     this.setData({
-      lastOutdoorid: util.loadOutdoorID()
+      lastOutdoorid: util.loadOutdoorID(),
+      size: app.globalData.setting.size,
     })
 
     // 同时看看org是否登录了
@@ -341,7 +341,7 @@ Page({
     var message = "获取坐标会有助于您报警救援时给出准确位置；小程序不会记录您的位置，请放心！"
     await util.authorize("userLocation", message)
     console.log("util.authorize,userLocation")
-    let res = promisify.getLocation({altitude: true})
+    let res = await promisify.getLocation({altitude: true})
     console.log(res)
     console.log(this.data.Calls)
     this.data.Calls[0].subname = "经度:" + res.longitude + ",维度:" + res.latitude + ",海拔:" + res.altitude + ",误差:" + res.accuracy + "米"
@@ -374,9 +374,37 @@ Page({
     })
   },
 
-  adError(e) {
-    console.error(e)
+  bindSetting() {
+    this.setData({
+      "setting.show": true,
+    })
   },
+
+  closeSetting() {
+    this.setData({
+      "setting.show": false,
+    })
+  },
+
+  onLargeSize(e) {
+    console.log("onLargeSize()",e)
+    this.setData({
+      "setting.size": this.data.setting.size ? "" :"large",
+    })
+    console.log("size:", this.data.setting.size)
+  }, 
+
+  onConfirmSetting() {
+    this.setData({
+      "setting.show": false,
+      size: this.data.setting.size
+    })
+    app.saveSetting(this.data.setting)
+  },
+
+  // adError(e) {
+  //   console.error(e)
+  // },
 
   //////////////////////////////// for testing ////////////////////////
   bindTest1: function() {

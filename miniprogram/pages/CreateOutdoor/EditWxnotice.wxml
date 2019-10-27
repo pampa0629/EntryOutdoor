@@ -1,15 +1,15 @@
 <!--微信服务通知-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="微信服务通知"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="微信服务通知" size="{{size}}"/>
   <van-switch-cell title="接收通知" checked="{{wxnotice.accept}}" bind:change="checkAccept"/>
    
   <block wx:if="{{wxnotice.accept}}">
     <!--接收前几位的报名通知-->
-    <van-cell title="接收前{{wxnotice.entryCount}}位队员报名的微信通知" border="{{false}}">
+    <van-cell title="接收前{{wxnotice.entryCount}}位队员报名的微信通知" border="{{false}}" size="{{size}}">
       <van-stepper value="{{wxnotice.entryCount}}" min="1" max="{{formids.length}}" bind:change="bindAddEntry"/> 
     </van-cell> 
     <!--是否接收满员通知-->
-    <van-cell title="满员时接收通知" title-width="90%" clickable bind:click="checkFullNotice" border="{{false}}">
+    <van-cell title="满员时接收通知" title-width="90%" clickable bind:click="checkFullNotice" border="{{false}}" size="{{size}}">
       <van-checkbox value="{{wxnotice.fullNotice}}"/>
     </van-cell>
   </block> 
@@ -18,9 +18,9 @@
 <van-cell title="  " border="{{false}}" />
 
 <!--提示和增加通知数量上限-->
-<van-tag type="primary" plain>当前可接收微信通知数量的上限是：{{formids.length}}，您可点击下面按钮增加上限。
+<van-tag type="primary" size="{{size}}" plain>当前可接收微信通知数量的上限是：{{formids.length}}，您可点击下面按钮增加上限。
 </van-tag>
-<van-tag type="danger" plain>注意：由于微信限制，通知有效期为七天，过期将无法收到，需重新点击下面按钮。</van-tag>
+<van-tag type="danger" size="{{size}}" plain>注意：由于微信限制，通知有效期为七天，过期将无法收到，需重新点击下面按钮。</van-tag>
 
 <form bindsubmit="addCount" report-submit="true">
   <button form-type="submit" disabled="{{!wxnotice.accept}}" type="primary" plain>增加微信通知数量</button>

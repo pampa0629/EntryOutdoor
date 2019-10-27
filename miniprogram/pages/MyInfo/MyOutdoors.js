@@ -14,6 +14,7 @@ Page({
     caredOutdoors: [], // 我关注的活动列表
 
     screenHeight: 736, // 默认可用屏幕高度
+    size: app.globalData.setting.size, // 界面大小
 
     // 弹出功能选项
     index: "", // 即将要处理的
@@ -34,6 +35,11 @@ Page({
 
   onShow: function() {
     console.log("MyOutdoors.onShow()")
+
+    this.setData({
+      size: app.globalData.setting.size
+    })
+
     const self = this;
     if(app.checkLogin()) {
       // 从Persons表中取出数据

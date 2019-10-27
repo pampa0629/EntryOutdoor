@@ -1,25 +1,25 @@
 <!--活动人数限制-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="活动人数限制"></van-cell>
-  <van-cell title-width="90%" title="限制人数" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}">
+	<van-cell slot="header" title-class="redtitle" title="活动人数限制" size="{{size}}"/>
+  <van-cell title-width="90%" title="限制人数" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}" size="{{size}}">
     <van-checkbox value="{{limits.maxPerson}}"/>
   </van-cell>    
-  <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}">
+  <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}" size="{{size}}">
     <van-stepper value="{{limits.personCount}}" min="1" max="100" bind:change="bindAddPerson" />
   </van-cell>   
   <!--扩编：允许人数增加，且已经有替补队员时-->
   <block wx:if="{{limits.personCount>oldPersonCount && (od.addMembers.length+od.members.length>oldPersonCount)}}">
-    <van-tag type="primary" plain>已有替补队员，请点击下面的“扩编”按钮转为正式队员。</van-tag>
+    <van-tag size="{{size}}" type="primary" plain>已有替补队员，请点击下面的“扩编”按钮转为正式队员。</van-tag>
     <van-button type="primary" size="large" plain bindtap='tapEnlarge'>扩编</van-button>
   </block>   
   <!--缩编：允许人数减少，且需要把队员转为替补时-->
   <block wx:if="{{limits.personCount<oldPersonCount && (od.addMembers.length+od.members.length>limits.personCount)}}">
-    <van-tag type="danger" plain>减少人数会造成已有队员转为替补，如确有必要，请点击点击下面的“缩编”。</van-tag>
+    <van-tag size="{{size}}" type="danger" plain>减少人数会造成已有队员转为替补，如确有必要，请点击点击下面的“缩编”。</van-tag>
     <van-button type="danger" size="large" plain bindtap='tapReduce'>缩编</van-button>
   </block>
 
   <block wx:if="{{!limits.maxPerson}}">
-    <van-cell title-width="90%" title="允许空降" clickable bind:click="checkAllowPopup" border="{{false}}">
+    <van-cell title-width="90%" title="允许空降" clickable bind:click="checkAllowPopup" border="{{false}}" size="{{size}}">
         <van-checkbox value="{{limits.allowPopup}}"/>
     </van-cell>
   </block>
@@ -27,47 +27,47 @@
 
 <!--活动性质选项-->
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="活动性质选项"></van-cell>
-<!--活动大厅-->
-  <van-cell title="进入活动大厅" title-width="90%" label="活动大厅能被所有人看到" clickable bind:click="checkIntoHall">
+  <van-cell slot="header" title-class="redtitle" title="活动性质选择（三选一）" size="{{size}}"/>
+  <!--公开-->
+  <van-cell title="公开活动" title-width="90%" label="活动大厅可见，能被所有人分享" clickable bind:click="checkIntoHall" size="{{size}}">
     <van-checkbox value="{{limits.intoHall}}"/>
   </van-cell>
-  <!--测试发帖-->
-  <van-cell title="测试活动"  title-width="90%" label="测试发帖仅作为学习体验使用，不发送微信消息通知，不纳入统计" clickable bind:click="checkTest">
-    <van-checkbox value="{{limits.isTest}}"/>
-  </van-cell>
   <!--私约活动-->
-  <van-cell title="私约活动"  title-width="90%" label="私约活动只限领队分享，不进入活动大厅" clickable bind:click="checkPrivate">
+  <van-cell title="私约活动"  title-width="90%" label="活动大厅不可见，仅在领队分享后方可看到" clickable bind:click="checkPrivate" size="{{size}}">
     <van-checkbox value="{{limits.private}}"/>
+  </van-cell>
+  <!--测试发帖-->
+  <van-cell title="测试活动"  title-width="90%" label="仅作为学习、测试体验使用，活动大厅不可见" clickable bind:click="checkTest" size="{{size}}">
+    <van-checkbox value="{{limits.isTest}}"/>
   </van-cell>
 </van-panel>
 
 <!--截止时间-->
-<van-cell title="占坑/报名截止时间" title-class="redtitle" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{true}}"/>
+<van-cell title="占坑/报名截止时间" title-class="redtitle" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{true}}" size="{{size}}"/>
 
 <!--活动装备-->
-<van-cell title="活动装备要求" title-class="redtitle" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{true}}"/>
+<van-cell title="活动装备要求" title-class="redtitle" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{true}}" size="{{size}}"/>
 
 <!--微信服务通知-->
-<van-cell title="微信服务通知" title-class="redtitle" label="" value="点击设置微信通知" is-link url="EditWxnotice" border="{{true}}"/>
+<van-cell title="微信服务通知" title-class="redtitle" label="" value="点击设置微信通知" is-link url="EditWxnotice" border="{{true}}" size="{{size}}"/>
 
 <!--户外网站同步-->
-<van-cell title="户外网站同步" wx:if="{{lvyeorgInfo}}" title-class="redtitle" label="" value="点击同步户外网站" is-link url="EditWebsites" border="{{true}}"/>
+<van-cell title="户外网站同步" wx:if="{{lvyeorgInfo}}" title-class="redtitle" label="" value="点击同步户外网站" is-link url="EditWebsites" border="{{true}}" size="{{size}}"/>
 
 <!--查看报名记录-->
-<!-- <van-cell title="查看退出记录" wx:if="{{od.operations}}" title-class="redtitle" label="" value="点击查看退出历史记录" is-link url="../AboutOutdoor/LookOutdoorOp" border="{{true}}"/> -->
+<!-- <van-cell title="查看退出记录" wx:if="{{od.operations}}" title-class="redtitle" label="" value="点击查看退出历史记录" is-link url="../AboutOutdoor/LookOutdoorOp" border="{{true}}" size="{{size}}"/> -->
 
 
 <!--活动规则-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="活动规则"></van-cell>
-  <van-cell title="AA" title-width="90%" label="公共费用所有成员AA；领队确认活动成行后再退出，若无人替补，费用也要分摊" clickable bind:click="checkAA"> 
+	<van-cell slot="header" title-class="redtitle" title="活动规则" size="{{size}}"/>
+  <van-cell title="AA" title-width="90%" label="公共费用所有成员AA；领队确认活动成行后再退出，若无人替补，费用也要分摊" clickable bind:click="checkAA" size="{{size}}"> 
     <van-checkbox value="{{limits.isAA}}"/>
   </van-cell>
-  <van-cell title="环保" title-width="90%" label="带走自己不可降解的垃圾，不摘一花一叶" clickable bind:click="checkEnvironment">
+  <van-cell title="环保" title-width="90%" label="带走自己不可降解的垃圾，不摘一花一叶" clickable bind:click="checkEnvironment" size="{{size}}">
     <van-checkbox value="{{limits.isEnvironment}}"/>
   </van-cell>
-  <van-cell title="守时" title-width="90%" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime">
+  <van-cell title="守时" title-width="90%" label="户外路远天黑危险，集合过时不候，费用照A" clickable bind:click="checkKeepTime" size="{{size}}">
       <van-checkbox value="{{limits.isKeepTime}}"/>
   </van-cell>
 </van-panel>

@@ -1,9 +1,9 @@
 <!--题目-->
 <van-panel wx:for="{{Questions}}" wx:key="item.question" wx:if="{{item.show}}" >
-  <van-cell title="{{item.question}}" disabled/>
+  <van-cell title="{{item.question}}" disabled size="{{size}}"/>
   <van-radio-group value="{{item.select}}" bind:change="changeAnswer{{index}}">
     <van-cell-group>
-      <van-cell wx:for="{{item.answers}}" wx:for-item="subItem" wx:for-index="subIndex" wx:key="subItem" title="{{subItem}}" clickable data-name="{{subIndex}}" bind:click="clickAnsweer{{index}}">
+      <van-cell wx:for="{{item.answers}}" wx:for-item="subItem" wx:for-index="subIndex" wx:key="subItem" title="{{subItem}}" clickable data-name="{{subIndex}}" bind:click="clickAnsweer{{index}}" size="{{size}}">
         <van-radio name="{{subIndex}}" />
       </van-cell> 
     </van-cell-group>

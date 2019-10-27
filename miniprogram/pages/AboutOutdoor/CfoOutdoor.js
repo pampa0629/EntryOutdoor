@@ -19,7 +19,7 @@ Page({
     members: [], // 队员
     aaMembers: [], // 需要参加aa的其他人员
     pay: {},
-
+    size: app.globalData.setting.size, // 界面大小
   },
 
   onLoad: function (options) {
@@ -33,6 +33,12 @@ Page({
         title: res.data.title.whole,
       })
       self.statPay()
+    })
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
     })
   },
 

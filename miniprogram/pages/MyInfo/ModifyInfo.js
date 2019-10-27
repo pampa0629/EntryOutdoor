@@ -22,6 +22,7 @@ Page({
     },
     Genders: ["GG", "MM"], // 性别选项; //性别 0:未知、1:男、2:女
     hasModified: false, // 是否修改了
+    size: app.globalData.setting.size, // 界面大小
 
     phoneErrMsg: "", // 电话号码输入错误提示 ==手机号格式错误
     nickErrMsg: "", // 昵称必须唯一
@@ -42,6 +43,12 @@ Page({
         photos: [],
       },
     },
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   async onLoad(options) {

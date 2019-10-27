@@ -1,7 +1,7 @@
 <!--路线途经点-->
 <van-panel use-footer-slot>
-	<van-cell slot="header" title-class="redtitle" title="路线途经点"></van-cell>
-  <van-cell wx:for="{{route.wayPoints}}" wx:key="item"  title="{{item.place}}" value="{{item.date}}，{{item.time}}" clickable bind:click="clickStop{{index}}" border="{{index<route.wayPoints.length-1}}" >
+	<van-cell slot="header" title-class="redtitle" title="路线途经点" size="{{size}}"/>
+  <van-cell wx:for="{{route.wayPoints}}" wx:key="item"  title="{{item.place}}" value="{{item.date}}，{{item.time}}" clickable bind:click="clickStop{{index}}" border="{{index<route.wayPoints.length-1}}" size="{{size}}">
     <van-icon slot="right-icon" name="edit-data" class="van-cell__right-icon" />
   </van-cell>
   <view slot="footer">
@@ -22,14 +22,14 @@
 
 <!--户外手台频率--> 
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="手台频率"></van-cell>
-  <van-field label="手台频率" value="{{route.interphone}}" placeholder="请输入手台频率" clearable bind:change="changeInterphone" error-message="{{interphoneErrMsg}}" type="digit"/>
+  <van-cell slot="header" title-class="redtitle" title="手台频率" size="{{size}}"/>
+  <van-field label="手台频率" value="{{route.interphone}}" placeholder="请输入手台频率" clearable bind:change="changeInterphone" error-message="{{interphoneErrMsg}}" type="digit" size="{{size}}"/>
 </van-panel>
 
 <!--轨迹文件--> 
 <van-panel use-footer-slot>
-  <van-cell slot="header" title-class="redtitle" title="轨迹文件"></van-cell>
-  <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}"  title-width="60%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
+  <van-cell slot="header" title-class="redtitle" title="轨迹文件" size="{{size}}"/>
+  <van-field wx:for="{{route.trackFiles}}" wx:key="item"  label="{{item.name}}"  title-width="60%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}" size="{{size}}">
     <van-button slot="button" size="small" plain type="warning" bind:click='deleteTrackFile{{index}}'>删除</van-button>
   </van-field>
   <view slot="footer">
@@ -39,14 +39,14 @@
 
 <!--六只脚、两步路等户外轨迹--> 
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="户外网站轨迹"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="户外网站轨迹" size="{{size}}"/>
   <block wx:for="{{route.trackSites}}" wx:key="name">
-    <van-cell title="{{item.name}}" title-width="90%" clickable bind:click="checkTrackSites{{index}}" border="{{item.useit}}">
+    <van-cell title="{{item.name}}" title-width="90%" clickable bind:click="checkTrackSites{{index}}" border="{{item.useit}}" size="{{size}}">
       <van-checkbox value="{{item.useit}}"/>
     </van-cell>
     <block wx:if="{{item.useit}}">
-      <van-field  label="轨迹编号" type="number" value="{{item.trackid}}" placeholder="请输入{{item.name}}中对应的轨迹编号" bind:change="changeTrackid{{index}}"/>
-      <van-field  label="轨迹网址" value="{{item.url}}" placeholder="请拷入{{item.name}}中对应轨迹的网址" disabled use-button-slot border="{{false}}"/>
+      <van-field  label="轨迹编号" type="number" value="{{item.trackid}}" placeholder="请输入{{item.name}}中对应的轨迹编号" bind:change="changeTrackid{{index}}"  size="{{size}}"/>
+      <van-field  label="轨迹网址" value="{{item.url}}" placeholder="请拷入{{item.name}}中对应轨迹的网址" disabled use-button-slot border="{{false}}" size="{{size}}"/>
       <van-row>
         <van-col span="4" offset="14">
           <van-button size="small" plain bind:click='copyinUrl{{index}}'>拷入</van-button>

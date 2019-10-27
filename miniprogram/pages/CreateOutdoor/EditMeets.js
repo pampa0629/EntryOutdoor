@@ -9,6 +9,7 @@ Page({
     index: 0, // 当前要处理的index
     hasModified: false,
     od:null,  
+    size: app.globalData.setting.size, // 界面大小
   
     showAction: false, 
     Actions: [{
@@ -60,7 +61,7 @@ Page({
     }
     this.setData({
       showAction: false
-    });
+    })
   },
 
   // 弹出选项：在前面追加，在后面追加，编辑，删除
@@ -69,7 +70,13 @@ Page({
     this.setData({
       index: index,
       showAction: true,
-    });
+    })
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function(options) {

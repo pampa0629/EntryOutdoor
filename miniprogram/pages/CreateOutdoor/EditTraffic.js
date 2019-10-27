@@ -26,11 +26,18 @@ Page({
     },
     hasModified: false,
     od:null, 
+    size: app.globalData.setting.size, // 界面大小
 
     showBrandPopup: false,
     showColorPopup: false,
     Brands: null,
     Colors: null,
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   async onLoad(options) {

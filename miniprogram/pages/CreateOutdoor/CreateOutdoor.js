@@ -49,6 +49,8 @@ Page({
     interval: null, // 计时器
     editTitle: false, // 开启基础信息编辑
     formids:[], // 消息数量
+
+    size: app.globalData.setting.size, // 界面大小
   },
 
   openEditTitle(e) {
@@ -79,6 +81,9 @@ Page({
     if (outdoorid) { // 支持从微信消息中登录活动
       util.saveOutdoorID(outdoorid)
     }
+    this.setData({
+      size: app.globalData.size
+    })
 
     this.data.od = new outdoor.OD()
 
@@ -92,6 +97,10 @@ Page({
     console.log("CreateOutdoor.js onShow()")
     var outdoorid = util.loadOutdoorID()
     this.checkLogin()
+
+    this.setData({
+      size: app.globalData.setting.size
+    })
 
     console.log("outdoorid: " + outdoorid)
     if (outdoorid && outdoorid != this.data.od.outdoorid) {

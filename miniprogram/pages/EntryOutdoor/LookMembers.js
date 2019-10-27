@@ -1,11 +1,19 @@
-// pages/EntryOutdoor/LookMembers.js
+const app = getApp()
+
 Page({
 
   data: {
     members:null,
     addMembers:null,
+    size: app.globalData.setting.size, // 界面大小
   },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+  
   onLoad: function (options) {  
     console.log("LookMembers.onLoad()", options)
     const self = this; 

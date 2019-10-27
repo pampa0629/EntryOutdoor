@@ -1,5 +1,5 @@
 <van-panel use-footer-slot>
-	<van-cell slot="header" title-class="redtitle" title="免责条款" value="请拷贝后这里粘贴生成"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="免责条款" value="请拷贝后这里粘贴生成" size="{{size}}"/>
   <view>
     <text style="font-size:12pt">{{disclaimer}}</text>
   </view>

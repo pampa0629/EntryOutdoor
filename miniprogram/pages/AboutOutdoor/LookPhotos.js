@@ -20,6 +20,7 @@ Page({
     od: null,
     currentTab: 0, // 默认是“风景”
     screenHeight: 736, // 默认可用屏幕高度
+    size: app.globalData.setting.size, // 界面大小
 
     isMember: true,
     landscapes: [], // 风景照（无人脸）
@@ -47,7 +48,12 @@ Page({
 
     var div = Math.min(Math.max(this.data.od.members.length / 2,2), 5) // 活动人数的一半(至少2人），或者有5人，即认为是合影
     this.dividePhotos(this.data.od.photos, div)
+  },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   // 给合影照片标注人名

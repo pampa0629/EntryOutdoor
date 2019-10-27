@@ -3,7 +3,7 @@
 
 <!--活动基本情况-->
 <view>
-  <van-tag type="primary" plain>请截长屏保存到手机相册</van-tag>
+  <van-tag type="primary" size="{{size}}" plain>请截长屏保存到手机相册</van-tag>
   <text>\n{{od.title.whole}}\n</text>
   <text class="tip">地点：</text>
   <text>{{od.title.place}}\n</text>  
@@ -33,7 +33,7 @@
 
 <!--队员列表-->
 <view> 
-  <van-tag type="primary" plain>\n活动状态：{{od.status}}</van-tag>
+  <van-tag type="primary" size="{{size}}" plain>\n活动状态：{{od.status}}</van-tag>
   <text class="tip">\n队员列表（共{{od.members.length}}人）\n</text>
 </view>
 

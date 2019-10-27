@@ -15,6 +15,7 @@ Page({
   
     index: 0, // 当前要处理的index
     hasModified: false,
+    size: app.globalData.setting.size, // 界面大小
 
     showAction: false,
     Actions: [{
@@ -76,6 +77,12 @@ Page({
       index: index,
       showAction: true,
     });
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function(options) {

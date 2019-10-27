@@ -22,6 +22,7 @@ Page({
     pay:{}, 
 
     mine:{num:1, screen:""},
+    size: app.globalData.setting.size, // 界面大小
   },
 
   onLoad: function (options) {
@@ -55,6 +56,12 @@ Page({
         })
       }
     }) 
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   clickCFO() {

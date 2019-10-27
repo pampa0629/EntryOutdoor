@@ -1,13 +1,13 @@
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="第一步：确定人均费用"></van-cell>
-  <van-field label="活动总费用（元）" title-width="70%" value="{{pay.total}}" type="digit" bind:change="changeTotal"/>
-  <van-field label="活动人数" title-width="70%" value="{{pay.count}}" type="number" bind:change="changeCount"/>
-  <van-field label="人均费用（元）" title-width="70%" value="{{pay.average}}" type="digit" bind:change="changeAverage"/>
+  <van-cell slot="header" title-class="redtitle" title="第一步：确定人均费用" size="{{size}}"/>
+  <van-field label="活动总费用（元）" title-width="70%" value="{{pay.total}}" type="digit" bind:change="changeTotal" size="{{size}}"/>
+  <van-field label="活动人数" title-width="70%" value="{{pay.count}}" type="number" bind:change="changeCount" size="{{size}}"/>
+  <van-field label="人均费用（元）" title-width="70%" value="{{pay.average}}" type="digit" bind:change="changeAverage" size="{{size}}"/>
 </van-panel>
 
 <!--设置收款二维码--> 
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="第二步：上传收款二维码，发送收款通知"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="第二步：上传收款二维码，发送收款通知" size="{{size}}"/>
   <van-row> 
     <van-col span="20" offset="2">
       <image mode="widthFix" src="{{pay.qrcode}}"></image>
@@ -19,13 +19,13 @@
 
 <!--统计收款状况-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="第三步：统计收款状况"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="第三步：统计收款状况" size="{{size}}"/>
 </van-panel>
 <van-button size="large" plain type="primary" bind:click='statPay'>统计收款状况</van-button>
   
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="已交款名单" title-width="30%" value="已收款{{pay.alreadyCount}}人(共{{pay.count}}人)"/>
-  <van-cell wx:for="{{pay.results}}" wx:key="nickName" title="{{item.nickName}}" title-width="50%" value="{{curScreen?'点击关闭':'点击查看'}}" bind:click="clickOne{{index}}"/>
+  <van-cell slot="header" title-class="redtitle" title="已交款名单" title-width="30%" value="已收款{{pay.alreadyCount}}人(共{{pay.count}}人)" size="{{size}}"/>
+  <van-cell wx:for="{{pay.results}}" wx:key="nickName" title="{{item.nickName}}" title-width="50%" value="{{curScreen?'点击关闭':'点击查看'}}" bind:click="clickOne{{index}}" size="{{size}}"/>
 </van-panel>
 
 <van-row wx:if="{{curScreen}}">
@@ -35,8 +35,8 @@
 </van-row>
 
 <van-panel wx:if="{{pay.lacks}}">
-  <van-cell slot="header" title-class="redtitle" title="未交款名单"></van-cell>
-  <van-cell wx:for="{{pay.lacks}}" wx:key="item" title="{{item}}" title-width="50%"/>
+  <van-cell slot="header" title-class="redtitle" title="未交款名单" size="{{size}}"/>
+  <van-cell wx:for="{{pay.lacks}}" wx:key="item" title="{{item}}" title-width="50%" size="{{size}}"/>
 </van-panel>
 
 

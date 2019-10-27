@@ -13,7 +13,7 @@
 
 <!--群主是谁-->
 <block wx:if="{{isOwner}}"> 
-  <van-cell title="我是群主" title-class="redtitle"/>
+  <van-cell title="我是群主" title-class="redtitle" size="{{size}}"/>
   <van-row>
     <van-col span="9" offset="2">
       <van-button size="large" plain type="primary" bind:click="tapRank">刷新排行榜</van-button>
@@ -24,10 +24,10 @@
   </van-row>
 </block>
 <block wx:else>
-  <van-cell title="群主是：{{owner.userInfo.nickName}}" title-class="redtitle"/>
+  <van-cell title="群主是：{{owner.userInfo.nickName}}" title-class="redtitle" size="{{size}}"/>
 </block>
 
-<van-cell title="排行榜最后更新时间" wx:if="{{rank.update}}" value="{{rank.update}}"/>
+<van-cell title="排行榜最后更新时间" wx:if="{{rank.update}}" value="{{rank.update}}" size="{{size}}"/>
 
 <!--排行榜，分为：总排行、本年度排行、上一年度排行-->
 <van-tabs active="{{currentTab}}" bind:change="changeTab">
@@ -41,19 +41,19 @@
   <!--总排行榜--> 
   <swiper-item>  
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-cell  wx:for="{{rank.total}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.total}}次" bind:click="clickTotal{{index}}"/>
+      <van-cell  wx:for="{{rank.total}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.total}}次" bind:click="clickTotal{{index}}" size="{{size}}"/>
     </scroll-view>
   </swiper-item>
   <!--本年度-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-cell  wx:for="{{rank.thisyear}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.thisyear}}次" bind:click="clickThisyear{{index}}"/>
+      <van-cell  wx:for="{{rank.thisyear}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.thisyear}}次" bind:click="clickThisyear{{index}}" size="{{size}}"/>
     </scroll-view>
   </swiper-item> 
   <!--上年度-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-cell  wx:for="{{rank.lastyear}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.lastyear}}次" bind:click="clickLastyear{{index}}"/>
+      <van-cell  wx:for="{{rank.lastyear}}" wx:key="id"  title="{{item.nickName}}" value="活动：{{item.lastyear}}次" bind:click="clickLastyear{{index}}" size="{{size}}"/>
     </scroll-view>
   </swiper-item>
 </swiper>

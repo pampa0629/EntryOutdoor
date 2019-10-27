@@ -1,19 +1,19 @@
 <!--路线途经点-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="途经点及预计时间" label="行程安排仅供参考，领队根据实际情况，有变更的可能性"></van-cell>
-  <van-cell wx:for="{{route.wayPoints}}" wx:key="place+time" title="{{index+1}}）{{item.place}}" value="{{item.date}}，{{item.time}}"/> 
+	<van-cell slot="header" title-class="redtitle" title="途经点及预计时间" label="行程安排仅供参考，领队根据实际情况，有变更的可能性" size="{{size}}"/>
+  <van-cell wx:for="{{route.wayPoints}}" wx:key="place+time" title="{{index+1}}）{{item.place}}" value="{{item.date}}，{{item.time}}" size="{{size}}"/> 
 </van-panel>
 
 <!--手台频率-->
-<van-cell wx:if="{{route.interphone}}" title-class="redtitle" title="手台频率" value="{{route.interphone}}"></van-cell>
+<van-cell wx:if="{{route.interphone}}" title-class="redtitle" title="手台频率" value="{{route.interphone}}" size="{{size}}"/>
 
 <!--轨迹文件-->
 <van-panel wx:if="{{route.trackFiles.length>0}}" use-footer-slot>
-  <van-cell slot="header" title-class="redtitle" title="轨迹文件"></van-cell>
-  <van-tag plain type="primary">方法1：点击“获取链接”，再到任意浏览器中粘贴链接下载。</van-tag>
-  <van-tag plain type="primary">方法2：用支付宝扫码(微信无效,不会扣款)，直接跳转到浏览器下载。</van-tag>
+  <van-cell slot="header" title-class="redtitle" title="轨迹文件" size="{{size}}"/>
+  <van-tag size="{{size}}" plain type="primary">方法1：点击“获取链接”，再到任意浏览器中粘贴链接下载。</van-tag>
+  <van-tag size="{{size}}" plain type="primary">方法2：用支付宝扫码(微信无效,不会扣款)，直接跳转到浏览器下载。</van-tag>
   <block wx:for="{{route.trackFiles}}" wx:key="item">
-    <van-field   label="{{item.name}}" title-width="70%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}">
+    <van-field label="{{item.name}}" title-width="70%" disabled use-button-slot border="{{index<route.trackFiles.length-1}}" size="{{size}}">
       <van-button slot="button" size="small" type="primary" bind:click='copyFileUrl{{index}}'>复制链接</van-button>
     </van-field>
     <van-row>
@@ -32,10 +32,10 @@
  
 <!--户外轨迹--> 
 <van-panel wx:if="{{route.trackSites.length>0}}">
-  <van-cell slot="header" title-class="redtitle" title="户外APP轨迹"></van-cell>
+  <van-cell slot="header" title-class="redtitle" title="户外APP轨迹" size="{{size}}"/>
   <block wx:if="{{item.useit}}" wx:for="{{route.trackSites}}" wx:key="name">
     <van-panel title="{{item.name}}，编号：{{item.trackid}}" >
-      <van-cell title="网址: {{item.url}}" value="" border="{{false}}"> 
+      <van-cell title="网址: {{item.url}}" value="" border="{{false}}" size="{{size}}"> 
         <van-button size="small" type="primary" bind:click='copyoutUrl{{index}}'>复制</van-button>
       </van-cell>
       <van-row>

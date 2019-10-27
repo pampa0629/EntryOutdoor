@@ -12,7 +12,7 @@ const dbPersons = db.collection('Persons')
 const dbOutdoors = db.collection('Outdoors')
    
 App({ 
-  globalData: { 
+  globalData: {  
     openid: null, // 每个微信用户的内部唯一id
     personid: "", // Persons表中的当前用户_id
 
@@ -23,25 +23,42 @@ App({
     // 与户外网站对接
     lvyeorgInfo: null,
     lvyeorgLogin: false,
+
+    // size:"", // 全局字体大小
+    setting:{}, // 全局设置
+    settingKey: "GlobalSetting",  // key 
+  },
+
+  loadSetting() {
+    var setting = wx.getStorageSync(this.globalData.settingKey)
+    if (setting) {
+      this.globalData.setting = setting
+    }
+  },
+
+  saveSetting(setting) {
+    wx.setStorageSync(this.globalData.settingKey, setting)
+    this.globalData.setting = setting
   },
 
   async onLaunch(options) {
     console.log("app.onLaunch()")
     console.log("options:",options)
     this.globalData.options = options // 存起来后面用
+    
+    this.loadSetting() // 加载全局设置
 
     // 判断微信版本号，太低的给予提示
     var versions = wx.getSystemInfoSync().version.split(".");
-    if (versions[0] < '6' || (versions[0] == '6' && versions[1] < '6')) {
-      // 版本不能低于 6.6.0
+    if (versions[0] < '6' || (versions[0] == '6' && versions[1] < '7')) {
+      // 版本不能低于 一定版本号
       wx.showToast({
         title: '微信版本过低',
-        content: '请升级微信版本，不低于6.6.3',
+        content: '请升级微信版本，不低于6.7.0',
       })
     } 
 
     await this.ensureLogin()
-
   },
 
   // 用await确保登录

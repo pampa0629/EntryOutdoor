@@ -1,3 +1,4 @@
+const app = getApp()
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
 // const select = require('../../libs/select.js')
@@ -24,6 +25,14 @@ Page({
 
     areaList: null, // 地区列表
     showPopup: false, // 是否显示弹窗
+
+    size: app.globalData.setting.size, // 界面大小
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   async onLoad(options) {

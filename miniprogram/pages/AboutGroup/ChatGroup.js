@@ -16,6 +16,7 @@ Page({
       messages: [],
       qrcode: null
     },
+    size: app.globalData.setting.size, // 界面大小
   },
 
   onLoad: function(options) {
@@ -28,6 +29,12 @@ Page({
       })
     }
     self.loadChat(null)
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   loadChat(callback) {

@@ -36,7 +36,9 @@ Page({
       show: false,
       oldName: "", // 原来的装备名称
       newName: "", // 新的装备名称
-    }
+    },
+
+    size: app.globalData.setting.size, // 界面大小
   },
 
   async onLoad(options) {
@@ -212,9 +214,9 @@ Page({
   },
 
   onShow() {
-    const self = this
-    self.setData({
-      equipments: self.data.equipments,
+    this.setData({
+      equipments: this.data.equipments,
+      size: app.globalData.setting.size
     })
   },
 

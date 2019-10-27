@@ -10,7 +10,7 @@ const promisify = require('../../utils/promisify.js')
 const facetools = require('../../utils/facetools.js')
 
 wx.cloud.init()
-const db = wx.cloud.database({})
+const db = wx.cloud.database({}) 
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
@@ -56,6 +56,8 @@ Page({
     genderErrMsg: "",
     phoneErrMsg: "",
     formids: [],
+
+    size: app.globalData.setting.size, // 界面大小
   },
 
   // 处理私约活动
@@ -102,6 +104,12 @@ Page({
     return true
   },
 
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
+
   async onLoad(options) {
     console.log("EntryOutdoor.onLoad()", options)
     var outdoorid = util.getIDFromOptions(options)
@@ -110,13 +118,13 @@ Page({
     console.log("leaderid:", leaderid)
 
     // 登录
-    var isLogin = await app.ensureLogin()
-    if (isLogin) {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-      })
-      this.loadFormids()
-    }
+    // var isLogin = await app.ensureLogin()
+    // if (isLogin) {
+    //   this.setData({
+    //     userInfo: app.globalData.userInfo,
+    //   })
+    //   this.loadFormids()
+    // }
 
     // 发现是领队是自己，则自动切换到发起活动页面
     if (leaderid && leaderid == app.globalData.personid) {
@@ -141,13 +149,13 @@ Page({
   },
 
   // 得到formids数量
-  async loadFormids() {
-    let formids = await template.clearPersonFormids(app.globalData.personid)
-    // this.data.formids = formids ? formids : []
-    this.setData({
-      formids: formids,
-    })
-  },
+  // async loadFormids() {
+  //   let formids = await template.clearPersonFormids(app.globalData.personid)
+  //   // this.data.formids = formids ? formids : []
+  //   this.setData({
+  //     formids: formids,
+  //   })
+  // },
 
   // 设置活动状态进程条
   setSteps(status) {
@@ -214,14 +222,19 @@ Page({
     console.log("time limits: ", this.data.od.limits.entry)
 
     this.setData({
-      "remains.occupy.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.ocuppy, true),
-      "remains.entry.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.entry, false)
+      // 单位要从分钟，转为毫秒
+      "remains.occupy.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.ocuppy, true) *60*1000,
+      "remains.entry.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.entry, false) * 60*1000
     })
-    this.setData({
-      "remains.occupy.text": odtools.buildRemainText(this.data.remains.occupy.time),
-      "remains.entry.text": odtools.buildRemainText(this.data.remains.entry.time)
-    })
-    console.log(this.data.remains)
+    // this.setData({
+    //   "remains.occupy.text": odtools.buildRemainText(this.data.remains.occupy.time),
+    //   "remains.entry.text": odtools.buildRemainText(this.data.remains.entry.time)
+    // })
+    // this.setData({
+    //   "remains.occupy.time": this.data.remains.occupy.time*60,
+    //   "remains.entry.time": this.data.remains.entry.time * 60
+    // })
+    console.log("remains:", this.data.remains)
   },
 
   // 处理报名信息

@@ -1,3 +1,4 @@
+const app = getApp()
 const QRCode = require('../../libs/weapp-qrcode.js')
 const util = require('../../utils/util.js')
 
@@ -8,6 +9,13 @@ Page({
     qrcodes: [], // 轨迹app二维码
     fqrcodes: [], // 轨迹文件二维码
     furls:[], // 轨迹文件临时下载url
+    size: app.globalData.setting.size, // 界面大小
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function(options) {

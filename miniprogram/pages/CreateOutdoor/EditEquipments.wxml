@@ -5,8 +5,8 @@
  
 <!--选择地区--> 
 <block wx:if="{{od.status!='已结束'}}"> 
-  <van-tag wx:if="{{!equipments.area}}" type="primary" plain>只有选择活动地区，才能通过天气预报推荐合适的装备</van-tag> 
-  <van-field value="{{equipments.area}}" center required clearable label="活动所在地区" placeholder="请选择/输入城市或区县" border="{{ false }}" use-button-slot bind:input="inputArea">
+  <van-tag wx:if="{{!equipments.area}}" type="primary" plain size="{{size}}">只有选择活动地区，才能通过天气预报推荐合适的装备</van-tag> 
+  <van-field value="{{equipments.area}}" center required clearable label="活动所在地区" placeholder="请选择/输入城市或区县" border="{{ false }}" use-button-slot bind:input="inputArea" size="{{size}}">
     <van-button slot="button" size="small" round plain type="primary" bind:click="onPopup">选择地区</van-button>
   </van-field>
   <van-popup show="{{ showPopup }}" position="bottom" custom-class="center" bind:close="closePopup">
@@ -23,7 +23,7 @@
 
 <!--最好有的装备-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="必须有的装备"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="必须有的装备" size="{{size}}"/>
   <van-row wx:for="{{equipments.must}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.mustRes }}" bind:change="changeMust">
       <van-col span="12" offset="1">
@@ -38,13 +38,13 @@
     </van-col>
   </van-row>
 </van-panel>
-<van-field value="{{addMust}}" center clearable label="还必须有" placeholder="请输入装备名称" border="{{ false }}" use-button-slot bind:input="inputMust">
+<van-field value="{{addMust}}" center clearable label="还必须有" placeholder="请输入装备名称" border="{{ false }}" use-button-slot bind:input="inputMust" size="{{size}}">
   <van-button slot="button" size="small" round type="primary" plain bind:click="addMust">添加</van-button>
 </van-field>
 
 <!--可以有的装备-->
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="可以有的装备"></van-cell>
+  <van-cell slot="header" title-class="redtitle" title="可以有的装备" size="{{size}}"/>
   <van-row wx:for="{{equipments.can}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.canRes }}" bind:change="changeCan">
       <van-col span="12" offset="1">
@@ -59,13 +59,13 @@
     </van-col>
   </van-row>
 </van-panel>
-<van-field value="{{addCan}}" center clearable label="还可以有" placeholder="请输入要添加的装备名称" border="{{ false }}" use-button-slot bind:input="inputCan">
+<van-field value="{{addCan}}" center clearable label="还可以有" placeholder="请输入要添加的装备名称" border="{{ false }}" use-button-slot bind:input="inputCan" size="{{size}}">
   <van-button slot="button" size="small" round type="primary" plain bind:click="addCan">添加</van-button>
 </van-field>
 
 <!--不能有的装备-->
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="不能有的装备"></van-cell>
+  <van-cell slot="header" title-class="redtitle" title="不能有的装备" size="{{size}}"/>
   <van-row wx:for="{{equipments.no}}" wx:key="{{item}}" >
     <van-checkbox-group value="{{ equipments.noRes }}" bind:change="changeNo">
       <van-col span="12" offset="1">
@@ -80,7 +80,7 @@
     </van-col>
   </van-row>
 </van-panel>
-<van-field value="{{addNo}}" center clearable label="还不能有" placeholder="请输入要添加的装备名称" border="{{ false }}" use-button-slot bind:input="inputNo">
+<van-field value="{{addNo}}" center clearable label="还不能有" placeholder="请输入要添加的装备名称" border="{{ false }}" use-button-slot bind:input="inputNo" size="{{size}}">
  <van-button slot="button" size="small" round type="primary" plain bind:click="addNo">添加</van-button>
 </van-field>
 
@@ -104,22 +104,7 @@
 </van-row>
 
 <!--装备编辑对话框-->
-<van-dialog
-  use-slot
-  async-close
-  show="{{ dialog.show }}"
-  show-cancel-button
-  bind:close="onClose"
->
-<van-cell
-  title="修改前：{{ dialog.oldName }}"
-/>
-<van-field
-  value="{{ dialog.newName }}"
-  label="修改后："
-  border="false"
-  focus="true"
-  placeholder="请输入修改后的装备内容"
-  bind:input="inputNewName"
-/>
+<van-dialog  use-slot  async-close  show="{{ dialog.show }}"  show-cancel-button  bind:close="onClose">
+  <van-cell  title="修改前：{{ dialog.oldName }}" size="{{size}}"/>
+  <van-field  value="{{ dialog.newName }}"  label="修改后："  border="false"  focus="true"  placeholder="请输入修改后的装备内容" bind:input="inputNewName" size="{{size}}"/>
 </van-dialog>

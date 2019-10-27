@@ -37,6 +37,8 @@ Page({
     addMember: "",
     entryFull:false, // 是否报名已满，防止领队添加过多附加队员
     openAdd: false, // 是否开启附加队员
+
+    size: app.globalData.setting.size, // 界面大小
   },
 
   onLoad: function(options) {
@@ -68,6 +70,12 @@ Page({
     self.flushAddMembers()
     // 处理需要AA费用的成员
     self.flushAaMembers()
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   flushMembers() {

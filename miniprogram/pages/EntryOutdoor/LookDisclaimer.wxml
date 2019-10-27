@@ -1,16 +1,16 @@
 <!--活动规则-->  
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="活动规则"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="活动规则" size="{{size}}"/>
   <van-cell-group>
-    <van-cell wx:if="isAA" title="AA" title-width="20%" value="公共费用所有成员AA，领队确认活动成行后再退出，若无人替补，费用也要分摊"/>
-    <van-cell wx:if="isEnvironment" title="环保" title-width="20%" value="带走自己不可降解的垃圾，不摘一花一叶"/>
-    <van-cell wx:if="isKeepTime" title="守时"  title-width="20%" value="户外路远天黑危险，集合过时不候，费用照A" border="{{ false }}"/>
+    <van-cell wx:if="isAA" title="AA" title-width="20%" value="公共费用所有成员AA，领队确认活动成行后再退出，若无人替补，费用也要分摊" size="{{size}}"/>
+    <van-cell wx:if="isEnvironment" title="环保" title-width="20%" value="带走自己不可降解的垃圾，不摘一花一叶" size="{{size}}"/>
+    <van-cell wx:if="isKeepTime" title="守时"  title-width="20%" value="户外路远天黑危险，集合过时不候，费用照A" border="{{ false }}" size="{{size}}"/>
     </van-cell-group> 
 </van-panel>
 
 <!--免责条款详细内容-->  
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="免责条款详细内容"></van-cell>
+	<van-cell slot="header" title-class="redtitle" title="免责条款详细内容" size="{{size}}"/>
   <view> 
     <text style="font-size:12pt">{{disclaimer}}</text>
   </view>

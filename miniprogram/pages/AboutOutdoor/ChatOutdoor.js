@@ -6,7 +6,7 @@ const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 const promisify = require('../../utils/promisify.js')
 
-wx.cloud.init()
+wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -26,6 +26,7 @@ Page({
       messages: []
     },
     sendWxnotice: false, // 发送留言时，是否自动发送微信消息
+    size: app.globalData.setting.size, // 界面大小
 
     hasPullFlush: false, // 本页面是否下拉刷新过
     showMembers: false, // 是否显示队员名单， @时出来
@@ -49,7 +50,6 @@ Page({
         isLeader: true,
       })
       self.data.members.push("所有人") // 领队可以给@所有人
-      self.data.personids.push("")
     }
     console.log("options.isLeader: " + options.isLeader)
     if (options.sendWxnotice) { // 通过点击别人发送的微信消息进入留言页面时，自动@对方
@@ -70,6 +70,12 @@ Page({
         hasPullFlush: wx.getStorageSync(self.data.outdoorid + ".hasPullFlush"),
       })
       self.flushLvyrorg2Chat(self.data.outdoorid, res.data.websites, res.data.members[0].userInfo.nickName)
+    })
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
     })
   },
 
@@ -260,7 +266,9 @@ Page({
   },
 
   sendWxnotice(msg) {
+    console.log("sendWxnotice()",msg)
     var personids = this.findPersonids(msg)
+    console.log("personids:", personids)
     personids.forEach((item, index) => {
       template.sendChatMsg2Member(item, this.data.title, this.data.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, msg)
     })

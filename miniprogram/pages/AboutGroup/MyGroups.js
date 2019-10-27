@@ -10,7 +10,8 @@ const dbPersons = db.collection('Persons')
 Page({
 
   data: {
-    groups: {}
+    groups: {},
+    size: app.globalData.setting.size, // 界面大小
   },
 
   onLoad: function(options) {
@@ -35,6 +36,12 @@ Page({
       })
     }
   }, 
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
+  },
 
   tapGroup(index, e) {
     const self = this

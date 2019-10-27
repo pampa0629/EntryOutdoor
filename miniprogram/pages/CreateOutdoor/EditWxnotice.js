@@ -14,6 +14,13 @@ Page({
     wxnotice: {},
     formids: [],
     hasModified: false,
+    size: app.globalData.setting.size, // 界面大小
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   async onLoad(options) {

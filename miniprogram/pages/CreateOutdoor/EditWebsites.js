@@ -14,6 +14,8 @@ Page({
  
   data: {
     od: null,
+    size: app.globalData.setting.size, // 界面大小
+    
     lvyeorgInfo: null, // 绿野org账户信息
     forum: {}, // 选择的绿野论坛{name, id}
     //  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游; 93：技术小组
@@ -34,6 +36,12 @@ Page({
       label: "测试类活动",
       id: "93"
     }]
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   onLoad: function(options) {

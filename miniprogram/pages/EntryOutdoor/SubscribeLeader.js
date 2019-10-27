@@ -19,6 +19,13 @@ Page({
 
     formids: [], // 消息id
     outdoors: {}, // 领队发起的活动列表
+    size: app.globalData.setting.size, // 界面大小
+  },
+
+  onShow() {
+    this.setData({
+      size: app.globalData.setting.size
+    })
   },
 
   async onLoad(options) {

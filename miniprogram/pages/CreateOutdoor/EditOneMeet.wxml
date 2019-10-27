@@ -1,19 +1,19 @@
 <!--集合地点-->
-<van-field label="集合地点" required value="{{meet.place}}" type="textarea" autosize clearable placeholder="请输入集合地点" bindinput="inputMeetPlace" icon="arrow-left" bind:click-icon="pasteMeetPlace"/>
+<van-field label="集合地点" required value="{{meet.place}}" type="textarea" autosize clearable placeholder="请输入集合地点" bindinput="inputMeetPlace" icon="arrow-left" bind:click-icon="pasteMeetPlace" size="{{size}}"/>
 
 <!--地图上选择-->
-<van-field label="地图位置描述" value="{{meet.name}}" disabled placeholder="请选择地图位置"  use-button-slot>
+<van-field label="地图位置描述" value="{{meet.name}}" disabled placeholder="请选择地图位置" use-button-slot size="{{size}}">
   <van-button slot="button" size="small" type="primary" bind:click="chooseMeetAddress" >地图</van-button>
 </van-field>
 
 <!--集合日期，如：当天-->
 <picker bindchange="changMeetDate" value="{{meetDatesIndex}}" range="{{MeetDates}}">
-    <van-field label="集合日期" disabled required value="{{meet.date}}" placeholder="请选择集合日期"/>
+    <van-field label="集合日期" disabled required value="{{meet.date}}" placeholder="请选择集合日期" size="{{size}}"/>
   </picker>
  
 <!--集合时间点：8:00-->
 <picker mode="time" value="{{meet.time}}" start="00:00" end="24:00" bindchange="changMeetTime">
-  <van-field label="集合时间" disabled required value="{{meet.time}}" placeholder="请选择集合时间"/>
+  <van-field label="集合时间" disabled required value="{{meet.time}}" placeholder="请选择集合时间" size="{{size}}"/>
 </picker> 
  
 <!-- 保存和返回按钮 --> 

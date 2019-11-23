@@ -27,7 +27,7 @@
 
 <!--活动性质选项-->
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="活动性质选择（三选一）" size="{{size}}"/>
+  <van-cell slot="header" title-class="redtitle" title="活动性质选择（三选一）" size="{{size}}"/> 
   <!--公开-->
   <van-cell title="公开活动" title-width="90%" label="活动大厅可见，能被所有人分享" clickable bind:click="checkIntoHall" size="{{size}}">
     <van-checkbox value="{{limits.intoHall}}"/>
@@ -53,9 +53,6 @@
 
 <!--户外网站同步-->
 <van-cell title="户外网站同步" wx:if="{{lvyeorgInfo}}" title-class="redtitle" label="" value="点击同步户外网站" is-link url="EditWebsites" border="{{true}}" size="{{size}}"/>
-
-<!--查看报名记录-->
-<!-- <van-cell title="查看退出记录" wx:if="{{od.operations}}" title-class="redtitle" label="" value="点击查看退出历史记录" is-link url="../AboutOutdoor/LookOutdoorOp" border="{{true}}" size="{{size}}"/> -->
 
 
 <!--活动规则-->

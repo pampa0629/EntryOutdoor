@@ -14,7 +14,7 @@
 </form> 
 
 <form bindsubmit="subscribeLeader" report-submit="true">
-  <view class="fix" style="left:50rpx">
+  <view class="fix" style="left:50rpx"> 
     <button form-type="submit" style="color:#1aad19;background-color:#ffffff" size="large" plain>
       <view wx:if="{{!hasSubscribed}}">订阅领队</view>
       <view wx:else>取消订阅</view>
@@ -30,16 +30,16 @@
 </form> 
 
 <!--文字提示-->
-<van-tag size="{{size}}" type="primary" plain>订阅后该领队所发起的活动，将自动加入“我关注的”活动列表，并可设定是否接收微信通知。
+<van-tag size="{{size}}" type="primary" plain>订阅后该领队所发起的公开活动，将自动加入“我关注的”活动列表；您还可设定是否接收微信通知。
 </van-tag>
-<van-tag size="{{size}}" type="primary" plain>当前可接收微信通知数量的上限是：{{formids.length}}，您可点击顶部按钮增加上限。
+<van-tag size="{{size}}" type="primary" plain>当前可接收微信通知数量是：{{formids.length}}，您可点击右上角按钮增加数量。
 </van-tag>
-<van-tag size="{{size}}" type="danger" plain>注意：由于微信限制，通知有效期为七天，过期将无法收到，需重新点击顶部按钮。</van-tag>
+<van-tag size="{{size}}" type="danger" plain>注意：由于微信官方限制，通知有效期为七天，过期将无法收到，需重新点击顶部按钮。</van-tag>
 
 <!--是否接收微信服务通知-->
 <van-panel wx:if="{{hasSubscribed}}">
-	<van-cell slot="header" title-class="redtitle" title="微信服务通知" size="{{size}}"/>
-  <van-switch-cell title="接收通知" checked="{{mine.acceptNotice}}" bind:change="checkAccept"/>
+	<!-- <van-cell slot="header" title-class="redtitle" title="微信服务通知" size="{{size}}"/> -->
+  <van-switch-cell title="接收微信消息通知" checked="{{mine.acceptNotice}}" bind:change="checkAccept"/>
 </van-panel> 
 
 <!--该领队发起的活动列表-->

@@ -188,7 +188,9 @@ Page({
       for (var i = begin; i < end; i++) {
         if (members[i].entryInfo.status != "替补中") {
           template.sendBenchMsg2Member(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].entryInfo.status, members[i].userInfo.nickName)
-          members[i].entryInfo.status = "替补中"
+          members[i].entryInfo.status = "替补中" 
+          // 记录操作
+          odtools.recordOperation(self.data.od.outdoorid, "缩编为替补", members[i].userInfo.nickName)
         }
       }
       self.afterAdjust(members)

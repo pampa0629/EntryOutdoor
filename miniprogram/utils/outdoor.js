@@ -8,7 +8,7 @@ const lvyeorg = require('./lvyeorg.js')
 const person = require('./person.js')
  
 wx.cloud.init()
-const db = wx.cloud.database({}) 
+const db = wx.cloud.database({})  
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command 
@@ -80,13 +80,15 @@ OD.prototype.load = async function(outdoorid) {
 // 移除或提醒占坑队员 
 OD.prototype.dealOcuppy = async function() {
   console.log("OD.prototype.dealOcuppy()")
-  // 判断处理占坑过期的问题
-  var remainTime = this.title.date ? odtools.calcRemainTime(this.title.date, this.limits.ocuppy, true) : 60 * 24 * 7
-  console.log("remainTime：", remainTime)
-  if (remainTime < 0) {
-    this.members = await odtools.removeOcuppy(this.outdoorid)
-  } else if (remainTime < 60 * 8) { // 不够八小时就给占坑队员发消息
-    await odtools.remindOcuppy(this)
+  // 判断处理占坑过期的问题； 只有活动为已发布或已成行时，才需要处理
+  if (this.status == "已发布" || this.status == "已成行") {
+    var remainTime = this.title.date ? odtools.calcRemainTime(this.title.date, this.limits.ocuppy, true) : 60 * 24 * 7
+    console.log("remainTime：", remainTime)
+    if (remainTime < 0) {
+      this.members = await odtools.removeOcuppy(this.outdoorid)
+    } else if (remainTime < 60 * 8) { // 不够八小时就给占坑队员发消息
+      await odtools.remindOcuppy(this)
+    }
   }
 }
 
@@ -477,18 +479,13 @@ OD.prototype.entry = async function(member) {
   // 更新Outdoors数据库
   cloudfun.opOutdoorItem(this.outdoorid, "members", this.members, "")
   // 记录报名操作历史
-  // this.recordOperation(member.entryInfo.status, member.userInfo.nickName)
+  odtools.recordOperation(this.outdoorid, member.entryInfo.status, member.userInfo.nickName, member.personid)
   // 报名信息同步到网站
   this.postEntry2Websites(member, false, false)
-  return {
+  return { 
     status: member.entryInfo.status,
     entry: !findSelf
   }
-}
-
-// 记录报名退出等重要操作
-OD.prototype.recordOperation = function (action, nickName) {
-  cloudfun.opOutdoorItem(this.outdoorid, "operations", {action, nickName}, "push")
 }
 
 // 有人新报名时，需要处理AA名单
@@ -590,7 +587,9 @@ OD.prototype.firstBench2Member = function() {
     for (var i in this.members) {
       if (this.members[i].entryInfo.status == "替补中") {
         this.members[i].entryInfo.status = "报名中"
-        // 给退出者发消息
+        // 转正记录
+        odtools.recordOperation(this.outdoorid, "替补转报名", this.members[i].userInfo.nickName, this.members[i].personid)
+        // 给转正者发消息
         template.sendEntryMsg2Bench(this.members[i].personid, this.outdoorid, this.title.whole, this.members[i].userInfo.nickName)
         this.postEntry2Websites(this.members[i], false, false)
         return true // 仅限一位
@@ -630,8 +629,7 @@ OD.prototype.quit = async function(personid, selfQuit) {
     var deleted = this.members.splice(index, 1) // 别忘了删除自己
     // 第四步：新成员列表写入数据库
     cloudfun.opOutdoorItem(this.outdoorid, "members", this.members, "")
-    // 退出记录一下
-    this.recordOperation("退出", member.userInfo.nickName)
+    
     if (isAfee) { // 要A费用的时候，单独开一个名单列表
       this.aaMembers.push(deleted)
       cloudfun.opOutdoorItem(this.outdoorid, "aaMembers", deleted, "push")
@@ -644,12 +642,16 @@ OD.prototype.quit = async function(personid, selfQuit) {
         remark += "由于活动已成行，您退出且无人替补，请联系领队A费用。"
       }
       template.sendQuitMsg2Self(member.personid, this.outdoorid, this.title.whole, this.title.date, this.leader.userInfo.nickName, member.userInfo.nickName, remark)
+      // 退出记录一下
+      odtools.recordOperation(this.outdoorid, "自行退出", member.userInfo.nickName, member.personid)
     } else {
       var remark = "您已被领队驳回报名，可点击回到活动的“留言”页面中查看原因。若仍有意参加，可在留言中@领队或电话等方式联系领队确认情况。"
       // 发模板消息
       template.sendRejectMsg2Member(member.personid, this.title.whole, this.outdoorid, this.leader.userInfo.nickName, this.leader.userInfo.phone, remark)
+      // 退出记录一下
+      odtools.recordOperation(this.outdoorid, "驳回报名", member.userInfo.nickName, member.personid)
     }
-
+    
     // 第六步：同步到网站
     this.postEntry2Websites(member, true, selfQuit)
     // 第七步：返回结果

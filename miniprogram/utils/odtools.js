@@ -387,6 +387,9 @@ const removeOcuppy = async(outdoorid) => {
       count++
       // 给被强制退坑者发模板消息
       template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
+      // 记录下来 
+      recordOperation(outdoorid, "强制退坑", members[i].userInfo.nickName, members[i].personid)
+
       members.splice(i, 1)
       i-- // i 要回退一格
     }
@@ -400,6 +403,8 @@ const removeOcuppy = async(outdoorid) => {
       members[i].entryInfo.status = "报名中"
       // 给替补上的队员发模板消息
       template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
+      // 记录下来
+      recordOperation(outdoorid, "替补转报名", members[i].userInfo.nickName, members[i].personid)
     }
   }
 
@@ -563,6 +568,9 @@ const drawShareCanvas = (canvas, od, callback) => {
   // 活动状态
   pos = drawText(canvas, "活动状态：" + od.status, pos.x, pos.y + 5, 30, 15, green)
 
+  // 活动性质
+  pos = drawText(canvas, "活动性质：" + getODType(od.limits), pos.x, pos.y + 5, 30, 10, green)
+
   canvas.draw(false, function(res) {
     console.log('canvas.draw done...')
     wx.canvasToTempFilePath({
@@ -578,6 +586,19 @@ const drawShareCanvas = (canvas, od, callback) => {
       }
     })
   })
+}
+
+// 得到活动性质的文字描述：公开、私约、测试
+const getODType = (limits)=>{
+  var type = "未知"
+  if(limits.intoHall) {
+    type = "公开"
+  } else if (limits.private) {
+    type = "私约"
+  } else if (limits.isTest) {
+    type = "测试"
+  }
+  return type
 }
 
 const setCFO = (outdoorid, cfo) => {
@@ -691,6 +712,14 @@ const getSteps = (status) =>{
   return {steps:steps, index:index}
 }
 
+// 记录报名退出等重要操作
+const recordOperation = (outdoorid, action, nickName, personid) =>{
+  var date = new Date()
+  var timeString = util.formatTime(date)
+  var operation = { action: action, nickName: nickName, personid: personid, time: timeString }
+  cloudfun.opOutdoorItem(outdoorid, "operations", operation, "push")
+}
+
 module.exports = {
   getSteps: getSteps, // 
   Durings: Durings, // 活动时长
@@ -712,6 +741,8 @@ module.exports = {
   removeOcuppy: removeOcuppy, // 清退占坑队员
   remindOcuppy: remindOcuppy, // 提醒占坑队员，占坑截止时间临近
   isNeedAA: isNeedAA, // 判断某个时刻退出活动是否需要AA费用
+
+  recordOperation: recordOperation, // 记录报名、占坑、退出、转正、退坑、缩编等此类所有操作（含被动）
 
   getWebsites: getWebsites, // 得到数据库中的网站同步结构
   // getWebsites_a: getWebsites_a, // aynsc

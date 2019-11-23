@@ -60,6 +60,11 @@ Page({
     size: app.globalData.setting.size, // 界面大小
   },
 
+  async getLeaderID(outdoorid) {
+    let res = await dbOutdoors.doc(outdoorid).get()
+    return res.data.leader.personid
+  },
+
   // 处理私约活动
   async dealPrivate(outdoorid, options) {
     console.log("EntryOutdoor.dealPrivate()", outdoorid, options)
@@ -67,6 +72,10 @@ Page({
     if (options.private || options.private == true || options.private=="true") {
       // 默认用openid，但如果发现有群，则用群id；避免有人在小程序启动后点击分享到群中的活动，从而用自己的openid把群id给占了
       // 存在的不足是：个人收到后，可以再次分享到一个群中
+      if (this.getLeaderID(outdoorid) == app.globalData.openid) {
+        return true // 领队自己查看，直接返回true；避免领队占用分享后的id匹配
+      }
+
       var id = app.globalData.openid
       var name = "openid"
       if (app.globalData.options.scene == 1044) {
@@ -94,7 +103,8 @@ Page({
       }
       await promisify.showModal({
         title: '不能查看',
-        content: '此活动为私约活动，只有领队直接转发才能查看；系统将自动转到活动大厅。您还可以试试从内存中杀掉小程序，然后直接点击群里的分享进入活动。',
+        content: '此活动为私约活动，只有领队直接转发才能查看；系统将自动转到活动大厅。您还可以试试再次点击领队发给你或发到群里的小程序，或者试试从内存中杀掉小程序，然后再直接点击分享的小程序进入活动。',
+        showCancel:false,
       })
       wx.switchTab({ // 跳转到活动大厅
         url: '../AboutOutdoor/HallOutdoor',
@@ -242,7 +252,7 @@ Page({
     // 若只有一个集合地点，默认设置就好了
     if (this.data.od.meets.length <= 1) {
       this.setData({
-        "entryInfo.meetsIndex": 0,
+        "entryInfo.meetsIndex": "0",
       })
     }
     // 从数据库中得到自己已经报名的状态
@@ -414,8 +424,9 @@ Page({
 
   // 检查报名选项是否完整
   checkEntryInfo() {
+    // console.log("checkEntryInfo():", this.data.entryInfo.meetsIndex)
     const self = this
-    if (self.data.entryInfo.meetsIndex < 0) {
+    if (parseInt(self.data.entryInfo.meetsIndex) < 0) {
       self.data.entryError += "请选择一个集合地点才能报名。"
     }
     if (!self.data.entryInfo.agreedDisclaimer) {
@@ -478,34 +489,37 @@ Page({
   },
 
   blurNickname(e) {
-    console.log(e)
+    console.log(e) 
     this.checkNickname(this.data.userInfo.nickName)
   },
 
   // 这里判断昵称的唯一性和不能为空
   async checkNickname(nickName) {
     const self = this
-    self.setData({
-      nickErrMsg: self.data.userInfo.nickName ? "" : "昵称不能为空",
-    })
-    let uniqueName = await person.getUniqueNickname(nickName, app.globalData.personid)
-    if (nickName != uniqueName) {
-      wx.showModal({
-        title: '昵称已被占用',
-        content: "您系统已为您自动取名为“" + uniqueName + "”，点击取消按钮重新取名",
-        success(res) {
-          if (res.confirm) {
-            self.setData({
-              nickErrMsg: "",
-              "userInfo.nickName": uniqueName,
-            })
-          } else if (res.cancel) {
-            self.setData({
-              nickErrMsg: "该昵称已被占用不能使用",
-            })
-          }
-        }
+    if (!nickName) {
+      self.setData({
+        nickErrMsg: "昵称不能为空",
       })
+    } else {
+      let uniqueName = await person.getUniqueNickname(nickName, app.globalData.personid)
+      if (nickName != uniqueName) {
+        wx.showModal({
+          title: '昵称已被占用',
+          content: "您系统已为您自动取名为“" + uniqueName + "”，点击取消按钮可自己重新取名",
+          success(res) {
+            if (res.confirm) {
+              self.setData({
+                nickErrMsg: "",
+                "userInfo.nickName": uniqueName,
+              })
+            } else if (res.cancel) {
+              self.setData({
+                nickErrMsg: "该昵称已被占用不能使用",
+              })
+            }
+          }
+        })
+      }
     }
   },
 
@@ -562,7 +576,7 @@ Page({
     if (error) {
       wx.showModal({
         title: '补充个人信息',
-        content: '请先输入正确的个人信息，然后再报名',
+        content: '请先输入正确的个人信息，然后再报名。错误原因：' + error,
         showCancel: false,
         confirmText: "知道了"
       })
@@ -798,18 +812,6 @@ Page({
     }
   },
 
-  // changeMeets(e) {
-  //   console.log(e)
-  //   const self = this
-  //   this.setData({
-  //     "entryInfo.meetsIndex": e.detail,
-  //   })
-  //   // 如果已经报名，则需要修改集合地点
-  //   if (odtools.isEntriedStatus(self.data.entryInfo.status)) {
-  //     self.entryOutdoorInner(self.data.entryInfo.status)
-  //   }
-  // },
-
   // 选择或改变集合地点选择
   clickMeets: function(e) {
     console.log(e)
@@ -837,11 +839,8 @@ Page({
   async lookMeetMap(index) {
     console.log("lookMeetMap()", index)
     const self = this
-    // const index = self.data.entryInfo.meetsIndex
     // 选中了集合地点，并且有经纬度，才开启选择地图
     if (index >= 0 && self.data.od.meets[index].latitude) {
-      var message = "同意授权“使用我的地理位置”才能调用微信地图；小程序不会记录您的位置，请放心"
-      await util.authorize("userLocation", message)
       const latitude = self.data.od.meets[index].latitude
       const longitude = self.data.od.meets[index].longitude
       wx.openLocation({

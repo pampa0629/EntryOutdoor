@@ -22,7 +22,7 @@
   </van-radio-group>
   <!--大致费用-->
 <van-cell wx:if="{{traffic.cost!='免费'}}" title="大致费用：{{traffic.money}}元" border="{{false}}" size="{{size}}">
-  <van-stepper value="{{traffic.money}}" min="1" max="500" bind:change="bindAddMoney" />
+  <van-stepper value="{{traffic.money}}" min="1" max="10000" bind:change="bindAddMoney" />
 </van-cell>
 </van-panel>
 

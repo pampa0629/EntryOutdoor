@@ -280,12 +280,13 @@ const sendEntryMsg2Self = (personid, title, phone, nickName, status, outdoorid) 
 
 // 发送报名消息
 const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) => {
-  console.log("sendEntryMsg2Leader")
+  console.log("sendEntryMsg2Leader()")
   console.log(leaderid)
   dbPersons.doc(leaderid).get().then(res => {
     var openid = res.data._openid
     console.log(openid)
     var tempid = "4f4JAb6IwzCW3iElLANR0OxSoJhDKZNo8rvbubsfgyE"
+    var meetIndex = parseInt(entryInfo.meetsIndex) + 1
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
       "keyword1": { // 昵称
         "value": userInfo.nickName
@@ -303,7 +304,7 @@ const sendEntryMsg2Leader = (leaderid, userInfo, entryInfo, title, outdoorid) =>
         "value": (entryInfo.knowWay ? "认路" : "不认路")
       },
       "keyword6": { // 集合地点
-        "value": "第" + (parseInt(entryInfo.meetsIndex) + 1) + "集合地点"
+        "value": "第" + meetIndex + "集合地点"
       }
     }
     var page = buildPage("CreateOutdoor", outdoorid)

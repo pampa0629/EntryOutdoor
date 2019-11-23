@@ -10,7 +10,7 @@ const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
 // const crypto = require('../../utils/crypto.js')
-
+ 
 // let interstitialAd = null // 插屏广告
 
 Page({ 
@@ -35,7 +35,7 @@ Page({
       contact: {
         name: "", 
         phone1: "",
-        phone2: "",
+        phone2: "", 
       },
       self: {
         trueName: "",
@@ -136,20 +136,48 @@ Page({
     }
   },
  
+  // async changeNickname(e) {
+  //   console.log("changeNickname()", e)
+  //   let res = await person.checkNickname(e.detail,app.globalData.personid) // , (errMsg,result)=>{
+  //   console.log("change name:" + res.result + ", " + res.msg)
+  //   if (!res.result) { // 不成功，强制回到最后一个合法的名字
+  //     e.detail = this.data.oldNickName
+  //   } 
+  //   this.setData({
+  //     hasModified: true,
+  //     "userInfo.nickName": e.detail,
+  //     userInfo: this.data.userInfo,
+  //     nickErrMsg: res.msg,
+  //   })
+  //   console.log("old name:" + this.data.oldNickName)
+  // },
+
   async changeNickname(e) {
-    console.log(e)
-    let res = await person.checkNickname(e.detail,app.globalData.personid) // , (errMsg,result)=>{
+    console.log("changeNickname()", e)
+    let res = await person.checkNickname(e.detail, app.globalData.personid)
     console.log("change name:" + res.result + ", " + res.msg)
-    if (!res.result) { // 不成功，强制回到最后一个合法的名字
-      e.detail = this.data.oldNickName
-    } 
     this.setData({
       hasModified: true,
       "userInfo.nickName": e.detail,
-      userInfo: this.data.userInfo,
       nickErrMsg: res.msg,
     })
     console.log("old name:" + this.data.oldNickName)
+  },
+
+  async blurNickname(e) {
+    console.log("blurNickname()", e)
+    var nickErrMsg = ""
+    let res = await person.checkNickname(e.detail.value, app.globalData.personid)
+    console.log("check res:", res)
+    console.log("oldNickName:", this.data.oldNickName)
+    if (!res.result) { // 不成功，强制回到最后一个合法的名字
+      e.detail.value = this.data.oldNickName
+      nickErrMsg += res.msg + "，已自动恢复原名"
+    } 
+    this.setData({
+      "userInfo.nickName": e.detail.value,
+      nickErrMsg: nickErrMsg,
+    })
   },
 
   changePhone: function(e) {

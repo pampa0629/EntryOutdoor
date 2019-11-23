@@ -8,7 +8,7 @@
   </van-panel> 
 </van-dialog>    
 
-<!--驳回报名对话框-->
+<!--驳回报名对话框--> 
 <van-dialog use-slot async-close show="{{rejectDlg.show}}" show-cancel-button  bind:close="closeRejectDlg" bind:confirm="confirmRejectDlg" title="驳回报名" confirmButtonText="确定驳回" cancelButtonText="取消">
   <van-panel title="请选择驳回理由">
     <van-checkbox-group value="{{rejectDlg.selects}}" bind:change="changeRejectSelects">
@@ -101,14 +101,6 @@
   </van-field> 
 </van-panel> 
 
-<van-panel wx:if="{{od.operations}}">
-	<van-cell slot="header" title-class="redtitle"  title="退出队员名单" title-width="40%" size="{{size}}"/>
-  <van-cell-group>
-    <van-cell wx:for="{{od.operations}}" wx:key="*this" title-width="40%" title="{{item.nickName}}" size="{{size}}"/> 
-  </van-cell-group>   
-</van-panel> 
-
-
 <!--领队编辑附加队员-->
 <van-switch-cell title="开启附加队员" wx:if="{{od.addMembers.length==0}}" checked="{{openAdd}}" bind:change="changeAddOpen"/>
 <block wx:if="{{openAdd || od.addMembers.length>0 || hasModified}}">
@@ -125,4 +117,13 @@
     <van-button slot="button" disabled="{{!addMember || entryFull}}" plain size="small" type="primary" bind:click="addOneMember">增加</van-button>
   </van-field> 
 </block>
+
+<!-- 退出队员名单 -->
+<van-panel>
+<!-- <van-panel > -->
+	<van-cell slot="header" title-class="redtitle"  title="退出队员名单/退出方式" title-width="60%" label="点击查看所有操作记录" value="退出时间" size="{{size}}" is-link url="../AboutOutdoor/LookOutdoorOp" />
+  <van-cell-group>
+    <van-cell wx:for="{{quitMembers}}" wx:key="*this" title-width="60%" title="{{item.nickName}}/{{item.action}}" value="{{item.time}}" size="{{size}}"/> 
+  </van-cell-group>   
+</van-panel> 
   

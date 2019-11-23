@@ -610,7 +610,7 @@ Page({
   async post2Subscriber() {
     console.log("post2Subscriber()")
     const self = this
-    if (!this.data.od.limits.isTest) { // 测试帖就不发消息了
+    if (this.data.od.limits.intoHall) { // 只有进入活动大厅的公开活动，才发送消息和把活动加入care列表
       console.log("outdoorid: " + self.data.od.outdoorid)
 
       const res = await dbPersons.doc(app.globalData.personid).get()

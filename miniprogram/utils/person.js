@@ -52,36 +52,50 @@ const updateWalkStep = async(personid) => {
 }
 
 const getUniqueNickname = async(nickName, personid) => {
-  let res = await dbPersons.where({
-    "userInfo.nickName": nickName
-  }).get()
-  console.log(res.data)
-  // 如果数据库中没有这个名字，或者只有一个，且是自己，则返回
-  if (res.data.length == 0 || (res.data.length == 1 && res.data[0]._id == personid)) {
-    return nickName
+  if (nickName != null) {
+    let res = await dbPersons.where({
+      "userInfo.nickName": nickName
+    }).get()
+    console.log(res.data)
+    // 如果数据库中没有这个名字，或者只有一个，且是自己，则返回
+    if (res.data.length == 0 || (res.data.length == 1 && res.data[0]._id == personid)) {
+      return nickName
+    }
   }
-
+  
   // 不然就随机取名
   var time = new Date().getTime().toString()
   var autoName = "驴友" + time.substr(-4)
   return getUniqueNickname(autoName)
 }
 
+// 是否包含特殊字符
+const includeSpecialChar = (str) =>{
+  var specials = "[`~!@#$^&*()=|{}':;',\\[\\].<>-—/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]"
+  for(var i in str) {
+    if (specials.indexOf(str[i]) >= 0) {
+      return true
+    }
+  }
+  return false
+}
+
 // 这里判断昵称的唯一性和不能为空
 const checkNickname = async (nickName, personid) => {
   var nickErrMsg = ""
-  if (!nickName) {
-    nickErrMsg = "昵称不能为空，已自动恢复旧名"
+  if (!nickName) { 
+    nickErrMsg = "昵称不能为空"
+    return { msg: nickErrMsg, result: false }
+  } else if (includeSpecialChar(nickName)) {
+    nickErrMsg = "昵称不能包括汉字、数字和字母之外的特殊字符"
     return { msg: nickErrMsg, result: false }
   } else {
     let res = await dbPersons.where({
       "userInfo.nickName": nickName
     }).get()
     console.log(res.data)
-    if (res.data.length > 1) {
-      nickErrMsg = "修改后的昵称已被占用不能使用，已自动恢复旧名"
-    } else if (res.data.length == 1 && res.data[0]._id != personid) {
-      nickErrMsg = "修改后的昵称已被占用不能使用，已自动恢复旧名"
+    if (res.data.length > 1 || (res.data.length == 1 && res.data[0]._id != personid) ) {
+      nickErrMsg = "昵称已被占用不能使用"
     }
     return { msg: nickErrMsg, result: nickErrMsg == "" }
   }

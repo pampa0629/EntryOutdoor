@@ -9,10 +9,11 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
   
-Page({  
+Page({   
 
   data: {
     members: [],
+    quitMembers:[], // 退出队员名单
 
     index: null, // 当前正在处理的index
     isLeader:false, // 判断自己是不是总领队
@@ -42,39 +43,53 @@ Page({
   },
 
   onLoad: function(options) {
-    const self = this
     let pages = getCurrentPages() //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2]
     let od = pages[pages.length - 2].data.od 
-    self.setData({
+    this.setData({
       od:od, // od 存起来，方便使用
       entryFull:odtools.entryFull(od.limits, od.members, od.addMembers)
     })
 
     console.log(od.leader.personid ,app.globalData.personid)
     if(od.leader.personid == app.globalData.personid) {
-      self.setData({ // 判断是否为总领队
+      this.setData({ // 判断是否为总领队
         isLeader:true,
       })
     }
     console.log(this.data.isLeader)
 
     if (od.pay && od.pay.cfo){
-      self.setData({
+      this.setData({
         cfo: od.pay.cfo, 
       })
     }
     // 构建正式队员列表
-    self.flushMembers()
+    this.flushMembers()
     // 处理附加队员
-    self.flushAddMembers()
+    this.flushAddMembers()
     // 处理需要AA费用的成员
-    self.flushAaMembers()
+    this.flushAaMembers()
+    // 处理退出队员名单
+    this.flushQuitMembers()
   },
 
   onShow() {
     this.setData({
       size: app.globalData.setting.size
+    })
+  },
+
+  flushQuitMembers() {
+    const ops = this.data.od.operations
+    for (var i in ops) {
+      // console.log("op:",ops[i])
+      if (ops[i].action == "自行退出" || ops[i].action == "退出" || ops[i].action == "驳回报名") {
+        this.data.quitMembers.push(ops[i])
+      }
+    }
+    this.setData({
+      quitMembers: this.data.quitMembers
     })
   },
 

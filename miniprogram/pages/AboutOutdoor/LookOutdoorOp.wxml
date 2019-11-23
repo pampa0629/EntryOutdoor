@@ -1,7 +1,7 @@
 <van-panel>
-	<van-cell slot="header" title-class="redtitle"  title="操作方式" title-width="40%" value="队员昵称"/>
+	<van-cell slot="header" title-class="redtitle"  title="队员昵称/操作方式" title-width="40%" value="发生时间"/>
 
   <van-cell-group>
-    <van-cell wx:for="{{operations}}" wx:key="*this" title-width="40%" title="{{item.action}}" value="{{item.nickName}}"/> 
+    <van-cell wx:for="{{operations}}" wx:key="*this" title-width="40%" title="{{item.nickName}}/{{item.action}}" value="{{item.time}}"/> 
   </van-cell-group>   
 </van-panel> 

@@ -104,20 +104,24 @@ Page({
       })
     }
     var message = "同意授权“使用我的地理位置”才能调用微信地图；小程序不会记录您的位置，请放心"
-    await util.authorize("userLocation", message)
-    let res = await promisify.chooseLocation({})
-        
-    console.log(res)
-    this.setData({
-      "meet.name": res.name,
-      "meet.latitude": res.latitude,
-      "meet.longitude": res.longitude,
-      hasModified: true,
-    })
-    if (!this.data.meet.place) {
+    let auRes = await util.authorize("userLocation", message)
+    console.log("授权结果:", auRes)
+    try {
+      let res = await promisify.chooseLocation({})
+      console.log("选择地址：", res)
       this.setData({
-        "meet.place": res.name, // 帮着设置一下
+        "meet.name": res.name,
+        "meet.latitude": res.latitude,
+        "meet.longitude": res.longitude,
+        hasModified: true,
       })
+      if (!this.data.meet.place) {
+        this.setData({
+          "meet.place": res.name, // 帮着设置一下
+        })
+      }
+    }catch{
+      wx.showToast({ title: '可继续点击授权', })
     }
   },
 

@@ -42,17 +42,22 @@
   <van-col span="3" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>1.1.7</view>
+      <view style='font-family:黑体;font-size:11pt'>1.1.9</view>
     </view>
   </van-col>
 </van-row>
 
 <!--个人信息-->
-<van-cell-group>
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="我的信息" value="点击右侧箭头修改信息" size="{{size}}"  is-link bind:click="clickModify"/>
+
   <van-cell title="户外昵称" value="{{userInfo.nickName}}" label="好听、易记、非真名" size="{{size}}" is-link bind:click="clickModify" />
   <van-cell title="性别" value="{{userInfo.gender}}" size="{{size}}" is-link bind:click="clickModify" />
   <van-cell title="手机号码" value="{{userInfo.phone}}" label="真实有效、方便领队联系" size="{{size}}" is-link bind:click="clickModify" border="{{ false }}" />
-</van-cell-group>
+</van-panel>
+
+<!-- 故意空一行 -->
+<van-cell title="  " border="{{false}}" />
  
 <!--微信登录-->
 <view wx:if="{{!hasLogin}}">
@@ -73,6 +78,9 @@
     <van-button size="large" plain  type="primary" disabled="{{!lastOutdoorid}}" bind:click="gotoLastOutdoor">最近的活动</van-button>
   </van-col>
 </van-row>
+
+<!-- 故意空一行 -->
+<van-cell title="  " border="{{false}}" />
 
 <!--户外履历 & 绿野ORG登录--> 
 <van-row>

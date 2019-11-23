@@ -9,7 +9,7 @@
     <van-col span="9" offset="2">
       <form bindsubmit="onShare2Circle" report-submit="true">
         <button form-type="submit" plain size="large">分享到朋友圈</button>
-      </form>
+      </form> 
     </van-col>
     <van-col span="9" offset="2">
       <form bindsubmit="onCancelShare" report-submit="true">
@@ -176,30 +176,38 @@
 <van-tag size="{{size}}" type="primary" plain>活动当前状态：{{od.status}}</van-tag>
 <van-steps size="{{size}}" steps="{{ steps }}" active="{{ active }}" />
 
-<!--截止时间提示-->
+<!--状态提示-->
+<van-tag size="{{size}}" type="primary" plain>报名当前状态：{{entryInfo.status}}</van-tag>
+<!--占坑时间提示-->
+<block wx:if="{{entryInfo.status=='浏览中' || entryInfo.status=='占坑中'}}">
   <block wx:if="{{remains.occupy.time<0}}">
-    <van-tag size="{{size}}" plain type="danger">\n已过占坑截止时间</van-tag>
+    <van-row>
+      <van-tag size="{{size}}" plain type="danger">已过占坑截止时间</van-tag>
+    </van-row>
   </block> 
   <block wx:else>
     <van-cell title="距离占坑截止时间还剩：" title-class="redtitle" size="{{size}}">
       <van-count-down size="{{size}}" time="{{ remains.occupy.time }}" format="DD 天 HH 时 mm 分 ss 秒" />
     </van-cell>
   </block> 
-  <!--报名时间提示-->
+</block>
+<!--报名时间提示-->
+<block wx:if="{{entryInfo.status=='浏览中' || entryInfo.status=='占坑中'}}">
   <block wx:if="{{remains.entry.time<0}}">
-    <van-tag size="{{size}}" plain type="danger">\n已过报名截止时间</van-tag>
+    <van-row>
+      <van-tag size="{{size}}" plain type="danger">已过报名截止时间</van-tag>
+    </van-row>
   </block> 
   <block wx:else>
   <van-cell title="距离报名截止时间还剩：" title-class="redtitle" size="{{size}}">
       <van-count-down size="{{size}}" time="{{ remains.entry.time }}" format="DD 天 HH 时 mm 分 ss 秒" />
     </van-cell>
   </block> 
+</block> 
 
-<!--状态提示-->
-<van-tag size="{{size}}" type="primary" plain>报名状态：{{entryInfo.status}}</van-tag>
-<block wx:if="{{od.status=='已发布'||od.status=='已成行'&&entryInfo.status=='浏览中'}}">
-  <!--报名条件提示-->
-    <van-tag size="{{size}}" plain type="primary">必须选择带(*)号的内容才能报名活动</van-tag>
+<!-- 报名条件提示 -->
+<block wx:if="{{(od.status=='已发布'||od.status=='已成行') && entryInfo.status=='浏览中'}}">
+  <van-tag size="{{size}}" plain type="primary">必须选择带(*)号的内容才能报名活动</van-tag>
   <van-row>
     <van-tag size="{{size}}" plain type="success" wx:if="{{entryInfo.meetsIndex>=0}}">选择集合地点：OK</van-tag>
     <van-tag size="{{size}}" plain type="danger" wx:else>选择集合地点：未选择</van-tag>
@@ -215,7 +223,7 @@
 </block>
 
 <!-- 绿野网站同步提示 -->
-<van-tag wx:if="{{od.websites.lvyeorg.tid}}" size="{{size}}" plain type="danger">\n该活动已被设置为与绿野ORG网站同步，您的报名信息将自动同步到网站</van-tag>
+<van-tag wx:if="{{od.websites.lvyeorg.tid}}" size="{{size}}" plain type="danger">该活动已被设置为与绿野ORG网站同步，您的报名信息将自动同步到网站</van-tag>
 
 <!--故意空白，防止遮挡-->
 <van-cell title="  " border="{{false}}" />

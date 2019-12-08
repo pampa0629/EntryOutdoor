@@ -230,9 +230,9 @@ const chooseForum = (title, isTesting) => {
     var dayCount = (day1 - day2) / (1000 * 60 * 60 * 24) // 差了几天
     if (dayCount > 30) { // 30天算远期
       fid = 91
-    } else if (title.loaded == "休闲" || title.level <= 0.8) {
+    } else if (title.loaded == "休闲" || title.level <= 1.0) {
       fid = 90
-    } else if (title.loaded == "重装" || title.level >= 1.0) {
+    } else if (title.loaded == "重装" || title.level > 1.0) {
       fid = 67
     }
   }

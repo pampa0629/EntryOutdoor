@@ -29,9 +29,10 @@ Page({
   },
 
   onLoad: function(options) {
+    console.log("OneGroup.onLoad()", options)
     wx.showShareMenu({
       withShareTicket: true
-    })
+    }) 
     
     const self = this
     self.setData({
@@ -132,46 +133,50 @@ Page({
   },
 
   /////////////////// 排行榜 /////////////////////////
-  tapRank() {
+  async tapRank() {
+    console.log("tapRank()")
+
     const self = this
     const rank = self.data.rank
-    self.statPersons(counts=>{
-      console.log(counts)
-      // 一共的
-      counts.sort((a,b)=>{
-        return a.total < b.total
-      })
-      rank.total = []
-      rank.total = rank.total.concat(counts)
-      console.log(rank.total)
-
-      // 今年的
-      counts.sort((a, b) => {
-        return a.thisyear < b.thisyear
-      })
-      rank.thisyear = []
-      rank.thisyear = rank.thisyear.concat(counts)
-      console.log(rank.thisyear)
-
-      // 去年的
-      counts.sort((a, b) => {
-        return a.lastyear < b.lastyear
-      })
-      rank.lastyear = []
-      rank.lastyear = rank.lastyear.concat(counts)
-      console.log(rank.lastyear)
-      
-      // 构造函数
-      self.buildFuntions()
-
-      // 最后更新时间
-      rank.update = util.formatTime(new Date())
-
-      self.setData({
-        rank:rank,
-      })
-      group.saveRank(self.data.groupid, rank)
+    wx.showLoading({title: '统计中请稍后',})
+    let counts = await self.statPersons()
+    console.log(counts)
+    // 一共的
+    counts.sort((a,b)=>{
+      return b.total - a.total
     })
+    rank.total = []
+    rank.total = rank.total.concat(counts)
+    console.log(rank.total)
+
+    // 今年的
+    counts.sort((a, b) => {
+      return b.thisyear - a.thisyear
+    })
+    rank.thisyear = []
+    rank.thisyear = rank.thisyear.concat(counts)
+    console.log(rank.thisyear)
+
+    // 去年的
+    counts.sort((a, b) => {
+      return b.lastyear - a.lastyear
+    })
+    rank.lastyear = []
+    rank.lastyear = rank.lastyear.concat(counts)
+    console.log(rank.lastyear)
+    
+    // 构造函数
+    self.buildFuntions()
+
+    // 最后更新时间
+    rank.update = util.formatTime(new Date())
+
+    self.setData({
+      rank:rank,
+    })
+    group.saveRank(self.data.groupid, rank)
+    wx.hideLoading()
+    // })
   },
 
   buildFuntions() {
@@ -220,25 +225,29 @@ Page({
     })
   },
 
-  statPersons(callback) {
+  // 统计每个人的活动次数
+  async statPersons() {
+    console.log("statPersons()")
     const self = this
     var counts = []
-    var num = 0
-    self.data.personids.forEach((item, index) => {
-      dbPersons.doc(item).get().then(res => {
-        var outdoors = []
-        outdoors = outdoors.concat(res.data.myOutdoors)
-        outdoors = outdoors.concat(res.data.entriedOutdoors)
-        var years = self.countOutdoor(outdoors)
-        var one = { nickName: res.data.userInfo.nickName, total: outdoors.length, thisyear: years.thisyear, lastyear: years.lastyear,personid:item}
-        console.log(one)
-        counts.push(one)
-        num ++ 
-        if (num == self.data.personids.length && callback) {
-          callback(counts)
-        }
-      })
-    })
+    // var num = 0
+    for (var id in self.data.personids) {
+    // self.data.personids.forEach((item, index) => {
+      let personid = self.data.personids[id]
+      let res = await dbPersons.doc(personid).get()
+      var outdoors = []
+      outdoors = outdoors.concat(res.data.myOutdoors)
+      outdoors = outdoors.concat(res.data.entriedOutdoors)
+      var years = self.countOutdoor(outdoors)
+      var one = { nickName: res.data.userInfo.nickName, total: outdoors.length, thisyear: years.thisyear, lastyear: years.lastyear, personid: personid}
+      // console.log(one)
+      counts.push(one)
+      // num ++ 
+      // if (num == self.data.personids.length && callback) {
+      //   callback(counts)
+      // }
+    }
+    return counts
   },
 
   countOutdoor(outdoors){

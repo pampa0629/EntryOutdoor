@@ -932,6 +932,13 @@ Page({
     })
   },
 
+  // 拷贝图文介绍
+  copyBriefDisc() {
+    wx.setClipboardData({
+      data: this.data.od.brief.disc,
+    })
+  },
+
   // 上传活动中的拍照
   async uploadPhotos(e) {
     console.log("uploadFaces()")

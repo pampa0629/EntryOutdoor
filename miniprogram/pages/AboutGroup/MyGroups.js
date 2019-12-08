@@ -15,6 +15,7 @@ Page({
   },
 
   onLoad: function(options) {
+    console.log("MyGroups.onLoad()", options)
     const self = this
     if (app.checkLogin()) {
       dbPersons.doc(app.globalData.personid).get().then(res => {

@@ -456,7 +456,7 @@ const calcRemainTime = (outdoorDate, limitItem, isOccupy) => {
   var outdoorMinute = Date.parse(util.Ymd2Mdy(outdoorDate)) / 1000.0 / 60 // 得到活动日期的分钟时间数
   var dayCount = util.getLimitDateIndex(limitItem.date)
   console.log("dayCount:" + dayCount)
-  var minute = 24 * 60; // 一天多少分钟
+  var minute = 24 * 60; // 一天多少分钟 
   //console.log(limitItem.time)
   if (limitItem.time) {
     var hour_minute = limitItem.time.split(":")
@@ -473,6 +473,18 @@ const calcRemainTime = (outdoorDate, limitItem, isOccupy) => {
 
   //console.log(remainMinute)
   return remainMinute
+}
+
+// 根据title中的日期和“前几日”，加“7:00”，构造准确日期时间
+const calcDateTime = (date, del, time) => {
+  console.log("OD.prototype.calcDateTime()", date, del, time)
+  var datetime = new Date(date + " " +time)
+  console.log("datetime: ", datetime)
+  var delDay = util.getLimitDateIndex(del)
+  console.log("delDay: ", delDay)
+  datetime.setDate(datetime.getDate() - delDay)
+  console.log("datetime: ", datetime)
+  return datetime
 }
 
 const getChatStatus = (personid, nickName, chat) => {
@@ -736,6 +748,7 @@ module.exports = {
 
   buildRemainText: buildRemainText, // 构造剩余时间提示文字
   calcRemainTime: calcRemainTime, // 计算占坑或报名的剩余时间
+  calcDateTime: calcDateTime, // 计算“前几日”和time，得到准确的日期时间
 
   // removeMember: removeMember, // 移除某个队员（自己退出，或者领队驳回报名）
   removeOcuppy: removeOcuppy, // 清退占坑队员

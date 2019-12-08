@@ -1,3 +1,4 @@
+const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
@@ -6,7 +7,7 @@ const _ = db.command
 Page({ 
 
   data: { 
-    career:null,
+    career:null, 
     myOutdoors:null, 
     entriedOutdoors:null,
   }, 

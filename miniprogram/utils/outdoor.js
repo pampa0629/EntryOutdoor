@@ -69,11 +69,53 @@ OD.prototype.load = async function(outdoorid) {
     this.postWaitings()
     // 处理占坑队员（移除或提醒）
     this.dealOcuppy()
+    // 处理自动成行
+    this.dealAutoConfirm()
+
     console.log("return true")
     return true
   } catch(e){
     console.log("e",e)
     return false
+  }
+}
+
+// 判断成行条件是否具备,1）活动处于已发布状态；2）开启了自动成行，且时间和人数OK；
+OD.prototype.canAutoConfirm = function () {
+  console.log("OD.prototype.canAutoConfirm()")
+  if (this.status == "已发布" && this.limits.autoConfirm && this.limits.autoConfirm.enabled) {
+    // 判断时间
+    var now = new Date()
+    var datetime = odtools.calcDateTime(this.title.date, this.limits.autoConfirm.date, this.limits.autoConfirm.time)
+    console.log("now:", now)
+    console.log("datetime:", datetime)
+    if (now < datetime) {
+      return false
+    }
+
+    // 判断人数
+    var count = this.members.length + this.aaMembers.length
+    if (count < this.limits.autoConfirm.personCount) {
+      return false
+    }
+    return true
+  }
+  return false
+}
+
+// 处理自动成行
+OD.prototype.dealAutoConfirm = async function () {
+  console.log("OD.prototype.dealAutoConfirm()")
+  if (this.canAutoConfirm())  {
+    console.log("canAutoConfirm:", true)
+    // 改变活动状态，并保存起来
+    this.status = "已成行"
+    this.saveItem("status")
+
+    // 给所有队员发送微信服务通知
+    for (let item of this.members) {
+      await template.sendConfirmMsg2Member(item.personid, this.outdoorid, this.title.whole, this.members.length, this.leader.userInfo.nickName, this.limits.isAA)
+    }
   }
 }
 
@@ -191,6 +233,7 @@ OD.prototype.setDefault4New = function(leader) {
   this.addMembers = []
   this.aaMembers = []
   this.websites = odtools.getDefaultWebsites()
+  this.limits.autoConfirm.enabled = false // 新活动默认为“不自动成行”
   this.chat = {
     messages: []
   }

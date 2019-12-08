@@ -114,9 +114,9 @@
 </van-panel>
 
 <!--活动图文介绍-->
-<van-panel>
+<van-panel> 
   <van-cell slot="header" title-class="redtitle" title="图文介绍" size="{{size}}"/>
-  <van-field value="{{od.brief.disc}}" size="{{size}}" autosize type="textarea" disabled border="{{false}}" />
+  <van-field value="{{od.brief.disc}}" size="{{size}}" autosize type="textarea" disabled border="{{false}}" right-icon="arrow" bind:click-icon="copyBriefDisc"/>
   <view wx:for="{{od.brief.pics}}" wx:key="src">
     <van-row>
       <van-col span="20" offset="2">

@@ -8,7 +8,7 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
  
 Page({
-
+ 
   data: { 
     limits: {
       maxPerson: false, // 是否进行人数限制 

@@ -11,7 +11,7 @@
   <block wx:if="{{limits.personCount>oldPersonCount && (od.addMembers.length+od.members.length>oldPersonCount)}}">
     <van-tag size="{{size}}" type="primary" plain>已有替补队员，请点击下面的“扩编”按钮转为正式队员。</van-tag>
     <van-button type="primary" size="large" plain bindtap='tapEnlarge'>扩编</van-button>
-  </block>   
+  </block>    
   <!--缩编：允许人数减少，且需要把队员转为替补时-->
   <block wx:if="{{limits.personCount<oldPersonCount && (od.addMembers.length+od.members.length>limits.personCount)}}">
     <van-tag size="{{size}}" type="danger" plain>减少人数会造成已有队员转为替补，如确有必要，请点击点击下面的“缩编”。</van-tag>
@@ -42,8 +42,8 @@
   </van-cell>
 </van-panel>
 
-<!--截止时间-->
-<van-cell title="占坑/报名截止时间" title-class="redtitle" label="" value="点击设置截止时间" is-link url="EditEndTimes" border="{{true}}" size="{{size}}"/>
+<!--截止时间与自动成行-->
+<van-cell title="截止时间与成行" title-class="redtitle" label="" value="点击设置截止时间与成行" is-link url="EditEndTimes" border="{{true}}" size="{{size}}"/>
 
 <!--活动装备-->
 <van-cell title="活动装备要求" title-class="redtitle" label="" value="点击设置活动装备" is-link url="EditEquipments" border="{{true}}" size="{{size}}"/>

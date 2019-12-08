@@ -10,8 +10,10 @@ Page({
 
     ocuppy: null, // 占坑截止时间
     entry: null, // 报名截止时间
+    autoConfirm: null, // 自动成行
     hasModified: false,
 
+    od:null, // 活动所有内容
     size: app.globalData.setting.size, // 界面大小
   },
 
@@ -24,9 +26,12 @@ Page({
 
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 2];
+    let prevprevPage = pages[pages.length - 3];
     self.setData({
       ocuppy: prevPage.data.limits.ocuppy,
       entry: prevPage.data.limits.entry,
+      autoConfirm: prevPage.data.limits.autoConfirm,
+      od: prevprevPage.data.od,
     })
 
     if (!self.data.ocuppy) {
@@ -74,9 +79,11 @@ Page({
       prevPage.setData({ // 这样设置，od同样也能被修改掉
         "limits.ocuppy": self.data.ocuppy,
         "limits.entry": self.data.entry,
+        "limits.autoConfirm": self.data.autoConfirm,
       })
       od.saveItem("limits.ocuppy")
       od.saveItem("limits.entry")
+      od.saveItem("limits.autoConfirm")
       this.setData({
         hasModified: false
       })
@@ -128,6 +135,56 @@ Page({
     console.log(e)
     this.setData({
       "entry.time": e.detail.value,
+      hasModified: true,
+    })
+  },
+
+  // 开启自动成行；若首次开启，设置默认条件
+  openAutoConfirm(e) {
+    console.log(e)
+    
+    if (!this.data.autoConfirm) { 
+      var defaultCount = 3 // 默认三人成行
+      if (this.data.od.limits.maxPerson) {
+        // 如果为null，即之前没有设置过，则设置为活动总限制人数的80%
+        defaultCount = parseInt(this.data.od.limits.personCount * 0.8)
+      }
+      this.setData({
+        "autoConfirm.personCount": defaultCount,
+        "autoConfirm.date": this.data.entry.date,
+        "autoConfirm.time": this.data.entry.time,
+      })  
+    }
+
+    this.setData({
+      "autoConfirm.enabled": e.detail,
+      hasModified: true,
+    })
+  },
+
+  // 自动成行：调整人数
+  bindAddPerson(e) {
+    this.setData({
+      "autoConfirm.personCount": e.detail,
+      hasModified: true
+    })
+  },
+
+  // 报名截止日期
+  changAutoConfirmDate: function (e) {
+    console.log(e)
+    const self = this;
+    self.setData({
+      "autoConfirm.date": self.data.EntryDates[e.detail.value],
+      hasModified: true,
+    })
+  },
+
+  // 报名截止时间
+  changAutoConfirmTime: function (e) {
+    console.log(e)
+    this.setData({
+      "autoConfirm.time": e.detail.value,
       hasModified: true,
     })
   },

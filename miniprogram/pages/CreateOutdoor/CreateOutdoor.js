@@ -513,7 +513,7 @@ Page({
       content: '确认活动成行将给所有队员发送微信消息提醒'
     })
     console.log("res:",res)
-    
+     
     if (res.confirm) {
       this.updateStatus("已成行")
       // 成行的活动通知，只发一次

@@ -7,7 +7,7 @@
   </van-panel>
 </van-dialog>
 
-<!--弹出分享按钮-->
+<!--弹出分享按钮--> 
 <van-popup show="{{ showPopup }}" overlay="{{false}}" position="bottom" custom-class="center" bind:close="closePopup">
   <van-row>
     <van-col span="20" offset="2">
@@ -193,15 +193,16 @@
 
 <block wx:if="{{od.status=='拟定中' || od.status=='已结束' || od.status=='已取消'}}">
   <!--故意空白，防止遮挡-->
-  <van-cell title="  " border="{{false}}" />
+  <van-cell title="  " border="{{false}}" /> 
   <van-cell title="  " border="{{false}}" />
   <van-cell title="  " border="{{false}}" />
 
   <van-row class="fix2">
     <van-col span="6" offset="1" wx:if="{{od.status=='拟定中'}}">
-      <form bindsubmit="publishOutdoor" report-submit="true">
+      <!-- <form bindsubmit="publishOutdoor" report-submit="true">
         <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布</button>
-      </form>
+      </form> -->
+      <button bindtap="publishOutdoor" disabled="{{!canPublish}}" type="primary">发布</button>
     </van-col>
     <van-col span="6" offset="2" wx:if="{{od.status=='拟定中'}}">
       <form bindsubmit="clearOutdoor" report-submit="true">

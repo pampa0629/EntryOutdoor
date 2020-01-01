@@ -3,6 +3,7 @@ const util = require('./util.js')
 var bmap = require('../libs/bmap-wx.min.js')
 const cloudfun = require('./cloudfun.js')
 const template = require('./template.js')
+const message = require('./message.js')
 const promisify = require('./promisify.js')
 
 wx.cloud.init()
@@ -370,7 +371,6 @@ const remindOcuppy = async(od) => {
     }
   }
 
-  // cloudfun.updateOutdoorMembers(od.outdoorid, members, null)
   cloudfun.opOutdoorItem(od.outdoorid, "members", members, "")
 }
 
@@ -387,6 +387,9 @@ const removeOcuppy = async(outdoorid) => {
       count++
       // 给被强制退坑者发模板消息
       template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
+      // 给被强制退坑者发订阅消息
+      message.sendEntryStatusChange(members[i].personid, outdoorid, res.data.title.whole, "您因到期未转报名，被系统强制退坑")
+
       // 记录下来 
       recordOperation(outdoorid, "强制退坑", members[i].userInfo.nickName, members[i].personid)
 
@@ -403,7 +406,9 @@ const removeOcuppy = async(outdoorid) => {
       members[i].entryInfo.status = "报名中"
       // 给替补上的队员发模板消息
       template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
-      // 记录下来
+      // 给替补上的队员发模板消息
+      message.sendEntryStatusChange(members[i].personid, outdoorid, res.data.title.whole, "因有人被退坑，您从“替补中”转为“报名中”")
+      // 操作记录下来 
       recordOperation(outdoorid, "替补转报名", members[i].userInfo.nickName, members[i].personid)
     }
   }

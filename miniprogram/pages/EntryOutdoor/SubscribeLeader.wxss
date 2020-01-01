@@ -18,3 +18,10 @@
   position:fixed;
   top: 10rpx;
 }
+
+.bigtip{
+  color:#F65959;
+  font-size:30pt;
+  text-align:center;
+}
+

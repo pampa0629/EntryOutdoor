@@ -6,6 +6,7 @@ const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
+const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
@@ -19,7 +20,7 @@ const _ = db.command
 
 Page({
   data: {
-    od: null,
+    od: null, 
     canPublish: false, // 判断是否可发布，必须定义关键的几项：地点、日期、集合时间地点等,不保存
     hasModified: false, // 是否被修改了，可以保存起来
     modifys: { // 到底更新了哪些条目，这里做一个临时记录
@@ -28,7 +29,7 @@ Page({
     },
 
     // 常量定义
-    Loadeds: ["轻装", "重装", "休闲"], // 枚举型：轻装、重装、休闲装
+    Loadeds: ["轻装", "亲子", "重装", "休闲"], // 枚举型：轻装、重装、休闲装
     // Durings: ["一日", "两日", "三日", "四日", "五日", "多日"], // 活动时长枚举
     Durings:odtools.Durings, 
 
@@ -488,9 +489,18 @@ Page({
 
   // 把取消的事情通告所有人，包括自己
   async postCancel2Template() {
+    // 发送模板消息
     for (let item of this.data.od.members) {
       await template.sendCancelMsg2Member(item.personid, this.data.od.title.whole, this.data.od.outdoorid, this.data.myself.userInfo.nickName, this.data.cancelDlg.reason)
     }
+
+    // 发送订阅消息
+    for (let item of this.data.od.members) {
+      if (item.personid != app.globalData.personid) {
+        await message.sendOdStatusChange(item.personid, this.data.od.outdoorid, this.data.od.title.whole, "因故取消", this.data.cancelDlg.reason)
+      }
+    }
+
   },
 
   // 活动一旦发起，就不能删除，只能取消
@@ -521,9 +531,19 @@ Page({
       if (!wx.getStorageSync(key)) {
         console.log(key)
         wx.setStorageSync(key, true)
-        // 给所有队员发活动成行通知
+        // 给所有队员发活动成行通知; 模板消息
         for (let item of this.data.od.members) { 
           await template.sendConfirmMsg2Member(item.personid, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.members.length, this.data.myself.userInfo.nickName, this.data.od.limits.isAA)
+        }
+        // 给所有队员发活动成行通知; 订阅消息
+        var msg = "请按时到达选定集合地点"
+        if (this.data.od.limits.isAA) {
+          msg += "；再退出留意A费用事宜。"
+        }
+        for (let item of this.data.od.members) {
+          if (item.personid != app.globalData.personid) {
+            await message.sendOdStatusChange(item.personid, this.data.od.outdoorid, this.data.od.title.whole, "活动已成行", msg)
+          }
         }
       }
     } else if (res.cancel) {
@@ -534,6 +554,7 @@ Page({
   // 检查微信消息数量是否够用
   checkFormids() {
     console.log("checkFormids()")
+    return true // todo 先不管数量了
     var result = this.data.formids.length >= 6 ? true : false
     console.log(result)
     this.setData({
@@ -569,9 +590,15 @@ Page({
   },
 
   // 发布活动
-  publishOutdoor: function(e) {
+  async publishOutdoor() {
     console.log("publishOutdoor()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // 订阅消息
+    let res = await promisify.requestSubscribeMessage({
+      tmplIds: ['1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg', // 收到队员报名通知
+      "td1vrF82SwI0e730B2bGL-k3fkYZXwmFQEPhssNU50c", // 满员通知
+      ]})
+    
     var check1 = this.checkFormids()
     if (check1) {
       this.publishOutdoorInner()
@@ -618,8 +645,15 @@ Page({
       var ids = Object.getOwnPropertyNames(res.data.subscribers)
       for (let id of ids) {
         await cloudfun.opPersonItem(id, "caredOutdoors", { id: this.data.od.outdoorid, title: this.data.od.title.whole }, "unshift")
+        // 模板消息
         await template.sendCreateMsg2Subscriber(id, this.data.od.title.whole, this.data.od.outdoorid, app.globalData.userInfo.phone)
+        // 订阅消息
+        await message.sendCreateMsg(id, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.leader.nickName, this.data.od.title.date, this.data.od.title.place, this.data.od.limits.maxPerson ? this.data.od.limits.personCount:99)
+        // 减掉一次消息次数
+        res.data.subscribers[id].messageCount --  
       }
+      // 把更新消息次数的结果写入 领队记录中
+      await cloudfun.opPersonItem(app.globalData.personid, "subscribers", res.data.subscribers)
     }
   },
 

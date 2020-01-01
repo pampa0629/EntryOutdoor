@@ -7,7 +7,7 @@ const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
-const facetools = require('../../utils/facetools.js')
+const facetools = require('../../utils/facetools.js') 
 
 wx.cloud.init()
 const db = wx.cloud.database({}) 
@@ -374,14 +374,14 @@ Page({
     }
   },
 
-  // 把报名消息给自己和领队发送微信模板消息
+  // 把报名消息给自己和领队发送微信消息
   postEntryMsg() {
-    console.log("postEntryMsg")
+    console.log("postEntryMsg()")
     const self = this
     const od = this.data.od
     let notice = self.data.od.limits.wxnotice
 
-    // 给自己发微信消息
+    // 给自己发微信模板消息
     if (true) {
       // 活动主题，领队联系方式，自己的昵称，报名状态，
       template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.od.outdoorid)
@@ -389,7 +389,7 @@ Page({
 
     console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
-      if ((notice.entryCount > notice.alreadyCount) || (notice.fullNotice && this.data.entryFull)) { // 前几个报名，或者接收最后一个报名，才发送微信消息
+      if (notice.entryCount > notice.alreadyCount) { // 前几个报名发送微信消息
         var key = this.data.od.outdoorid + "." + this.data.entryInfo.personid
         var count = parseInt(wx.getStorageSync(key))
         if (!count) {
@@ -397,12 +397,22 @@ Page({
         }
         console.log("count:" + count)
         if (count < 1) { // 每个人只发送一次
-          template.sendEntryMsg2Leader(od.leader.personid, this.data.userInfo, this.data.entryInfo, od.title.whole, this.data.od.outdoorid)
+          // 模板消息
+          template.sendEntryMsg2Leader(od.leader.personid, this.data.userInfo, this.data.entryInfo, od.title.whole, od.outdoorid)
+          // 订阅消息
+          var remark = this.data.userInfo.gender + "/" + this.data.userInfo.phone + "/第" + (parseInt(this.data.entryInfo.meetsIndex) + 1) + "集合地点"
+          message.sendEntryMsg(od.leader.personid, od.outdoorid, od.title.whole, this.data.userInfo.nickName, new Date(), remark)
+          // 给领队发了消息，得从领队那里减掉一个消息数量
+          cloudfun.opOutdoorItem(od.leader.personid, "messgeCount", -1, "inc")
+
           wx.setStorageSync(key, parseInt(count) + 1)
           // 发送结束，得往数据库里面加一条；还必须调用云函数
-          // cloudfun.addOutdoorNoticeCount(self.data.od.outdoorid, 1)
           cloudfun.opOutdoorItem(self.data.od.outdoorid, "limits.wxnotice.alreadyCount", 1, "inc")
         }
+      } 
+      // 满员通知 
+      if (notice.fullNotice && this.data.entryFull) {
+        message.sendEntryFull(od.leader.personid, od.outdoorid, od.title.whole, "报名已满，敬请留意")
       }
     }
   },
@@ -628,8 +638,9 @@ Page({
   // },
 
   // 检查微信消息数量是否够用
-  checkFormids() {
+  checkFormids() { 
     console.log("checkFormids()")
+    return true // todo 先返回true，之后再看是否需要增加数量检查
     var result = this.data.formids.length >= 6 ? true : false
     console.log(result)
     this.setData({
@@ -670,13 +681,25 @@ Page({
     const self = this
     template.savePersonFormid(app.globalData.personid, formid)
 
+    // 订阅消息
+    wx.requestSubscribeMessage({
+      tmplIds: ['Sj8TATwvmR-qZwUoUifcjOVUr1hpFk0CcXgOAPHGhww', // 活动状态变更通知（活动成行/取消）
+        "B6HdOB00WLtjV2Vbhc2Qb7lx1CtOPEV8A6qy4E6V-R4", // 报名状态变更通知（被领队驳回/缩编时报名变替补/强制退坑/替补转正等）
+        "1O-Y8wh7U7iNa_g3LmKiAJ7wHXUUwZdcNdOcCcYSEHY" // 活动重要提醒通知（活动基本信息被修改/换领队/有照片上传/领队留言等）
+      ],
+      complete(res) {
+        console.log("complete: ", res)
+      }
+    })
+
     if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg && !self.data.showFormidDlg) {
       self.data.entryTemp = {
         status: status,
       }
       var check1 = this.checkEntryInfo()
       var check2 = check1 ? this.checkPersonInfo() : false
-      var check3 = check2 ? this.checkFormids() : false
+      // var check3 = check2 ? this.checkFormids() : false
+      var check3 = true // 暂时不管微信消息数量这事了
       console.log("check1: " + check1)
       console.log("check2: " + check2)
       console.log("check3: " + check3)

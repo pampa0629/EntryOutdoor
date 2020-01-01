@@ -417,10 +417,13 @@ Page({
 
   },
 
-  tapNotice() {
-    console.log("tapNotice()")
+  tapNotice1() {
+    console.log("tapNotice1()")
     wx.requestSubscribeMessage({
-      tmplIds: ['gQtSQmltmXrOFeAcvOfXFVsRGv7v9S6YX6467rDoSMc', "CjoAXZpefhPo6IFgxvPWlx8xoFn08tGe4ijcZE-2Cdk"],
+      tmplIds: ['gQtSQmltmXrOFeAcvOfXFVsRGv7v9S6YX6467rDoSMc', 
+      "CjoAXZpefhPo6IFgxvPWlx8xoFn08tGe4ijcZE-2Cdk",
+      "1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg"
+       ],
       success(res) { 
         console.log("success: ", res)
       }, 
@@ -428,8 +431,78 @@ Page({
         console.log("complete: ", res)
       }
     })
+
+    this.tapNotice2()
   },
 
+  tapNotice2() {
+    console.log("tapNotice2()")
+    wx.requestSubscribeMessage({
+      tmplIds: ['1O-Y8wh7U7iNa_g3LmKiAMG5XFMosxzeDcf_Mivlt-Q',
+        "f6L4oJoqw0psVcxEI0eQWSv_-SpEdhNJ6-MSFzzQ-SI",
+        "1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg"
+      ],
+      success(res) {
+        console.log("success2: ", res)
+      },
+      complete(res) {
+        console.log("complete2: ", res)
+      }
+    })
+  },
 
+  async tapSend() {
+    console.log("tapSend()")
+    // {
+    //   number01: {
+    //     value: '339208499'
+    //   },
+    //   date01: {
+    //     value: '2015年01月05日'
+    //   },
+    //   site01: {
+    //     value: 'TIT创意园'
+    //   },
+    //   site02: {
+    //     value: '广州市新港中路397号'
+    //   }
+    // },
+
+    // "data": {
+    //   "thing1": {
+    //     "value": "内容"
+    //   },
+    //   "number2": {
+    //     "value": 20
+    //   }
+
+    // tmplIds: ['gQtSQmltmXrOFeAcvOfXFVsRGv7v9S6YX6467rDoSMc',  报名成功通知
+    // 活动名称    // { { thing2.DATA } }
+    // 姓名    // { { name1.DATA } }
+    // 地址    // { { thing5.DATA } }
+    // 活动时间    // { { date4.DATA } }
+    // 活动场馆    // { { thing3.DATA } }
+
+    // const res = await wx.cloud.callFunction({ name: 'getAccessToken' })
+    // console.log(res)
+    const res = await wx.cloud.callFunction({
+      name: 'sendMessage', // 云函数名称
+      data: {
+        openid: "ogNmG5KFPConlOTeQNYciQrW5SE4",
+        // access_token: JSON.parse(res.result).access_token,
+        tempid: 'gQtSQmltmXrOFeAcvOfXFVsRGv7v9S6YX6467rDoSMc',
+        page: "pages/MyInfo/MyInfo",
+        data: {
+              "thing2": {"value": "活动名称"},
+              "name1": {"value": "领队姓名"},
+              "thing5": { "value": "活动地址" },
+              "date4": { "value": "2019-4-23" },
+              "thing3": { "value": "活动场馆" },
+                      },
+      },
+    })
+    console.log("res",res)
+
+  },
 
 })

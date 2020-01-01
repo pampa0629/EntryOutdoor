@@ -11,7 +11,9 @@
 <van-button size="large"  bind:click="tapCallback">去回调</van-button>
 <van-button size="large"  bind:click="tapCheck">审核</van-button>
 <van-button size="large"  bind:click="tapDate">日期</van-button>
-<van-button size="large"  bind:click="tapNotice">订阅消息</van-button>
+<van-button size="large"  bind:click="tapNotice1">订阅消息1</van-button>
+<van-button size="large"  bind:click="tapNotice2">订阅消息2</van-button>
+<van-button size="large"  bind:click="tapSend">发送消息</van-button>
 
 
 <van-cell title="路线与轨迹" title-class="redtitle" label="{{od.route.wayPoints.length}}个途经点" value="点击查看详细路线与轨迹" is-link url="LookRoute" border="{{false}}" />

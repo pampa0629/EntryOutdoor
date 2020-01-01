@@ -3,6 +3,7 @@ const app = getApp()
 const odtools = require('./odtools.js')
 const util = require('./util.js')
 const template = require('./template.js')
+const message = require('./message.js')
 const cloudfun = require('./cloudfun.js')
 const lvyeorg = require('./lvyeorg.js')
 const person = require('./person.js')
@@ -115,6 +116,17 @@ OD.prototype.dealAutoConfirm = async function () {
     // 给所有队员发送微信服务通知
     for (let item of this.members) {
       await template.sendConfirmMsg2Member(item.personid, this.outdoorid, this.title.whole, this.members.length, this.leader.userInfo.nickName, this.limits.isAA)
+    }
+
+    // 给所有队员发活动成行通知; 订阅消息
+    var msg = "请按时到达选定集合地点"
+    if (this.limits.isAA) {
+      msg += "；退出留意A费用事宜。"
+    }
+    for (let item of this.members) {
+      if (item.personid != app.globalData.personid) {
+        await message.sendOdStatusChange(item.personid, this.outdoorid, this.title.whole, "活动已成行", msg)
+      }
     }
   }
 }
@@ -233,7 +245,9 @@ OD.prototype.setDefault4New = function(leader) {
   this.addMembers = []
   this.aaMembers = []
   this.websites = odtools.getDefaultWebsites()
-  this.limits.autoConfirm.enabled = false // 新活动默认为“不自动成行”
+  if (this.limits.autoConfirm) {
+    this.limits.autoConfirm.enabled = false // 新活动默认为“不自动成行”
+  }
   this.chat = {
     messages: []
   }
@@ -483,9 +497,20 @@ OD.prototype.sendModify2Members = async function(modifys) {
   console.log(modifys)
   // 只有活动标题和集合地点内容修改，才发通知给队员
   if (modifys.title || modifys.meets) {
+    var msg = "活动"
+    if (modifys.title) {
+      msg = "基本信息"
+    }
+    if (modifys.meets) {
+      msg = "集合时间地点"
+    }
+    msg += "被修改，敬请留意"
     if (this.status == "已发布" || this.status == "已成行") {
       for (let item of this.members) {
+        // 模板消息
         await template.sendModifyMsg2Member(item.personid, this.outdoorid, this.title.whole, this.leader.userInfo.nickName, modifys)
+        // 订阅消息
+        await message.sendOdInfoChange(item.personid, this.outdoorid, this.title.whole, msg)
       }
     }
   }
@@ -632,8 +657,11 @@ OD.prototype.firstBench2Member = function() {
         this.members[i].entryInfo.status = "报名中"
         // 转正记录
         odtools.recordOperation(this.outdoorid, "替补转报名", this.members[i].userInfo.nickName, this.members[i].personid)
-        // 给转正者发消息
+        // 给转正者发模板消息 
         template.sendEntryMsg2Bench(this.members[i].personid, this.outdoorid, this.title.whole, this.members[i].userInfo.nickName)
+        // 给转正者发订阅消息 
+        message.sendEntryStatusChange(this.members[i].personid, this.outdoorid, this.title.whole, "因有人退出，您从“替补中”转为“报名中”")
+
         this.postEntry2Websites(this.members[i], false, false)
         return true // 仅限一位
       }
@@ -684,15 +712,24 @@ OD.prototype.quit = async function(personid, selfQuit) {
       if (isAfee) {
         remark += "由于活动已成行，您退出且无人替补，请联系领队A费用。"
       }
+      // 发送模板消息
       template.sendQuitMsg2Self(member.personid, this.outdoorid, this.title.whole, this.title.date, this.leader.userInfo.nickName, member.userInfo.nickName, remark)
+      // 发送订阅消息
+      var msg = "您已退出活动"
+      if (isAfee) {
+        msg += "；请联系领队分摊公共费用"
+      }
+      message.sendEntryStatusChange(member.personid, this.outdoorid, this.title.whole, msg)
       // 退出记录一下
       odtools.recordOperation(this.outdoorid, "自行退出", member.userInfo.nickName, member.personid)
     } else {
       var remark = "您已被领队驳回报名，可点击回到活动的“留言”页面中查看原因。若仍有意参加，可在留言中@领队或电话等方式联系领队确认情况。"
-      // 发模板消息
+      // 发模板消息 
       template.sendRejectMsg2Member(member.personid, this.title.whole, this.outdoorid, this.leader.userInfo.nickName, this.leader.userInfo.phone, remark)
+      // 发送订阅消息
+      message.sendEntryStatusChange(member.personid, this.outdoorid, this.title.whole, "报名被领队驳回，可查看原因和再与领队沟通")
       // 退出记录一下
-      odtools.recordOperation(this.outdoorid, "驳回报名", member.userInfo.nickName, member.personid)
+      odtools.recordOperation(this.outdoorid, "报名被驳回", member.userInfo.nickName, member.personid)
     }
     
     // 第六步：同步到网站
@@ -747,7 +784,10 @@ OD.prototype.transferLeader = async function(oldLeader, newLeader) {
     // this.members.forEach((item, i) => {
     for (let item of this.members) {
       // old(index) ==> new （0）
+      // 模板消息
       await template.sendResetMsg2Member(this.outdoorid, item.personid, this.title.whole, this.members[index].userInfo.nickName, this.members[0].userInfo.nickName, this.leader.personid)
+      // 订阅消息
+      await message.sendOdInfoChange(item.personid, this.outdoorid, this.title.whole, "领队由“"+this.members[index].userInfo.nickName + "”换为“"+ this.members[0].userInfo.nickName+"”，敬请留意")
     }
 
     return this.members

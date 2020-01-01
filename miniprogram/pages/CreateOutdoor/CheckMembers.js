@@ -2,6 +2,7 @@ const app = getApp()
 const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const template = require('../../utils/template.js')
+const message = require('../../utils/message.js')
 const odtools = require('../../utils/odtools.js')
 const person = require('../../utils/person.js')
 
@@ -314,10 +315,12 @@ Page({
     }
     
     console.log(content)
-    if (content) {
+    if (content) { 
       const item = self.data.members[self.data.index]
       // 发模板消息
       template.sendChatMsg2Member(item.personid, self.data.od.title.whole, self.data.od.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, content)
+      // 订阅消息
+      message.sendOdInfoChange(item.personid, self.data.od.outdoorid, self.data.od.title.whole, "领队：" + content)
 
       // 增加活动留言
       // { "msg": "加油 @papa", "personid": "W72p-92AWotkbObV", "self": true, "who": "PiPi" }

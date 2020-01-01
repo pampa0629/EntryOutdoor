@@ -1,6 +1,7 @@
 const app = getApp()
 const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
+const promisify = require('../../utils/promisify.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -13,11 +14,13 @@ Page({
   data: {
     hasSubscribed: false, // 是否订阅领队
     leaderid: null, // 领队id
+    // 对该领队的订阅信息
     mine: {
-      acceptNotice: true
-    }, // 对该领队的订阅信息
+      acceptNotice: true,
+      messageCount: 0, // 订阅消息数量
+    }, 
 
-    formids: [], // 消息id
+    formids: [], // 模板消息id
     outdoors: {}, // 领队发起的活动列表
     size: app.globalData.setting.size, // 界面大小
   },
@@ -38,11 +41,18 @@ Page({
     this.setData({
       outdoors: res.data.myOutdoors,
     }) 
+    
     if (res.data.subscribers && res.data.subscribers[app.globalData.personid]) {
       this.setData({
-        mine: res.data.subscribers[app.globalData.personid], // 得到自己的订阅信息
+        mine: res.data.subscribers[app.globalData.personid], // 得到自己是否订阅了领队
         hasSubscribed: true
       })
+      // 防止为null
+      if (!this.data.mine.messageCount) {
+        this.setData({
+          "mine.messageCount": 0
+        })
+      }
     }
 
     if (app.checkLogin()) {
@@ -80,14 +90,30 @@ Page({
     console.log(this.data.mine.acceptNotice)
   },
 
+  // 增加模板消息数量
   addCount(e) {
     console.log("SubscribeLeader.addCount(): " + e.detail.formId)
     template.savePersonFormid(app.globalData.personid, e.detail.formId)
     console.log("formids: " + this.data.formids)
     this.data.formids.push(e.detail.formId)
-    this.setData({
+    this.setData({ 
       formids: this.data.formids
     })
+  },
+
+  // 增加订阅消息数量
+  async addMessageCount() {
+    console.log("SubscribeLeader.addMessageCount() ")
+    let res = await promisify.requestSubscribeMessage({
+      tmplIds: ['EX-4r4qcQrxj1XkO1uhGAUA-fDnwjn6QnLB4pHWszNs', // 新活动通知
+      ]
+    }) 
+    console.log("res: ", res)
+    if(res.errMsg.indexOf("ok")) {
+      this.setData({
+        "mine.messageCount": this.data.mine.messageCount + 1
+      })
+    }
   },
 
 })

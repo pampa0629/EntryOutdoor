@@ -227,28 +227,31 @@
 
 <!--故意空白，防止遮挡-->
 <van-cell title="  " border="{{false}}" />
-<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" /> 
 <van-cell title="  " border="{{false}}" />
 
 <!--报名按钮-->
 <van-row class="fix" wx:if="{{od.status=='已发布'||od.status=='已成行'}}">
   <!--替补-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapBench" report-submit="true" wx:if="{{entryFull && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
+    <!-- <form bindsubmit="tapBench" report-submit="true" wx:if="{{entryFull && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
       <button form-type="submit">替补</button>
-    </form>
+    </form> -->
+    <button bindtap="tapBench" wx:if="{{entryFull && entryInfo.status=='浏览中' && remains.entry.time>=0}}">替补</button>
   </van-col>
   <!--占坑-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapOcuppy" report-submit="true" wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
+    <!-- <form bindsubmit="tapOcuppy" report-submit="true" wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
       <button form-type="submit">占坑</button>
-    </form>
+    </form> -->
+    <button bindtap="tapOcuppy" wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">占坑</button>
   </van-col> 
   <!--报名-->
   <van-col span="9" offset="2">
-    <form bindsubmit="tapEntry" report-submit="true" wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">
+    <!-- <form bindsubmit="tapEntry" report-submit="true" wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">
       <button form-type="submit" type="primary">报名</button>
-    </form>
+    </form> -->
+    <button bindtap="tapEntry" wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">报名</button>
   </van-col>
   <!--退出-->
   <van-col span="9" offset="2">
@@ -291,13 +294,13 @@
   <van-field required value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="真实、有效、方便领队联系" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" size="{{size}}"/>
   <!-- <van-button open-type="getPhoneNumber" type="primary" size="large" plain bindgetuserinfo="dlgGetPhone">获取电话号码</van-button> 暂不提供-->
 
-</van-dialog>
+</van-dialog> 
 
 <!--保证formid数量对话框-->
 <van-dialog use-slot show="{{showFormidDlg}}" show-cancel-button bind:cancel="cancelFormidDlg" bind:confirm="confirmFormidDlg" title="微信消息数量" confirmButtonText="够数了" cancelButtonText="不报了">
   <text>为保证您能及时收到活动的消息提醒，包括：活动内容变更、活动成行与取消、领队审核等。请点击按钮，直到消息数量不小于六个。\n</text>
   <text>您当前的微信消息数量为：\n</text>
-  <van-row>
+  <van-row> 
     <van-col span="6" offset="8">
       <text class='bigtip'>{{formids.length}}个</text>
     </van-col>

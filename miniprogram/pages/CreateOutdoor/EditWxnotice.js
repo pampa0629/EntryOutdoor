@@ -6,6 +6,10 @@ const dbPersons = db.collection('Persons')
 
 const util = require('../../utils/util.js')
 const template = require('../../utils/template.js')
+const message = require('../../utils/message.js')
+const promisify = require('../../utils/promisify.js')
+const cloudfun = require('../../utils/cloudfun.js')
+
 
 Page({
 
@@ -14,6 +18,7 @@ Page({
     wxnotice: {},
     formids: [],
     hasModified: false,
+    messageCount:0, // 领队可收到的报名消息个数
     size: app.globalData.setting.size, // 界面大小
   },
 
@@ -29,6 +34,14 @@ Page({
       formids: formids
     })
 
+    // 得到领队可接受的微信消息个数
+    let res = await dbPersons.doc(app.globalData.personid).get()
+    if(res.data.messageCount) {
+      this.setData({
+        messageCount: res.data.messageCount
+      })
+    }
+
     let pages = getCurrentPages() //获取当前页面js里面的pages里的所有信息。
     let data = pages[pages.length - 3].data
     this.setData({
@@ -42,7 +55,7 @@ Page({
       })
     } else {
       this.setData({
-        wxnotice: template.getDefaultNotice(),
+        wxnotice: message.getDefaultNotice(),
         hasModified: true,
       })
     }
@@ -112,6 +125,20 @@ Page({
     this.setData({
       formids: this.data.formids
     })
+  },
+
+  async addMessageCount() {
+    console.log("EditWxnotics.addMessageCount()")
+    let res = await promisify.requestSubscribeMessage({
+      tmplIds: ['1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg', // 收到队员报名通知
+      ]})
+    console.log("res: ", res)
+    if (res.errMsg.indexOf("ok")) {
+      this.setData({
+        messageCount: this.data.messageCount + 1
+      })
+      await cloudfun.opPersonItem(app.globalData.personid, "messageCount", 1, "inc")
+    }
   },
 
 })

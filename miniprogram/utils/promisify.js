@@ -32,14 +32,13 @@ module.exports = {
   // hijklmn
   login: promise(wx.login),
   
-  
   // opqrst
   openSetting: promise(wx.openSetting),
   request: promise(wx.request),
+  requestSubscribeMessage: promise(wx.requestSubscribeMessage),
   saveImageToPhotosAlbum: promise(wx.saveImageToPhotosAlbum),
   showModal: promise(wx.showModal),
   
-
   // uvwxyz
   uploadFile: promise(wx.uploadFile),
 

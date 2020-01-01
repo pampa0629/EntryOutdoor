@@ -607,10 +607,10 @@ const sendMessage = async (openid, tempid, formid, page, data) => {
 }
 
 
-module.exports = {
+module.exports = { 
   getDefaultNotice: getDefaultNotice,
 
-  buildOneFormid: buildOneFormid,
+  buildOneFormid: buildOneFormid, 
   savePersonFormid: savePersonFormid,
   clearPersonFormids: clearPersonFormids, // 清理并得到有效的个人formids
 
@@ -618,24 +618,26 @@ module.exports = {
 
   // 给队员发消息；多人群发，注意控制并发数量不超过20
   sendCreateMsg2Subscriber: sendCreateMsg2Subscriber, // 给订阅者发“新活动”消息
-  sendModifyMsg2Member: sendModifyMsg2Member, // // 给队员发送活动重要内容修改通知
-  sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息
-  sendConfirmMsg2Member: sendConfirmMsg2Member, // 给队员发活动成行消息
-  sendResetMsg2Member: sendResetMsg2Member, // 给队员发换领队的消息
-  sendPayMsg2Member: sendPayMsg2Member, // 给队员发收款的消息
+ 
+  sendCancelMsg2Member: sendCancelMsg2Member, // 给队员发活动取消消息；OK
+  sendConfirmMsg2Member: sendConfirmMsg2Member, // 给队员发活动成行消息；OK
+
+  sendModifyMsg2Member: sendModifyMsg2Member, // // 给队员发送活动重要内容修改通知；OK
+  sendPhotoMsg2Member: sendPhotoMsg2Member, // 给全体队员发送有照片上传的消息；OK
+  sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况；OK一半，剩下一半再考虑
+  sendResetMsg2Member: sendResetMsg2Member, // 给队员发换领队的消息；OK
+  sendPayMsg2Member: sendPayMsg2Member, // 给队员发收款的消息；OK
 
 // 给队员发消息；一般是给单人发或者少数几人同时发
-  sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息
-  sendQuitMsg2Self: sendQuitMsg2Self, // 给自己发报名退出消息
-  sendEntryMsg2Bench: sendEntryMsg2Bench, // 给替补队员发转为正式队员的消息
-  sendBenchMsg2Member: sendBenchMsg2Member, // 给队员(报名/占坑)发转为替补队员的消息，用于领队缩编时
-  sendQuitMsg2Occupy: sendQuitMsg2Occupy, // 给被强制退坑者发消息提醒 
-  sendRemindMsg2Ocuppy: sendRemindMsg2Ocuppy, // 给占坑队员发占坑截止时间临近的消息提醒
-  sendChatMsg2Member: sendChatMsg2Member, // 给队员发留言消息，询问个人情况
-  sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息
-  sendPhotoMsg2Member: sendPhotoMsg2Member, // 给全体队员发送有照片上传的消息
+  sendEntryMsg2Self: sendEntryMsg2Self, //  给自己发报名消息；暂时不管
+  sendQuitMsg2Self: sendQuitMsg2Self, // 给自己发报名退出消息；OK
+  sendEntryMsg2Bench: sendEntryMsg2Bench, // 给替补队员发转为正式队员的消息；OK
+  sendBenchMsg2Member: sendBenchMsg2Member, // 给队员(报名/占坑)发转为替补队员的消息，用于领队缩编时；OK
+  sendQuitMsg2Occupy: sendQuitMsg2Occupy, // 给被强制退坑者发消息提醒 ；OK
+  sendRejectMsg2Member: sendRejectMsg2Member, // 给报名被驳回的队员发消息； OK  
+  sendRemindMsg2Ocuppy: sendRemindMsg2Ocuppy, // 给占坑队员发占坑截止时间临近的消息提醒；暂时不发订阅消息
 
   // 给领队/领队组/财务官等发消息
   sendEntryMsg2Leader: sendEntryMsg2Leader, // 给领队发报名消息
-  sendAppointMsg2CFO: sendAppointMsg2CFO, // 给cfo发当选消息
+  sendAppointMsg2CFO: sendAppointMsg2CFO, // 给cfo发当选消息；暂时不管
 }

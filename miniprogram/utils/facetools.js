@@ -2,6 +2,7 @@ const app = getApp()
 const util = require('./util.js')
 const cloudfun = require('./cloudfun.js')
 const template = require('./template.js')
+const message = require('./message.js')
 const promisify = require('./promisify.js')
 
 wx.cloud.init()
@@ -248,7 +249,10 @@ const dealOdPhotos = async (od, owner, tempFiles) => {
       owner.nickName = owner.nickName ? owner.nickName : "游客"
       for (var i in od.members) {
         const member = od.members[i]
+        // 模板消息
         template.sendPhotoMsg2Member(member.personid, od.outdoorid, od.title.whole, owner.nickName, count, od.leader.personid)
+        // 订阅消息
+        message.sendOdInfoChange(member.personid, od.outdoorid, od.title.whole, "有活动照片上传，点击查看")
       }
     }
   }

@@ -176,7 +176,7 @@ const uploadOneImage = async(outdoorid, cloudPath) => {
     }
   })
 
-  console.log(resp);
+  console.log("uploadOneImage uploadFile res:",resp);
   var resp_dict = JSON.parse(resp.data)
   console.log(resp_dict)
   if (resp_dict.err_code == 0) {
@@ -215,7 +215,7 @@ const uploadImages = async(outdoorid, pics) => {
 }
 
 // 这里确定活动应发布的版面 
-//  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游; 93：技术小组
+//  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游; 93：技术小组；120：亲子
 const chooseForum = (title, isTesting) => {
   console.log(title)
   console.log(isTesting)
@@ -223,6 +223,8 @@ const chooseForum = (title, isTesting) => {
   var fid = 67 // 默认户外
   if (isTesting) {
     fid = 93 // 技术小组版 
+  } else if (title.loaded == "亲子"){
+    fid = 120
   } else {
     var fid = 67 // 默认户外
     var day1 = new Date(title.date); // 活动日期
@@ -695,11 +697,12 @@ const loadPosts = async(tid, begin) => {
 
 // 得到绿野org网站反馈的错误信息
 const getError = async(resp) => {
+  console.log("lvyeorg.getError()", resp)
+
   if (resp.data.err_code != 0 && resp.data.err_msg) {
     console.log(resp.data.err_msg)
     return resp.data.err_msg
   } else {
-    console.log(resp);
     var token = wx.getStorageSync("LvyeOrgToken")
     console.log(token)
     let resp = await promisify.request({

@@ -7,7 +7,7 @@
   </van-row>
   <van-row>
     <van-col span="9" offset="2">
-      <form bindsubmit="onShare2Circle" report-submit="true">
+      <form bindsubmit="onShare2Circle" report-submit="true"> 
         <button form-type="submit" plain size="large">分享到朋友圈</button>
       </form> 
     </van-col>

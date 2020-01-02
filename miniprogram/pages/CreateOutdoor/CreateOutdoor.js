@@ -491,7 +491,7 @@ Page({
   async postCancel2Template() {
     // 发送模板消息
     for (let item of this.data.od.members) {
-      await template.sendCancelMsg2Member(item.personid, this.data.od.title.whole, this.data.od.outdoorid, this.data.myself.userInfo.nickName, this.data.cancelDlg.reason)
+      // await template.sendCancelMsg2Member(item.personid, this.data.od.title.whole, this.data.od.outdoorid, this.data.myself.userInfo.nickName, this.data.cancelDlg.reason)
     }
 
     // 发送订阅消息
@@ -533,7 +533,7 @@ Page({
         wx.setStorageSync(key, true)
         // 给所有队员发活动成行通知; 模板消息
         for (let item of this.data.od.members) { 
-          await template.sendConfirmMsg2Member(item.personid, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.members.length, this.data.myself.userInfo.nickName, this.data.od.limits.isAA)
+          // await template.sendConfirmMsg2Member(item.personid, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.members.length, this.data.myself.userInfo.nickName, this.data.od.limits.isAA)
         }
         // 给所有队员发活动成行通知; 订阅消息
         var msg = "请按时到达选定集合地点"
@@ -593,7 +593,7 @@ Page({
   async publishOutdoor() {
     console.log("publishOutdoor()")
     // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    // 订阅消息
+    // 订阅消息 todo 
     let res = await promisify.requestSubscribeMessage({
       tmplIds: ['1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg', // 收到队员报名通知
       "td1vrF82SwI0e730B2bGL-k3fkYZXwmFQEPhssNU50c", // 满员通知
@@ -646,9 +646,9 @@ Page({
       for (let id of ids) {
         await cloudfun.opPersonItem(id, "caredOutdoors", { id: this.data.od.outdoorid, title: this.data.od.title.whole }, "unshift")
         // 模板消息
-        await template.sendCreateMsg2Subscriber(id, this.data.od.title.whole, this.data.od.outdoorid, app.globalData.userInfo.phone)
+        // await template.sendCreateMsg2Subscriber(id, this.data.od.title.whole, this.data.od.outdoorid, app.globalData.userInfo.phone)
         // 订阅消息
-        await message.sendCreateMsg(id, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.leader.nickName, this.data.od.title.date, this.data.od.title.place, this.data.od.limits.maxPerson ? this.data.od.limits.personCount:99)
+        await message.sendCreateMsg(id, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.leader.userInfo.nickName, this.data.od.title.date, this.data.od.title.place, this.data.od.limits.maxPerson ? this.data.od.limits.personCount:99)
         // 减掉一次消息次数
         res.data.subscribers[id].messageCount --  
       }

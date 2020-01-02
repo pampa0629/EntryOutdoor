@@ -146,7 +146,7 @@ Page({
     // 发微信模板信息;for 加 await实现顺序发送，避免并发太多
     for (let item of self.data.members) {
       // 模板消息
-      await template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
+      // await template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
       // 订阅消息
       await message.sendOdInfoChange(item.personid, self.data.outdoorid, self.data.title, "财务官“" + pay.cfo.nickName + "”发起收款，人均" + pay.average+"元")
     }
@@ -154,7 +154,7 @@ Page({
     // aa members也要发送消息
     for (let item of self.data.aaMembers) {
       // 模板消息
-      await template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
+      // await template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
       // 订阅消息
       await message.sendOdInfoChange(item.personid, self.data.outdoorid, self.data.title, "财务官“" + pay.cfo.nickName + "”发起收款，人均" + pay.average + "元")
     }

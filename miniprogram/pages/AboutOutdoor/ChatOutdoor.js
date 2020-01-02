@@ -271,7 +271,7 @@ Page({
     console.log("personids:", personids)
     personids.forEach((item, index) => {
       // 模板消息
-      template.sendChatMsg2Member(item, this.data.title, this.data.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, msg)
+      // template.sendChatMsg2Member(item, this.data.title, this.data.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, msg)
       // 订阅消息 todo 暂时不发，再考虑
     })
   },

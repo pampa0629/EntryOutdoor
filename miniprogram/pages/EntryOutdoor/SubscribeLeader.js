@@ -41,7 +41,6 @@ Page({
     this.setData({
       outdoors: res.data.myOutdoors,
     }) 
-    
     if (res.data.subscribers && res.data.subscribers[app.globalData.personid]) {
       this.setData({
         mine: res.data.subscribers[app.globalData.personid], // 得到自己是否订阅了领队
@@ -61,7 +60,7 @@ Page({
       this.setData({
         formids: formids,
       })
-      console.log("formids.length:", this.data.formids.length)
+      // console.log("formids.length:", this.data.formids.length)
     }
   },
 

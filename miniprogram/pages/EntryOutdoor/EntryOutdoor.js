@@ -4,6 +4,7 @@ const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
 const template = require('../../utils/template.js')
+const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
@@ -384,7 +385,7 @@ Page({
     // 给自己发微信模板消息
     if (true) {
       // 活动主题，领队联系方式，自己的昵称，报名状态，
-      template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.od.outdoorid)
+      // template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.od.outdoorid)
     }
 
     console.log(notice)
@@ -396,12 +397,12 @@ Page({
           count = 0
         }
         console.log("count:" + count)
-        if (count < 1) { // 每个人只发送一次
+        if (count < 10) { // 每个人只发送一次
           // 模板消息
-          template.sendEntryMsg2Leader(od.leader.personid, this.data.userInfo, this.data.entryInfo, od.title.whole, od.outdoorid)
+          // template.sendEntryMsg2Leader(od.leader.personid, this.data.userInfo, this.data.entryInfo, od.title.whole, od.outdoorid)
           // 订阅消息
           var remark = this.data.userInfo.gender + "/" + this.data.userInfo.phone + "/第" + (parseInt(this.data.entryInfo.meetsIndex) + 1) + "集合地点"
-          message.sendEntryMsg(od.leader.personid, od.outdoorid, od.title.whole, this.data.userInfo.nickName, new Date(), remark)
+          message.sendEntryMsg(od.leader.personid, od.outdoorid, od.title.whole, this.data.userInfo.nickName, util.formatTime(new Date()), remark)
           // 给领队发了消息，得从领队那里减掉一个消息数量
           cloudfun.opOutdoorItem(od.leader.personid, "messgeCount", -1, "inc")
 
@@ -734,13 +735,15 @@ Page({
     if (resModel.confirm) {
       console.log('用户点击确定')
       var selfQuit = true
-      let resQuit = await this.data.od.quit(app.globalData.personid, selfQuit)
+      const od = this.data.od
+      let resQuit = await od.quit(app.globalData.personid, selfQuit)
       // 删除Persons表中的entriedOutdoors中的对应id的item
       this.updateEntriedOutdoors(true)
       // 退出后还可以继续再报名
       this.setData({
         "entryInfo.status": "浏览中",
         "od.members": resQuit.members,
+        entryFull: odtools.entryFull(od.limits, od.members, od.addMembers), // 退出后判断是否满员
       })
       if (resQuit.isAfee) {
         wx.showModal({

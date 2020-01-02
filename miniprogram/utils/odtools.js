@@ -365,8 +365,9 @@ const remindOcuppy = async(od) => {
   // 循环，找到所有占坑者
   for (var i = 0; i < members.length; i++) {
     if (members[i].entryInfo.status == "占坑中" && !members[i].remained) {
-      // 给占坑者发模板消息
-      template.sendRemindMsg2Ocuppy(members[i].personid, od.outdoorid, od.title.whole, remain, od.leader.userInfo.nickName, od.members.length + od.addMembers.length)
+      // 给占坑者发模板消息 
+      // template.sendRemindMsg2Ocuppy(members[i].personid, od.outdoorid, od.title.whole, remain, od.leader.userInfo.nickName, od.members.length + od.addMembers.length)
+      // 订阅消息 todo
       members[i].remained = true
     }
   }
@@ -386,7 +387,7 @@ const removeOcuppy = async(outdoorid) => {
       console.log(i, JSON.stringify(members[i]))
       count++
       // 给被强制退坑者发模板消息
-      template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
+      // template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
       // 给被强制退坑者发订阅消息
       message.sendEntryStatusChange(members[i].personid, outdoorid, res.data.title.whole, "您因到期未转报名，被系统强制退坑")
 
@@ -405,7 +406,7 @@ const removeOcuppy = async(outdoorid) => {
       count--
       members[i].entryInfo.status = "报名中"
       // 给替补上的队员发模板消息
-      template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
+      // template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
       // 给替补上的队员发模板消息
       message.sendEntryStatusChange(members[i].personid, outdoorid, res.data.title.whole, "因有人被退坑，您从“替补中”转为“报名中”")
       // 操作记录下来 
@@ -627,8 +628,8 @@ const setCFO = (outdoorid, cfo) => {
     pay.cfo = cfo
     // cloudfun.updateOutdoorPay(outdoorid, pay)
     cloudfun.opOutdoorItem(outdoorid, "pay", pay, "")
-    // 发模板消息
-    template.sendAppointMsg2CFO(cfo.personid, outdoorid, res.data.title.whole, cfo.nickName)
+    // 发模板消息；不考虑提供订阅消息了
+    // template.sendAppointMsg2CFO(cfo.personid, outdoorid, res.data.title.whole, cfo.nickName)
   })
 }
 
@@ -731,7 +732,7 @@ const getSteps = (status) =>{
 
 // 记录报名退出等重要操作
 const recordOperation = (outdoorid, action, nickName, personid) =>{
-  var date = new Date()
+  var date = new Date() 
   var timeString = util.formatTime(date)
   var operation = { action: action, nickName: nickName, personid: personid, time: timeString }
   cloudfun.opOutdoorItem(outdoorid, "operations", operation, "push")

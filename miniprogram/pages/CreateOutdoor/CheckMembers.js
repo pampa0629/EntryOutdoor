@@ -318,7 +318,7 @@ Page({
     if (content) { 
       const item = self.data.members[self.data.index]
       // 发模板消息
-      template.sendChatMsg2Member(item.personid, self.data.od.title.whole, self.data.od.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, content)
+      // template.sendChatMsg2Member(item.personid, self.data.od.title.whole, self.data.od.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, content)
       // 订阅消息
       message.sendOdInfoChange(item.personid, self.data.od.outdoorid, self.data.od.title.whole, "领队：" + content)
 

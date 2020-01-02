@@ -63,7 +63,7 @@ Page({
   },
 
   sendTemplate() {
-    template.sendMessage("ogNmG5P3ZlT29kXGhWfGX5nC_sqA", "4f4JAb6IwzCW3iElLANR0OxSoJhDKZNo8rvbubsfgyE", "1545879624341", "", "")
+    // template.sendMessage("ogNmG5P3ZlT29kXGhWfGX5nC_sqA", "4f4JAb6IwzCW3iElLANR0OxSoJhDKZNo8rvbubsfgyE", "1545879624341", "", "")
     // template.sendMessage("ogNmG5KFPConlOTeQNYciQrW5SE4", "IXScAdQZb_QmXCHXWCpjXwjwqii9_yOILJtCiGg1al0", "1543935782814", "", "")
 
   },

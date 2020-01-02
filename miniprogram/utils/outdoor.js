@@ -115,7 +115,7 @@ OD.prototype.dealAutoConfirm = async function () {
 
     // 给所有队员发送微信服务通知
     for (let item of this.members) {
-      await template.sendConfirmMsg2Member(item.personid, this.outdoorid, this.title.whole, this.members.length, this.leader.userInfo.nickName, this.limits.isAA)
+      // await template.sendConfirmMsg2Member(item.personid, this.outdoorid, this.title.whole, this.members.length, this.leader.userInfo.nickName, this.limits.isAA)
     }
 
     // 给所有队员发活动成行通知; 订阅消息
@@ -499,16 +499,16 @@ OD.prototype.sendModify2Members = async function(modifys) {
   if (modifys.title || modifys.meets) {
     var msg = "活动"
     if (modifys.title) {
-      msg = "基本信息"
+      msg += "基本信息"
     }
     if (modifys.meets) {
-      msg = "集合时间地点"
+      msg += "集合时间地点"
     }
     msg += "被修改，敬请留意"
     if (this.status == "已发布" || this.status == "已成行") {
       for (let item of this.members) {
         // 模板消息
-        await template.sendModifyMsg2Member(item.personid, this.outdoorid, this.title.whole, this.leader.userInfo.nickName, modifys)
+        // await template.sendModifyMsg2Member(item.personid, this.outdoorid, this.title.whole, this.leader.userInfo.nickName, modifys)
         // 订阅消息
         await message.sendOdInfoChange(item.personid, this.outdoorid, this.title.whole, msg)
       }
@@ -658,7 +658,7 @@ OD.prototype.firstBench2Member = function() {
         // 转正记录
         odtools.recordOperation(this.outdoorid, "替补转报名", this.members[i].userInfo.nickName, this.members[i].personid)
         // 给转正者发模板消息 
-        template.sendEntryMsg2Bench(this.members[i].personid, this.outdoorid, this.title.whole, this.members[i].userInfo.nickName)
+        // template.sendEntryMsg2Bench(this.members[i].personid, this.outdoorid, this.title.whole, this.members[i].userInfo.nickName)
         // 给转正者发订阅消息 
         message.sendEntryStatusChange(this.members[i].personid, this.outdoorid, this.title.whole, "因有人退出，您从“替补中”转为“报名中”")
 
@@ -713,7 +713,7 @@ OD.prototype.quit = async function(personid, selfQuit) {
         remark += "由于活动已成行，您退出且无人替补，请联系领队A费用。"
       }
       // 发送模板消息
-      template.sendQuitMsg2Self(member.personid, this.outdoorid, this.title.whole, this.title.date, this.leader.userInfo.nickName, member.userInfo.nickName, remark)
+      // template.sendQuitMsg2Self(member.personid, this.outdoorid, this.title.whole, this.title.date, this.leader.userInfo.nickName, member.userInfo.nickName, remark)
       // 发送订阅消息
       var msg = "您已退出活动"
       if (isAfee) {
@@ -723,11 +723,11 @@ OD.prototype.quit = async function(personid, selfQuit) {
       // 退出记录一下
       odtools.recordOperation(this.outdoorid, "自行退出", member.userInfo.nickName, member.personid)
     } else {
-      var remark = "您已被领队驳回报名，可点击回到活动的“留言”页面中查看原因。若仍有意参加，可在留言中@领队或电话等方式联系领队确认情况。"
+      // var remark = "您已被领队驳回报名，可点击回到活动的“留言”页面中查看原因。若仍有意参加，可在留言中@领队或电话等方式联系领队确认情况。"
       // 发模板消息 
-      template.sendRejectMsg2Member(member.personid, this.title.whole, this.outdoorid, this.leader.userInfo.nickName, this.leader.userInfo.phone, remark)
+      // template.sendRejectMsg2Member(member.personid, this.title.whole, this.outdoorid, this.leader.userInfo.nickName, this.leader.userInfo.phone, remark)
       // 发送订阅消息
-      message.sendEntryStatusChange(member.personid, this.outdoorid, this.title.whole, "报名被领队驳回，可查看原因和再与领队沟通")
+      message.sendEntryStatusChange(member.personid, this.outdoorid, this.title.whole, "报名被驳回，可到留言中查看原因及与领队沟通")
       // 退出记录一下
       odtools.recordOperation(this.outdoorid, "报名被驳回", member.userInfo.nickName, member.personid)
     }
@@ -785,7 +785,7 @@ OD.prototype.transferLeader = async function(oldLeader, newLeader) {
     for (let item of this.members) {
       // old(index) ==> new （0）
       // 模板消息
-      await template.sendResetMsg2Member(this.outdoorid, item.personid, this.title.whole, this.members[index].userInfo.nickName, this.members[0].userInfo.nickName, this.leader.personid)
+      // await template.sendResetMsg2Member(this.outdoorid, item.personid, this.title.whole, this.members[index].userInfo.nickName, this.members[0].userInfo.nickName, this.leader.personid)
       // 订阅消息
       await message.sendOdInfoChange(item.personid, this.outdoorid, this.title.whole, "领队由“"+this.members[index].userInfo.nickName + "”换为“"+ this.members[0].userInfo.nickName+"”，敬请留意")
     }

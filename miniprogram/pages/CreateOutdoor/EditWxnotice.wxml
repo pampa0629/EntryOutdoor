@@ -6,7 +6,7 @@
   <block wx:if="{{wxnotice.accept}}">
     <!--接收前几位的报名通知-->
     <van-cell title="接收前{{wxnotice.entryCount}}位队员报名的微信通知" border="{{false}}" size="{{size}}">
-      <van-stepper value="{{wxnotice.entryCount}}" min="1" max="{{formids.length}}" bind:change="bindAddEntry"/> 
+      <van-stepper value="{{wxnotice.entryCount}}" min="1" max="{{messageCount}}" bind:change="bindAddEntry"/> 
     </van-cell> 
     <!--是否接收满员通知-->
     <van-cell title="满员时接收通知" title-width="90%" clickable bind:click="checkFullNotice" border="{{false}}" size="{{size}}">
@@ -19,8 +19,8 @@
 
 <!--提示和增加通知数量上限-->
 <van-tag size="{{size}}" type="primary" plain>当前可接收微信通知数量是：</van-tag>
-<text class='bigtip'>{{mine.messageCount}}个</text>
-<van-tag size="{{size}}" type="primary" plain>您可点击右上角按钮增加通知数量。</van-tag>
+<text class='bigtip'>{{messageCount}}个</text>
+<van-tag size="{{size}}" type="primary" plain>您可点击下面的按钮增加通知数量。</van-tag>
 <!-- <van-tag type="primary" size="{{size}}" plain>当前可接收微信通知数量的上限是：{{formids.length}}，您可点击下面按钮增加上限。
 </van-tag> -->
 <!-- <van-tag type="danger" size="{{size}}" plain>注意：由于微信限制，通知有效期为七天，过期将无法收到，需重新点击下面按钮。</van-tag> -->

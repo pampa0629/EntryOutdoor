@@ -172,7 +172,7 @@ Page({
         if (members[i].entryInfo.status == "替补中") {
           members[i].entryInfo.status = "报名中"
           // 模板消息
-          template.sendEntryMsg2Bench(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].userInfo.nickName)
+          // template.sendEntryMsg2Bench(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].userInfo.nickName)
           // 订阅消息
           message.sendEntryStatusChange(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, "因领队扩编，您从“替补中”转为“报名中”")
           // 记录操作
@@ -194,7 +194,7 @@ Page({
       for (var i = begin; i < end; i++) {
         if (members[i].entryInfo.status != "替补中") {
           // 模板消息
-          template.sendBenchMsg2Member(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].entryInfo.status, members[i].userInfo.nickName)
+          // template.sendBenchMsg2Member(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].entryInfo.status, members[i].userInfo.nickName)
           // 订阅消息
           message.sendEntryStatusChange(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, "因领队缩编队伍，您被转为替补")
           members[i].entryInfo.status = "替补中" 

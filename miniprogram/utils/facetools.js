@@ -250,7 +250,7 @@ const dealOdPhotos = async (od, owner, tempFiles) => {
       for (var i in od.members) {
         const member = od.members[i]
         // 模板消息
-        template.sendPhotoMsg2Member(member.personid, od.outdoorid, od.title.whole, owner.nickName, count, od.leader.personid)
+        // template.sendPhotoMsg2Member(member.personid, od.outdoorid, od.title.whole, owner.nickName, count, od.leader.personid)
         // 订阅消息
         message.sendOdInfoChange(member.personid, od.outdoorid, od.title.whole, "有活动照片上传，点击查看")
       }

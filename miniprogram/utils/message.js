@@ -82,7 +82,7 @@ const sendEntryStatusChange = async(personid, outdoorid, title, msg) => {
   try {
     const res = await dbPersons.doc(personid).get()
     var openid = res.data._openid
-    var tempid = "Sj8TATwvmR-qZwUoUifcjOVUr1hpFk0CcXgOAPHGhww"
+    var tempid = "B6HdOB00WLtjV2Vbhc2Qb7lx1CtOPEV8A6qy4E6V-R4"
     var data = { //下面的keyword*是设置的模板消息的关键词变量  
       "thing1": { // 活动主题    { { thing1.DATA } }
         "value": title.substring(0, 20)

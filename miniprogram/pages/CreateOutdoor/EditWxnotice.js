@@ -29,6 +29,7 @@ Page({
   },
 
   async onLoad(options) {
+    console.log("EditWxnotice.onLoad()")
     let formids = await template.clearPersonFormids(app.globalData.personid)
     this.setData({
       formids: formids
@@ -36,10 +37,13 @@ Page({
 
     // 得到领队可接受的微信消息个数
     let res = await dbPersons.doc(app.globalData.personid).get()
+    console.log("res:",res)
     if(res.data.messageCount) {
       this.setData({
         messageCount: res.data.messageCount
       })
+    } else { // 没有就先设置为0
+      await cloudfun.opPersonItem(app.globalData.personid, "messageCount", 0)
     }
 
     let pages = getCurrentPages() //获取当前页面js里面的pages里的所有信息。

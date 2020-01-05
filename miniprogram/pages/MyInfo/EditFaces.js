@@ -2,7 +2,7 @@ const app = getApp()
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
@@ -44,7 +44,7 @@ Page({
 
   async deleteFace(e,fid) {
     console.log("LookPhotos.managerMyFaces()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
 
     let res = await promisify.showModal({
       title:"确认删除",

@@ -1,7 +1,8 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const qrcode = require('../../utils/qrcode.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
+const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const regeneratorRuntime = require('regenerator-runtime')
 

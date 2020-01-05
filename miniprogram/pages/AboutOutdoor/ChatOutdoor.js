@@ -1,7 +1,8 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
+const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 const promisify = require('../../utils/promisify.js')
@@ -237,7 +238,7 @@ Page({
 
   submitChat(e) {
     console.log("submitChat()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
 
     const self = this
     if (self.data.message.msg) {

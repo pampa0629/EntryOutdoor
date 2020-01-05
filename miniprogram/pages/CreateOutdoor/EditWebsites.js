@@ -1,7 +1,7 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 const outdoor = require('../../utils/outdoor.js')
 const odtools = require('../../utils/odtools.js')
@@ -98,7 +98,7 @@ Page({
   },
 
   async connetLvyeorg(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     let tid = await this.data.od.push2org(this.data.forum.id)
     wx.showModal({
       title: '同步绿野org成功',
@@ -114,7 +114,7 @@ Page({
 
   disconnetLvyeorg(e) {
     const self = this
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     wx.showModal({
       title: '确认断开？',
       content: '断开将导致后续本活动所有信息，包括报名、活动内容修改等都无法同步到原帖子上；再同步只能发布新帖。请确认',

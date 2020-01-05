@@ -1,5 +1,5 @@
 const app = getApp()
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 
 Page({
 
@@ -109,8 +109,8 @@ Page({
 
   save: function(e) {
     console.log("save")
-    if(e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // if(e)
+    //   template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
 
     const self = this;
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -140,14 +140,14 @@ Page({
 
   giveup(e) {
     console.log("giveup()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },
 
   // 把输入的点，加到meets中
   addMeet: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     wx.navigateTo({
       url: "EditOneMeet?action=addLast",
     })

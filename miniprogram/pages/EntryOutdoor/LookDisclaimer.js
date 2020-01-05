@@ -1,5 +1,5 @@
 const app = getApp()
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -43,7 +43,7 @@ Page({
   },
 
   copyDisclaimer: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     const self = this
     wx.setClipboardData({
       data: self.data.disclaimer,
@@ -51,7 +51,7 @@ Page({
   },
 
   saveMyDisclaimer: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     const self = this
     if (app.checkLogin()) {
       dbPersons.doc(app.globalData.personid).update({

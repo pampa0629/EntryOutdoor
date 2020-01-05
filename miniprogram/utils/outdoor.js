@@ -2,7 +2,7 @@ const app = getApp()
 
 const odtools = require('./odtools.js')
 const util = require('./util.js')
-const template = require('./template.js')
+// const template = require('./template.js')
 const message = require('./message.js')
 const cloudfun = require('./cloudfun.js')
 const lvyeorg = require('./lvyeorg.js')
@@ -168,7 +168,7 @@ OD.prototype.copy = function(od) {
   this.limits = od.limits ? od.limits : this.limits
   // 微信服务通知，没有的话需要取默认值
   if (!this.limits.wxnotice) {
-    this.limits.wxnotice = template.getDefaultNotice()
+    this.limits.wxnotice = message.getDefaultNotice()
   }
 
   // 几日活动，老存储：durings duringIndex
@@ -727,7 +727,7 @@ OD.prototype.quit = async function(personid, selfQuit) {
       // 发模板消息 
       // template.sendRejectMsg2Member(member.personid, this.title.whole, this.outdoorid, this.leader.userInfo.nickName, this.leader.userInfo.phone, remark)
       // 发送订阅消息
-      message.sendEntryStatusChange(member.personid, this.outdoorid, this.title.whole, "报名被驳回，可到留言中查看原因及与领队沟通")
+      message.sendEntryStatusChange(member.personid, this.outdoorid, this.title.whole, "报名被驳回，可查看活动留言并和领队沟通")
       // 退出记录一下
       odtools.recordOperation(this.outdoorid, "报名被驳回", member.userInfo.nickName, member.personid)
     }

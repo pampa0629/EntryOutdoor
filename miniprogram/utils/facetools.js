@@ -1,7 +1,7 @@
 const app = getApp()
 const util = require('./util.js')
 const cloudfun = require('./cloudfun.js')
-const template = require('./template.js')
+// const template = require('./template.js')
 const message = require('./message.js')
 const promisify = require('./promisify.js')
 

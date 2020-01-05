@@ -5,7 +5,7 @@ const lvyeorg = require('../../utils/lvyeorg.js')
 const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
@@ -49,7 +49,7 @@ Page({
     chatChange: false,
     interval: null, // 计时器
     editTitle: false, // 开启基础信息编辑
-    formids:[], // 消息数量
+    // formids:[], // 消息数量
 
     size: app.globalData.setting.size, // 界面大小
   },
@@ -113,13 +113,13 @@ Page({
   },
 
   // 得到formids数量
-  async loadFormids() { 
-    let formids = await template.clearPersonFormids(app.globalData.personid)
+  // async loadFormids() { 
+    // let formids = await template.clearPersonFormids(app.globalData.personid)
     // this.data.formids = formids ? formids : []
-    this.setData({
-      formids: formids,
-    })
-  },
+    // this.setData({
+    //   formids: formids,
+    // })
+  // },
 
   async checkLogin() { 
     var isLogin = await app.ensureLogin()
@@ -128,7 +128,7 @@ Page({
       var content = "小程序将自动切换到“我的信息”页面，请点击“微信登录”按钮登录；然后再回来创建活动"
        // 确保登录
       if(app.checkLogin(title, content, false)){
-        this.loadFormids() 
+        // this.loadFormids() 
 
         // 确保留有手机号码
         if (!util.validPhone(app.globalData.userInfo.phone)) {
@@ -145,7 +145,7 @@ Page({
         }
       }
     } else {
-      this.loadFormids() 
+      // this.loadFormids() 
     }
     this.setMyselfDefault()
   },
@@ -223,7 +223,7 @@ Page({
   // 清空活动内容
   clearOutdoor(e) {
     console.log("clearOutdoor()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
 
     const self = this
     wx.showModal({
@@ -249,7 +249,7 @@ Page({
   // 删除活动，记得清空缓存中的活动id
   deleteOutdoor(e) {
     console.log("deleteOutdoor()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this
     wx.showModal({
       title: '确定删除？',
@@ -490,9 +490,9 @@ Page({
   // 把取消的事情通告所有人，包括自己
   async postCancel2Template() {
     // 发送模板消息
-    for (let item of this.data.od.members) {
+    // for (let item of this.data.od.members) {
       // await template.sendCancelMsg2Member(item.personid, this.data.od.title.whole, this.data.od.outdoorid, this.data.myself.userInfo.nickName, this.data.cancelDlg.reason)
-    }
+    // }
 
     // 发送订阅消息
     for (let item of this.data.od.members) {
@@ -532,9 +532,10 @@ Page({
         console.log(key)
         wx.setStorageSync(key, true)
         // 给所有队员发活动成行通知; 模板消息
-        for (let item of this.data.od.members) { 
+        // for (let item of this.data.od.members) { 
           // await template.sendConfirmMsg2Member(item.personid, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.members.length, this.data.myself.userInfo.nickName, this.data.od.limits.isAA)
-        }
+        // }
+
         // 给所有队员发活动成行通知; 订阅消息
         var msg = "请按时到达选定集合地点"
         if (this.data.od.limits.isAA) {
@@ -552,42 +553,41 @@ Page({
   },
 
   // 检查微信消息数量是否够用
-  checkFormids() {
-    console.log("checkFormids()")
-    return true // todo 先不管数量了
-    var result = this.data.formids.length >= 6 ? true : false
-    console.log(result)
-    this.setData({
-      showFormidDlg: !result,
-    })
+  // checkFormids() {
+  //   console.log("checkFormids()")
+  //   var result = this.data.formids.length >= 6 ? true : false
+  //   console.log(result)
+  //   this.setData({
+  //     showFormidDlg: !result,
+  //   })
 
-    return result
-  },
+  //   return result
+  // },
 
-  confirmFormidDlg() {
-    console.log("confirmFormidDlg()")
-    if (this.checkFormids()) {
-      this.publishOutdoorInner()
-    } else {
-      wx.showToast({ title: '数量不够六个' })
-    }
-  },
+  // confirmFormidDlg() {
+  //   console.log("confirmFormidDlg()")
+  //   if (this.checkFormids()) {
+  //     this.publishOutdoorInner()
+  //   } else {
+  //     wx.showToast({ title: '数量不够六个' })
+  //   }
+  // },
 
-  cancelFormidDlg() {
-    console.log("cancelFormidDlg()")
-    this.setData({
-      showFormidDlg: false,
-    })
-  },
+  // cancelFormidDlg() {
+  //   console.log("cancelFormidDlg()")
+  //   this.setData({
+  //     showFormidDlg: false,
+  //   })
+  // },
 
-  tapAddFormid(e) {
-    console.log("tapAddFormid()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    this.data.formids.push(template.buildOneFormid(e.detail.formId))
-    this.setData({
-      formids: this.data.formids,
-    })
-  },
+  // tapAddFormid(e) {
+  //   console.log("tapAddFormid()")
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // this.data.formids.push(template.buildOneFormid(e.detail.formId))
+  //   this.setData({
+  //     formids: this.data.formids,
+  //   })
+  // },
 
   // 发布活动
   async publishOutdoor() {
@@ -599,10 +599,10 @@ Page({
       "td1vrF82SwI0e730B2bGL-k3fkYZXwmFQEPhssNU50c", // 满员通知
       ]})
     
-    var check1 = this.checkFormids()
-    if (check1) {
+    // var check1 = this.checkFormids()
+    // if (check1) {
       this.publishOutdoorInner()
-    }
+    // }
   },
 
   async publishOutdoorInner() {
@@ -660,7 +660,7 @@ Page({
   // 保存 活动的更新信息
   saveModified: function(e) {
     console.log("saveModified()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) {
       this.saveOutdoor()
     }
@@ -940,7 +940,7 @@ Page({
   // 上传活动中的拍照
   async uploadPhotos(e) {
     console.log("uploadFaces()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
 
     let resChoose = await promisify.chooseImage({
       sizeType: ['original', 'compressed'], //['original', 'compressed'], 
@@ -955,7 +955,7 @@ Page({
   },
 
   lookPhotos(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     wx.navigateTo({
       url: "../AboutOutdoor/LookPhotos?outdoorid=" + this.data.od.outdoorid,
     })

@@ -3,7 +3,7 @@ const util = require('../../utils/util.js')
 const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
@@ -56,7 +56,7 @@ Page({
     nickErrMsg: "", // 报名的时候，个人信息是否正确的判断
     genderErrMsg: "",
     phoneErrMsg: "",
-    formids: [],
+    // formids: [],
 
     size: app.globalData.setting.size, // 界面大小
   },
@@ -293,9 +293,9 @@ Page({
   },
 
   onCancelShare(e) {
-    console.log("onCancelShare")
-    console.log(e)
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    console.log("onCancelShare()")
+    // console.log(e)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     this.setData({
       showPopup: false,
     })
@@ -326,7 +326,7 @@ Page({
 
   // 分享到朋友圈
   onShare2Circle: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     const self = this
     qrcode.share2Circle(self.data.od.outdoorid, self.data.od.title.whole, false)
     this.closePopup()
@@ -383,10 +383,10 @@ Page({
     let notice = self.data.od.limits.wxnotice
 
     // 给自己发微信模板消息
-    if (true) {
+    // if (true) {
       // 活动主题，领队联系方式，自己的昵称，报名状态，
       // template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.od.outdoorid)
-    }
+    // }
 
     console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
@@ -397,7 +397,7 @@ Page({
           count = 0
         }
         console.log("count:" + count)
-        if (count < 10) { // 每个人只发送一次
+        if (count < 1) { // 每个人只发送一次
           // 模板消息
           // template.sendEntryMsg2Leader(od.leader.personid, this.data.userInfo, this.data.entryInfo, od.title.whole, od.outdoorid)
           // 订阅消息
@@ -603,9 +603,9 @@ Page({
         showLoginDlg: false,
       })
       // 最后还得继续报名才行
-      if (this.checkFormids()) {
+      // if (this.checkFormids()) {
         this.entryOutdoorInner(this.data.entryTemp.status)
-      }
+      // }
     }
   },
 
@@ -639,48 +639,48 @@ Page({
   // },
 
   // 检查微信消息数量是否够用
-  checkFormids() { 
-    console.log("checkFormids()")
-    return true // todo 先返回true，之后再看是否需要增加数量检查
-    var result = this.data.formids.length >= 6 ? true : false
-    console.log(result)
-    this.setData({
-      showFormidDlg: !result,
-    })
+  // checkFormids() { 
+  //   console.log("checkFormids()")
+  //   return true // todo 先返回true，之后再看是否需要增加数量检查
+  //   var result = this.data.formids.length >= 6 ? true : false
+  //   console.log(result)
+  //   this.setData({
+  //     showFormidDlg: !result,
+  //   })
 
-    return result
-  },
+  //   return result
+  // },
 
-  confirmFormidDlg() {
-    console.log("confirmFormidDlg()")
-    if (this.checkFormids()) { 
-      this.entryOutdoorInner(this.data.entryTemp.status)
-    } else {
-      wx.showToast({ title: '数量不够六个' })
-    }
-  },
+  // confirmFormidDlg() {
+  //   console.log("confirmFormidDlg()")
+  //   if (this.checkFormids()) { 
+  //     this.entryOutdoorInner(this.data.entryTemp.status)
+  //   } else {
+  //     wx.showToast({ title: '数量不够六个' })
+  //   }
+  // },
 
-  cancelFormidDlg() {
-    console.log("cancelFormidDlg()")
-    this.setData({
-      showFormidDlg: false,
-    })
-  },
+  // cancelFormidDlg() {
+  //   console.log("cancelFormidDlg()")
+  //   this.setData({
+  //     showFormidDlg: false,
+  //   })
+  // },
 
-  tapAddFormid(e) {
-    console.log("tapAddFormid()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
-    this.data.formids.push(template.buildOneFormid(e.detail.formId))
-    this.setData({
-      formids: this.data.formids,
-    })
-  },
+  // tapAddFormid(e) {
+  //   console.log("tapAddFormid()")
+  //   template.savePersonFormid(app.globalData.personid, e.detail.formId)
+  //   this.data.formids.push(template.buildOneFormid(e.detail.formId))
+  //   this.setData({
+  //     formids: this.data.formids,
+  //   })
+  // },
 
   // 替补、占坑、报名，用同一个函数，减少重复代码
   doEntry(status, formid) {
     console.log("doEntry(): " + status)
     const self = this
-    template.savePersonFormid(app.globalData.personid, formid)
+    // template.savePersonFormid(app.globalData.personid, formid)
 
     // 订阅消息
     wx.requestSubscribeMessage({
@@ -693,7 +693,8 @@ Page({
       }
     })
 
-    if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg && !self.data.showFormidDlg) {
+    // if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg && !self.data.showFormidDlg) {
+    if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg) {
       self.data.entryTemp = {
         status: status,
       }
@@ -713,7 +714,7 @@ Page({
   // 退出
   async tapQuit(e) {
     console.log("tapQuit()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     if (this.data.od.leader.personid == app.globalData.personid) {
       wx.showModal({
         title: '不能退出',
@@ -968,7 +969,7 @@ Page({
   // 上传活动中的拍照
   async uploadPhotos(e) {
     console.log("uploadFaces()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
 
     let resChoose = await promisify.chooseImage({
       sizeType: ['original', 'compressed'], //['original', 'compressed'], 
@@ -986,7 +987,7 @@ Page({
   },
 
   lookPhotos(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     wx.navigateTo({
       url: "../AboutOutdoor/LookPhotos?outdoorid=" + this.data.od.outdoorid,
     })

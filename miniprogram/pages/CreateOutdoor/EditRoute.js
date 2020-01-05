@@ -1,6 +1,6 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 
 Page({
 
@@ -188,8 +188,8 @@ Page({
 
   save(e) {
     console.log("save()")
-    if(e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // if(e)
+    //   template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if(this.data.hasModified) {
       const self = this;
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -208,14 +208,14 @@ Page({
 
   giveup(e) {
     console.log("giveup()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },
 
   // 调出新页面，增加途经点
   addStop: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     wx.navigateTo({
       url: "EditOneStop?action=addLast",
     })

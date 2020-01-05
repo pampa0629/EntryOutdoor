@@ -248,7 +248,7 @@
   <text>您当前的微信消息数量为：\n</text>
   <van-row>
     <van-col span="6" offset="8">
-      <text class='bigtip'>{{formids.length}}个</text>
+      <!-- <text class='bigtip'>{{formids.length}}个</text> -->
     </van-col>
   </van-row>
   <form bindsubmit="tapAddFormid" report-submit="true">

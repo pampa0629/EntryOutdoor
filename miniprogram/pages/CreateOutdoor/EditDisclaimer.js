@@ -2,7 +2,8 @@ const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
+// const message = require('../../utils/message.js')
 
 Page({
 
@@ -31,7 +32,7 @@ Page({
   save(e) {
     console.log("save()")
     if (e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+      // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) { 
       const self = this;
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -53,13 +54,13 @@ Page({
 
   giveup(e) {
     console.log("giveup()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },
 
   pasteDisclaimer: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this
     wx.getClipboardData({
       success: function(res) {
@@ -73,7 +74,7 @@ Page({
   },
 
   copyDisclaimer: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this
     wx.setClipboardData({
       data: self.data.disclaimer,
@@ -81,7 +82,7 @@ Page({
   },
 
   loadMyDisclaimer: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this;
     dbPersons.doc(app.globalData.personid).get()
       .then(res => {
@@ -93,7 +94,7 @@ Page({
   },
 
   saveMyDisclaimer: function(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     const self = this;
     dbPersons.doc(app.globalData.personid).update({
       data: {

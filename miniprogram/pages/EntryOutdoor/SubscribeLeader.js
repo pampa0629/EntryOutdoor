@@ -1,5 +1,5 @@
 const app = getApp()
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const promisify = require('../../utils/promisify.js')
 
@@ -56,10 +56,10 @@ Page({
 
     if (app.checkLogin()) {
       // 得到过滤后的formids
-      let formids = await template.clearPersonFormids(app.globalData.personid)
-      this.setData({
-        formids: formids,
-      })
+      // let formids = await template.clearPersonFormids(app.globalData.personid)
+      // this.setData({
+      //   formids: formids,
+      // })
       // console.log("formids.length:", this.data.formids.length)
     }
   },
@@ -90,15 +90,15 @@ Page({
   },
 
   // 增加模板消息数量
-  addCount(e) {
-    console.log("SubscribeLeader.addCount(): " + e.detail.formId)
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
-    console.log("formids: " + this.data.formids)
-    this.data.formids.push(e.detail.formId)
-    this.setData({ 
-      formids: this.data.formids
-    })
-  },
+  // addCount(e) {
+  //   console.log("SubscribeLeader.addCount(): " + e.detail.formId)
+  //   // template.savePersonFormid(app.globalData.personid, e.detail.formId)
+  //   console.log("formids: " + this.data.formids)
+  //   this.data.formids.push(e.detail.formId)
+  //   this.setData({ 
+  //     formids: this.data.formids
+  //   })
+  // },
 
   // 增加订阅消息数量
   async addMessageCount() {

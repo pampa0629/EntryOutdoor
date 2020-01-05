@@ -5,7 +5,7 @@ const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 
 const util = require('../../utils/util.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 const message = require('../../utils/message.js')
 const promisify = require('../../utils/promisify.js')
 const cloudfun = require('../../utils/cloudfun.js')
@@ -16,7 +16,7 @@ Page({
   data: {
     outdoorid: null,
     wxnotice: {},
-    formids: [],
+    // formids: [],
     hasModified: false,
     messageCount:0, // 领队可收到的报名消息个数
     size: app.globalData.setting.size, // 界面大小
@@ -30,10 +30,10 @@ Page({
 
   async onLoad(options) {
     console.log("EditWxnotice.onLoad()")
-    let formids = await template.clearPersonFormids(app.globalData.personid)
-    this.setData({
-      formids: formids
-    })
+    // let formids = await template.clearPersonFormids(app.globalData.personid)
+    // this.setData({
+    //   formids: formids
+    // })
 
     // 得到领队可接受的微信消息个数
     let res = await dbPersons.doc(app.globalData.personid).get()
@@ -72,8 +72,8 @@ Page({
 
   save(e) {
     console.log("save()")
-    if (e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // if (e)
+    //   template.savePersonFormid(app.globalData.personid, e.detail.formId)
     
     if (this.data.hasModified) {
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -91,7 +91,7 @@ Page({
 
   giveup(e) {
     console.log("giveup()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     this.data.hasModified = false
     wx.navigateBack({})
   },
@@ -124,11 +124,11 @@ Page({
 
   addCount(e) {
     console.log(e.detail.formId)
-    let formid = template.savePersonFormid(app.globalData.personid, e.detail.formId)
-    this.data.formids.push(formid)
-    this.setData({
-      formids: this.data.formids
-    })
+    // let formid = template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // this.data.formids.push(formid)
+    // this.setData({
+    //   formids: this.data.formids
+    // })
   },
 
   async addMessageCount() {

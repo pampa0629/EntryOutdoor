@@ -44,7 +44,7 @@ const sendCreateMsg = async(personid, outdoorid, title, leader, date, place, cou
         "value": count
       },
     }
-    var page = buildDefaultPage(outdoorid, personid)
+    var page = buildPage("EntryOutdoor", outdoorid)
     return await sendMessage(openid, tempid, page, data)
   } catch (err) {
     console.error(err)
@@ -69,7 +69,7 @@ const sendOdStatusChange = async(personid, outdoorid, title, status, remark) => 
         "value": remark.substring(0, 20)
       }
     }
-    var page = buildDefaultPage(outdoorid, personid)
+    var page = buildPage("EntryOutdoor", outdoorid)
     return await sendMessage(openid, tempid, page, data)
   } catch (err) {
     console.error(err)
@@ -91,7 +91,7 @@ const sendEntryStatusChange = async(personid, outdoorid, title, msg) => {
         "value": msg.substring(0, 20)
       }
     }
-    var page = buildDefaultPage(outdoorid, personid)
+    var page = buildPage("EntryOutdoor", outdoorid)
     return await sendMessage(openid, tempid, page, data)
   } catch (err) {
     console.error(err)
@@ -113,7 +113,7 @@ const sendOdInfoChange = async(personid, outdoorid, title, msg) => {
         "value": msg.substring(0, 20)
       }
     }
-    var page = buildDefaultPage(outdoorid, personid)
+    var page = buildPage("EntryOutdoor", outdoorid)
     return await sendMessage(openid, tempid, page, data)
   } catch (err) {
     console.error(err)
@@ -141,7 +141,7 @@ const sendEntryMsg = async(personid, outdoorid, title, nickName, time, remark) =
         "value": remark.substring(0, 20)
       }
     }
-    var page = buildDefaultPage(outdoorid, personid)
+    var page = buildPage("CreateOutdoor", outdoorid)
     return await sendMessage(openid, tempid, page, data)
   } catch (err) {
     console.error(err)
@@ -163,7 +163,7 @@ const sendEntryFull = async(personid, outdoorid, title, remark) => {
         "value": remark.substring(0, 20)
       }
     }
-    var page = buildDefaultPage(outdoorid, personid)
+    var page = buildPage("CreateOutdoor", outdoorid)
     return await sendMessage(openid, tempid, page, data)
   } catch (err) {
     console.error(err)

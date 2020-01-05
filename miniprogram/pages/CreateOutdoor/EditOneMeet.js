@@ -1,5 +1,5 @@
 const app = getApp()
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 const util = require('../../utils/util.js')
 const promisify = require('../../utils/promisify.js')
 
@@ -127,8 +127,8 @@ Page({
 
   save: function (e) {
     console.log("save()")
-    if (e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // if (e)
+    //   template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     console.log(this.data.meet)
     if (this.data.hasModified && this.data.meet.place && this.data.meet.date && this.data.meet.time) {
       const self = this
@@ -175,7 +175,7 @@ Page({
   },
 
   giveup(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },

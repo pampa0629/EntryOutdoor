@@ -2,7 +2,7 @@ const app = getApp()
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
@@ -122,7 +122,7 @@ Page({
   // 上传个人标准照片
   async uploadMyFace(e) {
     console.log("LookPhotos.uploadMyFace()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
 
     let resChoose = await promisify.chooseImage({
       count: 1, // 
@@ -213,7 +213,7 @@ Page({
 
   managerMyFaces(e) {
     console.log("LookPhotos.managerMyFaces()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     wx.navigateTo({
       url: "../MyInfo/EditFaces",
     })
@@ -235,7 +235,7 @@ Page({
   },
 
   async downPhotos(e, photos) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     
     var size = 0
     for(var i in photos) {

@@ -1,5 +1,6 @@
 const app = getApp()
-const template = require('../../utils/template.js')
+// const template = require('../../utils/template.js')
+// const message = require('../../utils/message.js')
 const util = require('../../utils/util.js')
 
 Page({
@@ -68,7 +69,7 @@ Page({
   save: function(e) {
     console.log("EditEndTimes.js save()")
     if (e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+      // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     
     if (this.data.hasModified) {
       const self = this;
@@ -96,7 +97,7 @@ Page({
   },
 
   giveup(e) {
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },

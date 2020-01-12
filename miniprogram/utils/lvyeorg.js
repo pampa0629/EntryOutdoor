@@ -585,10 +585,7 @@ const addThread = async(outdoorid, data, fid) => {
 
 // 即时发布一条消息到绿野org网站，发布失败则记录到数据库中
 const postMessage = async(outdoorid, tid, title, message) => {
-  console.log("const postMessage")
-  console.log(outdoorid)
-  console.log(tid)
-  console.log(message)
+  console.log("lvyeorg.postMessage()", outdoorid, tid, title, message)
   var token = wx.getStorageSync("LvyeOrgToken")
 
   let resp = await promisify.request({

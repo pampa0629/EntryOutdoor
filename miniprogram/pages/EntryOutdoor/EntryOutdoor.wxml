@@ -1,7 +1,7 @@
 <!--弹出分享按钮-->
 <van-popup show="{{ showPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closePopup">
   <van-row>
-    <van-col span="20" offset="2">
+    <van-col span="20" offset="2"> 
       <button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</button>
     </van-col>
   </van-row>

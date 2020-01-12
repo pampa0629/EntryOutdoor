@@ -594,10 +594,15 @@ Page({
     console.log("publishOutdoor()")
     // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     // 订阅消息 todo 
-    let res = await promisify.requestSubscribeMessage({
-      tmplIds: ['1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg', // 收到队员报名通知
-      "td1vrF82SwI0e730B2bGL-k3fkYZXwmFQEPhssNU50c", // 满员通知
-      ]})
+    try{
+      let res = await promisify.requestSubscribeMessage({
+        tmplIds: ['1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg', // 收到队员报名通知
+          "td1vrF82SwI0e730B2bGL-k3fkYZXwmFQEPhssNU50c", // 满员通知
+        ]
+      })
+    }catch(e) {
+      console.error(e)
+    }
     
     // var check1 = this.checkFormids()
     // if (check1) {

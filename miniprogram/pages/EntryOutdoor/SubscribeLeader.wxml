@@ -4,14 +4,12 @@
 <van-cell title="  " border="{{false}}" />
 
 <!--订阅领队/取消订阅-->
-<form bindsubmit="subscribeLeader" report-submit="true">
-  <view class="fix" style="left:50rpx">
-    <button form-type="submit" style="color:#1aad19;background-color:#ffffff" size="large" plain>
-      <view wx:if="{{!hasSubscribed}}">订阅领队</view>
-      <view wx:else>取消订阅</view>
-    </button>
-  </view>
-</form> 
+<view class="fix" style="left:50rpx">
+  <button bindtap="subscribeLeader" style="color:#1aad19;background-color:#ffffff" size="large" plain>
+    <view wx:if="{{!hasSubscribed}}">订阅领队</view>
+    <view wx:else>取消订阅</view>
+  </button>
+</view> 
 
 <!--增加通知数量-->
 <!-- <form bindsubmit="addCount" report-submit="true">

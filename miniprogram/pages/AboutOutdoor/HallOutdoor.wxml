@@ -1,14 +1,15 @@
 <van-row>
   <!--报名截止/继续报名--> 
-  <van-col span="2" offset="21">
-    <view style="flex-direction:row">
-      <van-icon name="setting-o" size="24px" color="#1aad19" bind:click="openSetting"></van-icon>
-    </view>
+  <van-col span="2" offset="18">
+    <van-icon name="setting-o" size="24px" color="#1aad19" bind:click="openSetting"></van-icon>
+  </van-col>
+  <van-col span="3" offset="0">
+    <view bindtap="openSetting">设置</view>
   </van-col>
 </van-row>
   
 <!--没有活动的提示-->
-<view wx:if="{{outdoors.length == 0 && !isPulldown}}">居然没有活动。可以修改设置，看看过期的活动；或者点击“发起活动”可以创建并发布自己的活动。
+<view wx:if="{{outdoors.length == 0 && !isPulldown}}">居然没有活动。可以修改设置，查看过期的活动；或者点击“发起活动”可以创建并发布自己的活动。
 </view>
 
 <!--活动列表--> 

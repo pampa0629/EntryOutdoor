@@ -3,7 +3,7 @@ const app = getApp()
 const cloudfun = require('../../utils/cloudfun.js')
 const promisify = require('../../utils/promisify.js')
 
-wx.cloud.init()
+wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -73,8 +73,8 @@ Page({
 
   // 订阅领队/取消订阅
   subscribeLeader(e) {
-    console.log("subscribeLeader()")
-    this.addCount(e)
+    console.log("SubscribeLeader.subscribeLeader()")
+    this.addMessageCount(e)
     this.setData({
       hasSubscribed: !this.data.hasSubscribed,
     })

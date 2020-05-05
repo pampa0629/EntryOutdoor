@@ -77,8 +77,11 @@ Page({
         return true // 领队自己查看，直接返回true；避免领队占用分享后的id匹配
       }
 
-      var id = app.globalData.openid
+      console.log("app.globalData.openid:", app.globalData.openid)
+      var id = app.globalData.openid // 默认为自己的id
       var name = "openid"
+      console.log("app.globalData.options:", app.globalData.options)
+      // 判断是否点击 分享到群里面的小程序卡片；若是，则用群id
       if (app.globalData.options.scene == 1044) {
         if (!app.globalData.groupOpenid) {
           app.globalData.groupOpenid = await app.getGroupId(app.globalData.options.shareTicket)
@@ -128,7 +131,8 @@ Page({
     var leaderid = options.leaderid ? options.leaderid : null
     console.log("leaderid:", leaderid)
 
-    // 登录
+    // 先确保登录
+    await app.ensureLogin()
     // var isLogin = await app.ensureLogin()
     // if (isLogin) {
     //   this.setData({

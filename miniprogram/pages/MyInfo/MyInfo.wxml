@@ -42,7 +42,7 @@
   <van-col span="3" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>1.2.3</view>
+      <view style='font-family:黑体;font-size:11pt'>1.2.4</view>
     </view>
   </van-col>
 </van-row>

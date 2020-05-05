@@ -26,7 +26,7 @@
 	"compileType": "miniprogram",
 	"libVersion": "2.8.3",
 	"appid": "wx20edd5723fb67799",
-	"projectname": "%E6%88%B7%E5%A4%96%E6%8A%A5%E5%90%8D",
+	"projectname": "EntryOutdoor",
 	"debugOptions": {
 		"hidedInDevtools": []
 	},

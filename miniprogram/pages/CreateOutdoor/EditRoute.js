@@ -18,14 +18,7 @@ Page({
     size: app.globalData.setting.size, // 界面大小
 
     showAction: false,
-    Actions: [{
-        name: '编辑',
-        subname: "编辑当前途经点"
-      },
-      {
-        name: '删除',
-        subname: "删除当前途经点"
-      },
+    Actions: [
       {
         name: '追加(前面)',
         subname: "在前面追加途经点"
@@ -33,6 +26,14 @@ Page({
       {
         name: '追加(后面)',
         subname: "在后面追加途经点"
+      },
+      {
+        name: '编辑',
+        subname: "编辑当前途经点"
+      },
+      {
+        name: '删除',
+        subname: "删除当前途经点"
       },
     ],
   },

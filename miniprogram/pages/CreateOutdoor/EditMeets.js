@@ -12,14 +12,7 @@ Page({
     size: app.globalData.setting.size, // 界面大小
   
     showAction: false, 
-    Actions: [{
-        name: '编辑',
-        subname: "编辑当前集合点"
-      },
-      { 
-        name: '删除', 
-        subname: "删除当前集合点"
-      },
+    Actions: [
       {
         name: '追加(前面)',
         subname: "在前面追加集合点"
@@ -27,6 +20,14 @@ Page({
       {
         name: '追加(后面)',
         subname: "在后面追加集合点"
+      },
+      {
+        name: '编辑',
+        subname: "编辑当前集合点"
+      },
+      {
+        name: '删除',
+        subname: "删除当前集合点"
       },
     ],
   },

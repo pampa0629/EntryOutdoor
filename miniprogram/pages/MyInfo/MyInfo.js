@@ -199,12 +199,12 @@ Page({
       }
     }
   },
-
+  
   // 设置org登录信息
   setLoginLvyeorg: function(res) {
     console.log("MyInfo setLoginLvyeorg, res is: ")
     console.log(res)
-    if (res.error) {
+    if (res.error) { 
       this.setData({
         hasLoginLvyeorg: false,
         lvyeOrgButton: res.error,

@@ -392,7 +392,7 @@ const removeOcuppy = async(outdoorid) => {
       message.sendEntryStatusChange(members[i].personid, outdoorid, res.data.title.whole, "您因到期未转报名，被系统强制退坑")
 
       // 记录下来 
-      recordOperation(outdoorid, "强制退坑", members[i].userInfo.nickName, members[i].personid)
+      recordOperation(outdoorid, "强制退坑", members[i].userInfo.nickName, members[i].personid, members[i].entryInfo.status)
 
       members.splice(i, 1)
       i-- // i 要回退一格
@@ -404,13 +404,14 @@ const removeOcuppy = async(outdoorid) => {
     if (members[i].entryInfo.status == "替补中") {
       console.log(i, JSON.stringify(members[i]))
       count--
+      var oldStatus = members[i].entryInfo.status // 原来的报名状态
       members[i].entryInfo.status = "报名中"
       // 给替补上的队员发模板消息
       // template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
       // 给替补上的队员发模板消息
       message.sendEntryStatusChange(members[i].personid, outdoorid, res.data.title.whole, "因有人被退坑，您从“替补中”转为“报名中”")
       // 操作记录下来 
-      recordOperation(outdoorid, "替补转报名", members[i].userInfo.nickName, members[i].personid)
+      recordOperation(outdoorid, "替补转报名", members[i].userInfo.nickName, members[i].personid, oldStatus)
     }
   }
 
@@ -731,10 +732,11 @@ const getSteps = (status) =>{
 }
 
 // 记录报名退出等重要操作
-const recordOperation = (outdoorid, action, nickName, personid) =>{
+const recordOperation = (outdoorid, action, nickName, personid, oldStatus) =>{
   var date = new Date() 
   var timeString = util.formatTime(date)
-  var operation = { action: action, nickName: nickName, personid: personid, time: timeString }
+  oldStatus = oldStatus ? oldStatus: "未知"
+  var operation = { action: action, nickName: nickName, personid: personid, time: timeString, oldStatus:oldStatus }
   cloudfun.opOutdoorItem(outdoorid, "operations", operation, "push")
 }
 

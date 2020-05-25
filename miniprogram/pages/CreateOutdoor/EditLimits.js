@@ -3,6 +3,7 @@ const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const template = require('../../utils/template.js')
 const message = require('../../utils/message.js')
+const odtools = require('../../utils/odtools.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -162,6 +163,7 @@ Page({
 
   // 扩编：允许人数增加，且已经有替补队员时--> 把对应的替补队员改为正式队员，并发微信通知
   tapEnlarge() {
+    console.log("tapEnlarge()")
     const self = this
     dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       const members = res.data.members
@@ -170,13 +172,12 @@ Page({
       var end = Math.min(members.length, self.data.limits.personCount - self.data.od.addMembers.length)
       for (var i = begin; i < end; i++) {
         if (members[i].entryInfo.status == "替补中") {
+          var oldStatus = members[i].entryInfo.status
           members[i].entryInfo.status = "报名中"
-          // 模板消息
-          // template.sendEntryMsg2Bench(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].userInfo.nickName)
           // 订阅消息
           message.sendEntryStatusChange(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, "因领队扩编，您从“替补中”转为“报名中”")
           // 记录操作
-          odtools.recordOperation(self.data.od.outdoorid, "扩编为报名中", members[i].userInfo.nickName)
+          odtools.recordOperation(self.data.od.outdoorid, "扩编为报名中", members[i].userInfo.nickName, members[i].userInfo.personid, oldStatus)
         }
       }
       self.afterAdjust(members)
@@ -185,6 +186,7 @@ Page({
 
   // 缩编：允许人数减少，且需要把队员转为替补时-- >把对应的正式队员改为替补队员，并发微信通知
   tapReduce() {
+    console.log("tapReduce()")
     const self = this
     dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
       const members = res.data.members
@@ -193,13 +195,12 @@ Page({
       var end = Math.min(members.length, self.data.oldPersonCount - self.data.od.addMembers.length)
       for (var i = begin; i < end; i++) {
         if (members[i].entryInfo.status != "替补中") {
-          // 模板消息
-          // template.sendBenchMsg2Member(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, members[i].entryInfo.status, members[i].userInfo.nickName)
+          var oldStatus = members[i].entryInfo.status
           // 订阅消息
           message.sendEntryStatusChange(members[i].personid, self.data.od.outdoorid, self.data.od.title.whole, "因领队缩编队伍，您被转为替补")
           members[i].entryInfo.status = "替补中" 
           // 记录操作
-          odtools.recordOperation(self.data.od.outdoorid, "缩编为替补", members[i].userInfo.nickName)
+          odtools.recordOperation(self.data.od.outdoorid, "缩编为替补", members[i].userInfo.nickName, members[i].userInfo.personid, oldStatus)
         }
       }
       self.afterAdjust(members)
@@ -208,6 +209,7 @@ Page({
 
   // 扩编或者缩编后的共同事务
   afterAdjust(members) {
+    console.log("afterAdjust()",members)
     this.setData({
       oldPersonCount: this.data.limits.personCount, // 把人数限制的变化保存起来 
       // members: members,
@@ -219,6 +221,7 @@ Page({
       "od.members": members,
     })
     this.data.od.saveItem("members")
+    this.save()
   },
 
   // 勾选是否允许空降

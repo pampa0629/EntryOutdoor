@@ -526,9 +526,11 @@ OD.prototype.entry = async function(member) {
   this.addMembers = res.data.addMembers ? res.data.addMembers : [] // 防止为null
 
   // 第二步，判断是更新报名信息，还是新报名
-  var findSelf = false
+  var oldStatus = "浏览中" // 默认原来的状态为“浏览中”
+  var findSelf = false  
   this.members.forEach((item, index) => {
     if (item.personid == member.personid) {
+      oldStatus = this.members[index].entryInfo.status // 保存原来的状态
       this.members[index] = member // 找到自己的index，就更新信息
       findSelf = true
     }
@@ -547,7 +549,7 @@ OD.prototype.entry = async function(member) {
   // 更新Outdoors数据库
   cloudfun.opOutdoorItem(this.outdoorid, "members", this.members, "")
   // 记录报名操作历史
-  odtools.recordOperation(this.outdoorid, member.entryInfo.status, member.userInfo.nickName, member.personid)
+  odtools.recordOperation(this.outdoorid, member.entryInfo.status, member.userInfo.nickName, member.personid, oldStatus)
   // 报名信息同步到网站
   this.postEntry2Websites(member, false, false)
   return { 
@@ -654,9 +656,10 @@ OD.prototype.firstBench2Member = function() {
   if (this.limits.maxPerson) {
     for (var i in this.members) {
       if (this.members[i].entryInfo.status == "替补中") {
+        var oldStatus = this.members[i].entryInfo.status
         this.members[i].entryInfo.status = "报名中"
         // 转正记录
-        odtools.recordOperation(this.outdoorid, "替补转报名", this.members[i].userInfo.nickName, this.members[i].personid)
+        odtools.recordOperation(this.outdoorid, "替补转报名", this.members[i].userInfo.nickName, this.members[i].personid, oldStatus)
         // 给转正者发模板消息 
         // template.sendEntryMsg2Bench(this.members[i].personid, this.outdoorid, this.title.whole, this.members[i].userInfo.nickName)
         // 给转正者发订阅消息 
@@ -686,6 +689,7 @@ OD.prototype.quit = async function(personid, selfQuit) {
   var index = util.findIndex(this.members, "personid", personid)
   if (index >= 0) {
     var member = this.members[index]
+    var oldStatus = member.entryInfo.status
 
     // 第三步：判断是否能让替补上；原则：我不是替补，我退出，就让第一个替补顶上
     var isAfee = odtools.isNeedAA(this, member.entryInfo.status) // 判断是否A费用
@@ -721,7 +725,7 @@ OD.prototype.quit = async function(personid, selfQuit) {
       }
       message.sendEntryStatusChange(member.personid, this.outdoorid, this.title.whole, msg)
       // 退出记录一下
-      odtools.recordOperation(this.outdoorid, "自行退出", member.userInfo.nickName, member.personid)
+      odtools.recordOperation(this.outdoorid, "自行退出", member.userInfo.nickName, member.personid, oldStatus)
     } else {
       // var remark = "您已被领队驳回报名，可点击回到活动的“留言”页面中查看原因。若仍有意参加，可在留言中@领队或电话等方式联系领队确认情况。"
       // 发模板消息 
@@ -729,7 +733,7 @@ OD.prototype.quit = async function(personid, selfQuit) {
       // 发送订阅消息
       message.sendEntryStatusChange(member.personid, this.outdoorid, this.title.whole, "报名被驳回，可查看活动留言并和领队沟通")
       // 退出记录一下
-      odtools.recordOperation(this.outdoorid, "报名被驳回", member.userInfo.nickName, member.personid)
+      odtools.recordOperation(this.outdoorid, "报名被驳回", member.userInfo.nickName, member.personid, oldStatus)
     }
     
     // 第六步：同步到网站

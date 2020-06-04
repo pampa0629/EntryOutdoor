@@ -1,5 +1,4 @@
 const app = getApp()
-// const template = require('../../utils/template.js')
 
 Page({
 
@@ -52,11 +51,9 @@ Page({
     }
   },
 
-  save: function (e) {
+  save() {
     console.log("save()")
-    // if (e)
-    //   template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-
+    
     if (this.data.hasModified && this.data.stop.place) {
       const self = this
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -94,9 +91,8 @@ Page({
     this.save() // 自动保存
   },
 
-  giveup(e) {
+  giveup() {
     console.log("giveup()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },

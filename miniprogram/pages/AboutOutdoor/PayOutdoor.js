@@ -1,10 +1,9 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-const qrcode = require('../../utils/qrcode.js')
+// const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
-// const template = require('../../utils/template.js')
-const message = require('../../utils/message.js')
-const cloudfun = require('../../utils/cloudfun.js')
+// const message = require('../../utils/message.js')
+// const cloudfun = require('../../utils/cloudfun.js')
 const promisify = require('../../utils/promisify.js')
 
 wx.cloud.init()

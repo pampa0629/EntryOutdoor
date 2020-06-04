@@ -1,11 +1,10 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-const odtools = require('../../utils/odtools.js')
+// const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
-// const template = require('../../utils/template.js')
-const message = require('../../utils/message.js')
+// const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
-const person = require('../../utils/person.js')
+// const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
 const facetools = require('../../utils/facetools.js')
 
@@ -122,8 +121,7 @@ Page({
   // 上传个人标准照片
   async uploadMyFace(e) {
     console.log("LookPhotos.uploadMyFace()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
-
+    
     let resChoose = await promisify.chooseImage({
       count: 1, // 
       sizeType: ['original'], //['original', 'compressed'], // 必须用原图
@@ -213,7 +211,6 @@ Page({
 
   managerMyFaces(e) {
     console.log("LookPhotos.managerMyFaces()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     wx.navigateTo({
       url: "../MyInfo/EditFaces",
     })
@@ -235,7 +232,6 @@ Page({
   },
 
   async downPhotos(e, photos) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     
     var size = 0
     for(var i in photos) {

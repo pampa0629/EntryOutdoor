@@ -1,9 +1,8 @@
 const app = getApp()
 const util = require('../../utils/util.js')
 const cloudfun = require('../../utils/cloudfun.js')
-// const template = require('../../utils/template.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
-const outdoor = require('../../utils/outdoor.js')
+// const outdoor = require('../../utils/outdoor.js')
 const odtools = require('../../utils/odtools.js')
 
 wx.cloud.init()
@@ -93,12 +92,7 @@ Page({
     this.flushForm(e.target.dataset.name)
   },
 
-  onUnload: function() {
-
-  },
-
-  async connetLvyeorg(e) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+  async connetLvyeorg() {
     let tid = await this.data.od.push2org(this.data.forum.id)
     wx.showModal({
       title: '同步绿野org成功',
@@ -110,21 +104,30 @@ Page({
       "od.websites": this.data.od.websites, 
     })
     this.flushUrl(tid)
+    this.data.od.saveItem("websites")
   },
 
-  disconnetLvyeorg(e) {
+  disconnetLvyeorg() {
+    console.log('disconnetLvyeorg()')
     const self = this
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     wx.showModal({
       title: '确认断开？',
-      content: '断开将导致后续本活动所有信息，包括报名、活动内容修改等都无法同步到原帖子上；再同步只能发布新帖。请确认',
+      content: '断开将导致后续本活动所有信息，包括报名信息、活动内容修改等都无法同步到原帖子上；再次同步只能发布新帖。请确认',
       success(res) {
         if (res.confirm) {
-          console.log('用户点击确定')
+
+          // 在org中跟帖说明已经断开的事情
+          var title = "活动已与本帖断开连接"
+          var message = "领队已废弃本帖子，请勿跟帖报名和留言。若关注本次活动，请扫描主帖子中的二维码，进入小程序的活动页面。"
+          self.data.od.postMessage2Websites(title, message)
+
           self.setData({
             "od.websites" : odtools.getDefaultWebsites()
           })
-          self.flushForm(lvyeorg.chooseForum(self.data.od.title, self.data.od.limits.isTest))
+          self.data.od.saveItem("websites")
+
+          self.flushForm(lvyeorg.chooseForum(self.data.od.title, self.data.od.limits.isTest).toString())
+
         } else if (res.cancel) {
           console.log('用户点击取消')
         }

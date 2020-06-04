@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "审核队员与授权职务",
+  "enablePullDownRefresh": true,
   "usingComponents": {
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",

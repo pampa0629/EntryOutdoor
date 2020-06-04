@@ -746,12 +746,14 @@ module.exports = {
   login: login, // 登录
   logout: logout, // 退出登录
   register: register, // 注册
-
+ 
   addThread: addThread, // 发帖
   buildOutdoorMesage: buildOutdoorMesage, // 构造活动信息
   buildEntryMessage: buildEntryMessage, // 构造报名信息
   buildEntryNotice: buildEntryNotice, // 构造报名须知
   buildChatMessage: buildChatMessage, // 构造留言信息
+  // buildDisconnetMessage: buildDisconnetMessage, // 构造与网址断开信息
+
   postMessage: postMessage, // 跟帖
   add2Waitings: add2Waitings, // 往waiting中增加一条信息
   postWaitings: postWaitings, // 把正在等待发布的信息发布出去

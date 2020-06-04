@@ -2,8 +2,6 @@ const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
-// const template = require('../../utils/template.js')
-// const message = require('../../utils/message.js')
 
 Page({
 
@@ -29,10 +27,8 @@ Page({
     })
   },
 
-  save(e) {
+  save() {
     console.log("save()")
-    if (e)
-      // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     if (this.data.hasModified) { 
       const self = this;
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -40,7 +36,7 @@ Page({
       prevPage.setData({
         "od.limits.disclaimer": self.data.disclaimer,
       })
-      prevPage.data.od.saveItem("disclaimer")
+      prevPage.data.od.saveItem("limits.disclaimer")
       this.setData({
         hasModified: false,
       })
@@ -52,15 +48,13 @@ Page({
     this.save() // 自动保存
   },
 
-  giveup(e) {
+  giveup() {
     console.log("giveup()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },
 
-  pasteDisclaimer: function(e) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+  pasteDisclaimer: function() {
     const self = this
     wx.getClipboardData({
       success: function(res) {
@@ -73,16 +67,14 @@ Page({
     })
   },
 
-  copyDisclaimer: function(e) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+  copyDisclaimer: function() {
     const self = this
     wx.setClipboardData({
       data: self.data.disclaimer,
     })
   },
 
-  loadMyDisclaimer: function(e) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+  loadMyDisclaimer: function() {
     const self = this;
     dbPersons.doc(app.globalData.personid).get()
       .then(res => {
@@ -93,8 +85,7 @@ Page({
       })
   },
 
-  saveMyDisclaimer: function(e) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+  saveMyDisclaimer: function() {
     const self = this;
     dbPersons.doc(app.globalData.personid).update({
       data: {

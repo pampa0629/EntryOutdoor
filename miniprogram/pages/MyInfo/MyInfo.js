@@ -172,11 +172,12 @@ Page({
   },
 
   onShow: function() {
+    console.log("MyInfo.onShow()", app.globalData.setting)
     const self = this
     // 就看看有无最近的活动
     this.setData({
       lastOutdoorid: util.loadOutdoorID(),
-      size: app.globalData.setting.size,
+      size: app.globalData.setting.size, 
     })
 
     // 同时看看org是否登录了

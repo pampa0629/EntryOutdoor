@@ -1,12 +1,11 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-const qrcode = require('../../utils/qrcode.js')
-// const template = require('../../utils/template.js')
+// const qrcode = require('../../utils/qrcode.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
-const regeneratorRuntime = require('regenerator-runtime')
+// const regeneratorRuntime = require('regenerator-runtime')
 
-wx.cloud.init()
+wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -115,9 +114,7 @@ Page({
             self.setData({
               "pay.qrcode": resUpload.fileID,
             })
-            // self.perpareResults()
             // 写入 pay 到数据库中
-            // cloudfun.updateOutdoorPay(self.data.outdoorid, self.data.pay)
             cloudfun.opOutdoorItem(self.data.outdoorid, "pay", self.data.pay, "")
             if (oldpath) { // 删除原来的二维码文件
               wx.cloud.deleteFile({
@@ -130,14 +127,6 @@ Page({
     })
   },
 
-  // perpareResults() {
-  //   const self = this
-  //   self.data.pay.results
-  //   self.data.members.forEach((item, index) => {
-
-  //   })
-  // },
-  
   // 通知所有队员付款
   async sendPayNotice() {
     const self = this
@@ -146,16 +135,12 @@ Page({
     
     // 发微信模板信息;for 加 await实现顺序发送，避免并发太多
     for (let item of self.data.members) {
-      // 模板消息
-      // await template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
       // 订阅消息
       await message.sendOdInfoChange(item.personid, self.data.outdoorid, self.data.title, "财务官“" + pay.cfo.nickName + "”发起收款，人均" + pay.average+"元")
     }
     
     // aa members也要发送消息
     for (let item of self.data.aaMembers) {
-      // 模板消息
-      // await template.sendPayMsg2Member(self.data.outdoorid, item.personid, self.data.title, pay.cfo.nickName, pay.average, item.userInfo.nickName)
       // 订阅消息
       await message.sendOdInfoChange(item.personid, self.data.outdoorid, self.data.title, "财务官“" + pay.cfo.nickName + "”发起收款，人均" + pay.average + "元")
     }
@@ -186,14 +171,12 @@ Page({
       const results = this.data.pay.results
       var count = 0
       for (var i in results) {
-        // count += results[i].num
         count += 1
       }
       self.setData({
         "pay.alreadyCount": count
       })
       self.statLacks()
-      // cloudfun.updateOutdoorPay(self.data.outdoorid, self.data.pay)
       cloudfun.opOutdoorItem(self.data.outdoorid, "pay", self.data.pay, "")
     })
   },

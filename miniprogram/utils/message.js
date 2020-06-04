@@ -170,10 +170,36 @@ const sendEntryFull = async(personid, outdoorid, title, remark) => {
   }
 }
 
+// 活动留言消息 
+const sendChatMsg = async(personid, outdoorid, title, who, msg) => {
+  console.log("message.sendChatMsg()", personid, outdoorid, who, msg)
+  try {
+    const res = await dbPersons.doc(personid).get()
+    var openid = res.data._openid
+    var tempid = "LDql_HagUv44myVId-t66z9wOnzc4iHAoCH9CYWA84Y"
+    var data = { //下面的keyword*是设置的模板消息的关键词变量  
+      "thing4": { // 任务名称 {{thing4.DATA}}
+        "value": title.substring(0, 20)
+      },
+      "name1": { // 留言人{{name1.DATA}}
+        "value": who.substring(0, 10)
+      },
+      "thing3": { // 留言内容{{thing3.DATA}}
+        "value": msg.substring(0, 20)
+      }
+    }
+    // var page = buildPage2("AboutOutdoor", "ChatOutdoor", outdoorid, [{key:"sendWxnotice",value:"true"},{key:"nickName",value:nickName}] )
+    var page = buildPage2("AboutOutdoor", "ChatOutdoor",  outdoorid)
+    return await sendMessage(openid, tempid, page, data)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 
 // 构建页面路径
 const buildDefaultPage = (outdoorid, personid, leaderid) => {
-  console.log("template.buildDefaultPage()", outdoorid, personid, leaderid)
+  console.log("message.buildDefaultPage()", outdoorid, personid, leaderid)
   console.log("app.globalData.personid", app.globalData.personid)
   // 给了领队id，就用；没给，就用发起者作为领队
   leaderid = leaderid ? leaderid : app.globalData.personid
@@ -207,7 +233,7 @@ const sendMessage = async(openid, tempid, page, data) => {
       openid: openid,
       tempid: tempid,
       data: data,
-      page: page,
+      page: page, 
     },
   })
   console.log("res:", res)
@@ -230,5 +256,8 @@ module.exports = {
   // 队员给领队发报名消息
   sendEntryMsg: sendEntryMsg, // 队员报名消息 1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg
   sendEntryFull: sendEntryFull, // 报名满员通知
+
+  // 活动留言消息
+  sendChatMsg:sendChatMsg, // LDql_HagUv44myVId-t660rFMAHClXO9vOKBgpbR6xc
 
 }

@@ -1,6 +1,5 @@
 const app = getApp()
 
-const template = require('../../utils/template.js')
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
 // const select = require('../../libs/select.js')
@@ -220,11 +219,9 @@ Page({
     })
   },
 
-  save: function(e) {
+  save() {
     console.log("save()")
-    if (e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-
+    
     if (this.data.hasModified) {
       const self = this;
       console.log(self.data)
@@ -246,9 +243,8 @@ Page({
     this.save() // 自动保存
   },
 
-  giveup(e) {
+  giveup() {
     console.log("giveup()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },

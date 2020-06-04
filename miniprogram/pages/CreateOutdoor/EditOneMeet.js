@@ -1,5 +1,4 @@
 const app = getApp()
-// const template = require('../../utils/template.js')
 const util = require('../../utils/util.js')
 const promisify = require('../../utils/promisify.js')
 
@@ -125,11 +124,8 @@ Page({
     }
   },
 
-  save: function (e) {
-    console.log("save()")
-    // if (e)
-    //   template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-    console.log(this.data.meet)
+  save() {
+    console.log("save()",this.data.meet)
     if (this.data.hasModified && this.data.meet.place && this.data.meet.date && this.data.meet.time) {
       const self = this
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -174,8 +170,7 @@ Page({
     this.save() // 自动保存
   },
 
-  giveup(e) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+  giveup() {
     this.data.hasModified = false
     wx.navigateBack({})
   },

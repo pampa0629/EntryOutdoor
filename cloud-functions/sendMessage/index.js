@@ -10,7 +10,7 @@ exports.main = async (event, context) => {
     })
     console.log(result)
     return result
-  } catch (err) {
+  } catch (err) { 
     console.log(err)
     return err
   }

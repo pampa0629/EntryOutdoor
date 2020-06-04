@@ -1,13 +1,12 @@
 const app = getApp()
-const util = require('../../utils/util.js')
+// const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
-// const template = require('../../utils/template.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
 const promisify = require('../../utils/promisify.js')
 
-wx.cloud.init() 
+wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
@@ -38,7 +37,7 @@ Page({
     tid: null, // lvyeorg上的帖子id
   },
 
-  onLoad: function(options) {
+  onLoad: function (options) {
     console.log(options)
     const self = this
     self.data.outdoorid = options.outdoorid
@@ -116,7 +115,6 @@ Page({
           chat: self.data.chat
         })
         websites.lvyeorg.chatPosition = posts[posts.length - 1].position
-        // cloudfun.updateOutdoorWebsites(outdoorid, websites)
         cloudfun.opOutdoorItem(outdoorid, "websites", websites, "")
         // 更新最小单元，防止云数据库修改数据结构类型
         cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", self.data.chat.messages, "")
@@ -218,7 +216,7 @@ Page({
   },
 
   async checkSendWxnotice(e) {
-    console.log("checkSendWxnotice()",e)
+    console.log("checkSendWxnotice()", e)
     if (!this.data.sendWxnotice) {
       let res = await promisify.showModal({
         title: '请确认开启',
@@ -236,9 +234,22 @@ Page({
     }
   },
 
-  submitChat(e) {
+  // 处理订阅消息  
+  async dealMessage() {
+    try {
+      let res = await promisify.requestSubscribeMessage({
+        tmplIds: ['LDql_HagUv44myVId-t66z9wOnzc4iHAoCH9CYWA84Y', // 收到留言消息
+        ]
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  },
+
+
+  submitChat() {
     console.log("submitChat()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
+    this.dealMessage()
 
     const self = this
     if (self.data.message.msg) {
@@ -267,13 +278,12 @@ Page({
   },
 
   sendWxnotice(msg) {
-    console.log("sendWxnotice()",msg)
+    console.log("sendWxnotice()", msg)
     var personids = this.findPersonids(msg)
     console.log("personids:", personids)
     personids.forEach((item, index) => {
-      // 模板消息
-      // template.sendChatMsg2Member(item, this.data.title, this.data.outdoorid, app.globalData.userInfo.nickName, app.globalData.userInfo.phone, msg)
-      // 订阅消息 todo 暂时不发，再考虑
+      // 订阅消息  personid, outdoorid,title, who, msg
+      message.sendChatMsg(item, this.data.outdoorid, this.data.title,  app.globalData.userInfo.nickName, msg)
     })
   },
 
@@ -293,7 +303,7 @@ Page({
   },
 
   // 页面相关事件处理函数--监听用户下拉动作  
-  onPullDownRefresh: function() {
+  onPullDownRefresh: function () {
     console.log("onPullDownRefresh")
     wx.showNavigationBarLoading();
     this.flushChats(null, res => {
@@ -308,7 +318,7 @@ Page({
   },
 
   // 页面上拉触底事件的处理函数 
-  onReachBottom: function() {
+  onReachBottom: function () {
     console.log("onReachBottom")
     this.flushChats(null, null)
   },

@@ -1,7 +1,6 @@
 const app = getApp()
-const util = require('../../utils/util.js')
-const cloudfun = require('../../utils/cloudfun.js')
-const template = require('../../utils/template.js')
+// const util = require('../../utils/util.js')
+// const cloudfun = require('../../utils/cloudfun.js')
 const message = require('../../utils/message.js')
 const odtools = require('../../utils/odtools.js')
 
@@ -99,12 +98,10 @@ Page({
     }
   },
 
-  save(e) {
+  save() {
     console.log("EditLimits save()")
     console.log("this.data.hasModified：" + this.data.hasModified)
-    if (e)
-      template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-
+    
     if (this.data.hasModified) {
       const self = this;
       console.log(self.data)
@@ -125,9 +122,8 @@ Page({
     this.save() // 自动保存
   },
 
-  giveup(e) {
+  giveup() {
     console.log("giveup()")
-    template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },

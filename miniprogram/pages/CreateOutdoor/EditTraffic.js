@@ -1,6 +1,5 @@
 const app = getApp()
 
-// const template = require('../../utils/template.js')
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
 
@@ -68,11 +67,9 @@ Page({
     this.save() // 自动保存
   },
 
-  save(e) {
+  save() {
     console.log("save()")
-    // if (e)
-    //   template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
-
+    
     if (this.data.hasModified) {
       const self = this;
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
@@ -89,9 +86,8 @@ Page({
     }
   },
 
-  giveup(e) {
+  giveup() {
     console.log("giveup()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId, null)
     this.data.hasModified = false
     wx.navigateBack({})
   },

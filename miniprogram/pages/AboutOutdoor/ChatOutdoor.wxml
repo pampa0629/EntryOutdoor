@@ -12,7 +12,7 @@
     <view wx:if="{{isLeader}}" style="flex-direction:column">
       <van-icon name="upgrade" size="24px" color="#1aad19" bind:click="onEnterGroup"></van-icon>
       <view class="icon_tip">升级</view>
-    </view>
+    </view> 
     <view wx:else style="flex-direction:column">
       <van-icon name="friends-o" size="24px" color="#1aad19" bind:click="onEnterGroup"></van-icon>
       <view class="icon_tip">群聊</view>
@@ -33,13 +33,13 @@
 <!--刷新提示-->
 <van-tag wx:if="{{!hasPullFlush}}" size="{{size}}" type="success">下拉即时刷新留言</van-tag>
 
-<!-- 留言是否发送微信服务消息 todo -->
-<!-- <van-cell title="@昵称同时发送微信消息"  title-width="90%"  clickable bind:click="checkSendWxnotice" size="{{size}}">
+<!-- 留言是否发送微信服务消息  -->
+<van-cell title="@昵称，同时发送微信消息"  title-width="90%"  clickable bind:click="checkSendWxnotice" size="{{size}}">
   <van-checkbox value="{{sendWxnotice}}"/>
-</van-cell> -->
+</van-cell>
  
 <!--活动留言--> 
-<van-row wx:for="{{chat.messages}}" wx:key="who+msg">
+<van-row wx:for="{{chat.messages}}" wx:key="who">
   <block wx:if="{{!item.self}}">
     <van-col span="4" offset=""> 
       <van-tag size="{{size}}" bindtap="tapWho{{index}}" plain size="large" type="primary">{{item.who}}</van-tag>
@@ -74,10 +74,11 @@
 
 <view class="page-tail"> 
   <view class="resp-input-cell">
-    <input class="resp-input" type="text" placeholder="试试输入@..." value="{{message.msg}}" bindinput="inputChat" focus />
+    <input class="resp-input" type="text" placeholder="试试输入@...  点击'留言'按钮可增加消息数量" value="{{message.msg}}" bindinput="inputChat" focus />
   </view> 
   <!-- <view > -->
-    <form bindsubmit="submitChat" class="resp-btn" report-submit="true" >
+    <!-- <form bindsubmit="submitChat" class="resp-btn" report-submit="true" > -->
+    <form bindtap="submitChat" class="resp-btn" report-submit="true" >
       <button form-type="submit" type="primary" size='mini'>留言</button>
     </form>
   <!-- </view> -->

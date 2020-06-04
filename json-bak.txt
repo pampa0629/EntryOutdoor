@@ -1,0 +1,6 @@
+  // "navigateToMiniProgramAppIdList": [
+  //   "wx1599b7c8d1e2b4d4",
+  //   "wxd45c635d754dbf59"
+  // ],
+
+  // "darkmode":true, 暗黑模式，暂不开启，得界面库配套也有才行

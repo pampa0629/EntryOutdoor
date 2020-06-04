@@ -52,8 +52,8 @@ const personid2openid = async(personid) => {
   console.log(res)
   return res.data._openid
 }
-
-// 构建页面路径
+ 
+// 构建页面路径 
 const buildDefaultPage = (outdoorid,personid,leaderid) => {
   console.log("template.buildDefaultPage()", outdoorid, personid, leaderid)
   console.log("app.globalData.personid", app.globalData.personid)

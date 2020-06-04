@@ -3,7 +3,6 @@ const util = require('../../utils/util.js')
 const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
-// const template = require('../../utils/template.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
@@ -56,7 +55,6 @@ Page({
     nickErrMsg: "", // 报名的时候，个人信息是否正确的判断
     genderErrMsg: "",
     phoneErrMsg: "",
-    // formids: [],
 
     size: app.globalData.setting.size, // 界面大小
   },
@@ -133,14 +131,7 @@ Page({
 
     // 先确保登录
     await app.ensureLogin()
-    // var isLogin = await app.ensureLogin()
-    // if (isLogin) {
-    //   this.setData({
-    //     userInfo: app.globalData.userInfo,
-    //   })
-    //   this.loadFormids()
-    // }
-
+    
     // 发现是领队是自己，则自动切换到发起活动页面
     if (leaderid && leaderid == app.globalData.personid) {
       wx.switchTab({
@@ -162,16 +153,7 @@ Page({
       })
     }
   },
-
-  // 得到formids数量
-  // async loadFormids() {
-  //   let formids = await template.clearPersonFormids(app.globalData.personid)
-  //   // this.data.formids = formids ? formids : []
-  //   this.setData({
-  //     formids: formids,
-  //   })
-  // },
-
+  
   // 设置活动状态进程条
   setSteps(status) {
     const res = odtools.getSteps(status)
@@ -241,14 +223,6 @@ Page({
       "remains.occupy.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.ocuppy, true) *60*1000,
       "remains.entry.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.entry, false) * 60*1000
     })
-    // this.setData({
-    //   "remains.occupy.text": odtools.buildRemainText(this.data.remains.occupy.time),
-    //   "remains.entry.text": odtools.buildRemainText(this.data.remains.entry.time)
-    // })
-    // this.setData({
-    //   "remains.occupy.time": this.data.remains.occupy.time*60,
-    //   "remains.entry.time": this.data.remains.entry.time * 60
-    // })
     console.log("remains:", this.data.remains)
   },
 
@@ -298,8 +272,6 @@ Page({
 
   onCancelShare(e) {
     console.log("onCancelShare()")
-    // console.log(e)
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     this.setData({
       showPopup: false,
     })
@@ -329,8 +301,7 @@ Page({
   },
 
   // 分享到朋友圈
-  onShare2Circle: function(e) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
+  onShare2Circle() {
     const self = this
     qrcode.share2Circle(self.data.od.outdoorid, self.data.od.title.whole, false)
     this.closePopup()
@@ -386,11 +357,11 @@ Page({
     const od = this.data.od
     let notice = self.data.od.limits.wxnotice
 
-    // 给自己发微信模板消息
+    // 给自己发微信模板消息，订阅消息是否要做，再定
     // if (true) {
       // 活动主题，领队联系方式，自己的昵称，报名状态，
       // template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.od.outdoorid)
-    // }
+    // } 
 
     console.log(notice)
     if (notice.accept) { // 领队设置接收微信消息
@@ -402,8 +373,6 @@ Page({
         }
         console.log("count:" + count)
         if (count < 1) { // 每个人只发送一次
-          // 模板消息
-          // template.sendEntryMsg2Leader(od.leader.personid, this.data.userInfo, this.data.entryInfo, od.title.whole, od.outdoorid)
           // 订阅消息
           var remark = this.data.userInfo.gender + "/" + this.data.userInfo.phone + "/第" + (parseInt(this.data.entryInfo.meetsIndex) + 1) + "集合地点"
           message.sendEntryMsg(od.leader.personid, od.outdoorid, od.title.whole, this.data.userInfo.nickName, util.formatTime(new Date()), remark)
@@ -423,18 +392,18 @@ Page({
   },
 
   // 替补
-  tapBench: function(e) {
-    this.doEntry("替补中", e.detail.formId)
+  tapBench() {
+    this.doEntry("替补中")
   },
 
   // 占坑
-  tapOcuppy: function(e) {
-    this.doEntry("占坑中", e.detail.formId)
+  tapOcuppy() {
+    this.doEntry("占坑中")
   },
 
   // 报名
-  tapEntry: function(e) {
-    this.doEntry("报名中", e.detail.formId)
+  tapEntry() {
+    this.doEntry("报名中")
   },
 
   // 检查报名选项是否完整
@@ -607,9 +576,7 @@ Page({
         showLoginDlg: false,
       })
       // 最后还得继续报名才行
-      // if (this.checkFormids()) {
-        this.entryOutdoorInner(this.data.entryTemp.status)
-      // }
+      this.entryOutdoorInner(this.data.entryTemp.status)
     }
   },
 
@@ -633,59 +600,11 @@ Page({
     }
   },
 
-  // dlgGetPhone(e) {
-  //   console.log(e)
-  //   const self = this
-  //   self.setData({
-  //     "userInfo.phone": e.detail,
-  //   })
-  //   self.checkPhone()
-  // },
-
-  // 检查微信消息数量是否够用
-  // checkFormids() { 
-  //   console.log("checkFormids()")
-  //   return true // todo 先返回true，之后再看是否需要增加数量检查
-  //   var result = this.data.formids.length >= 6 ? true : false
-  //   console.log(result)
-  //   this.setData({
-  //     showFormidDlg: !result,
-  //   })
-
-  //   return result
-  // },
-
-  // confirmFormidDlg() {
-  //   console.log("confirmFormidDlg()")
-  //   if (this.checkFormids()) { 
-  //     this.entryOutdoorInner(this.data.entryTemp.status)
-  //   } else {
-  //     wx.showToast({ title: '数量不够六个' })
-  //   }
-  // },
-
-  // cancelFormidDlg() {
-  //   console.log("cancelFormidDlg()")
-  //   this.setData({
-  //     showFormidDlg: false,
-  //   })
-  // },
-
-  // tapAddFormid(e) {
-  //   console.log("tapAddFormid()")
-  //   template.savePersonFormid(app.globalData.personid, e.detail.formId)
-  //   this.data.formids.push(template.buildOneFormid(e.detail.formId))
-  //   this.setData({
-  //     formids: this.data.formids,
-  //   })
-  // },
-
   // 替补、占坑、报名，用同一个函数，减少重复代码
-  doEntry(status, formid) {
-    console.log("doEntry(): " + status)
+  doEntry(status) {
+    console.log("doEntry()", status)
     const self = this
-    // template.savePersonFormid(app.globalData.personid, formid)
-
+    
     // 订阅消息
     wx.requestSubscribeMessage({
       tmplIds: ['Sj8TATwvmR-qZwUoUifcjOVUr1hpFk0CcXgOAPHGhww', // 活动状态变更通知（活动成行/取消）
@@ -697,28 +616,23 @@ Page({
       }
     })
 
-    // if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg && !self.data.showFormidDlg) {
     if (this.data.entryInfo.status != status && !self.data.entryError && !self.data.showLoginDlg) {
       self.data.entryTemp = {
         status: status,
       }
       var check1 = this.checkEntryInfo()
       var check2 = check1 ? this.checkPersonInfo() : false
-      // var check3 = check2 ? this.checkFormids() : false
-      var check3 = true // 暂时不管微信消息数量这事了
       console.log("check1: " + check1)
       console.log("check2: " + check2)
-      console.log("check3: " + check3)
-      if (check1 && check2 && check3) {
+      if (check1 && check2) {
         this.entryOutdoorInner(status)
       }
     }
   },
 
   // 退出
-  async tapQuit(e) {
+  async tapQuit() {
     console.log("tapQuit()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
     if (this.data.od.leader.personid == app.globalData.personid) {
       wx.showModal({
         title: '不能退出',
@@ -900,7 +814,7 @@ Page({
   },
 
   // 勾选是否认路
-  checkKnowWay: function(e) {
+  checkKnowWay(e) {
     const self = this
     console.log(self.data.entryInfo.knowWay)
     self.setData({
@@ -912,13 +826,13 @@ Page({
   },
 
   // 关注活动
-  careOutdoor: function() {
+  careOutdoor() {
     console.log("careOutdoor()")
     this.dealCaredOutdoors(false)
   },
 
   //取消关注
-  cancelCare: function() {
+  cancelCare() {
     console.log("cancelCare()")
     this.dealCaredOutdoors(true)
   },
@@ -971,9 +885,8 @@ Page({
   },
 
   // 上传活动中的拍照
-  async uploadPhotos(e) {
+  async uploadPhotos() {
     console.log("uploadFaces()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
 
     let resChoose = await promisify.chooseImage({
       sizeType: ['original', 'compressed'], //['original', 'compressed'], 
@@ -990,8 +903,7 @@ Page({
     })
   },
 
-  lookPhotos(e) {
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
+  lookPhotos() {
     wx.navigateTo({
       url: "../AboutOutdoor/LookPhotos?outdoorid=" + this.data.od.outdoorid,
     })

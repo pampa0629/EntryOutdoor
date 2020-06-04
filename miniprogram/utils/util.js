@@ -406,7 +406,7 @@ const findValue = (objs, name, value) => {
   return null
 }
 
-// 从对象中得到指定属性的值
+// 从对象中得到指定属性的值 
 // obj：对象
 // name：指定的属性，支持 obj.a.b 的用法
 const getValue=(obj, name) =>{

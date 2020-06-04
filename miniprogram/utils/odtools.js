@@ -2,7 +2,6 @@ const app = getApp()
 const util = require('./util.js')
 var bmap = require('../libs/bmap-wx.min.js')
 const cloudfun = require('./cloudfun.js')
-// const template = require('./template.js')
 const message = require('./message.js')
 const promisify = require('./promisify.js')
 
@@ -386,8 +385,6 @@ const removeOcuppy = async(outdoorid) => {
     if (members[i].entryInfo.status == "占坑中") {
       console.log(i, JSON.stringify(members[i]))
       count++
-      // 给被强制退坑者发模板消息
-      // template.sendQuitMsg2Occupy(members[i].personid, outdoorid, res.data.title.whole, res.data.title.date, res.data.members[0].userInfo.nickName, members[i].userInfo.nickName)
       // 给被强制退坑者发订阅消息
       message.sendEntryStatusChange(members[i].personid, outdoorid, res.data.title.whole, "您因到期未转报名，被系统强制退坑")
 
@@ -406,9 +403,7 @@ const removeOcuppy = async(outdoorid) => {
       count--
       var oldStatus = members[i].entryInfo.status // 原来的报名状态
       members[i].entryInfo.status = "报名中"
-      // 给替补上的队员发模板消息
-      // template.sendEntryMsg2Bench(members[i].personid, outdoorid, res.data.title.whole, members[i].userInfo.nickName)
-      // 给替补上的队员发模板消息
+      // 给替补上的队员发订阅消息
       message.sendEntryStatusChange(members[i].personid, outdoorid, res.data.title.whole, "因有人被退坑，您从“替补中”转为“报名中”")
       // 操作记录下来 
       recordOperation(outdoorid, "替补转报名", members[i].userInfo.nickName, members[i].personid, oldStatus)
@@ -416,7 +411,6 @@ const removeOcuppy = async(outdoorid) => {
   }
 
   // 删完了还得存到数据库中，调用云函数写入
-  // cloudfun.updateOutdoorMembers(outdoorid, members, null)
   cloudfun.opOutdoorItem(outdoorid, "members", members, "")
 
   return members
@@ -556,10 +550,13 @@ const drawText = (canvas, text, x, y, size, dy, color) => {
 
 const drawShareCanvas = (canvas, od, callback) => {
   console.log("odtools.drawShareCanvas")
+  // 先涂成灰色，后续如何适配暗黑模式，再定
+  canvas.setFillStyle('#444444')
+  canvas.fillRect(0,0,500,400)
 
   var green = "#1aad19",
     pos = {
-      x: 10,
+      x: 10, 
       y: 35
     },
     dx = 35

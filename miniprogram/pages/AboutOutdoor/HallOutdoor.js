@@ -1,6 +1,5 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-// const template = require('../../utils/template.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')

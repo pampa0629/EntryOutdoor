@@ -11,13 +11,6 @@
   </button>
 </view> 
 
-<!--增加通知数量-->
-<!-- <form bindsubmit="addCount" report-submit="true">
-  <view class="fix" style="left:400rpx">
-    <button form-type="submit" style="color:#1aad19;background-color:#ffffff" size="large" plain>增加通知数量</button>
-  </view>
-</form>  -->
-
 <view class="fix" style="left:400rpx">
   <button bindtap="addMessageCount" style="color:#1aad19;background-color:#ffffff" size="large" plain>增加通知数量</button>
 </view>

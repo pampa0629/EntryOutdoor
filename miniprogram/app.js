@@ -24,8 +24,8 @@ App({
     lvyeorgInfo: null,
     lvyeorgLogin: false,
 
-    // size:"", // 全局字体大小
-    setting:{}, // 全局设置
+    // size:"", // 全局字体大小 
+    setting:{size:""}, // 全局设置
     settingKey: "GlobalSetting",  // key 
   },
 

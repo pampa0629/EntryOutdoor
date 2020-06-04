@@ -1,12 +1,11 @@
 const app = getApp()
-const util = require('../../utils/util.js')
-const odtools = require('../../utils/odtools.js')
-const outdoor = require('../../utils/outdoor.js')
-// const template = require('../../utils/template.js')
+// const util = require('../../utils/util.js')
+// const odtools = require('../../utils/odtools.js')
+// const outdoor = require('../../utils/outdoor.js')
 const cloudfun = require('../../utils/cloudfun.js')
-const person = require('../../utils/person.js')
+// const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
-const facetools = require('../../utils/facetools.js')
+// const facetools = require('../../utils/facetools.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -44,8 +43,7 @@ Page({
 
   async deleteFace(e,fid) {
     console.log("LookPhotos.managerMyFaces()")
-    // template.savePersonFormid(app.globalData.personid, e.detail.formId)
-
+    
     let res = await promisify.showModal({
       title:"确认删除",
       content:"删除后无法恢复，只能从活动照片页面重新上传照片"

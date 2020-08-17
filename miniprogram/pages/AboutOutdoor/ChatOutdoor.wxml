@@ -39,7 +39,7 @@
 </van-cell>
  
 <!--活动留言--> 
-<van-row wx:for="{{chat.messages}}" wx:key="who">
+<van-row wx:for="{{chat.messages}}" wx:key="this">
   <block wx:if="{{!item.self}}">
     <van-col span="4" offset=""> 
       <van-tag size="{{size}}" bindtap="tapWho{{index}}" plain size="large" type="primary">{{item.who}}</van-tag>
@@ -74,7 +74,7 @@
 
 <view class="page-tail"> 
   <view class="resp-input-cell">
-    <input class="resp-input" type="text" placeholder="试试输入@...  点击'留言'按钮可增加消息数量" value="{{message.msg}}" bindinput="inputChat" focus />
+    <input class="resp-input" type="text" placeholder="试试输入@...  点击'留言'按钮可增加消息数量" value="{{message.msg}}" bindinput="inputChat" focus="{{inputFocus}}" />
   </view> 
   <!-- <view > -->
     <!-- <form bindsubmit="submitChat" class="resp-btn" report-submit="true" > -->

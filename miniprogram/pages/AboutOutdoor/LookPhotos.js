@@ -35,9 +35,13 @@ Page({
     this.setData({
       screenHeight: (sysInfo.screenHeight - sysInfo.statusBarHeight) * 0.8,
     })
+    wx.showLoading({
+      title: '加载中，请稍候',
+    })
 
     this.data.od = new outdoor.OD()
     await this.data.od.load(options.outdoorid)
+    await this.data.od.loadPhotos() // 照片要单独load
     if (util.findIndex(this.data.od.members, "personid", app.globalData.personid)<0) {
       this.setData({
         isMember: false
@@ -45,9 +49,10 @@ Page({
     }
     
     this.loadFacecodes()
-
     var div = Math.min(Math.max(this.data.od.members.length / 2,2), 5) // 活动人数的一半(至少2人），或者有5人，即认为是合影
     this.dividePhotos(this.data.od.photos, div)
+
+    wx.hideLoading()
   },
 
   onShow() {
@@ -72,11 +77,11 @@ Page({
     }
   },
 
-  async divideOnePhoto(photo, div) {
-    // console.log("LookPhotos.divideFaces()", photos, div)
+  async divideOnePhoto(photo, pid, div) {
+    console.log("LookPhotos.divideOnePhoto()", photo, pid, div)
     if (photo.facecount == -1 && !photo.error) { // 未识别，立即识别一下
       photo = await facetools.aiOdPhoto(this.data.od.outdoorid, photo, pid, 5) // 先识别，下次打开再展示
-      divideOnePhoto(photo, div)
+      this.divideOnePhoto(photo, pid, div)
     } else if (photo.facecount == 0) { // 风景
       this.data.landscapes.push(photo)
     } else if (photo.facecount >= div) { // 合影，把人员昵称列出来
@@ -92,9 +97,10 @@ Page({
   },
 
   async dividePhotos(photos, div) {
-    console.log("LookPhotos.divideFaces()", photos, div)
+    console.log("LookPhotos.dividePhotos()", photos, div)
     for (var pid in photos) {
-      await this.divideOnePhoto(photos[pid], div)
+      // console.log("pid:", pid)
+      await this.divideOnePhoto(photos[pid], pid, div)
     }
     this.setData({
       landscapes: this.data.landscapes,
@@ -108,7 +114,7 @@ Page({
     console.log("others", this.data.others)
   },
 
-  async loadFacecodes() {
+  async loadFacecodes() { 
     console.log("LookPhotos.loadFacecodes()")
     let res = await dbPersons.doc(app.globalData.personid).get()
     this.data.facecodes = res.data.facecodes ? res.data.facecodes : {}
@@ -313,6 +319,34 @@ Page({
         currentTab: index
       })
     }
+  }, 
+
+  ///// 预览照片 //////
+  viewImages(photos, pos) {
+    console.log("viewImages()", pos)
+    var urls = []
+    photos.forEach((item, index) => {
+      urls.push(item.src)
+    })
+    wx.previewImage({
+      urls: urls,
+      current: urls[pos]
+   })
+  },
+
+  viewLandscapes(e) {
+    console.log("viewLandscapes()", e)
+    this.viewImages(this.data.landscapes, e.currentTarget.dataset.pos)
+  }, 
+
+  viewMultis(e) {
+    console.log("viewMultis()", e)
+    this.viewImages(this.data.multis, e.currentTarget.dataset.pos)    
+  },
+
+  viewMines(e) {
+    console.log("viewMines()", e)
+    this.viewImages(this.data.mines, e.currentTarget.dataset.pos)    
   }
 
 

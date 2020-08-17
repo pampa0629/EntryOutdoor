@@ -7,10 +7,10 @@ const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const person = require('../../utils/person.js')
 const promisify = require('../../utils/promisify.js')
-const facetools = require('../../utils/facetools.js') 
+const facetools = require('../../utils/facetools.js')
 
 wx.cloud.init()
-const db = wx.cloud.database({}) 
+const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const _ = db.command
@@ -60,7 +60,9 @@ Page({
   },
 
   async getLeaderID(outdoorid) {
-    let res = await dbOutdoors.doc(outdoorid).get()
+    let res = await dbOutdoors.doc(outdoorid).field({
+      leader:true, // 只要这个
+    }).get()
     return res.data.leader.personid
   },
 
@@ -68,7 +70,7 @@ Page({
   async dealPrivate(outdoorid, options) {
     console.log("EntryOutdoor.dealPrivate()", outdoorid, options)
     console.log("options.private：", options.private)
-    if (options.private || options.private == true || options.private=="true") {
+    if (options.private || options.private == true || options.private == "true") {
       // 默认用openid，但如果发现有群，则用群id；避免有人在小程序启动后点击分享到群中的活动，从而用自己的openid把群id给占了
       // 存在的不足是：个人收到后，可以再次分享到一个群中
       if (this.getLeaderID(outdoorid) == app.globalData.openid) {
@@ -80,7 +82,7 @@ Page({
       var name = "openid"
       console.log("app.globalData.options:", app.globalData.options)
       // 判断是否点击 分享到群里面的小程序卡片；若是，则用群id
-      if (app.globalData.options.scene == 1044) {
+      if (app.globalData.options.scene == 1044) { 
         if (!app.globalData.groupOpenid) {
           app.globalData.groupOpenid = await app.getGroupId(app.globalData.options.shareTicket)
         }
@@ -90,23 +92,25 @@ Page({
       }
       console.log("id:", id)
       if (id) {
-        let resOD = await dbOutdoors.doc(outdoorid).get()
+        let resOD = await dbOutdoors.doc(outdoorid).field({
+          matchs:true, // 只要这个
+        }).get()
         resOD.data.matchs = resOD.data.matchs ? resOD.data.matchs : {} // 不能为null
         console.log("resOD.data.matchs:", resOD.data.matchs)
-        resOD.data.matchs[options.uuid] = resOD.data.matchs[options.uuid] ? resOD.data.matchs[options.uuid]:{}
+        resOD.data.matchs[options.uuid] = resOD.data.matchs[options.uuid] ? resOD.data.matchs[options.uuid] : {}
         let resID = resOD.data.matchs[options.uuid][name]
         if (!resID) {
-          cloudfun.opOutdoorItem(outdoorid, "matchs." + options.uuid+"."+name, id, "")
+          cloudfun.opOutdoorItem(outdoorid, "matchs." + options.uuid + "." + name, id, "")
           resID = id
         }
         if (resID == id) {
-          return true  
+          return true
         }
       }
       await promisify.showModal({
         title: '不能查看',
         content: '此活动为私约活动，只有领队直接转发才能查看；系统将自动转到活动大厅。您还可以试试再次点击领队发给你或发到群里的小程序，或者试试从内存中杀掉小程序，然后再直接点击分享的小程序进入活动。',
-        showCancel:false,
+        showCancel: false,
       })
       wx.switchTab({ // 跳转到活动大厅
         url: '../AboutOutdoor/HallOutdoor',
@@ -131,7 +135,7 @@ Page({
 
     // 先确保登录
     await app.ensureLogin()
-    
+
     // 发现是领队是自己，则自动切换到发起活动页面
     if (leaderid && leaderid == app.globalData.personid) {
       wx.switchTab({
@@ -141,11 +145,11 @@ Page({
 
     // 加载活动内容前，如果设置了私约活动，需要单独处理
     await this.dealPrivate(outdoorid, options)
-    
+
     // 加载活动内容
     await this.loadOutdoor(outdoorid)
-    
-    if(this.data.od.limits.private) {
+
+    if (this.data.od.limits.private) {
       wx.hideShareMenu()
     } else {
       wx.showShareMenu({ // 处理分享到群的情况
@@ -153,7 +157,7 @@ Page({
       })
     }
   },
-  
+
   // 设置活动状态进程条
   setSteps(status) {
     const res = odtools.getSteps(status)
@@ -220,14 +224,14 @@ Page({
 
     this.setData({
       // 单位要从分钟，转为毫秒
-      "remains.occupy.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.ocuppy, true) *60*1000,
-      "remains.entry.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.entry, false) * 60*1000
+      "remains.occupy.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.ocuppy, true) * 60 * 1000,
+      "remains.entry.time": odtools.calcRemainTime(this.data.od.title.date, this.data.od.limits.entry, false) * 60 * 1000
     })
     console.log("remains:", this.data.remains)
   },
 
   // 处理报名信息
-  dealEntryInfo: function() {
+  dealEntryInfo: function () {
     // 若只有一个集合地点，默认设置就好了
     if (this.data.od.meets.length <= 1) {
       this.setData({
@@ -287,7 +291,7 @@ Page({
     })
   },
 
-  onShareAppMessage: function(e) {
+  onShareAppMessage: function (e) {
     const self = this
     this.closePopup()
     if (self.data.od.outdoorid) { // 数据库里面有，才能分享出去
@@ -359,8 +363,8 @@ Page({
 
     // 给自己发微信模板消息，订阅消息是否要做，再定
     // if (true) {
-      // 活动主题，领队联系方式，自己的昵称，报名状态，
-      // template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.od.outdoorid)
+    // 活动主题，领队联系方式，自己的昵称，报名状态，
+    // template.sendEntryMsg2Self(app.globalData.personid, od.title.whole, od.leader.userInfo.phone, app.globalData.userInfo.nickName, this.data.entryInfo.status, this.data.od.outdoorid)
     // } 
 
     console.log(notice)
@@ -368,22 +372,20 @@ Page({
       if (notice.entryCount > notice.alreadyCount) { // 前几个报名发送微信消息
         var key = this.data.od.outdoorid + "." + this.data.entryInfo.personid
         var count = parseInt(wx.getStorageSync(key))
-        if (!count) {
-          count = 0
-        }
+        count = count ? count : 0 // 防止为null
         console.log("count:" + count)
         if (count < 1) { // 每个人只发送一次
           // 订阅消息
           var remark = this.data.userInfo.gender + "/" + this.data.userInfo.phone + "/第" + (parseInt(this.data.entryInfo.meetsIndex) + 1) + "集合地点"
           message.sendEntryMsg(od.leader.personid, od.outdoorid, od.title.whole, this.data.userInfo.nickName, util.formatTime(new Date()), remark)
           // 给领队发了消息，得从领队那里减掉一个消息数量
-          cloudfun.opOutdoorItem(od.leader.personid, "messgeCount", -1, "inc")
+          cloudfun.opPersonItem(od.leader.personid, "messageCount", -1, "inc")
 
           wx.setStorageSync(key, parseInt(count) + 1)
           // 发送结束，得往数据库里面加一条；还必须调用云函数
           cloudfun.opOutdoorItem(self.data.od.outdoorid, "limits.wxnotice.alreadyCount", 1, "inc")
         }
-      } 
+      }
       // 满员通知 
       if (notice.fullNotice && this.data.entryFull) {
         message.sendEntryFull(od.leader.personid, od.outdoorid, od.title.whole, "报名已满，敬请留意")
@@ -463,7 +465,7 @@ Page({
     return result
   },
 
-  changeNickname: function(e) {
+  changeNickname: function (e) {
     console.log(e)
     const self = this
     self.setData({
@@ -473,7 +475,7 @@ Page({
   },
 
   blurNickname(e) {
-    console.log(e) 
+    console.log(e)
     this.checkNickname(this.data.userInfo.nickName)
   },
 
@@ -507,7 +509,7 @@ Page({
     }
   },
 
-  changeGender: function(e) {
+  changeGender: function (e) {
     console.log(e)
     this.setData({
       "userInfo.gender": e.detail,
@@ -536,7 +538,7 @@ Page({
     }
   },
 
-  changePhone: function(e) {
+  changePhone: function (e) {
     console.log(e)
     const self = this
     self.setData({
@@ -604,12 +606,13 @@ Page({
   doEntry(status) {
     console.log("doEntry()", status)
     const self = this
-    
+
     // 订阅消息
     wx.requestSubscribeMessage({
-      tmplIds: ['Sj8TATwvmR-qZwUoUifcjOVUr1hpFk0CcXgOAPHGhww', // 活动状态变更通知（活动成行/取消）
-        "B6HdOB00WLtjV2Vbhc2Qb7lx1CtOPEV8A6qy4E6V-R4", // 报名状态变更通知（被领队驳回/缩编时报名变替补/强制退坑/替补转正等）
-        "1O-Y8wh7U7iNa_g3LmKiAJ7wHXUUwZdcNdOcCcYSEHY" // 活动重要提醒通知（活动基本信息被修改/换领队/有照片上传/领队留言等）
+      tmplIds: [
+        message.OdStatusID, // 活动状态变更通知（活动成行/取消）
+        message.EntryStatusID, // 报名状态变更通知（被领队驳回/缩编时报名变替补/强制退坑/替补转正等）
+        message.OdInfoID // 活动重要提醒通知（活动基本信息被修改/换领队/有照片上传/领队留言等）
       ],
       complete(res) {
         console.log("complete: ", res)
@@ -644,7 +647,7 @@ Page({
     var content = '您已经点击“退出”按钮，是否确定退出本活动？'
     if (odtools.isNeedAA(this.data.od, this.data.entryInfo.status)) {
       content += "本活动已成行，退出若无人替补，则需要A共同费用，请慎重操作。"
-    } 
+    }
 
     let resModel = await promisify.showModal({
       title: '确定退出？',
@@ -747,7 +750,7 @@ Page({
     })
     console.log(this.data.chatStatus)
     if (this.data.chatStatus == "atme") {
-      this.data.interval = setInterval(function() {
+      this.data.interval = setInterval(function () {
         this.setData({
           chatChange: !this.data.chatChange,
         })
@@ -758,16 +761,54 @@ Page({
   },
 
   // 选择或改变集合地点选择
-  clickMeets: function(e) {
-    console.log(e)
-    this.setData({
-      "entryInfo.meetsIndex": e.target.dataset.name.toString(),
-    })
-    console.log("entryInfo.meetsIndex:", this.data.entryInfo.meetsIndex)
-    // 如果已经报名，则需要修改集合地点
-    if (odtools.isEntriedStatus(this.data.entryInfo.status)) {
-      this.entryOutdoorInner(this.data.entryInfo.status)
+  async clickMeets(e) {
+    console.log("EntryOutdor.clickMeets()", e)
+    var oldIndex = this.data.entryInfo.meetsIndex
+    var newIndex = e.target.dataset.name.toString()
+    if (oldIndex != newIndex) { // 改变了才干活
+
+      // 如果已经报名，则需要：1）提示确认；2）确认后，修改集合地点+留言+修改数据库
+      if (odtools.isEntriedStatus(this.data.entryInfo.status)) {
+
+        // 先提示，要求确认一下
+        var res = await promisify.showModal({
+          title: '请确认',
+          content: '请确认是否修改集合地点？',
+        })
+        console.log("res:", res)
+
+        if (res.confirm) { // 点击确认
+          // 修改界面
+          this.setData({
+            "entryInfo.meetsIndex": newIndex,
+          })
+
+          // 活动留言中提示领队
+          var newIndexString = "我已改为“第"+(e.target.dataset.name+1).toString()+"集合地点”，请领队留意"
+          var chat = {
+            personid: app.globalData.personid,
+            msg: newIndexString + " @" + this.data.od.leader.userInfo.nickName,
+            who: app.globalData.userInfo.nickName
+          }
+          cloudfun.opOutdoorItem(this.data.od.outdoorid, "chat.messages", chat, "push")
+          // 同时还发送微信消息
+          message.sendChatMsg(this.data.od.leader.personid, this.data.od.outdoorid, this.data.od.title.whole, app.globalData.userInfo.nickName, chat.msg)
+
+          // 修改数据库
+          this.entryOutdoorInner(this.data.entryInfo.status)
+
+          await promisify.showModal({
+            content: '修改信息已给领队发送活动留言和微信消息，但无法保证领队一定看到，请自行确保领队知晓。',
+            showCancel:false
+          })
+        }
+      } else { // 没报名时，直接改界面就好
+        this.setData({
+          "entryInfo.meetsIndex": newIndex,
+        })
+      }
     }
+    console.log("entryInfo.meetsIndex:", this.data.entryInfo.meetsIndex)
   },
 
   // 构造查看地图的函数
@@ -797,7 +838,7 @@ Page({
   },
 
   // 勾选同意免责条款
-  checkDisclaimer: function(e) {
+  checkDisclaimer: function (e) {
     const self = this
     if (this.data.entryInfo.status == "浏览中") {
       self.setData({
@@ -870,7 +911,7 @@ Page({
   },
 
   // 回到首页
-  toMainpage: function() {
+  toMainpage: function () {
     var url = app.globalData.hasUserInfo ? "../AboutOutdoor/HallOutdoor" : "../MyInfo/MyInfo"
     wx.switchTab({
       url: url,
@@ -882,6 +923,20 @@ Page({
     wx.setClipboardData({
       data: this.data.od.brief.disc,
     })
+  },
+
+  // 预览活动宣传照片
+  viewPics(e) {
+    console.log("viewPics()",e)
+    var urls = []
+    this.data.od.brief.pics.forEach((item, index) => {
+      urls.push(item.src)
+    })
+    console.log("urls:",urls)
+    wx.previewImage({
+      urls: urls,
+      current: urls[e.currentTarget.dataset.pos]
+   })
   },
 
   // 上传活动中的拍照

@@ -39,7 +39,9 @@ Page({
 
   loadChat(callback) {
     const self = this
-    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.outdoorid).field({
+      chat:true, // 只要这个
+    }).get().then(res => {
       if (res.data.chat) {
         self.setData({
           chat: res.data.chat,

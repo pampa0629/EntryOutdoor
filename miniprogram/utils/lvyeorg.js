@@ -163,6 +163,7 @@ const uploadOneImage = async(outdoorid, cloudPath) => {
   let res = await wx.cloud.downloadFile({
     fileID: cloudPath,
   })
+  // 万一下载失败呢？这里未来应添加防范代码 ...... todo
   console.log(res.tempFilePath)
   var token = wx.getStorageSync("LvyeOrgToken")
   console.log(token)
@@ -216,29 +217,31 @@ const uploadImages = async(outdoorid, pics) => {
 
 // 这里确定活动应发布的版面 
 //  67: 周末户外活动; 90：周末休闲活动； 91:远期自助旅游; 93：技术小组；120：亲子
-const chooseForum = (title, isTesting) => {
-  console.log(title)
-  console.log(isTesting)
-
-  var fid = 67 // 默认户外
-  if (isTesting) {
-    fid = 93 // 技术小组版 
-  } else if (title.loaded == "亲子"){
-    fid = 120
+const chooseForum = (limits, title, isTesting) => {
+  console.log("lvyeorg.chooseForum()", limits,title,isTesting)
+  if(limits.forumid) { // 有选好的，直接用就好了
+    return limits.forumid
   } else {
     var fid = 67 // 默认户外
-    var day1 = new Date(title.date); // 活动日期
-    var day2 = new Date(); // 当前日期
-    var dayCount = (day1 - day2) / (1000 * 60 * 60 * 24) // 差了几天
-    if (dayCount > 30) { // 30天算远期
-      fid = 91
-    } else if (title.loaded == "休闲" || title.level <= 1.0) {
-      fid = 90
-    } else if (title.loaded == "重装" || title.level > 1.0) {
-      fid = 67
+    if (isTesting) {
+      fid = 93 // 技术小组版 
+    } else if (title.loaded == "亲子"){
+      fid = 120
+    } else {
+      var fid = 67 // 默认户外
+      var day1 = new Date(title.date); // 活动日期
+      var day2 = new Date(); // 当前日期
+      var dayCount = (day1 - day2) / (1000 * 60 * 60 * 24) // 差了几天
+      if (dayCount > 30) { // 30天算远期
+        fid = 91
+      } else if (title.loaded == "休闲" || title.level <= 1.0) {
+        fid = 90
+      } else if (title.loaded == "重装" || title.level > 1.0) {
+        fid = 67
+      }
     }
+    return fid
   }
-  return fid
 }
 
 // 判断版面id是否为测试类活动
@@ -377,6 +380,7 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
     } else {
       message += "本活动不允许空降" + NL
     }
+
     // 占坑/报名截止时间
     if (data.limits && data.limits.ocuppy) {
       if (data.limits.ocuppy.date == "不限") {
@@ -390,6 +394,17 @@ const buildOutdoorMesage = (data, first, modifys, addMessage, allowSiteEntry) =>
       }
       message += "报名截止时间：活动" + data.limits.entry.date + " " + data.limits.entry.time + NL
     }
+
+    // 禁止占坑
+    if (data.limits && data.limits.forbidOccupy) {
+      message += "本活动禁止占坑" + NL
+    }
+
+    // 费用AA
+    if (data.limits && data.limits.isAA) {
+      message += "本活动成行后再退出，又无替补时，请主动联系领队AA包车等公共费用" + NL
+    }
+
     // 体力要求
     if (data.title.level >= 1.0) {
       message += NL + "体力要求：要求报名人员近期应参加过强度值不小于" + data.title.level + "的活动，体力能满足本活动要求。" + NL

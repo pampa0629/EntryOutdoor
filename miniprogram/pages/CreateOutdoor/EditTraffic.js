@@ -2,6 +2,7 @@ const app = getApp()
 
 const util = require('../../utils/util.js')
 const odtools = require('../../utils/odtools.js')
+const promisify = require('../../utils/promisify.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -23,6 +24,7 @@ Page({
         plate: "", // 车牌号码(后四位)
       },
     },
+    limits:{},
     hasModified: false,
     od:null, 
     size: app.globalData.setting.size, // 界面大小
@@ -46,6 +48,7 @@ Page({
     if (prevPage.data.od.traffic) {
       self.setData({
         traffic: prevPage.data.od.traffic,
+        limits:prevPage.data.od.limits, 
         od: prevPage.data.od,
       })
     }
@@ -67,10 +70,29 @@ Page({
     this.save() // 自动保存
   },
 
-  save() {
+  // 如果当前是包车(费用AA)，则自动判断并提醒领队，是否开启AA选项
+  async dealAA() {
+    if(this.data.traffic.mode == "包车") {
+      if(!this.data.limits.isAA) {
+        await promisify.showModal({
+          title: '包车AA',
+          content: "您已选择包车出行，系统将自动为您开启“附加设置”中的AA规则，请知晓！",
+          showCancel:false, 
+          confirmText: "知道了"})
+        this.data.limits.isAA = true
+        return true
+      }
+    }
+    return false
+  },
+
+  async save() {
     console.log("save()")
     
     if (this.data.hasModified) {
+
+      let needAA = await this.dealAA()
+
       const self = this;
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
       let prevPage = pages[pages.length - 2];
@@ -78,8 +100,12 @@ Page({
         "od.traffic": self.data.traffic,
         "od.traffic.carInfo": odtools.buildCarInfo(self.data.traffic),
         "od.traffic.costInfo": odtools.buildCostInfo(self.data.traffic),
+        "limits.isAA":self.data.limits.isAA,
       })
       this.data.od.saveItem("traffic")
+      if(needAA) {
+        this.data.od.saveItem("limits")
+      }
       this.setData({
         hasModified: false,
       })

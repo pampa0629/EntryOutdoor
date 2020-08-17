@@ -11,6 +11,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})  
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
+const dbPhotos = db.collection('Photos')
 const _ = db.command 
 
 // 创建函数，使用者必须： var od = new outdoor.OD() 来获得活动对象，并设置默认值
@@ -59,10 +60,12 @@ function OD() {
 }
 
 // 根据id从数据库中装载活动内容 
-OD.prototype.load = async function(outdoorid) {
+OD.prototype.load = async function(outdoorid) { 
   console.log("OD.prototype.load()", outdoorid)
-  try{
-    let res = await dbOutdoors.doc(outdoorid).get()
+  try{ 
+    let res = await dbOutdoors.doc(outdoorid).field({
+      // photos:false, // 照片这里先不要
+    }).get()
     res.data.outdoorid = res.data._id
     this.copy(res.data) // 处理Outdoors表中数据的兼容性
     // 判断处理websites中的信息
@@ -206,6 +209,23 @@ OD.prototype.copy = function(od) {
 
 }
 
+// 单独load照片
+OD.prototype.loadPhotos = async function () {
+  console.log("OD.prototype.loadPhotos()")
+  // console.log("photos:", this.photos)
+  for (var pid in this.photos) {
+    // 如果这个photoid有，则说明faces存储到 Photos中，需要单独加载一下
+    if(this.photos[pid].photoid) {
+      // console.log("pid:", pid)
+      // console.log("photoid:", this.photos[pid].photoid)
+
+      let res = await dbPhotos.doc(this.photos[pid].photoid).get()
+      // console.log("res:", res)
+      this.photos[pid].faces = res.data.faces
+    }
+  }
+}
+
 // 判断处理活动状态
 OD.prototype.checkStatus = function (status) {
   console.log("OD.prototype.checkStatus()", status)
@@ -281,7 +301,9 @@ OD.prototype.save = async function(myself, modifys) {
     // 进行中或已结束的活动，不能保存
     if (this.status != '进行中' && this.status != '已结束') {
       // 必须先刷新一下成员，不然容易覆盖
-      let res = await dbOutdoors.doc(this.outdoorid).get()
+      let res = await dbOutdoors.doc(this.outdoorid).field({
+        members:true, // 只要这个
+      }).get()
       this.members = res.data.members
       // 找到自己的index，并更新信息
       this.members.forEach((item, index) => {
@@ -318,7 +340,7 @@ OD.prototype.publish = async function(leader) {
   if(await this.save(leader, {})){
     if (!this.limits.private) { // 私约活动默认不发布到org网站
       // 确定绿野org版面，发布出去
-      var fid = lvyeorg.chooseForum(this.title, this.limits.isTest)
+      var fid = lvyeorg.chooseForum(this.limits, this.title, this.limits.isTest)
       this.push2org(fid)
     }
     wx.showToast({ title: '发布成功' })
@@ -400,7 +422,7 @@ OD.prototype.create = async function(leader) {
       title: this.title,
       traffic: this.traffic,
       websites: this.websites,
-      chat: this.chat,
+      chat: this.chat, // 这个要复制么？ ......
     }
   })
 
@@ -513,7 +535,10 @@ OD.prototype.sendModify2Members = async function(modifys) {
 OD.prototype.entry = async function(member) {
   console.log("OD.prototype.entry()", member)
   // 第一步，刷新members，防止之前已经有人报名了
-  let res = await dbOutdoors.doc(this.outdoorid).get()
+  let res = await dbOutdoors.doc(this.outdoorid).field({
+    members:true, 
+    addMembers:true
+  }).get()
   this.members = res.data.members
   this.addMembers = res.data.addMembers ? res.data.addMembers : [] // 防止为null
 
@@ -574,7 +599,10 @@ OD.prototype.dealAaMembers = function(member) {
 OD.prototype.entry4Add = async function(addMember) {
   console.log("OD.prototype.entry4Add()")
   // 第一步，刷新members，防止之前已经有人报名了
-  let res = await dbOutdoors.doc(this.outdoorid).get()
+  let res = await dbOutdoors.doc(this.outdoorid).field({
+    members:true, 
+    addMembers:true
+  }).get()
   this.members = res.data.members
   this.addMembers = res.data.addMembers ? res.data.addMembers : [] // 防止为null
 
@@ -670,7 +698,11 @@ OD.prototype.firstBench2Member = function() {
 OD.prototype.quit = async function(personid, selfQuit) {
   console.log("OD.prototype.quit()")
   // 第一步：刷新重要信息
-  let res = await dbOutdoors.doc(this.outdoorid).get()
+  let res = await dbOutdoors.doc(this.outdoorid).field({
+    members:true, 
+    addMembers:true, 
+    limits:true
+  }).get()
   this.members = res.data.members
   this.addMembers = res.data.addMembers ? res.data.addMembers : []
   this.limits = res.data.limits
@@ -741,7 +773,9 @@ OD.prototype.transferLeader = async function(oldLeader, newLeader) {
     console.assert(this.members[0].personid == oldLeader)
   }
 
-  const res = await dbOutdoors.doc(this.outdoorid).get()
+  const res = await dbOutdoors.doc(this.outdoorid).field({
+    members:true, // 只要这个
+  }).get()
   this.members = res.data.members
   var index = util.findIndex(this.members, "personid", newLeader)
   if (index >= 1) {
@@ -916,6 +950,9 @@ module.exports = {
   // org同步功能
   push2org: OD.prototype.push2org, // 同步到org网址
   postWaitings: OD.prototype.postWaitings,
+
+  // 单独加载照片的faces部分
+  loadPhotos:OD.prototype.loadPhotos,
 
   // 以下为内部函数，外面不得调用
   // create: OD.prototype.create, // save内部判断处理

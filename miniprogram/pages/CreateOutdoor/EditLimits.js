@@ -161,7 +161,9 @@ Page({
   tapEnlarge() {
     console.log("tapEnlarge()")
     const self = this
-    dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.od.outdoorid).field({
+      members:true, 
+    }).get().then(res => {
       const members = res.data.members
       var begin = self.data.oldPersonCount - self.data.od.addMembers.length // 起点index
       begin = Math.max(0, begin) // 不能比0小
@@ -184,7 +186,9 @@ Page({
   tapReduce() {
     console.log("tapReduce()")
     const self = this
-    dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.od.outdoorid).field({
+      members:true, 
+    }).get().then(res => {
       const members = res.data.members
       var begin = self.data.limits.personCount - self.data.od.addMembers.length // 起点index
       begin = Math.max(0, begin) // 不能比0小
@@ -294,6 +298,17 @@ Page({
     console.log(self.data.limits.isAA)
     self.setData({
       "limits.isAA": !self.data.limits.isAA,
+      hasModified: true
+    })
+  },
+
+  // 勾选是否 禁止占坑
+  checkOccupy(e) {
+    console.log("checkOccupy()", e)
+    const self = this;
+    console.log(self.data.limits.forbidOccupy)
+    self.setData({
+      "limits.forbidOccupy": !self.data.limits.forbidOccupy,
       hasModified: true
     })
   },

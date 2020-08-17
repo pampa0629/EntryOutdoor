@@ -8,7 +8,7 @@
 <view wx:for="{{pics}}" wx:key="src"> 
   <van-row>
     <van-col span="20" offset="2">
-      <image mode="widthFix" src="{{item.src}}"></image>
+      <image mode="widthFix" src="{{item.src}}" bindtap="viewImages" data-pos='{{index}}' show-menu-by-longpress></image>
     </van-col>
   </van-row>
 </view> 

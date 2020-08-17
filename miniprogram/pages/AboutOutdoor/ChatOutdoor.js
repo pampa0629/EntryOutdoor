@@ -1,5 +1,5 @@
 const app = getApp()
-// const util = require('../../utils/util.js')
+
 const odtools = require('../../utils/odtools.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
@@ -27,6 +27,7 @@ Page({
     },
     sendWxnotice: false, // 发送留言时，是否自动发送微信消息
     size: app.globalData.setting.size, // 界面大小
+    inputFocus:false, // 输入框是否获取焦点
 
     hasPullFlush: false, // 本页面是否下拉刷新过
     showMembers: false, // 是否显示队员名单， @时出来
@@ -132,7 +133,11 @@ Page({
   flushChats(addMessage, callback) {
     console.log("flushChats()")
     const self = this
-    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.outdoorid).field({
+      chat:true, 
+      members:true,
+      title:true
+    }).get().then(res => {
       if (res.data.chat) { // 数据库有，就覆盖一下
         self.data.chat = res.data.chat
         if (!self.data.chat.messages) {
@@ -210,8 +215,9 @@ Page({
     console.log(e)
     const self = this
     self.setData({
-      "message.msg": self.data.message.msg + e.detail.value,
+      "message.msg": self.data.message.msg + e.detail.value + " ",
       showMembers: false,
+      "inputFocus":true, 
     })
   },
 
@@ -238,7 +244,8 @@ Page({
   async dealMessage() {
     try {
       let res = await promisify.requestSubscribeMessage({
-        tmplIds: ['LDql_HagUv44myVId-t66z9wOnzc4iHAoCH9CYWA84Y', // 收到留言消息
+        tmplIds: [
+          message.ChatID, // 收到留言时的微信消息
         ]
       })
     } catch (e) {
@@ -274,11 +281,11 @@ Page({
         "message.msg": "",
       })
       console.log(self.data.chat.messages)
-    }
+    } 
   },
 
   sendWxnotice(msg) {
-    console.log("sendWxnotice()", msg)
+    console.log("ChatOutdoor.sendWxnotice()", msg)
     var personids = this.findPersonids(msg)
     console.log("personids:", personids)
     personids.forEach((item, index) => {
@@ -289,14 +296,16 @@ Page({
 
   // msg: xxx @name xxx@name xxx
   findPersonids(msg) {
+    console.log("ChatOutdoor.findPersonids()", msg)
     var personids = []
     const self = this
     if (msg.match("@所有人")) {
       return self.data.personids
     }
     this.data.members.forEach((item, index) => {
+      var res = msg.match("@" + item)
       if (msg.match("@" + item)) {
-        personids.push(self.data.personids[index])
+        personids.push(self.data.personids[index-1]) // index[0] 是 all，不能要
       }
     })
     return personids

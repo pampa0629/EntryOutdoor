@@ -44,7 +44,13 @@ Page({
 
   flushPay(callback) {
     const self = this
-    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.outdoorid).field({
+      members:true,
+      addMembers:true, 
+      aaMembers:true,
+      pay:true, 
+      title:true,
+    }).get().then(res => {
       self.setData({
         pay: res.data.pay,
       })
@@ -125,6 +131,18 @@ Page({
         })
       }
     })
+  },
+
+  
+  // 预览收款二维码
+  viewQrcode(e) {
+    console.log("viewQrcode()",e)
+    var urls = [this.data.pay.qrcode]
+    console.log("urls:",urls)
+    wx.previewImage({
+      urls: urls,
+      current: urls[0]
+   })
   },
 
   // 通知所有队员付款

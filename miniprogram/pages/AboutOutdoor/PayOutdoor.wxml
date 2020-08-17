@@ -23,7 +23,9 @@
   <van-button size="large" plain type="primary" bind:click='downloadQrcode'>保存收款二维码</van-button>
   <van-row>
     <van-col span="20" offset="2">
-      <image mode="widthFix" src="{{pay.qrcode}}"></image>
+      <!-- 既然不能长按自动识别二维码收款，那就暂时不放开预览功能 -->
+      <!-- <image mode="widthFix" src="{{pay.qrcode}}" bindtap="viewQrcode"></image> -->
+      <image mode="widthFix" src="{{pay.qrcode}}" show-menu-by-longpress></image>
     </van-col>
   </van-row>
 </van-panel>
@@ -42,11 +44,11 @@
 </van-panel>
 
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="第三步：上传微信支付截屏" size="{{size}}"/>
+	<van-cell slot="header" title-class="redtitle" title="第三步：我已付款，上传支付结果截屏" size="{{size}}"/>
   <van-button size="large" plain type="primary" bind:click='updateScreen'>上传支付截屏</van-button>
   <van-row>
       <van-col span="20" offset="2">
-        <image mode="widthFix" src="{{mine.screen}}"></image>
+        <image mode="widthFix" src="{{mine.screen}}" show-menu-by-longpress></image>
       </van-col>
     </van-row>
 </van-panel>

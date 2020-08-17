@@ -354,7 +354,9 @@ const buildCostInfo = (traffic) => {
 const remindOcuppy = async(od) => {
   console.log("odtools.remindOcuppy()")
 
-  let res = await dbOutdoors.doc(od.outdoorid).get()
+  let res = await dbOutdoors.doc(od.outdoorid).field({
+    members:true, 
+  }).get()
   const members = res.data.members
   var temp = calcRemainTime(od.title.date, od.limits.ocuppy, true)
   var remain = buildRemainText(calcRemainTime(od.title.date, od.limits.ocuppy, true))
@@ -377,7 +379,10 @@ const remindOcuppy = async(od) => {
 // 超过占坑截止时间（外部判断），则清退所有占坑队员，后续替补
 const removeOcuppy = async(outdoorid) => {
   console.log("odtools.removeOcuppy()")
-  let res = await dbOutdoors.doc(outdoorid).get()
+  let res = await dbOutdoors.doc(outdoorid).field({
+    members:true, 
+    title:true,
+  }).get()
   const members = res.data.members
   var count = 0
   // 第一遍循环，找到所有占坑者
@@ -583,7 +588,7 @@ const drawShareCanvas = (canvas, od, callback) => {
 
   // 活动状态
   pos = drawText(canvas, "活动状态：" + od.status, pos.x, pos.y + 5, 30, 15, green)
-
+ 
   // 活动性质
   pos = drawText(canvas, "活动性质：" + getODType(od.limits), pos.x, pos.y + 5, 30, 10, green)
 
@@ -618,13 +623,14 @@ const getODType = (limits)=>{
 }
 
 const setCFO = (outdoorid, cfo) => {
-  dbOutdoors.doc(outdoorid).get().then(res => {
+  dbOutdoors.doc(outdoorid).field({
+    pay:true, // 只要这个
+  }).get().then(res => {
     var pay = {}
     if (res.data.pay) {
       pay = res.data.pay
     }
     pay.cfo = cfo
-    // cloudfun.updateOutdoorPay(outdoorid, pay)
     cloudfun.opOutdoorItem(outdoorid, "pay", pay, "")
     // 发模板消息；不考虑提供订阅消息了
     // template.sendAppointMsg2CFO(cfo.personid, outdoorid, res.data.title.whole, cfo.nickName)
@@ -633,13 +639,14 @@ const setCFO = (outdoorid, cfo) => {
 
 // 设置我的活动费用支付结果
 const setPayMine = (outdoorid, personid, mine) => {
-  dbOutdoors.doc(outdoorid).get().then(res => {
+  dbOutdoors.doc(outdoorid).field({
+    pay:true, // 只要这个
+  }).get().then(res => {
     const pay = res.data.pay
     if (!pay.results) {
       pay.results = {}
     }
     pay.results[personid] = mine
-    // cloudfun.updateOutdoorPay(outdoorid, pay)
     cloudfun.opOutdoorItem(outdoorid, "pay", pay, "")
   })
 }
@@ -682,7 +689,9 @@ const entryFull = (limits, members, addMembers) => {
 // }
 
 const getWebsites = async(outdoorid) => {
-  const res = await dbOutdoors.doc(outdoorid).get()
+  const res = await dbOutdoors.doc(outdoorid).field({
+    websites:true, // 只要这个
+  }).get()
   return res.data.websites
 }
 

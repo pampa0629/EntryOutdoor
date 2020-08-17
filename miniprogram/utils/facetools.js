@@ -8,6 +8,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
+const dbPhotos = db.collection('Photos')
 const _ = db.command
 
 const getDist = (code1, code2) => {
@@ -80,9 +81,36 @@ const aiOdPhoto = async(outdoorid, photo, id, count) => {
       photo.faces.push(face)
     }
   }
-  cloudfun.opOutdoorItem(outdoorid, "photos." + id, photo, "")
+  
+  updatePhoto(outdoorid, id, photo)
+  // cloudfun.opOutdoorItem(outdoorid, "photos." + id, photoid, "")
   return photo
 }
+
+// 创建一条活动照片的记录
+const createPhotoRecord = async(photo) => {
+  let res = await dbPhotos.add({
+    data: {} // 空记录
+  })
+  return res._id
+}
+
+// 更新photo，分别存到outdoor和photo表中
+const updatePhoto = async(outdoorid, id, photo) =>{
+  // 没有 photoid，说明尚未创建 照片的单独记录，则先创建，并 记录下id
+  if(!photo.photoid) { 
+    let photoid = await createPhotoRecord(photo)
+    photo.photoid = photoid
+  }
+  let faces = photo.faces
+  // Photos 表中，只记录faces内容
+  cloudfun.opPhotoItem(photo.photoid, "faces", photo.faces, "")
+  delete photo.faces // outdoor中不存储 faces，先删掉
+  cloudfun.opOutdoorItem(outdoorid, "photos." + id, photo, "")
+  photo.faces = faces // 之后得复原
+  
+}
+
 
 // 得到一个活动中，所有成员的人脸特征码集合
 const getMemsFacecodes = async(outdoorid) => {
@@ -167,7 +195,8 @@ const matchOnePhoto = (outdoorid, photo, code, personid, nickName)=>{
     face.personid = most.personid
     face.nickName = most.nickName
 
-    cloudfun.opOutdoorItem(outdoorid, "photos." + photo.id, photo, "")
+    updatePhoto(outdoorid, id, photo)
+    // cloudfun.opOutdoorItem(outdoorid, "photos." + photo.id, photo, "")
   }
   return changed
 }
@@ -192,7 +221,8 @@ const matchOdPhotos = async(outdoorid, photos) => {
       }
     }
     if (changed) {
-      await cloudfun.opOutdoorItem(outdoorid, "photos." + pid, photo, "")
+      await updatePhoto(outdoorid, pid, photo)
+      // await cloudfun.opOutdoorItem(outdoorid, "photos." + pid, photo, "")
     }
   }
   wx.hideLoading()
@@ -228,7 +258,8 @@ const uploadOdPhotos = async(outdoorid, owner, tempFiles) => {
       facecount: -1 // -1代表尚未进行ai识别
     }
     photos[id] = photo
-    await cloudfun.opOutdoorItem(outdoorid, "photos." + id, photo, "")
+    await updatePhoto(outdoorid, id, photo)
+    // await cloudfun.opOutdoorItem(outdoorid, "photos." + id, photo, "")
   }
   wx.hideLoading()
   return photos

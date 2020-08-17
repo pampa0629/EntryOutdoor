@@ -212,7 +212,12 @@ Page({
       console.log(outdoors)
       outdoors.forEach((item, index) => {
         // 进入每个活动中，进行详细统计 
-        dbOutdoors.doc(item.id).get()
+        dbOutdoors.doc(item.id).field({
+          title:true, 
+          status:true,
+          limits:true, 
+          members:true,
+        }).get()
           .then(res => {
             // console.log(res)
             var theDate = new Date(res.data.title.date)

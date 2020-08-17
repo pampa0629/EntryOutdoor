@@ -104,4 +104,17 @@ Page({
     this.save()
   },
 
+  viewImages(e) {
+    console.log("viewImages()",e)
+    var urls = []
+    this.data.pics.forEach((item, index) => {
+      urls.push(item.src)
+    })
+    console.log("urls:",urls)
+    wx.previewImage({
+      urls: urls,
+      current: urls[e.currentTarget.dataset.pos]
+   })
+  }
+
 })

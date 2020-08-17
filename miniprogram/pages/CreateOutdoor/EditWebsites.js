@@ -14,6 +14,7 @@ Page({
   data: {
     od: null,
     size: app.globalData.setting.size, // 界面大小
+    hasModified: false,
     
     lvyeorgInfo: null, // 绿野org账户信息
     forum: {}, // 选择的绿野论坛{name, id}
@@ -47,7 +48,7 @@ Page({
     })
   },
 
-  onLoad: function(options) {
+  onLoad: function(options) { 
     console.log("onLoad()")
     let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
     let prevPage = pages[pages.length - 3];
@@ -59,8 +60,8 @@ Page({
  
     var fid = this.data.od.websites.lvyeorg.fid
     if (!fid) { // 选择合适的论坛
-      console.log("limits.isTest:", this.data.od.limits.isTest)
-      fid = lvyeorg.chooseForum(this.data.od.title, this.data.od.limits.isTest)
+        // console.log("limits.isTest:", this.data.od.limits.isTest)
+      fid = lvyeorg.chooseForum(this.data.od.limits, this.data.od.title, this.data.od.limits.isTest)
     }
     this.flushForm(fid.toString())
 
@@ -69,6 +70,35 @@ Page({
     }
 
     console.log(this.data)
+  },
+
+  onUnload: function() {
+    console.log("onUnload()")
+    this.save() // 自动保存
+  },
+
+  save() {
+    console.log("save()")
+    if(this.data.hasModified) {
+      const self = this;
+      let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
+      let prevPage = pages[pages.length - 3];
+
+      prevPage.setData({
+        "od.limits.forumid": self.data.forum.id,
+      })
+      this.data.od.saveItem("limits")
+
+      this.setData({
+        hasModified:false,
+      })
+    }
+  },
+
+  giveup() {
+    console.log("giveup()")
+    this.data.hasModified = false
+    wx.navigateBack({})
   },
 
   flushUrl(tid) {
@@ -89,7 +119,13 @@ Page({
 
   clickForum(e) {
     console.log("clickForum(),e:", e)
-    this.flushForm(e.target.dataset.name)
+    if(e.target.dataset.name != this.data.forum.id) {
+      this.flushForm(e.target.dataset.name)
+      this.setData({
+        hasModified:true,
+      })
+    }
+    console.log("hasModified:", this.data.hasModified)
   },
 
   async connetLvyeorg() {
@@ -126,7 +162,7 @@ Page({
           })
           self.data.od.saveItem("websites")
 
-          self.flushForm(lvyeorg.chooseForum(self.data.od.title, self.data.od.limits.isTest).toString())
+          self.flushForm(lvyeorg.chooseForum(self.data.od.limits, self.data.od.title, self.data.od.limits.isTest).toString())
 
         } else if (res.cancel) {
           console.log('用户点击取消')

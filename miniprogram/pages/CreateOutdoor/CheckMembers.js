@@ -79,6 +79,7 @@ Page({
     var od2 = new outdoor.OD()
     await od2.load(this.data.od.outdoorid)
     this.data.od.members = od2.members
+    this.data.od.aaMembers = od2.aaMembers    
     this.data.od.addMembers = od2.addMembers
     this.data.od.operations = od2.operations
     this.data.od.limits = od2.limits
@@ -254,9 +255,8 @@ Page({
     })
   },
 
-  onLookCareer(e) {
-    console.log("onLookCareer")
-    console.log(e)
+  onLookCareer() {
+    console.log("onLookCareer()")
     const self = this
     wx.navigateTo({
       url: '../MyInfo/LookCareer?personid=' + self.data.members[self.data.index].personid,
@@ -271,7 +271,9 @@ Page({
   onLeaderGroup() {
     console.log("onLeaderGroup")
     const self = this
-    dbOutdoors.doc(self.data.od.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.od.outdoorid).field({
+      members:true, 
+    }).get().then(res => {
       res.data.members.forEach((item, index) => {
         if (item.personid == self.data.members[self.data.index].personid) {
           if (item.entryInfo.status != "领队组") {
@@ -281,7 +283,6 @@ Page({
           }
         }
       })
-      // cloudfun.updateOutdoorMembers(self.data.od.outdoorid, res.data.members)
       cloudfun.opOutdoorItem(self.data.od.outdoorid, "members", res.data.members, "")
       self.setData({
         "od.members": res.data.members
@@ -302,7 +303,7 @@ Page({
     })
     wx.showModal({
       title: '财务官设置成功',
-      content: '已设置“' + member.nickName + '”为财务官，请提醒TA查看微信服务消息，点击进入活动收款页面，按页面提示步骤操作即可。若未收到微信消息，财务官可进入活动报名页面，点击第一排的“支付”图标进入收款页面。',
+      content: '已设置“' + member.nickName + '”为财务官，请提醒TA进入活动报名页面，点击第一排的“支付”图标进入收款页面。',
     })
   },
 

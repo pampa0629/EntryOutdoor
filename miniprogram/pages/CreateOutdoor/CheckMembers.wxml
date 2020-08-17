@@ -85,7 +85,7 @@
 	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人，其中占坑{{occupyCount}}人，替补{{benchCount}}人）" size="{{size}}"/>
   <van-tag size="{{size}}" type="primary" plain>审核与授权结果即时生效，无需保存</van-tag> 
   <van-cell wx:if="{{cfo.nickName}}" title="当前财务官（CFO）为：{{cfo.nickName}}" title-width="90%" size="{{size}}"/>
-  <van-field wx:for="{{members}}" title-width="60%" wx:key="item.personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.meetsIndex}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot size="{{size}}">
+  <van-field wx:for="{{members}}" title-width="60%" wx:key="personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.meetsIndex}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot size="{{size}}">
     <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onCheckPopup{{index}}">审核</van-button>
     <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onAppointPopup{{index}}">授权</van-button>
   </van-field> 

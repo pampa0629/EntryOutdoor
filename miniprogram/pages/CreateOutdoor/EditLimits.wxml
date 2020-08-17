@@ -69,6 +69,14 @@
   </van-cell>
 </van-panel>
 
+<!--报名规则-->
+<van-panel>
+	<van-cell slot="header" title-class="redtitle" title="报名规则" size="{{size}}"/>
+  <van-cell title="禁止占坑" title-width="90%" label="勾选后，队员将不能“占坑”" clickable bind:click="checkOccupy" size="{{size}}"> 
+    <van-checkbox value="{{limits.forbidOccupy}}"/>
+  </van-cell>
+</van-panel>
+
 <!--故意空白，防止遮挡-->
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />

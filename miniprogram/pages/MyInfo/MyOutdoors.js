@@ -147,7 +147,9 @@ Page({
     if (outdoors[index] != null) {
       var outdoorid = outdoors[index].id
       console.log("MyOutdoor.js in tapOneOutdoor fun, outdoorid is:" + outdoorid)
-      dbOutdoors.doc(outdoorid).get()
+      dbOutdoors.doc(outdoorid).field({
+        title:true, // 只要这个
+      }).get()
         .then(res => {
           util.saveOutdoorID(outdoorid) 
           if (name == "myOutdoors") {

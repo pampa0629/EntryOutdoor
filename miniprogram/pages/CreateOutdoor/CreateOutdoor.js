@@ -1,6 +1,5 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-// const lvyeorg = require('../../utils/lvyeorg.js')
 const qrcode = require('../../utils/qrcode.js')
 const odtools = require('../../utils/odtools.js')
 const outdoor = require('../../utils/outdoor.js')
@@ -17,7 +16,7 @@ const dbPersons = db.collection('Persons')
 const _ = db.command
 
 Page({
-  data: {
+  data: { 
     od: null,
     canPublish: false, // 判断是否可发布，必须定义关键的几项：地点、日期、集合时间地点等,不保存
     hasModified: false, // 是否被修改了，可以保存起来
@@ -81,7 +80,7 @@ Page({
       util.saveOutdoorID(outdoorid)
     }
     this.setData({
-      size: app.globalData.size
+      size: app.globalData.setting.size
     })
 
     this.data.od = new outdoor.OD()
@@ -536,8 +535,9 @@ Page({
     // 订阅消息  
     try {
       let res = await promisify.requestSubscribeMessage({
-        tmplIds: ['1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg', // 收到队员报名通知
-          "td1vrF82SwI0e730B2bGL-k3fkYZXwmFQEPhssNU50c", // 满员通知
+        tmplIds: [
+          message.EntryID, // 收到队员报名通知
+          message.EntryFullID, // 满员通知
         ]
       })
     } catch (e) {
@@ -869,6 +869,20 @@ Page({
         })
       }
     })
+  },
+
+  // 预览活动宣传照片
+  viewPics(e) {
+    console.log("viewPics()",e)
+    var urls = []
+    this.data.od.brief.pics.forEach((item, index) => {
+      urls.push(item.src)
+    })
+    console.log("urls:",urls)
+    wx.previewImage({
+      urls: urls,
+      current: urls[e.currentTarget.dataset.pos]
+   })
   },
 
   // 调出上传照片页面

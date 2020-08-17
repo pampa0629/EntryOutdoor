@@ -2,7 +2,7 @@
 <van-dialog use-slot async-close show="{{cancelDlg.show}}" show-cancel-button bind:close="closeCancelDlg" bind:confirm="confirmCancelDlg" title="是否确认取消活动" confirmButtonText="确认取消" cancelButtonText="我再想想">
   <van-panel title="请选择活动取消主要原因">
     <van-radio-group value="{{cancelDlg.reason}}" bind:change="changeCancelReason">
-      <van-radio wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio>
+      <van-radio wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="item">{{item}}</van-radio>
     </van-radio-group>
   </van-panel>
 </van-dialog>
@@ -142,10 +142,10 @@
   <van-field label="文字介绍" value="{{od.brief.disc}}" autosize type="textarea" placeholder="请输入活动介绍" size="{{size}}" bind:confirm="bindBriefText" bind:change="bindBriefText" icon="arrow-left" bind:click-icon="pasteBriefDisc" />
   <!-- <van-tag type="danger" plain wx:if="{{!outdoorid}}">必须先“保存草稿”或“发布活动”，才能“上传照片”</van-tag> -->
   <van-cell title="活动照片" wx:if="{{od.status!='进行中' && od.status!='已结束'}}" label="好照片胜过千言万语" value="点击上传/删除活动照片" border="{{false}}" clickable="{{outdoorid}}" size="{{size}}" is-link bind:click="clickUploadPics" />
-  <view wx:for="{{od.brief.pics}}" wx:key="src">
+  <view wx:for="{{od.brief.pics}}" wx:key="src" bindtap="viewPics" data-pos='{{index}}'>
     <van-row>
       <van-col span="20" offset="2">
-        <image mode="widthFix" src="{{item.src}}"></image>
+        <image mode="widthFix" src="{{item.src}}" show-menu-by-longpress></image>
       </van-col>
     </van-row>
   </view>

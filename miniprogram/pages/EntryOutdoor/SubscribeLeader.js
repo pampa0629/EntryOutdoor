@@ -1,6 +1,7 @@
 const app = getApp()
 const cloudfun = require('../../utils/cloudfun.js')
 const promisify = require('../../utils/promisify.js')
+const message = require('../../utils/message.js')
 
 wx.cloud.init() 
 const db = wx.cloud.database({})
@@ -14,7 +15,7 @@ Page({
     hasSubscribed: false, // 是否订阅领队
     leaderid: null, // 领队id
     // 对该领队的订阅信息
-    mine: {
+    mine: { 
       acceptNotice: true,
       messageCount: 0, // 订阅消息数量
     }, 
@@ -75,7 +76,9 @@ Page({
    async addMessageCount() {
     console.log("SubscribeLeader.addMessageCount() ")
     let res = await promisify.requestSubscribeMessage({
-      tmplIds: ['EX-4r4qcQrxj1XkO1uhGAUA-fDnwjn6QnLB4pHWszNs', // 新活动通知
+      tmplIds: [
+        message.CreateID, // 新活动通知
+        message.ChatID, // 活动留言
       ]
     }) 
     console.log("res: ", res)

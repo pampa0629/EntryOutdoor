@@ -42,7 +42,7 @@
   <van-col span="3" offset="1">
     <view style="flex-direction:column">
       <van-icon size='32px' name="question-o" bind:click="bindHelp"/>
-      <view style='font-family:黑体;font-size:11pt'>1.2.7</view>
+      <view style='font-family:黑体;font-size:11pt'>1.2.9</view>
     </view>
   </van-col>
 </van-row>
@@ -98,7 +98,8 @@
 </van-row>
 
 <!--测试页面-->
-<block wx:if="{{isTesting}}"> 
+<block wx:if="{{false}}"> 
+<!-- <block wx:if="{{true}}">  -->
   <van-button size="large" bind:click="bindTest1">Test1</van-button>
   <!-- <van-button size="large" bind:click="managerMyFaces">管理人脸</van-button> -->
   <!-- <van-button size="large" bind:click="bindTest2">测试</van-button> -->

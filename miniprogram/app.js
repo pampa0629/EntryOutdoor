@@ -10,6 +10,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
 const dbOutdoors = db.collection('Outdoors')
+const dbBlacks = db.collection('Blacks')
    
 App({ 
   globalData: {  
@@ -61,8 +62,24 @@ App({
     await this.ensureLogin()
   },
 
+  // 判断是否在黑名单中
+  async isInBlacks() {
+    var openid = util.loadOpenID()
+    const res = await dbBlacks.where({openid: openid}).get()
+    // var res = await dbBlacks.doc(personid).get()
+    if(res != null) {
+      wx.showModal({
+        title: '你Y的滚蛋？',
+        content: '意思意思，你懂的。',
+      })
+      return true
+    }
+    return false
+  },
+
   // 用await确保登录
   async ensureLogin() {
+    // this.isInBlacks()
     console.log("app.ensureLogin()")
     const self = this
     if (self.globalData.hasUserInfo) {
@@ -73,7 +90,7 @@ App({
       try {
         var res = await dbPersons.doc(personid).get()
         console.log("person by id, res:", res)
-        this.setPersonInfo(res.data)
+        this.setPersonInfo(res.data)        
         return true
       } 
       catch (e) {

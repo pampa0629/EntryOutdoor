@@ -14,10 +14,7 @@
 <van-button size="large"  bind:click="tapNotice1">订阅消息1</van-button>
 <van-button size="large"  bind:click="tapNotice2">订阅消息2</van-button>
 <van-button size="large"  bind:click="tapSend">发送消息</van-button>
+<van-button size="large"  bind:click="tapQuery">数据库查询</van-button>
+<van-button size="large"  bind:click="tapUpdate">数据库更新</van-button>
+<van-button size="large"  bind:click="tapDelete">对象删除操作</van-button>
 
-
-<van-cell title="路线与轨迹" title-class="redtitle" label="{{od.route.wayPoints.length}}个途经点" value="点击查看详细路线与轨迹" is-link url="LookRoute" border="{{false}}" />
-
-<van-cell title="路线与轨迹" title-class="redtitle" label="{{od.route.wayPoints.length}}个途经点" value="点击查看详细路线与轨迹" is-link url="LookRoute" border="{{false}}" size="large"/>
-
-<van-cell title="路线与轨迹" title-class="redtitle" label="{{od.route.wayPoints.length}}个途经点" value="点击查看详细路线与轨迹" is-link url="LookRoute" border="{{false}}" size="{{size}}"/>

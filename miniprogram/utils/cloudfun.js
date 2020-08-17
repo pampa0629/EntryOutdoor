@@ -1,5 +1,6 @@
 wx.cloud.init()
-
+const db = wx.cloud.database({})
+const dbPhotos = db.collection('Photos')
 
 const updateOutdoor = async(outdoorid, od) => {
   console.log("updateOutdoor")
@@ -28,6 +29,34 @@ const opOutdoorItem = async(outdoorid, item, value, op) => {
     }
   })
 }
+
+// 操作Photos表中的某个子项  
+const opPhotoItem = async(photoid, item, value, op) => {
+  console.log("cloudfun.opPhotoItem()", photoid, item, value, op)
+  op = op ? op : "" // 默认的""为更新; push,pop,shift,unshift,""
+  return await wx.cloud.callFunction({
+    name: 'dbSimpleUpdate', // 云函数名称
+    // table,id,item,command(push,pop,shift,unshift,""),value 
+    data: {
+      table: "Photos",
+      id: photoid,
+      item: item,
+      command: op,
+      value: value
+    }
+  })
+}
+
+// 更新Photos表的整个对象
+// const updatePhoto = async(photoid, value) => {
+//   console.log("cloudfun.updatePhoto()", photoid, value)
+//   // 因为都是自己读写，故而先直接调用，需要用云函数时再修改
+//   dbPhotos.doc(photoid).update({
+//     data: value
+//   })  
+// }
+
+
 
 // 对Persons表的某个子项进行特定数据库操作
 const opPersonItem = async(personid, item, value, op) => {
@@ -114,6 +143,10 @@ module.exports = {
   
   // Persons
   opPersonItem: opPersonItem,
+
+  // Photos
+  opPhotoItem: opPhotoItem,
+  // updatePhoto: updatePhoto,
   
   // Groups
   opGroupItem: opGroupItem, 

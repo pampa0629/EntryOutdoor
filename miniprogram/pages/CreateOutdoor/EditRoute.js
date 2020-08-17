@@ -179,7 +179,7 @@ Page({
         }
       }
     }
-  },
+  }, 
 
   onUnload: function() {
     console.log("onUnload()")

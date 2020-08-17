@@ -14,6 +14,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
+const dbTemp = db.collection('Temp')
 const _ = db.command
 
 Page({
@@ -505,4 +506,66 @@ Page({
 
   },
 
+  tapQuery() {
+    // dbOutdoors.query()
+
+    // var query = dbOutdoors.field({
+    //   addMembers: true,
+    //   brief: true,
+    //   limits: true,
+    //   leader: true,
+    //   status: true,
+    //   members: true,
+    //   title: true,
+    //   _openid: true,
+    // })
+    var doc = dbOutdoors.doc("3adec2825f29712700067b044517609a")
+    doc.field({
+        addMembers: true,
+        brief: true,
+        limits: true,
+        leader: true,
+        status: true,
+        members: true,
+        title: true,
+        _openid: true,
+      }).get().then(res=>{
+      console.log("res:", res)
+    })
+  },
+
+  async tapUpdate() {
+    console.log("tapUpdate()")
+    let id = "W7cw8J25dhqgDMHA"
+    var value = {"abc":"edf3"}
+    let res = await wx.cloud.callFunction({
+      name: 'dbSimpleUpdate', // 云函数名称
+      data: {
+        table: "Temp",
+        id: id,
+        item: "code",
+        command: "",
+        value: value
+      }
+    })
+    // let res = await dbTemp.doc(id).update({
+    //   data: value
+    // })
+    console.log("res:", res)
+  },
+
+  async tapDelete() {
+    console.log("tapDelete()")
+    var obj = {"item1":"value1", "item2": 2}
+    console.log("obj:", JSON.stringify(obj))
+    let item1 = obj.item1
+    console.log("item1:", JSON.stringify(item1))
+    delete obj.item1
+    console.log("obj:", JSON.stringify(obj))
+    console.log("item1:", JSON.stringify(item1))
+    obj.item1 = item1
+    console.log("obj:", JSON.stringify(obj))
+  }
+
 })
+

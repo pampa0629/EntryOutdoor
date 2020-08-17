@@ -117,10 +117,10 @@
 <van-panel> 
   <van-cell slot="header" title-class="redtitle" title="图文介绍" size="{{size}}"/>
   <van-field value="{{od.brief.disc}}" size="{{size}}" autosize type="textarea" disabled border="{{false}}" right-icon="arrow" bind:click-icon="copyBriefDisc"/>
-  <view wx:for="{{od.brief.pics}}" wx:key="src">
+  <view wx:for="{{od.brief.pics}}" wx:key="src" bindtap="viewPics" data-pos='{{index}}'>
     <van-row>
       <van-col span="20" offset="2">
-        <image mode="widthFix" src="{{item.src}}"></image>
+        <image mode="widthFix" src="{{item.src}}" show-menu-by-longpress></image>
       </van-col>
     </van-row>
   </view>
@@ -179,17 +179,19 @@
 <!--状态提示-->
 <van-tag size="{{size}}" type="primary" plain>报名当前状态：{{entryInfo.status}}</van-tag>
 <!--占坑时间提示-->
-<block wx:if="{{entryInfo.status=='浏览中' || entryInfo.status=='占坑中'}}">
-  <block wx:if="{{remains.occupy.time<0}}">
-    <van-row>
-      <van-tag size="{{size}}" plain type="danger">已过占坑截止时间</van-tag>
-    </van-row>
-  </block> 
-  <block wx:else>
-    <van-cell title="距离占坑截止时间还剩：" title-class="redtitle" size="{{size}}">
-      <van-count-down size="{{size}}" time="{{ remains.occupy.time }}" format="DD 天 HH 时 mm 分 ss 秒" />
-    </van-cell>
-  </block> 
+<block wx:if="{{!od.limits.forbidOccupy}}">
+  <block wx:if="{{entryInfo.status=='浏览中' || entryInfo.status=='占坑中'}}">
+    <block wx:if="{{remains.occupy.time<0}}">
+      <van-row>
+        <van-tag size="{{size}}" plain type="danger">已过占坑截止时间</van-tag>
+      </van-row>
+    </block> 
+    <block wx:else>
+      <van-cell title="距离占坑截止时间还剩：" title-class="redtitle" size="{{size}}">
+        <van-count-down size="{{size}}" time="{{ remains.occupy.time }}" format="DD 天 HH 时 mm 分 ss 秒" />
+      </van-cell>
+    </block> 
+  </block>
 </block>
 <!--报名时间提示-->
 <block wx:if="{{entryInfo.status=='浏览中' || entryInfo.status=='占坑中'}}">
@@ -234,23 +236,14 @@
 <van-row class="fix" wx:if="{{od.status=='已发布'||od.status=='已成行'}}">
   <!--替补-->
   <van-col span="9" offset="2">
-    <!-- <form bindsubmit="tapBench" report-submit="true" wx:if="{{entryFull && entryInfo.status=='浏览中' && remains.entry.time>=0}}">
-      <button form-type="submit">替补</button>
-    </form> -->
     <button bindtap="tapBench" wx:if="{{entryFull && entryInfo.status=='浏览中' && remains.entry.time>=0}}">替补</button>
   </van-col>
   <!--占坑-->
-  <van-col span="9" offset="2">
-    <!-- <form bindsubmit="tapOcuppy" report-submit="true" wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">
-      <button form-type="submit">占坑</button>
-    </form> -->
+  <van-col span="9" offset="2" wx:if="{{!od.limits.forbidOccupy}}">
     <button bindtap="tapOcuppy" wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">占坑</button>
   </van-col> 
   <!--报名-->
   <van-col span="9" offset="2">
-    <!-- <form bindsubmit="tapEntry" report-submit="true" wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">
-      <button form-type="submit" type="primary">报名</button>
-    </form> -->
     <button bindtap="tapEntry" wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">报名</button>
   </van-col>
   <!--退出-->
@@ -268,7 +261,7 @@
       <form bindsubmit="uploadPhotos" report-submit="true">
         <button form-type="submit" type="primary">上传活动照片</button>
       </form>
-    </van-col>
+    </van-col> 
     <van-col span="11" offset="1" wx:if="{{od.photocount}}">
       <form bindsubmit="lookPhotos" report-submit="true">
         <button form-type="submit" type="primary">查看活动照片({{od.photocount}})</button>

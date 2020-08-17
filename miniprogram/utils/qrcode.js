@@ -59,7 +59,9 @@ const save2Album = async(outdoorid, title, isLeader) => {
 // 得到二维码图片的云存储路径，没有就先生成出来
 const getCloudPath = async(outdoorid) => {
   // 先看看数据库中是否
-  let resDB = await dbOutdoors.doc(outdoorid).get()
+  let resDB = await dbOutdoors.doc(outdoorid).field({
+    QcCode:true, // 只要这个
+  }).get()
   if (resDB.data.QcCode) {
     console.log("Outdoors is:" + resDB.data.QcCode)
     return resDB.data.QcCode

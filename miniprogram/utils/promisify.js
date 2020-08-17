@@ -6,6 +6,8 @@
 //   }
 // } 
 
+// async
+
 const promise=(api) => {
   return (options, ...params) => {
     return new Promise((resolve, reject) => {

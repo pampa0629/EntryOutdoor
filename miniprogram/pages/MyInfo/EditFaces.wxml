@@ -2,7 +2,7 @@
 <van-panel wx:for="{{facecodes}}" wx:key="id">
   <van-row>
     <van-col span="20" offset="2">
-      <image mode="widthFix" src="{{item.src}}"></image>
+      <image mode="widthFix" src="{{item.src}}" show-menu-by-longpress></image>
     </van-col>
   </van-row>
   <van-row>

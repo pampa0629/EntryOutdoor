@@ -1,8 +1,8 @@
 const app = getApp()
 const util = require('../../utils/util.js')
-const message = require('../../utils/message.js')
-const cloudfun = require('../../utils/cloudfun.js')
-const lvyeorg = require('../../utils/lvyeorg.js')
+// const message = require('../../utils/message.js')
+// const cloudfun = require('../../utils/cloudfun.js')
+// const lvyeorg = require('../../utils/lvyeorg.js')
 
 wx.cloud.init()
 const db = wx.cloud.database({})
@@ -44,6 +44,7 @@ Page({
 
   // isClear:是否清空之前结果重新查询
   flushOutdoors(isClear, callback) {
+    console.log("HallOutdoor.flushOutdoors()", isClear)
     const self = this
     if (isClear) {
       self.setData({
@@ -56,7 +57,13 @@ Page({
       })
     }
     var today = util.formatDate(new Date())
-    var query = dbOutdoors.where({
+    // 数据容易超量的部分，这里不用读取
+    var query = dbOutdoors.field({
+      photos:false,
+      chat:false 
+    })
+
+    query = query.where({
       "limits.intoHall": _.eq(true)
     })
     const setting = self.data.setting
@@ -88,7 +95,7 @@ Page({
     } else {
       query = query.orderBy("title.date", 'desc')
     }
-
+    
     // 分页
     const page = self.data.page
     console.log("page:", page)
@@ -99,6 +106,9 @@ Page({
       self.setData({ // 到底部了
         "page.bottom": res.data.length == 0 ? true : false,
       })
+      // .catch(err => { 
+      //   console.error(err)
+      // })
 
       res.data.forEach((item, index) => {
         console.log(item)

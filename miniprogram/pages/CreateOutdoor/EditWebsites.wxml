@@ -50,3 +50,21 @@
  
 <van-button size="large" bindtap='tapOrgHall'>跳转：绿野ORG小程序</van-button>
 
+<!--故意空白，防止遮挡-->
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+
+<!-- 保存和返回按钮 -->
+<van-row class="fix" wx:if="{{od.status!='进行中' && od.status!='已结束'}}">
+  <van-col span="9" offset="2">
+    <form bindsubmit="save" report-submit="true">
+      <button form-type="submit" type="primary" disabled='{{!hasModified}}'>保存</button>
+    </form>
+  </van-col>
+  <van-col span="9" offset="2">
+    <form bindsubmit="giveup" report-submit="true">
+      <button form-type="submit" size="large" type="warn">放弃</button>
+    </form>
+  </van-col>
+</van-row>

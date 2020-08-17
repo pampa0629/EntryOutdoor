@@ -26,7 +26,7 @@ let interstitialAd = null
 Page({
   data: {
     home: false,
-    formIds: [],
+    // formIds: [],
     od: null,
     a: null,
    

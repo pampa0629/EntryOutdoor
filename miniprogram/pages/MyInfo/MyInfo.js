@@ -12,8 +12,6 @@ const dbPersons = db.collection('Persons')
 Page({ 
 
   data: { 
-    isTesting: false, // for test  false true
-
     hasLogin: false, // 判断用户是否已经登录了(Persons表中有记录了)
     userInfo: {
       nickName: "待定",

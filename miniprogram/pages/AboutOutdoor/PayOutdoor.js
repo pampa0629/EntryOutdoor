@@ -37,7 +37,10 @@ Page({
     self.data.mine.nickName = app.globalData.userInfo.nickName
     
     self.data.outdoorid = options.outdoorid
-    dbOutdoors.doc(self.data.outdoorid).get().then(res => {
+    dbOutdoors.doc(self.data.outdoorid).field({
+      pay:true, 
+      title:true, 
+    }).get().then(res => {
       self.setData({
         pay: res.data.pay,
         title: res.data.title.whole,
@@ -92,8 +95,17 @@ Page({
       filePath: res.tempFilePath})
     wx.showToast({
       title: '已保存',
-    })
-    
+    })    
+  },
+
+  viewQrcode(e) {
+    console.log("viewQrcode()",e)
+    var urls = [this.data.pay.qrcode]
+    console.log("urls:",urls)
+    wx.previewImage({
+      urls: urls,
+      current: urls[0]
+   })
   },
 
   bindNum(e) {

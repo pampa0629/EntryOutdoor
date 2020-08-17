@@ -1,5 +1,5 @@
 <!--占坑截止时间-->
-<van-panel>
+<van-panel wx:if="{{!od.limits.forbidOccupy}}">
   <van-cell slot="header" title-class="redtitle" title="占坑截止时间" size="{{size}}"/>
   <picker bindchange="changOcuppyDate" value="{{ocuppy.date}}" range="{{OcuppyDates}}">
       <van-field label="日期" disabled  value="{{ocuppy.date}}" placeholder="请选择占坑截止日期" size="{{size}}"/>

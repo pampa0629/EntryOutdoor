@@ -8,10 +8,10 @@
   <!--风景-->
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
-      <van-panel wx:for="{{landscapes}}" wx:key="src">
+      <van-panel wx:for="{{landscapes}}" wx:key="src" bindtap="viewLandscapes" data-pos='{{index}}'>
         <van-row>
           <van-col span="20" offset="2">
-            <image mode="widthFix" src="{{item.src}}"></image>
+            <image mode="widthFix" src="{{item.src}}" show-menu-by-longpress></image>
           </van-col>
         </van-row>
         <van-row>
@@ -39,10 +39,10 @@
   <swiper-item>
     <scroll-view scroll-y="true" style="height:{{screenHeight}}px">
       <van-tag size="{{size}}" wx:if="{{myFaceCount == 0}}" type="primary" plain>在“自己”中上传一张“只有您”的人脸像，即可从合影中标识出您的昵称，以便队友认出您来</van-tag>
-      <van-panel wx:for="{{multis}}" wx:key="src">
+      <van-panel wx:for="{{multis}}" wx:key="src" data-pos='{{index}}' bindtap="viewMultis"> 
         <van-row>
           <van-col span="20" offset="2">
-            <image mode="widthFix" src="{{item.src}}"></image>
+            <image mode="widthFix" src="{{item.src}}" show-menu-by-longpress></image>
           </van-col>
         </van-row>
         <van-row>
@@ -95,10 +95,10 @@
       <van-cell title="  " border="{{false}}" />
 
       <!-- 自己的照片 -->
-      <van-panel wx:for="{{mines}}" wx:key="src">
+      <van-panel wx:for="{{mines}}" wx:key="src" bindtap="viewMines" data-pos='{{index}}'>
         <van-row>
           <van-col span="20" offset="2">
-            <image mode="widthFix" src="{{item.src}}"></image>
+            <image mode="widthFix" src="{{item.src}}" show-menu-by-longpress></image>
           </van-col>
         </van-row>
         <van-row>

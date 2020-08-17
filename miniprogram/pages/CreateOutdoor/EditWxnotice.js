@@ -1,10 +1,8 @@
 const app = getApp()
 wx.cloud.init()
 const db = wx.cloud.database()
-// const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 
-// const util = require('../../utils/util.js')
 const message = require('../../utils/message.js')
 const promisify = require('../../utils/promisify.js')
 const cloudfun = require('../../utils/cloudfun.js')
@@ -117,7 +115,9 @@ Page({
   async addMessageCount() {
     console.log("EditWxnotics.addMessageCount()")
     let res = await promisify.requestSubscribeMessage({
-      tmplIds: ['1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg', // 收到队员报名通知
+      tmplIds: [
+        // '1u0TixqNPN-E4yzzaK8LrUooofZAgGoK3_EwrrIG_Lg', // 收到队员报名通知
+        message.ChatID, // 活动留言
       ]})
     console.log("res: ", res)
     if (res.errMsg.indexOf("ok")) {

@@ -33,13 +33,10 @@ Page({
     hasModified: false,
 
     // 人数扩容或缩编导致需要即时变化的情况
-    // outdoorid: null,
     od:null,
-    // title: null,
-    // members: null, // 当前已报名队员
-    // addMembers: null, // 附加队员
-    //newPersonCount:null, // 变化后的人数
     oldPersonCount: null,
+
+    unit:"人", // 报名单位是人，还是家（绿野童军）；
 
     lvyeorgInfo:null, // 绿野org信息
 
@@ -60,11 +57,7 @@ Page({
     let od = prevPage.data.od
     self.setData({
       od:od,
-      // outdoorid: od.outdoorid,
-      // title: od.title.whole,
       limits: od.limits,
-      // members: od.members, // 当前已报名队员
-      // addMembers: od.addMembers, // 附加队员
       oldPersonCount: od.limits.personCount ? od.limits.personCount : 0,
     })
     console.log(self.data)
@@ -94,6 +87,12 @@ Page({
     if (app.globalData.lvyeorgLogin) {
       self.setData({
         lvyeorgInfo: app.globalData.lvyeorgInfo
+      })
+    }
+
+    if(this.data.od.title.loaded == "绿野童军") {
+      this.setData({
+        unit:"家"
       })
     }
   },

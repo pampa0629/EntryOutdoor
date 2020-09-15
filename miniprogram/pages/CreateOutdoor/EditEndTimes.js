@@ -113,7 +113,7 @@ Page({
     this.setData({
       "ocuppy.time": e.detail.value,
       hasModified: true,
-    })
+    }) 
   },
 
   // 报名截止日期

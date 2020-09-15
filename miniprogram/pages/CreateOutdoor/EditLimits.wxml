@@ -1,10 +1,10 @@
 <!--活动人数限制-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="活动人数限制" size="{{size}}"/>
-  <van-cell title-width="90%" title="限制人数" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}" size="{{size}}">
+	<van-cell slot="header" title-class="redtitle" title="活动{{unit}}数限制" size="{{size}}"/>
+  <van-cell title-width="90%" title="限制{{unit}}数" clickable bind:click="checkMaxPerson" border="{{limits.maxPerson}}" size="{{size}}">
     <van-checkbox value="{{limits.maxPerson}}"/>
   </van-cell>    
-  <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}人" border="{{false}}" size="{{size}}">
+  <van-cell wx:if="{{limits.maxPerson}}" title="活动成员（含领队）限：{{limits.personCount}}{{unit}}" border="{{false}}" size="{{size}}">
     <van-stepper value="{{limits.personCount}}" min="1" max="100" bind:change="bindAddPerson" />
   </van-cell>   
   <!--扩编：允许人数增加，且已经有替补队员时-->

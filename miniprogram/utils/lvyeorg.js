@@ -225,7 +225,7 @@ const chooseForum = (limits, title, isTesting) => {
     var fid = 67 // 默认户外
     if (isTesting) {
       fid = 93 // 技术小组版 
-    } else if (title.loaded == "亲子"){
+    } else if (title.loaded == "绿野童军"){
       fid = 120
     } else {
       var fid = 67 // 默认户外

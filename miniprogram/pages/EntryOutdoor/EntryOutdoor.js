@@ -325,32 +325,39 @@ Page({
   // 报名就是在活动表中加上自己的id，同时还要在Person表中加上活动的id
   async entryOutdoorInner(status) {
     console.log("entryOutdoorInner()", status)
-    this.setData({
-      "entryInfo.status": status,
-    })
-    console.log(this.data.entryInfo)
-
-    var member = util.createMember(app.globalData.personid, this.data.userInfo, this.data.entryInfo)
-    let res = await this.data.od.entry(member)
-    this.setData({ // 刷新队员信息
-      "od.members": this.data.od.members,
-    })
-    if (status != "替补中" && res.status == "替补中") { // 被迫替补，则要给与弹窗提示
+    
+    // 绿野童军需要进入单独的页面报名
+    if (this.data.od.title.loaded == "绿野童军") {
+      wx.navigateTo({
+        url: './ChildEntry',
+      })
+    } else { 
       this.setData({
-        "entryInfo.status": res.status,
+        "entryInfo.status": status,
       })
-      wx.showModal({
-        title: '替补通知',
-        content: '由于有人抢先点击报名了，报名人数已满，您不得不变为替补。若不愿替补，可随时退出；若前面队员退出或领队扩编，您将自动转为报名',
+
+      var member = util.createMember(app.globalData.personid, this.data.userInfo, this.data.entryInfo)
+      let res = await this.data.od.entry(member)
+      this.setData({ // 刷新队员信息
+        "od.members": this.data.od.members,
       })
-    }
+      if (status != "替补中" && res.status == "替补中") { // 被迫替补，则要给与弹窗提示
+        this.setData({
+          "entryInfo.status": res.status, 
+        })
+        wx.showModal({
+          title: '替补通知',
+          content: '由于有人抢先点击报名了，报名人数已满，您不得不变为替补。若不愿替补，可随时退出；若前面队员退出或领队扩编，您将自动转为报名',
+        })
+      }
 
-    // Person表中，还要把当前outdoorid记录下来
-    this.updateEntriedOutdoors(false)
+      // Person表中，还要把当前outdoorid记录下来
+      this.updateEntriedOutdoors(false)
 
-    // 首次报名，发送微信消息
-    if (res.entry) {
-      this.postEntryMsg()
+      // 首次报名，发送微信消息
+      if (res.entry) {
+        this.postEntryMsg()
+      }
     }
   },
 

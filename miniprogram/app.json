@@ -42,7 +42,10 @@
     "pages/CreateOutdoor/EditWebsites",
     "pages/Test/Test1",
     "pages/MyInfo/EditFaces",
-    "pages/AboutOutdoor/LookOutdoorOp"
+    "pages/AboutOutdoor/LookOutdoorOp",
+    "pages/EntryOutdoor/ChildEntry",
+    "pages/EntryOutdoor/AddOneChild",
+    "pages/EntryOutdoor/AddOneParent"
   ],
   "window": {
     "backgroundTextStyle": "dark",

@@ -1,0 +1,24 @@
+<!--户外昵称-->
+<van-field label="户外昵称" required value="{{parent.nickName}}" type="text" autosize clearable placeholder="请输入户外昵称" bindinput="inputNickname" size="{{size}}"/>
+
+<!-- 性别 todo -->
+<!-- <van-field label="性别：" value="{{userInfo.gender}}" disabled size="{{size}}"/>
+<van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">
+    <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender" size="{{size}}">
+      <van-radio name="{{item}}"/>
+    </van-cell> 
+</van-radio-group>   -->
+
+<!--手机号码-->
+<van-field label="手机号码" required value="{{parent.phone}}" type="number" autosize clearable placeholder="请输入手机号码" bindinput="inputPhone" size="{{size}}"/>
+
+ 
+<!-- 保存和返回按钮 --> 
+<van-row>
+  <van-col span="9" offset="2">
+  <button bindtap="save" type="primary" disabled='{{!hasModified||!parent.phone||!parent.nickName}}'>保存</button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <button bindtap="giveup" type="warn">放弃</button>
+  </van-col>
+</van-row>

@@ -1,0 +1,67 @@
+<van-cell title="绿野童军" title-class="redtitle" size="{{size}}"/>
+<van-cell title="户外昵称" value="性别/童军号码"  size="{{size}}"/>
+<van-cell wx:for="{{childs}}" wx:key="no"  title="{{item.nickName}}" value="{{item.gender}}/{{item.no}}" clickable bind:click="clickChild{{index}}" size="{{size}}">
+  <van-icon slot="right-icon" name="edit-data" class="van-cell__right-icon" />
+</van-cell>
+  
+ <van-row>
+  <van-col span="20" offset="2">
+    <button plain bindtap="addChild" type="primary">增加童军</button>
+  </van-col>
+</van-row>
+
+<!--弹出功能选项-->
+<van-action-sheet
+  show="{{ showChildAction }}"
+  actions="{{ ChildActions }}" 
+  cancel-text="取消"
+  bind:cancel="onCancelChildAction"
+  bind:select="onSelectChildAction"
+/>
+
+
+<!--故意空白，防止遮挡-->
+<van-cell title="  " border="{{false}}" />
+
+<van-tag type="primary">报名者为固定随行家长，若不能参加，请换家长报名</van-tag>
+<!-- 报名的家长是固定的 -->
+<van-cell title="固定随行家长：{{fix.nickName}}" value="{{fix.gender}}/{{fix.phone}}"  size="{{size}}"/>
+
+<van-cell title="  " border="{{false}}" />
+
+<van-cell title="随行家长" title-class="redtitle" size="{{size}}"/>
+<van-cell title="户外昵称" value="性别/手机号码"  size="{{size}}"/>
+<van-cell wx:for="{{parents}}" wx:key="nickName"  title="{{item.nickName}}" value="{{item.gender}}/{{item.phone}}" clickable bind:click="clickParent{{index}}" size="{{size}}">
+  <van-icon slot="right-icon" name="edit-data" class="van-cell__right-icon" />
+</van-cell>
+  
+ <van-row>
+  <van-col span="20" offset="2">
+  <button plain bindtap="addParent" type="primary">增加家长</button>
+  </van-col>
+</van-row>
+
+<!--弹出功能选项-->
+<van-action-sheet
+  show="{{ showParentAction }}"
+  actions="{{ ParentActions }}" 
+  cancel-text="取消"
+  bind:cancel="onCancelParentAction"
+  bind:select="onSelectParentAction"
+/>
+
+<!--故意空白，防止遮挡-->
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+<van-cell title="  " border="{{false}}" />
+
+<van-row class="fix" >
+  <!-- 确定 -->
+  <van-col span="9" offset="2">
+    <button bindtap="tapConfirm" type="primary">确定</button>
+  </van-col>
+  <!--取消-->
+  <van-col span="9" offset="2">
+    <button bindtap="tapCancel" type="warn">取消</button>
+  </van-col>
+</van-row>

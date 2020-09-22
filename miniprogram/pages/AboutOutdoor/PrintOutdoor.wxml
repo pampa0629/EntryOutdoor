@@ -19,7 +19,7 @@
 
 <!--活动路线-->
 <text class="tip">\n活动路线</text>
-  <view wx:for="{{od.route.wayPoints}}" wx:key="place+time" data-pos='{{index}}'>途经点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
+  <view wx:for="{{od.route.wayPoints}}" wx:key="*this" data-pos='{{index}}'>途经点：{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}\n</view>
 
 <!--交通方式-->
 <block wx:if="{{traffic}}">
@@ -34,20 +34,24 @@
 <!--队员列表-->
 <view> 
   <van-tag type="primary" size="{{size}}" plain>\n活动状态：{{od.status}}</van-tag>
-  <text class="tip">\n队员列表（共{{od.members.length}}人）\n</text>
+  <text class="tip">\n队员列表（共{{od.members.length}}{{unit}}）\n</text>
 </view>
 
 <!--要按照集合地点排列名单--> 
 <block>
   <checkbox-group bindchange="cbCallName">
-    <view wx:for="{{meetMembers}}" wx:key="**this">
+    <view wx:for="{{meetMembers}}" wx:key="*this">
       <view class="multi_row">
         <checkbox-group bindchange="cbCallNamebyMeet{{index}}">
           <checkbox class="tip" value="{{index}}" checked="{{meetMembers[index].checked}}">第{{index+1}}集合地点（共{{meetMembers[index].length}}人）\n</checkbox>
         </checkbox-group>
       </view>
       <view class="multi_row" wx:for="{{meetMembers[index]}}" wx:key="personid" wx:for-item="cell" wx:for-index="cellindex">
-        <checkbox value="{{cell.personid}}" checked="{{cell.checked}}" bindlongpress="longTapMeetMembers{{index}}_{{cellindex}}">{{cell.userInfo.nickName}}/{{cell.userInfo.gender}}/{{cell.userInfo.phone}}/{{cell.entryInfo.knowWay}}/{{cell.entryInfo.agreedDisclaimer}}({{cell.entryInfo.status}})</checkbox>
+        <checkbox value="{{cell.personid}}" checked="{{cell.checked}}" bindlongpress="longTapMeetMembers{{index}}_{{cellindex}}">{{cell.userInfo.nickName}}/{{cell.userInfo.gender}}/{{cell.userInfo.phone}}/{{cell.entryInfo.knowWay}}/{{cell.entryInfo.agreedDisclaimer}}({{cell.entryInfo.status}}){{cell.childInfo}}</checkbox>
+        <!-- <van-cell wx:for="{{cell.childs}}" wx:key="no" wx:for-item="child" title="童军：{{child.nickName}}" value="{{child.gender}}/{{child.no}}" size="{{size}}"/>
+        <van-cell wx:for="{{cell.parents}}" wx:key="nickName" wx:for-item="child" title="家长：{{child.nickName}}" value="{{child.gender}}/{{child.phone}}" size="{{size}}"/> -->
+        <!-- <van-cell wx:for="{{cell.childs}}" wx:key="no" wx:for-item="child">童军：{{child.nickName}}/{{child.gender}}/{{child.no}}</text>
+        <text wx:for="{{cell.parents}}" wx:key="nickName" wx:for-item="parent">家长：{{parent.nickName}}/{{parent.gender}}/{{parent.phone}}</text> -->
       </view>
     </view>
   </checkbox-group>

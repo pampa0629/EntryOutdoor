@@ -5,6 +5,8 @@ const promisify = require('../../utils/promisify.js')
 Page({
 
   data: {
+    Genders: ["GG", "MM"], // 性别
+
     parent: {        
       nickName:"", // 户外昵称
       //  gender, // 性别：GG/MM
@@ -43,9 +45,6 @@ Page({
           parent: prevPage.data.parents[options.index],
         })
       }
-      // self.setData({
-      //   od: pages[pages.length - 3].data.od,
-      // })
     }
   },
 
@@ -68,12 +67,10 @@ Page({
 
   save() {
     console.log("save()",this.data.parent)
-    if (this.data.hasModified && this.data.parent.phone && this.data.parent.nickName) {
+    if (this.data.hasModified && this.data.parent.phone && this.data.parent.nickName && this.data.parent.gender) {
       const self = this
       let pages = getCurrentPages(); //获取当前页面js里面的pages里的所有信息。
       let prevPage = pages[pages.length - 2];
-      // let prevprevPage = pages[pages.length - 3];
-      // let od = this.data.od
       if (self.data.action == "edit") {
         prevPage.setData({
           ['parents[' + self.data.index + ']']: self.data.parent,
@@ -83,27 +80,38 @@ Page({
           // 往最后追加一个集合点
           prevPage.data.parents.push(self.data.parent)
         }
-        // } else if (self.data.action == "addBefore") {
-        //   prevPage.data.meets.splice(self.data.index, 0, self.data.meet)
-        // } else if (self.data.action == "addAfter") {
-        //   prevPage.data.meets.splice(self.data.index + 1, 0, self.data.meet)
-        // }
         prevPage.setData({
           parents: prevPage.data.parents,
         })
         prevPage.rebuildClickParentFun()
       }
-      // 最上面也要记得设置，以便刷新主界面
-      // console.log("od:",od)
-      // prevprevPage.setData({
-      //   "od.meets":od.meets
-      // })
-      
-      // od.saveItem("meets")
+      prevPage.setData({
+        hasModified: true
+      })
+
       this.setData({
         hasModified: false
       })
+      wx.navigateBack({})
     }
+  },
+
+  
+  clickGender(e) {
+    console.log(e)
+    this.setData({
+      "parent.gender": e.target.dataset.name,
+      hasModified: true,
+    })
+  },
+
+  changeGender(e) {
+    console.log(e)
+    const self = this
+    self.setData({
+      "parent.gender": e.detail,
+      hasModified: true,
+    })
   },
 
   onUnload: function () {

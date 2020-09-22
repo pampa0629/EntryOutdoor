@@ -1,5 +1,6 @@
 const app = getApp()
 const outdoor = require('../../utils/outdoor.js')
+const odtools = require('../../utils/odtools.js')
 
 Page({
 
@@ -8,6 +9,8 @@ Page({
     addMembers: null,
     size: app.globalData.setting.size, // 界面大小
     outdoorid:"", // 活动id
+    isChild:false,
+    unit:"人",
   },
 
   onShow() {
@@ -23,6 +26,12 @@ Page({
     let prevPage = pages[pages.length - 2];
     this.data.outdoorid = prevPage.data.od.outdoorid
     this.flushMembers(prevPage.data.od.members, prevPage.data.od.addMembers)
+    if(prevPage.data.od.title.loaded == "绿野童军") {
+      this.setData({
+        isChild:true,
+        unit:"家"
+      })
+    }
   },
 
   flushMembers(members, addMembers) {
@@ -36,6 +45,7 @@ Page({
         item.entryInfo.knowWay = "不认路"
       }
       item.entryInfo.meetsIndex = parseInt(item.entryInfo.meetsIndex)
+      item.childInfo = odtools.buildChildInfo(item, null)
     })
 
     self.setData({

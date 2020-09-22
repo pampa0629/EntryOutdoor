@@ -98,8 +98,8 @@
 </van-row>
 
 <!--测试页面-->
-<block wx:if="{{false}}"> 
 <!-- <block wx:if="{{true}}">  -->
+<block wx:if="{{false}}"> 
   <van-button size="large" bind:click="bindTest1">Test1</van-button>
   <!-- <van-button size="large" bind:click="managerMyFaces">管理人脸</van-button> -->
   <!-- <van-button size="large" bind:click="bindTest2">测试</van-button> -->

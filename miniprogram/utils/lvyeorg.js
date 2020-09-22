@@ -2,6 +2,7 @@
 const app = getApp()
 const qrcode = require('./qrcode.js')
 const util = require('./util.js')
+const odtools = require('./odtools.js')
 const cloudfun = require('./cloudfun.js')
 const promisify = require('./promisify.js')
 
@@ -272,7 +273,7 @@ const buildMembersMessage = (meets, members) => {
   meetMembers.forEach((item, index) => {
     message += "第" + (index + 1) + "）集合地点：" + meets[index].place + "，活动" + meets[index].date + " " + meets[index].time + NL
     meetMembers[index].forEach((citem, cindex) => {
-      var result = buildEntryMessage(meetMembers[index][cindex].userInfo, meetMembers[index][cindex].entryInfo, false, false, true)
+      var result = buildEntryMessage(meetMembers[index][cindex], false, false, true)
       message += result.message + NL
     })
     message += NL
@@ -465,9 +466,13 @@ const buildEntryNotice = (qrcode, first, allowSiteEntry) => {
 }
 
 // 构建网站报名信息; isQuit:是否为退出活动； isPrint：是否为集中打印名单时调用
-const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
-  console.log("lvyeorg.buildEntryMessage()")
-  console.log(userInfo)
+// const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
+const buildEntryMessage = (member, isQuit, selfQuit, isPrint) => {
+  console.log("lvyeorg.buildEntryMessage()", member)
+
+  var userInfo = member.userInfo
+  var entryInfo = member.entryInfo
+  
   var message = ""
   var title = ""
   if (!isPrint) {
@@ -492,6 +497,10 @@ const buildEntryMessage = (userInfo, entryInfo, isQuit, selfQuit, isPrint) => {
       temp += "第" + (entryInfo.meetsIndex + 1) + "集合点"
     }
     temp += "（" + entryInfo.status + "）"
+
+    // 绿野童军
+    temp += odtools.buildChildInfo(member, "；")
+    
 
     if (!isPrint) { // 集中打印就不要标注为“代报名”了
       message += "代报名："

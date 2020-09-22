@@ -17,4 +17,5 @@
 <van-button size="large"  bind:click="tapQuery">数据库查询</van-button>
 <van-button size="large"  bind:click="tapUpdate">数据库更新</van-button>
 <van-button size="large"  bind:click="tapDelete">对象删除操作</van-button>
+<van-button size="large"  bind:click="tapChild">绿野童军</van-button>
 

@@ -136,12 +136,18 @@ const fromWxGender = (value) => { //从微信的gender得到GG/MM
 }
 
 // 创建出 member的数据结构
-const createMember = (personid, userInfo, entryInfo) => {
+const createMember = (personid, userInfo, entryInfo, childs, parents) => {
   var member = {
     personid: personid,
     userInfo: userInfo,
     entryInfo: entryInfo,
-  };
+  }
+  if (childs) {
+    member.childs = childs
+  }
+  if (parents) {
+    member.parents = parents
+  }
   //member.time = new Date();// 自动记录时间
   //member.time = db.serverDate(); // 用服务端时间
   return member

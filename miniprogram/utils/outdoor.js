@@ -531,7 +531,7 @@ OD.prototype.sendModify2Members = async function(modifys) {
 }
 
 // 报名。若已经存在，则更新状态；若不存在，则添加到最后
-// 返回报名状态 status，以及是否属于新增加报名 
+// 返回报名状态 status，以及是否属于新增加报名  
 OD.prototype.entry = async function(member) {
   console.log("OD.prototype.entry()", member)
   // 第一步，刷新members，防止之前已经有人报名了
@@ -921,7 +921,7 @@ OD.prototype.postEntry2Websites = function(member, isQuit, selfQuit) {
   // 先确定是否要同步
   if (lvyeobj.tid) {
     // 构建报名信息
-    var entryMessage = lvyeorg.buildEntryMessage(member.userInfo, member.entryInfo, isQuit, selfQuit, false)
+    var entryMessage = lvyeorg.buildEntryMessage(member, isQuit, selfQuit, false)
     var entryNotice = lvyeorg.buildEntryNotice(lvyeobj.qrcodeUrl, false, lvyeobj.allowSiteEntry)
     entryMessage.message += entryNotice
 

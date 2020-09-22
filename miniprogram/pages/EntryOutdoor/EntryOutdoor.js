@@ -26,6 +26,7 @@ Page({
       agreedDisclaimer: false, // 认同免责条款
       knowWay: false, // 是否认路
     },
+    myself: {}, // 供绿野童军报名时使用
 
     remains: {
       occupy: { // 距离占坑截止还剩余的时间（单位：分钟）
@@ -61,7 +62,7 @@ Page({
 
   async getLeaderID(outdoorid) {
     let res = await dbOutdoors.doc(outdoorid).field({
-      leader:true, // 只要这个
+      leader: true, // 只要这个
     }).get()
     return res.data.leader.personid
   },
@@ -82,7 +83,7 @@ Page({
       var name = "openid"
       console.log("app.globalData.options:", app.globalData.options)
       // 判断是否点击 分享到群里面的小程序卡片；若是，则用群id
-      if (app.globalData.options.scene == 1044) { 
+      if (app.globalData.options.scene == 1044) {
         if (!app.globalData.groupOpenid) {
           app.globalData.groupOpenid = await app.getGroupId(app.globalData.options.shareTicket)
         }
@@ -93,7 +94,7 @@ Page({
       console.log("id:", id)
       if (id) {
         let resOD = await dbOutdoors.doc(outdoorid).field({
-          matchs:true, // 只要这个
+          matchs: true, // 只要这个
         }).get()
         resOD.data.matchs = resOD.data.matchs ? resOD.data.matchs : {} // 不能为null
         console.log("resOD.data.matchs:", resOD.data.matchs)
@@ -239,10 +240,12 @@ Page({
       })
     }
     // 从数据库中得到自己已经报名的状态
-    var myself = util.findObj(this.data.od.members, "personid", app.globalData.personid)
-    if (myself) {
+    var me = util.findObj(this.data.od.members, "personid", app.globalData.personid)
+    if (me) {
       this.setData({
-        entryInfo: myself.entryInfo,
+        entryInfo: me.entryInfo,
+        "myself.childs": me.childs, // 处理可能的童军
+        "myself.parents": me.parents,
       })
     }
 
@@ -258,6 +261,13 @@ Page({
         "entryInfo.knowWay": false,
       })
     }
+  },
+
+  // 设置童军
+  setChilds() {
+    wx.navigateTo({
+      url: '../AboutChild/ChildEntry?isMember=true&status=' + this.data.entryInfo.status,
+    })
   },
 
   onPopup() {
@@ -325,39 +335,31 @@ Page({
   // 报名就是在活动表中加上自己的id，同时还要在Person表中加上活动的id
   async entryOutdoorInner(status) {
     console.log("entryOutdoorInner()", status)
-    
-    // 绿野童军需要进入单独的页面报名
-    if (this.data.od.title.loaded == "绿野童军") {
-      wx.navigateTo({
-        url: './ChildEntry',
-      })
-    } else { 
+    var member = util.createMember(app.globalData.personid, this.data.userInfo, this.data.entryInfo, this.data.myself.childs, this.data.myself.parents)
+    this.setData({
+      "entryInfo.status": status,
+    })
+
+    let res = await this.data.od.entry(member)
+    this.setData({ // 刷新队员信息
+      "od.members": this.data.od.members,
+    })
+    if (status != "替补中" && res.status == "替补中") { // 被迫替补，则要给与弹窗提示
       this.setData({
-        "entryInfo.status": status,
+        "entryInfo.status": res.status,
       })
-
-      var member = util.createMember(app.globalData.personid, this.data.userInfo, this.data.entryInfo)
-      let res = await this.data.od.entry(member)
-      this.setData({ // 刷新队员信息
-        "od.members": this.data.od.members,
+      wx.showModal({
+        title: '替补通知',
+        content: '由于有人抢先点击报名了，报名人数已满，您不得不变为替补。若不愿替补，可随时退出；若前面队员退出或领队扩编，您将自动转为报名',
       })
-      if (status != "替补中" && res.status == "替补中") { // 被迫替补，则要给与弹窗提示
-        this.setData({
-          "entryInfo.status": res.status, 
-        })
-        wx.showModal({
-          title: '替补通知',
-          content: '由于有人抢先点击报名了，报名人数已满，您不得不变为替补。若不愿替补，可随时退出；若前面队员退出或领队扩编，您将自动转为报名',
-        })
-      }
+    }
 
-      // Person表中，还要把当前outdoorid记录下来
-      this.updateEntriedOutdoors(false)
+    // Person表中，还要把当前outdoorid记录下来
+    this.updateEntriedOutdoors(false)
 
-      // 首次报名，发送微信消息
-      if (res.entry) {
-        this.postEntryMsg()
-      }
+    // 首次报名，发送微信消息
+    if (res.entry) {
+      this.postEntryMsg()
     }
   },
 
@@ -791,7 +793,7 @@ Page({
           })
 
           // 活动留言中提示领队
-          var newIndexString = "我已改为“第"+(e.target.dataset.name+1).toString()+"集合地点”，请领队留意"
+          var newIndexString = "我已改为“第" + (e.target.dataset.name + 1).toString() + "集合地点”，请领队留意"
           var chat = {
             personid: app.globalData.personid,
             msg: newIndexString + " @" + this.data.od.leader.userInfo.nickName,
@@ -806,7 +808,7 @@ Page({
 
           await promisify.showModal({
             content: '修改信息已给领队发送活动留言和微信消息，但无法保证领队一定看到，请自行确保领队知晓。',
-            showCancel:false
+            showCancel: false
           })
         }
       } else { // 没报名时，直接改界面就好
@@ -934,16 +936,16 @@ Page({
 
   // 预览活动宣传照片
   viewPics(e) {
-    console.log("viewPics()",e)
+    console.log("viewPics()", e)
     var urls = []
     this.data.od.brief.pics.forEach((item, index) => {
       urls.push(item.src)
     })
-    console.log("urls:",urls)
+    console.log("urls:", urls)
     wx.previewImage({
       urls: urls,
       current: urls[e.currentTarget.dataset.pos]
-   })
+    })
   },
 
   // 上传活动中的拍照

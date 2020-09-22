@@ -82,13 +82,24 @@
 
 <!--审核与授权-->
 <van-panel>
-	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}人，其中占坑{{occupyCount}}人，替补{{benchCount}}人）" size="{{size}}"/>
+	<van-cell slot="header" title-class="redtitle" title="列表队员名单（共{{members.length}}{{unit}}，其中占坑{{occupyCount}}{{unit}}，替补{{benchCount}}{{unit}}）" size="{{size}}"/>
   <van-tag size="{{size}}" type="primary" plain>审核与授权结果即时生效，无需保存</van-tag> 
   <van-cell wx:if="{{cfo.nickName}}" title="当前财务官（CFO）为：{{cfo.nickName}}" title-width="90%" size="{{size}}"/>
-  <van-field wx:for="{{members}}" title-width="60%" wx:key="personid" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.meetsIndex}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot size="{{size}}">
-    <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onCheckPopup{{index}}">审核</van-button>
-    <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onAppointPopup{{index}}">授权</van-button>
-  </van-field> 
+
+  <block wx:for="{{members}}" wx:key="personid">
+    <van-field title-width="60%" label="{{item.nickName}}/{{item.gender}}/{{item.phone}}/{{item.knowWay}}/{{item.meetsIndex}}/{{item.status}}" value="{{item.result}}" bindlongpress="longPressMember{{index}}" disabled use-button-slot size="{{size}}">
+      <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onCheckPopup{{index}}">审核</van-button>
+      <van-button wx:if="{{index>0}}" slot="button" plain size="small" type="primary" bind:click="onAppointPopup{{index}}">授权</van-button>
+    </van-field> 
+    <!-- 绿野童军 -->
+    <van-row wx:if="{{isChild}}">
+    <!-- <van-row > -->
+      <van-col span="22" offset="2">
+        <van-cell title-width="100%" title="{{item.childInfo}}" size="{{size}}"/>
+      </van-col>
+    </van-row>
+  </block>
+      <!-- <van-cell title-width="40%" title="{{item.userInfo.nickName}}（{{item.userInfo.gender}}）" value="{{item.entryInfo.knowWay}}/第{{item.entryInfo.meetsIndex+1}}集合点({{item.entryInfo.status}})" size="{{size}}" border="false"/>  -->
 </van-panel> 
 
 <!--领队编辑退出后需A费用名单-->

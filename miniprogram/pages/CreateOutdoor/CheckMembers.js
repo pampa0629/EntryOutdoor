@@ -40,6 +40,7 @@ Page({
     entryFull: false, // 是否报名已满，防止领队添加过多附加队员
     openAdd: false, // 是否开启附加队员
 
+    unit:"人",
     size: app.globalData.setting.size, // 界面大小
   },
 
@@ -99,6 +100,17 @@ Page({
     this.flushAaMembers()
     // 处理退出队员名单
     this.flushQuitMembers()
+    // 处理童军
+    this.flushChild()
+  },
+
+  flushChild() {
+    if(this.data.od.title.loaded == "绿野童军") {
+      this.setData({
+        isChild:true, 
+        unit:"家",
+      })
+    }
   },
 
   onShow() {
@@ -138,7 +150,9 @@ Page({
         status: s[i].entryInfo.status,
         personid: s[i].personid,
         meetsIndex: "第" + (parseInt(s[i].entryInfo.meetsIndex) + 1) + "集合点",
+        childInfo: odtools.buildChildInfo(s[i], null)
       }
+      console.log("member:",member)
       self.data.members.push(member)
       if (member.status == "占坑中") {
         occupyCount += 1

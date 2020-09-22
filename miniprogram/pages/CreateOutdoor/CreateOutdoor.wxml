@@ -160,6 +160,16 @@
 <!--审核和授权队员-->
 <van-cell title="审核队员和授权职务" title-class="redtitle" label="已有队员{{od.members.length+od.addMembers.length}}人" value="点击审核与授权" size="{{size}}" is-link url="CheckMembers" border="{{false}}" />
 
+<!-- 设置童军 -->
+<van-panel wx:if="{{od.title.loaded=='绿野童军'}}">
+  <van-cell title="设置领队所带童军信息" title-class="redtitle" value="点击编辑童军" size="{{size}}" is-link url="../AboutChild/ChildEntry" border="{{false}}" />
+  <van-cell wx:for="{{myself.childs}}" wx:key="no"  title="童军：{{item.nickName}}" value="{{item.gender}}/{{item.no}}" size="{{size}}"/>
+  <van-cell wx:for="{{myself.parents}}" wx:key="nickName"  title="家长：{{item.nickName}}" value="{{item.gender}}/{{item.phone}}" size="{{size}}"/>
+  <!-- <van-col span="22" offset="1">
+    <button bindtap="setChilds" plain type="primary">设置童军</button>
+  </van-col> -->
+</van-panel>
+
 <!--活动当前状态-->
 <van-tag type="primary" size="{{size}}" plain>活动当前状态：{{od.status}}</van-tag>
 <van-steps steps="{{ steps }}" active="{{ active }}" size="{{size}}"/>
@@ -186,10 +196,12 @@
   </van-row>
 </block>
 
+
 <!--故意空白，防止遮挡-->
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
+
 
 <block wx:if="{{od.status=='拟定中' || od.status=='已结束' || od.status=='已取消'}}">
   <!--故意空白，防止遮挡-->
@@ -199,20 +211,13 @@
 
   <van-row class="fix2">
     <van-col span="6" offset="1" wx:if="{{od.status=='拟定中'}}">
-      <!-- <form bindsubmit="publishOutdoor" report-submit="true">
-        <button form-type="submit" disabled="{{!canPublish}}" type="primary">发布</button>
-      </form> -->
       <button bindtap="publishOutdoor" disabled="{{!canPublish}}" type="primary">发布</button>
     </van-col>
     <van-col span="6" offset="2" wx:if="{{od.status=='拟定中'}}">
-      <form bindsubmit="clearOutdoor" report-submit="true">
-        <button form-type="submit" type="warn">清空</button>
-      </form>
+      <button bindtap="clearOutdoor" type="warn">清空</button>
     </van-col>
     <van-col span="6" offset="2" wx:if="{{od.status=='拟定中' || ((od.status=='已结束'||od.status=='已取消') && od.members.length==1)}}">
-      <form bindsubmit="deleteOutdoor" report-submit="true">
-        <button form-type="submit" type="warn">删除</button>
-      </form>
+      <button bindtap="deleteOutdoor" type="warn">删除</button>
     </van-col>
   </van-row>
 </block>
@@ -220,9 +225,7 @@
 <!-- 保存修改 -->
 <van-row class="fix" wx:if="{{od.status!='已结束' && od.status!='进行中'}}">
   <van-col span="22" offset="1">
-    <form bindsubmit="saveModified" report-submit="true">
-      <button form-type="submit" disabled="{{!hasModified}}" type="primary">保存修改</button>
-    </form>
+    <button bindtap="saveModified" disabled="{{!hasModified}}" type="primary">保存修改</button>
   </van-col>
 </van-row>
 
@@ -230,31 +233,14 @@
 <block wx:if="{{od.status=='进行中' ||od.status=='已结束'}}">
   <van-row class="fix">
     <van-col span="10" offset="1">
-      <form bindsubmit="uploadPhotos" report-submit="true">
-        <button form-type="submit" type="primary">上传活动照片</button>
-      </form>
+      <button bindtap="uploadPhotos" type="primary">上传活动照片</button>
     </van-col>
     <van-col span="11" offset="1" wx:if="{{od.photocount}}">
-      <form bindsubmit="lookPhotos" report-submit="true">
-        <button form-type="submit" type="primary">查看活动照片({{od.photocount}})</button>
-      </form>
+      <button bindtap="lookPhotos" type="primary">查看活动照片({{od.photocount}})</button>
     </van-col>
   </van-row>
 </block>
 
-<!--保证formid数量对话框-->
-<van-dialog use-slot show="{{showFormidDlg}}" show-cancel-button bind:cancel="cancelFormidDlg" bind:confirm="confirmFormidDlg" title="微信消息数量" confirmButtonText="够数了" cancelButtonText="不报了">
-  <text>为保证您能及时收到活动的消息提醒，如队员报名信息等。请点击按钮，直到消息数量不小于六个。您还可以“附加设置”--“微信服务通知”中进行更多的设置。\n</text>
-  <text>您当前的微信消息数量为：\n</text>
-  <van-row>
-    <van-col span="6" offset="8">
-      <!-- <text class='bigtip'>{{formids.length}}个</text> -->
-    </van-col>
-  </van-row>
-  <form bindsubmit="tapAddFormid" report-submit="true">
-    <button form-type="submit" type="primary">增加微信消息</button>
-  </form>
-</van-dialog>
 
 <!--画布-->
 <view style="position:fixed;top:9999rpx;">

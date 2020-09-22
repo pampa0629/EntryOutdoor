@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "绿野童军报名",
+  "navigationBarTitleText": "设置绿野童军",
   "usingComponents": {
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",

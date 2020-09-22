@@ -1,7 +1,6 @@
 {
   "pages": [
     "pages/MyInfo/MyInfo",
-    "pages/Test/OneOutdoor",
     "pages/EntryOutdoor/EntryOutdoor",
     "pages/AboutOutdoor/PrintOutdoor",
     "pages/MyInfo/MyOutdoors",
@@ -43,9 +42,9 @@
     "pages/Test/Test1",
     "pages/MyInfo/EditFaces",
     "pages/AboutOutdoor/LookOutdoorOp",
-    "pages/EntryOutdoor/ChildEntry",
-    "pages/EntryOutdoor/AddOneChild",
-    "pages/EntryOutdoor/AddOneParent"
+    "pages/AboutChild/ChildEntry",
+    "pages/AboutChild/AddOneChild",
+    "pages/AboutChild/AddOneParent"
   ],
   "window": {
     "backgroundTextStyle": "dark",

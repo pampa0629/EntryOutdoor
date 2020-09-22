@@ -15,7 +15,10 @@ const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
 const dbPersons = db.collection('Persons')
 const dbTemp = db.collection('Temp')
+const dbChilds = db.collection('Childs')
 const _ = db.command
+
+
 
 Page({
 
@@ -565,7 +568,17 @@ Page({
     console.log("item1:", JSON.stringify(item1))
     obj.item1 = item1
     console.log("obj:", JSON.stringify(obj))
-  }
+  },
+
+  async tapChild() {
+
+
+    let  no = "001"
+    const res2 = await dbChilds.where({
+      "no": parseInt(no)
+    }).get()
+    console.log(res2)
+  },
 
 })
 

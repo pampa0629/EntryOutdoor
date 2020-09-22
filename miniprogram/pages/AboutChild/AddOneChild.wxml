@@ -1,0 +1,31 @@
+<!-- 提示 -->
+<van-tag type="primary">已有童军号码：请输入号码，点击“查询”，昵称和性别会自动填充，信息不对请联系小狼修改</van-tag>
+<van-tag type="primary">没有童军号码：请点击“生成”，会自动生成临时号码；然后请自行填写户外昵称和性别</van-tag>
+
+<!--童军号码-->
+<van-field label="童军号码" required value="{{child.no}}" type="idcard" autosize clearable placeholder="请输入童军号码" bindinput="inputNo" size="{{size}}"  use-button-slot>
+  <van-button wx:if="{{!child.no}}" bindtap="createTempNo" slot="button" size="small" type="primary">生成</van-button>
+  <van-button wx:elif="{{child.no.length<=3}}" bindtap="queryNo" slot="button" size="small" type="primary">查询</van-button>
+  <van-button wx:else disabled="true" bindtap="createTempNo" slot="button" size="small" type="primary">查询</van-button>
+</van-field>
+
+<!--户外昵称-->
+<van-field label="户外昵称" required value="{{child.nickName}}" type="text" autosize clearable placeholder="请输入户外昵称" bindinput="inputNickname" size="{{size}}"/>
+
+<!-- 童军性别 -->
+<van-field required label="性别：" value="{{child.gender}}" disabled size="{{size}}"/>
+<van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{child.gender}}" bind:change="changeGender">
+  <van-cell title="{{item}}" data-name="{{item}}" clickable bind:click="clickGender" size="{{size}}">
+    <van-radio name="{{item}}"/>
+  </van-cell> 
+</van-radio-group>  
+ 
+<!-- 保存和返回按钮 --> 
+<van-row>
+  <van-col span="9" offset="2">
+  <button bindtap="save" type="primary" disabled='{{!hasModified||!child.no||!child.nickName||!child.gender}}'>确定</button>
+  </van-col>
+  <van-col span="9" offset="2">
+    <button bindtap="giveup" type="warn">取消</button>
+  </van-col>
+</van-row>

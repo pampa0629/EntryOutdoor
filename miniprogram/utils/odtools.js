@@ -554,7 +554,7 @@ const drawText = (canvas, text, x, y, size, dy, color) => {
 }
 
 const drawShareCanvas = (canvas, od, callback) => {
-  console.log("odtools.drawShareCanvas")
+  console.log("odtools.drawShareCanvas()", od)
   // 先涂成灰色，后续如何适配暗黑模式，再定
   canvas.setFillStyle('#444444')
   canvas.fillRect(0,0,500,400)
@@ -746,6 +746,31 @@ const recordOperation = (outdoorid, action, nickName, personid, oldStatus) =>{
   cloudfun.opOutdoorItem(outdoorid, "operations", operation, "push")
 }
 
+// 构建童军文本信息
+const buildChildInfo = (member, before) =>{
+  console.log("buildChildInfo()", member)
+
+  var info = ""
+  
+  if (member.childs) {
+    for (var i = 0; i < member.childs.length; i++) {
+      info += "童军：" + member.childs[i].nickName + "/" + member.childs[i].gender + "/" + member.childs[i].no + "；"
+    }
+  }
+
+  if (member.parents) {
+    for (var i = 0; i < member.parents.length; i++) {
+      info += "家长：" + member.parents[i].nickName + "/" + member.parents[i].gender + "/" + member.parents[i].phone + "；"
+    }
+  }
+
+  if (info.length>0 && before) {
+    info = before + info
+  }
+
+  return info
+}
+
 module.exports = {
   getSteps: getSteps, // 
   Durings: Durings, // 活动时长
@@ -787,5 +812,8 @@ module.exports = {
 
   // 得到默认的websites信息
   getDefaultWebsites: getDefaultWebsites,
+
+  // 构建童军文本信息
+  buildChildInfo:buildChildInfo, 
 
 }

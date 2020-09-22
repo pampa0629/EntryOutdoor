@@ -916,4 +916,10 @@ Page({
     })
   },
 
+  // setChilds() {
+  //   wx.navigateTo({
+  //     url: '../AboutChild/ChildEntry',
+  //   })
+  // }
+
 })

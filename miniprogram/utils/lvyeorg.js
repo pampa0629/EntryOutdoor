@@ -1,5 +1,4 @@
 // 把和lvyeorg对接的具体实现代码都放到这里来
-const app = getApp()
 const qrcode = require('./qrcode.js')
 const util = require('./util.js')
 const odtools = require('./odtools.js')
@@ -498,7 +497,7 @@ const buildEntryMessage = (member, isQuit, selfQuit, isPrint) => {
     }
     temp += "（" + entryInfo.status + "）"
 
-    // 绿野童军
+    // 绿野童军 
     temp += odtools.buildChildInfo(member, "；")
     
 
@@ -726,7 +725,7 @@ const getError = async(resp) => {
   } else {
     var token = wx.getStorageSync("LvyeOrgToken")
     console.log(token)
-    let resp = await promisify.request({
+    let resp2 = await promisify.request({
       url: LvyeOrgURL + 'report_error.php',
       method: 'POST',
       header: {
@@ -738,8 +737,8 @@ const getError = async(resp) => {
         svr_url: LvyeOrgURL,
       }
     })
-    console.log("getError:", resp.data.err_msg);
-    return resp.data.err_msg
+    console.log("getError:", resp2.data.err_msg);
+    return resp2.data.err_msg
   }
 }
 

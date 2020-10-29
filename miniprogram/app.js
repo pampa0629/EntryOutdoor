@@ -1,6 +1,6 @@
 const promisify = require('./utils/promisify.js')
 const util = require('./utils/util.js')
-const qrcode = require('./utils/qrcode.js')
+// const qrcode = require('./utils/qrcode.js')
 const lvyeorg = require('./utils/lvyeorg.js')
 const person = require('./utils/person.js')
 const cloudfun = require('./utils/cloudfun.js')
@@ -9,14 +9,14 @@ const group = require('./utils/group.js')
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
-const dbOutdoors = db.collection('Outdoors')
+// const dbOutdoors = db.collection('Outdoors')
 const dbBlacks = db.collection('Blacks')
    
 App({ 
   globalData: {  
     openid: null, // 每个微信用户的内部唯一id
     personid: "", // Persons表中的当前用户_id
-
+ 
     // 用户信息
     hasUserInfo: false,
     userInfo: {},

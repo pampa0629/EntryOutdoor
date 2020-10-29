@@ -1,4 +1,4 @@
-const util = require('./util.js')
+// const util = require('./util.js')
 const cloudfun = require('./cloudfun.js')
 
 wx.cloud.init()

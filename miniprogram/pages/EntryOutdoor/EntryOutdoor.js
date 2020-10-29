@@ -232,7 +232,9 @@ Page({
   },
 
   // 处理报名信息
-  dealEntryInfo: function () {
+  dealEntryInfo() {
+    console.log("dealEntryInfo()")
+
     // 若只有一个集合地点，默认设置就好了
     if (this.data.od.meets.length <= 1) {
       this.setData({
@@ -242,12 +244,18 @@ Page({
     // 从数据库中得到自己已经报名的状态
     var me = util.findObj(this.data.od.members, "personid", app.globalData.personid)
     if (me) {
+      // 兼容性处理：界面需要字符串类型，而数据库存储可能为数字
+      if(typeof(me.entryInfo.meetsIndex) == "number") {
+        me.entryInfo.meetsIndex = me.entryInfo.meetsIndex.toString()
+      }
+
       this.setData({
         entryInfo: me.entryInfo,
         "myself.childs": me.childs, // 处理可能的童军
         "myself.parents": me.parents,
       })
     }
+    console.log("entryInfo: ", this.data.entryInfo)
 
     // 做兼容性处理：是否同意免责条款
     if (!this.data.entryInfo.agreedDisclaimer) {
@@ -271,7 +279,7 @@ Page({
   },
 
   onPopup() {
-    console.log("onPopup")
+    console.log("onPopup()")
     this.setData({
       showPopup: true,
     })
@@ -444,6 +452,7 @@ Page({
 
   // 判断是否有账号了
   checkPersonInfo() {
+    // console.log("checkPersonInfo()",app.globalData,this.data.userInfo)
     const self = this
     var result = true
     if (!app.globalData.personid) { // 没账号的
@@ -490,6 +499,7 @@ Page({
 
   // 这里判断昵称的唯一性和不能为空
   async checkNickname(nickName) {
+    console.log("checkNickname()", nickName)
     const self = this
     if (!nickName) {
       self.setData({
@@ -497,7 +507,9 @@ Page({
       })
     } else {
       let uniqueName = await person.getUniqueNickname(nickName, app.globalData.personid)
+      console.log("uniqueName:", uniqueName)
       if (nickName != uniqueName) {
+        // 昵称被占用了
         wx.showModal({
           title: '昵称已被占用',
           content: "您系统已为您自动取名为“" + uniqueName + "”，点击取消按钮可自己重新取名",
@@ -513,6 +525,10 @@ Page({
               })
             }
           }
+        })
+      } else {
+        self.setData({
+          nickErrMsg: "",
         })
       }
     }
@@ -599,7 +615,7 @@ Page({
   },
 
   dlgGetUserinfo(e) {
-    console.log(e)
+    console.log("dlgGetUserinfo()", e)
     const self = this
     if (e.detail.userInfo) {
       self.setData({
@@ -610,6 +626,14 @@ Page({
       self.checkNickname(self.data.userInfo.nickName)
     }
   },
+
+  // dlgGetPhone(e) {
+  //   console.log("dlgGetPhone()", e)
+  //   self.setData({
+  //     "userInfo.phone": e.detail.,
+  //     "userInfo.nickName": e.detail.userInfo.nickName,
+  //   })
+  // }
 
   // 替补、占坑、报名，用同一个函数，减少重复代码
   doEntry(status) {
@@ -814,8 +838,12 @@ Page({
       } else { // 没报名时，直接改界面就好
         this.setData({
           "entryInfo.meetsIndex": newIndex,
-        })
+        }) 
       }
+    } else {
+      this.setData({
+        "entryInfo.meetsIndex": newIndex,
+      }) 
     }
     console.log("entryInfo.meetsIndex:", this.data.entryInfo.meetsIndex)
   },

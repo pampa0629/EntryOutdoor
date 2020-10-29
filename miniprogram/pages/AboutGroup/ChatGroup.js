@@ -1,6 +1,7 @@
 const cloudfun = require('../../utils/cloudfun.js')
 const util = require('../../utils/util.js')
-const odtools = require('../../utils/odtools.js')
+const usapp = require('../../utils/usapp.js')
+// const odtools = require('../../utils/odtools.js')
 const promisify = require('../../utils/promisify.js')
 
 const app = getApp()
@@ -84,7 +85,7 @@ Page({
               // cloudfun.updateOutdoorChatQrcode(self.data.outdoorid, self.data.chat.qrcode)
               cloudfun.opOutdoorItem(self.data.outdoorid, "chat.qrcode", self.data.chat.qrcode, "")
               // 构建留言信息
-              var message = odtools.buildChatMessage("@所有人 领队设置了活动专用微信群，请在留言页面右上角点击查看并扫码入群。谢谢！")
+              var message = usapp.buildChatMessage("@所有人 领队设置了活动专用微信群，请在留言页面右上角点击查看并扫码入群。谢谢！")
               // cloudfun.pushOutdoorChatMsg(self.data.outdoorid, message)
               cloudfun.opOutdoorItem(self.data.outdoorid, "chat.messages", message, "push")
               if (oldpath) { // 删除原来的二维码文件

@@ -1,6 +1,8 @@
 const app = getApp()
 
-const odtools = require('../../utils/odtools.js')
+// const odtools = require('../../utils/odtools.js')
+// const util = require('../../utils/util.js')
+const usapp = require('../../utils/usapp.js')
 const message = require('../../utils/message.js')
 const cloudfun = require('../../utils/cloudfun.js')
 const lvyeorg = require('../../utils/lvyeorg.js')
@@ -9,7 +11,7 @@ const promisify = require('../../utils/promisify.js')
 wx.cloud.init()
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
-const dbPersons = db.collection('Persons')
+// const dbPersons = db.collection('Persons')
 const _ = db.command
 
 Page({
@@ -136,7 +138,7 @@ Page({
     dbOutdoors.doc(self.data.outdoorid).field({
       chat:true, 
       members:true,
-      title:true
+      title:true 
     }).get().then(res => {
       if (res.data.chat) { // 数据库有，就覆盖一下
         self.data.chat = res.data.chat
@@ -260,7 +262,7 @@ Page({
 
     const self = this
     if (self.data.message.msg) {
-      var message = odtools.buildChatMessage(self.data.message.msg)
+      var message = usapp.buildChatMessage(self.data.message.msg)
       console.log(message)
       // load
       self.flushChats(message, null)

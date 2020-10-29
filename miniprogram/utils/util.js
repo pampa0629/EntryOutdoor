@@ -1,8 +1,8 @@
-const app = getApp()
 const promisify = require('./promisify.js')
+
 wx.cloud.init()
 const db = wx.cloud.database()
-const dbPersons = db.collection('Persons') 
+// const dbPersons = db.collection('Persons') 
 const dbSelect = db.collection('Selects')
  
 const formatTime = date => {
@@ -535,4 +535,5 @@ module.exports = {
   validPhone: validPhone, // 判断是否为有效的手机号码
 
   getIDFromOptions: getIDFromOptions, // 从options中得到活动id
+
 }

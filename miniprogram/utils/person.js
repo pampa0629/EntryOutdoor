@@ -1,4 +1,4 @@
-const app = getApp()
+// const app = getApp()
 const util = require('./util.js')
 const cloudfun = require('./cloudfun.js')
 const promisify = require('./promisify.js')

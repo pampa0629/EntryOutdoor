@@ -1,6 +1,6 @@
 wx.cloud.init()
 const db = wx.cloud.database({})
-const dbPhotos = db.collection('Photos')
+// const dbPhotos = db.collection('Photos')
 
 const updateOutdoor = async(outdoorid, od) => {
   console.log("updateOutdoor")

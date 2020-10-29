@@ -156,7 +156,7 @@
       <van-col span="20" offset="0">
         <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="90%" border="{{index<meets.length-1}}" size="{{size}}">
           <van-radio name="{{index}}" />
-        </van-cell>
+        </van-cell> 
       </van-col>
 
       <van-col span="2" offset="1" wx:if="{{od.meets[index].latitude}}">
@@ -297,7 +297,7 @@
   <van-button open-type="getUserInfo" type="primary" size="large" plain bindgetuserinfo="dlgGetUserinfo">填入微信昵称和性别</van-button>
 
   <van-field required value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="真实、有效、方便领队联系" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" size="{{size}}"/>
-  <!-- <van-button open-type="getPhoneNumber" type="primary" size="large" plain bindgetuserinfo="dlgGetPhone">获取电话号码</van-button> 暂不提供-->
+  <!-- <van-button open-type="getPhoneNumber" type="primary" size="large" plain bindgetuserinfo="dlgGetPhone">填入手机号码</van-button> 暂不提供 -->
 </van-dialog> 
 
 

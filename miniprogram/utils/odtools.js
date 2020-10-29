@@ -1,4 +1,3 @@
-const app = getApp()
 const util = require('./util.js')
 var bmap = require('../libs/bmap-wx.min.js')
 const cloudfun = require('./cloudfun.js')
@@ -519,20 +518,6 @@ const getChatStatus = (personid, nickName, chat) => {
   }
 }
 
-const buildChatMessage = (msg) => {
-  var message = {}
-  //  { who: "", msg: "", personid:"", self: false},
-  message.personid = app.globalData.personid
-  if (app.globalData.personid) {
-    message.who = app.globalData.userInfo.nickName
-  } else {
-    message.who = "游客"
-  }
-  message.msg = msg
-  message.self = true // 肯定是自己了
-  return message
-}
-
 // const findPersonIndex = (members, personid, callback) => {
 //   members.forEach((item, index) => {
 //     if (item.personid == personid) {
@@ -800,7 +785,8 @@ module.exports = {
   // getWebsites_a: getWebsites_a, // aynsc
 
   getChatStatus: getChatStatus, // 判断留言的状态：self、new等
-  buildChatMessage: buildChatMessage, // 构建一条留言
+  // 由于要用到app，故而放到usapp.js中
+  // buildChatMessage: buildChatMessage, // 构建一条留言
 
   // findPersonIndex: findPersonIndex, // 从Members数组中找到自己的index
 
@@ -813,7 +799,6 @@ module.exports = {
   // 得到默认的websites信息
   getDefaultWebsites: getDefaultWebsites,
 
-  // 构建童军文本信息
   buildChildInfo:buildChildInfo, 
 
 }

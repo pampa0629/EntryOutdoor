@@ -144,10 +144,10 @@ App({
     }
     // walk step autoUpdate
     if (data.career && data.career.step && data.career.step.autoUpdate) {
-      if ( (new Date()).toLocaleDateString() != data.career.step.update ) {
+      // if ( (new Date()).toLocaleDateString() != data.career.step.update ) {
         console.log("update walk step")
-        person.updateWalkStep(this.globalData.personid)
-      }
+        person.updateWalkStep(this.globalData.personid, true)
+      // }
     }
     // 记录group id 和 openid， personid的对应关系
     await this.dealGroup()

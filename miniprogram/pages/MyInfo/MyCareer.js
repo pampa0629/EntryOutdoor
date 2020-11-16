@@ -85,12 +85,14 @@ Page({
   async clickFetchWalk() {
     console.log("MyCareer.clickFetchWalk()")
     if (app.checkLogin()) {
-      let step = await person.updateWalkStep(app.globalData.personid)
-      console.log(step)
-      step.autoUpdate = this.data.career.step.autoUpdate
-      this.setData({
-        "career.step": step,
-      })
+      let step = await person.updateWalkStep(app.globalData.personid, false)
+      console.log("step:", step)
+      if(step) {
+        step.autoUpdate = this.data.career.step.autoUpdate
+        this.setData({
+          "career.step": step,
+        })
+      }
     }
   },
 

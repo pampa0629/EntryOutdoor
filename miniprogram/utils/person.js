@@ -21,34 +21,49 @@ const getPersonData = async(personid) => {
   // }
 }
 
-const updateWalkStep = async(personid) => {
+// auto：是否自动获取步数
+const updateWalkStep = async(personid, auto) => {
   console.log("updateWalkStep()", personid)
   let resLogin = await promisify.login({})
   console.log("resLogin:", resLogin)
 
-  await util.authorize("werun", "授权后才能获取步数")
-  let res = await promisify.getWeRunData({})
+  var message = "授权后才能获取步数；"
+  if (auto) {
+    message += "若不授权，系统将自动引导到“户外履历”页面，请您手动关闭“自动更新步数”来避免后续弹窗提示。"
+  }
 
-  const encryptedData = res.encryptedData
-  let run = await cloudfun.decrypt(res.encryptedData, res.iv, resLogin.code)
-  console.log(run)
-  var step = {}
-  var date = new Date()
-  date.setTime(run.watermark.timestamp * 1000)
-  step.update = date.toLocaleDateString()
-  var steps = []
-  run.stepInfoList.forEach((item, index) => {
-    steps.push(parseInt(item.step))
-  })
-  var tops = util.stepsTopNs(steps, [7, 30])
-  step.topLast7 = tops[0]
-  step.topLast30 = tops[1]
-  dbPersons.doc(personid).update({
-    data: {
-      "career.step": step,
-    }
-  })
-  return step
+  let auRes = await util.authorize("werun", message)
+  console.log("authorize result:", auRes)
+  if (auRes) {
+    let res = await promisify.getWeRunData({})  
+
+    const encryptedData = res.encryptedData
+    let run = await cloudfun.decrypt(res.encryptedData, res.iv, resLogin.code)
+    console.log(run)
+    var step = {}
+    var date = new Date()
+    date.setTime(run.watermark.timestamp * 1000)
+    step.update = date.toLocaleDateString()
+    var steps = []
+    run.stepInfoList.forEach((item, index) => {
+      steps.push(parseInt(item.step))
+    })
+    var tops = util.stepsTopNs(steps, [7, 30])
+    step.topLast7 = tops[0]
+    step.topLast30 = tops[1]
+    dbPersons.doc(personid).update({
+      data: {
+        "career.step": step,
+      }
+    })
+    return step
+  } else if (auto) {
+    // 对于自动去获取步数，且又不授权，则引导到关闭“自动更新步数”页面
+    wx.navigateTo({
+      url: '../MyInfo/MyCareer'
+    })
+  }
+  return null
 }
 
 const getUniqueNickname = async(nickName, personid) => {

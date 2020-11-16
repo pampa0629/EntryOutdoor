@@ -2,7 +2,7 @@
 <van-dialog use-slot async-close show="{{cancelDlg.show}}" show-cancel-button bind:close="closeCancelDlg" bind:confirm="confirmCancelDlg" title="是否确认取消活动" confirmButtonText="确认取消" cancelButtonText="我再想想">
   <van-panel title="请选择活动取消主要原因">
     <van-radio-group value="{{cancelDlg.reason}}" bind:change="changeCancelReason">
-      <van-radio wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="item">{{item}}</van-radio>
+      <van-radio wx:for="{{cancelDlg.Reasons}}" wx:key="item" name="{{item}}">{{item}}</van-radio>
     </van-radio-group>
   </van-panel>
 </van-dialog>
@@ -150,7 +150,7 @@
     </van-row>
   </view>
 </van-panel>
-
+ 
 <!--附加设置-->
 <van-cell title="附加设置" title-class="redtitle" label="对人数/时间/装备/规则/通知等的设置" value="点击设置附加设置" size="{{size}}" is-link url="EditLimits" border="{{false}}" />
 

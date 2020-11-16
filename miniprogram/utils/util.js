@@ -292,7 +292,7 @@ const authorize = async(which, message) => {
   var scope = 'scope.' + which
   console.log("scope is: " + scope)
   let res = await promisify.getSetting({})
-  console.log("wx.getSetting")
+  console.log("wx.getSetting：", res)
   if (!res.authSetting[scope]) { 
     try {
       let resAU = await promisify.authorize({scope: scope})
@@ -306,12 +306,17 @@ const authorize = async(which, message) => {
         confirmText: "这就授权"})
       if (res.confirm) {
         console.log('用户点击确定')
-        await promisify.openSetting({})
+        let resOS = await promisify.openSetting({})
+        console.log('resOS:',resOS)
+        return resOS.authSetting["scope.werun"]
+        // return resOS.is
       } else if (res.cancel) {
         console.log('用户点击取消')
+        return false
       }
     }
   }
+  return true
 }
 
 // 得到唯一的户外昵称

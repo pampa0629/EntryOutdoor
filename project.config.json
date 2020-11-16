@@ -30,7 +30,8 @@
     "useCompilerModule": true,
     "userConfirmedUseCompilerModuleSwitch": false,
     "packNpmManually": false,
-    "packNpmRelationList": []
+    "packNpmRelationList": [],
+    "minifyWXSS": true
   },
   "miniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloud-functions/",
@@ -46,15 +47,12 @@
   "simulatorPluginLibVersion": {},
   "condition": {
     "search": {
-      "current": -1,
       "list": []
     },
     "conversation": {
-      "current": -1,
       "list": []
     },
     "plugin": {
-      "current": -1,
       "list": []
     },
     "game": {
@@ -62,7 +60,6 @@
       "list": []
     },
     "miniprogram": {
-      "current": 1,
       "list": [
         {
           "id": -1,

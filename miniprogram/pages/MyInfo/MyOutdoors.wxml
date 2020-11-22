@@ -2,7 +2,7 @@
 <van-tabs active="{{currentTab}}" bind:change="changeTab">
   <van-tab title="我发起的"></van-tab>
   <van-tab title="我参加的"></van-tab>
-  <van-tab title="我关注的"></van-tab>
+  <van-tab title="我收藏的"></van-tab>
 </van-tabs>
 
 <!--活动列表-->

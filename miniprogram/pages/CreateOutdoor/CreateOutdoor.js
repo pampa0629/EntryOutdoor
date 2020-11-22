@@ -588,7 +588,7 @@ Page({
       var ids = Object.getOwnPropertyNames(res.data.subscribers)
       for (let id of ids) {
         // 必须订阅者愿意接收消息，且数量足够，才发送消息
-        if (res.data.subscribers[id].acceptNotice && res.data.subscribers[id].messageCount > 0) { 
+        if (!res.data.subscribers[id].cancel && res.data.subscribers[id].messageCount > 0) { 
           await cloudfun.opPersonItem(id, "caredOutdoors", { id: this.data.od.outdoorid, title: this.data.od.title.whole }, "unshift")
           // 订阅消息
           await message.sendCreateMsg(id, this.data.od.outdoorid, this.data.od.title.whole, this.data.od.leader.userInfo.nickName, this.data.od.title.date, this.data.od.title.place, this.data.od.limits.maxPerson ? this.data.od.limits.personCount : 99)

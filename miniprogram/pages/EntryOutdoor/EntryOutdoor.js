@@ -45,6 +45,7 @@ Page({
     entriedOutdoors: [], // 报名的id列表
     caredOutdoors: [], // 关注的活动id列表
     hasCared: false, // 该活动是否已经加了关注
+    isSubscribed:false, // 是否关注（订阅）了领队
 
     chatStatus: "", // 留言状态：new，有新留言；self，有@我的留言，
     chatChange: false,
@@ -157,6 +158,13 @@ Page({
         withShareTicket: true
       })
     }
+
+    // 判断是否订阅了领队
+    let isSub = await person.isSubscribed(this.data.od.leader.personid, app.globalData.personid)
+    this.setData({
+      isSubscribed:isSub
+    })
+    console.log("isSubscribed:", isSub)
   },
 
   // 设置活动状态进程条
@@ -903,13 +911,13 @@ Page({
     }
   },
 
-  // 关注活动
+  // 收藏关注活动
   careOutdoor() {
     console.log("careOutdoor()")
     this.dealCaredOutdoors(false)
   },
 
-  //取消关注
+  //取消收藏
   cancelCare() {
     console.log("cancelCare()")
     this.dealCaredOutdoors(true)

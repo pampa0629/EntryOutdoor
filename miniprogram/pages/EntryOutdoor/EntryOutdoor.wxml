@@ -1,15 +1,15 @@
 <!--弹出分享按钮-->
 <van-popup show="{{ showPopup }}" position="bottom" overlay="{{false}}" custom-class="center" bind:close="closePopup">
   <van-row>
-    <van-col span="20" offset="2"> 
+    <van-col span="20" offset="2">
       <button type="primary" size="large" open-type="share" bind:click="onShareAppMessage">分享到微信群</button>
     </van-col>
   </van-row>
   <van-row>
     <van-col span="9" offset="2">
-      <form bindsubmit="onShare2Circle" report-submit="true"> 
+      <form bindsubmit="onShare2Circle" report-submit="true">
         <button form-type="submit" plain size="large">分享到朋友圈</button>
-      </form> 
+      </form>
     </van-col>
     <van-col span="9" offset="2">
       <form bindsubmit="onCancelShare" report-submit="true">
@@ -32,25 +32,28 @@
   <van-col span="2" offset="1">
     <view wx:if="{{hasCared}}" style="flex-direction:column">
       <van-icon name="like" size="24px" color="#F65959" bind:click="cancelCare"></van-icon>
-      <view class="icon_tip">取关</view>
+      <view class="icon_tip">收藏</view>
     </view>
     <view wx:else style="flex-direction:column">
       <van-icon name="like-o" size="24px" color="#1aad19" bind:click="careOutdoor"></van-icon>
-      <view class="icon_tip">关注</view>
+      <view class="icon_tip">收藏</view>
     </view>
   </van-col>
-  <van-col span="2" offset="1">
+  <!-- <van-col span="2" offset="1">
     <view style="flex-direction:column">
       <van-icon name="bullhorn-o" size="24px" color="#1aad19" bind:click="clickNotice"></van-icon>
       <view class="icon_tip">通知</view>
     </view>
-  </van-col>
+  </van-col> -->
   <!--留言-->
   <van-col span="2" offset="1">
     <view style="flex-direction:column">
-      <van-icon wx:if="{{chatStatus=='atme' && chatChange}}" name="chat" size="24px" color="#5959F6" bind:click="chatOutdoor"></van-icon>
-      <van-icon wx:elif="{{chatStatus=='atme' && !chatChange}}" name="chat" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
-      <van-icon wx:elif="{{chatStatus=='new'}}" name="chat-o" size="24px" color="#F65959" bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:if="{{chatStatus=='atme' && chatChange}}" name="chat" size="24px" color="#5959F6"
+        bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:elif="{{chatStatus=='atme' && !chatChange}}" name="chat" size="24px" color="#F65959"
+        bind:click="chatOutdoor"></van-icon>
+      <van-icon wx:elif="{{chatStatus=='new'}}" name="chat-o" size="24px" color="#F65959" bind:click="chatOutdoor">
+      </van-icon>
       <van-icon wx:else name="chat-o" size="24px" color="#1aad19" bind:click="chatOutdoor"></van-icon>
       <view class="icon_tip">留言</view>
     </view>
@@ -105,18 +108,31 @@
 <van-tag size="{{size}}" plain type="primary" wx:if="{{od.status=='已结束'}}">提示：点击“新建”图标可创建同路线活动。</van-tag>
 
 <!--活动信息-->
+<van-row>
+  <van-col span="20" offset="0">
+    <van-panel>
+      <van-cell slot="header" title-class="redtitle" title="{{od.title.whole}}" size="{{size}}" />
+    </van-panel>
+  </van-col>
+  <van-col span="4" offset="0">
+    <van-button type="primary" icon="add-o" size="small" bind:click="clickNotice" wx:if="{{!isSubscribed}}">关注</van-button>
+    <van-button type="primary"  size="small" bind:click="clickNotice" wx:else plain>已关注</van-button>
+  </van-col>
+</van-row>
+
 <van-panel>
-  <van-cell slot="header" title-class="redtitle" title="{{od.title.whole}}" size="{{size}}"/>
-  <van-cell title="地点" value="{{od.title.place}}" size="{{size}}"/>
-  <van-cell title="日期" value="{{od.title.date}}" size="{{size}}"/>
-  <van-cell title="时长负重" value="{{od.title.during}}，{{od.title.loaded}}" size="{{size}}"/>
-  <van-cell title="强度" label="强度值：{{od.title.level}}" value="累积距离{{od.title.addedLength}}公里，累积上升{{od.title.addedUp}}00米" border="{{false}}" size="{{size}}"/>
+  <van-cell title="地点" value="{{od.title.place}}" size="{{size}}" />
+  <van-cell title="日期" value="{{od.title.date}}" size="{{size}}" />
+  <van-cell title="时长负重" value="{{od.title.during}}，{{od.title.loaded}}" size="{{size}}" />
+  <van-cell title="强度" label="强度值：{{od.title.level}}" value="累积距离{{od.title.addedLength}}公里，累积上升{{od.title.addedUp}}00米"
+    border="{{false}}" size="{{size}}" />
 </van-panel>
 
 <!--活动图文介绍-->
-<van-panel> 
-  <van-cell slot="header" title-class="redtitle" title="图文介绍" size="{{size}}"/>
-  <van-field value="{{od.brief.disc}}" size="{{size}}" autosize type="textarea" disabled border="{{false}}" right-icon="arrow" bind:click-icon="copyBriefDisc"/>
+<van-panel>
+  <van-cell slot="header" title-class="redtitle" title="图文介绍" size="{{size}}" />
+  <van-field value="{{od.brief.disc}}" size="{{size}}" autosize type="textarea" disabled border="{{false}}"
+    right-icon="arrow" bind:click-icon="copyBriefDisc" />
   <view wx:for="{{od.brief.pics}}" wx:key="src" bindtap="viewPics" data-pos='{{index}}'>
     <van-row>
       <van-col span="20" offset="2">
@@ -127,22 +143,30 @@
 </van-panel>
 
 <!--活动路线-->
-<van-cell title="路线与轨迹" title-class="redtitle" label="{{od.route.wayPoints.length}}个途经点" value="点击查看详细路线与轨迹" is-link url="LookRoute" border="{{false}}" size="{{size}}"/>
+<van-cell title="路线与轨迹" title-class="redtitle" label="{{od.route.wayPoints.length}}个途经点" value="点击查看详细路线与轨迹" is-link
+  url="LookRoute" border="{{false}}" size="{{size}}" />
 
 <!--活动装备-->
-<van-cell title="装备要求" title-class="redtitle" label="推荐的装备列表" value="点击查看活动装备" is-link url="LookEquipments" border="{{false}}" size="{{size}}"/>
+<van-cell title="装备要求" title-class="redtitle" label="推荐的装备列表" value="点击查看活动装备" is-link url="LookEquipments"
+  border="{{false}}" size="{{size}}" />
 
 <!--队员列表-->
-<van-cell-group> 
-  <van-cell wx:if="{{od.limits.maxPerson}}" title="队员列表" title-class="redtitle" label="已有{{od.members.length+od.addMembers.length}}人（限{{od.limits.personCount}}人）" value="点击查看队员名单" size="{{size}}" is-link url="LookMembers" border="{{false}}" />
-  <van-cell wx:else title="队员列表" title-class="redtitle" label="已有{{od.members.length+od.addMembers.length}}人（不限人数）" value="点击查看队员名单" size="{{size}}" is-link url="LookMembers" border="{{false}}" />
+<van-cell-group>
+  <van-cell wx:if="{{od.limits.maxPerson}}" title="队员列表" title-class="redtitle"
+    label="已有{{od.members.length+od.addMembers.length}}人（限{{od.limits.personCount}}人）" value="点击查看队员名单" size="{{size}}"
+    is-link url="LookMembers" border="{{false}}" />
+  <van-cell wx:else title="队员列表" title-class="redtitle" label="已有{{od.members.length+od.addMembers.length}}人（不限人数）"
+    value="点击查看队员名单" size="{{size}}" is-link url="LookMembers" border="{{false}}" />
 </van-cell-group>
 
 <!-- 设置童军 -->
 <van-panel wx:if="{{od.title.loaded=='绿野童军'}}">
-  <van-cell title="设置所带童军信息" title-class="redtitle" value="点击编辑童军" size="{{size}}" is-link url="../AboutChild/ChildEntry?isMember=true&status={{entryInfo.status}}" border="{{false}}" />
-  <van-cell wx:for="{{myself.childs}}" wx:key="no"  title="童军：{{item.nickName}}" value="{{item.gender}}/{{item.no}}" size="{{size}}"/>
-  <van-cell wx:for="{{myself.parents}}" wx:key="nickName"  title="家长：{{item.nickName}}" value="{{item.gender}}/{{item.phone}}" size="{{size}}"/>
+  <van-cell title="设置所带童军信息" title-class="redtitle" value="点击编辑童军" size="{{size}}" is-link
+    url="../AboutChild/ChildEntry?isMember=true&status={{entryInfo.status}}" border="{{false}}" />
+  <van-cell wx:for="{{myself.childs}}" wx:key="no" title="童军：{{item.nickName}}" value="{{item.gender}}/{{item.no}}"
+    size="{{size}}" />
+  <van-cell wx:for="{{myself.parents}}" wx:key="nickName" title="家长：{{item.nickName}}"
+    value="{{item.gender}}/{{item.phone}}" size="{{size}}" />
   <!-- <van-col span="22" offset="1">
     <button bindtap="setChilds" plain type="primary">设置童军</button>
   </van-col> -->
@@ -150,13 +174,15 @@
 
 <!--集合地点-->
 <van-panel wx:if="{{od.status!='已结束'}}">
-  <van-cell slot="header" title-class="redtitle" title="集合点选择" size="{{size}}" required/>
+  <van-cell slot="header" title-class="redtitle" title="集合点选择" size="{{size}}" required />
   <van-radio-group wx:for="{{od.meets}}" wx:key="place" value="{{entryInfo.meetsIndex}}">
     <van-row>
       <van-col span="20" offset="0">
-        <van-cell clickable data-name="{{index}}" bind:click="clickMeets" title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="90%" border="{{index<meets.length-1}}" size="{{size}}">
+        <van-cell clickable data-name="{{index}}" bind:click="clickMeets"
+          title="{{index+1}}）{{item.place}}，{{item.date}}，{{item.time}}" title-width="90%"
+          border="{{index<meets.length-1}}" size="{{size}}">
           <van-radio name="{{index}}" />
-        </van-cell> 
+        </van-cell>
       </van-col>
 
       <van-col span="2" offset="1" wx:if="{{od.meets[index].latitude}}">
@@ -167,24 +193,28 @@
 </van-panel>
 
 <!--交通方式-->
-<van-cell wx:if="{{od.traffic}}" title="交通方式：{{od.traffic.mode}}" title-class="redtitle" label="车辆信息： {{od.traffic.carInfo}}" value="{{od.traffic.costInfo}}" border="{{false}}" size="{{size}}"/>
+<van-cell wx:if="{{od.traffic}}" title="交通方式：{{od.traffic.mode}}" title-class="redtitle"
+  label="车辆信息： {{od.traffic.carInfo}}" value="{{od.traffic.costInfo}}" border="{{false}}" size="{{size}}" />
 
 
 <block wx:if="{{od.status!='已结束'}}">
   <!--免责条款-->
-  <van-cell title="免责条款与活动规则" title-class="redtitle" value="点击查看详细内容" clickable size="{{size}}" is-link url="LookDisclaimer" />
-  <van-cell required title="我已阅读并同意条款和规则内容" title-width="90%" label="必须勾选同意才能报名" size="{{size}}" clickable bind:click="checkDisclaimer">
+  <van-cell title="免责条款与活动规则" title-class="redtitle" value="点击查看详细内容" clickable size="{{size}}" is-link
+    url="LookDisclaimer" />
+  <van-cell required title="我已阅读并同意条款和规则内容" title-width="90%" label="必须勾选同意才能报名" size="{{size}}" clickable
+    bind:click="checkDisclaimer">
     <van-checkbox value="{{entryInfo.agreedDisclaimer}}" />
   </van-cell>
   <!-- 是否认路 -->
-  <van-cell title="认路与否" title-class="redtitle" title-width="90%" label="勾选即为认路" size="{{size}}" clickable bind:click="checkKnowWay">
+  <van-cell title="认路与否" title-class="redtitle" title-width="90%" label="勾选即为认路" size="{{size}}" clickable
+    bind:click="checkKnowWay">
     <van-checkbox value="{{entryInfo.knowWay}}" />
   </van-cell>
   <!-- 设置童军 -->
   <!-- <van-col span="22" offset="1" wx:if="{{od.title.loaded=='绿野童军'}}">
     <button bindtap="setChilds" plain type="primary">设置童军</button>
   </van-col> -->
-</block> 
+</block>
 
 <!--活动当前状态-->
 <van-tag size="{{size}}" type="primary" plain>活动当前状态：{{od.status}}</van-tag>
@@ -199,12 +229,12 @@
       <van-row>
         <van-tag size="{{size}}" plain type="danger">已过占坑截止时间</van-tag>
       </van-row>
-    </block> 
+    </block>
     <block wx:else>
       <van-cell title="距离占坑截止时间还剩：" title-class="redtitle" size="{{size}}">
         <van-count-down size="{{size}}" time="{{ remains.occupy.time }}" format="DD 天 HH 时 mm 分 ss 秒" />
       </van-cell>
-    </block> 
+    </block>
   </block>
 </block>
 <!--报名时间提示-->
@@ -213,13 +243,13 @@
     <van-row>
       <van-tag size="{{size}}" plain type="danger">已过报名截止时间</van-tag>
     </van-row>
-  </block> 
+  </block>
   <block wx:else>
-  <van-cell title="距离报名截止时间还剩：" title-class="redtitle" size="{{size}}">
+    <van-cell title="距离报名截止时间还剩：" title-class="redtitle" size="{{size}}">
       <van-count-down size="{{size}}" time="{{ remains.entry.time }}" format="DD 天 HH 时 mm 分 ss 秒" />
     </van-cell>
-  </block> 
-</block> 
+  </block>
+</block>
 
 <!-- 报名条件提示 -->
 <block wx:if="{{(od.status=='已发布'||od.status=='已成行') && entryInfo.status=='浏览中'}}">
@@ -234,16 +264,18 @@
   </van-row>
   <van-row>
     <van-tag wx:if="{{entryFull}}" size="{{size}}" plain type="danger">报名人数已经达到限额，只能替补；若前面报名者退出，则自动转为正式队员。</van-tag>
-    <van-tag wx:if="{{remains.entry.time<0 && limits.allowPopup}}" size="{{size}}" plain type="primary">该活动允许空降</van-tag>
+    <van-tag wx:if="{{remains.entry.time<0 && limits.allowPopup}}" size="{{size}}" plain type="primary">该活动允许空降
+    </van-tag>
   </van-row>
 </block>
 
 <!-- 绿野网站同步提示 -->
-<van-tag wx:if="{{od.websites.lvyeorg.tid}}" size="{{size}}" plain type="danger">该活动已被设置为与绿野ORG网站同步，您的报名信息将自动同步到网站</van-tag>
+<van-tag wx:if="{{od.websites.lvyeorg.tid}}" size="{{size}}" plain type="danger">该活动已被设置为与绿野ORG网站同步，您的报名信息将自动同步到网站
+</van-tag>
 
 <!--故意空白，防止遮挡-->
 <van-cell title="  " border="{{false}}" />
-<van-cell title="  " border="{{false}}" /> 
+<van-cell title="  " border="{{false}}" />
 <van-cell title="  " border="{{false}}" />
 
 <!--报名按钮-->
@@ -255,10 +287,11 @@
   <!--占坑-->
   <van-col span="9" offset="2" wx:if="{{!od.limits.forbidOccupy}}">
     <button bindtap="tapOcuppy" wx:if="{{!entryFull && entryInfo.status=='浏览中' && remains.occupy.time>=0}}">占坑</button>
-  </van-col> 
+  </van-col>
   <!--报名-->
   <van-col span="9" offset="2">
-    <button bindtap="tapEntry" type="primary" wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">报名</button>
+    <button bindtap="tapEntry" type="primary"
+      wx:if="{{( (!entryFull && entryInfo.status=='浏览中') || entryInfo.status=='占坑中' ) && remains.entry.time>=0}}">报名</button>
   </van-col>
   <!--退出-->
   <van-col span="9" offset="2">
@@ -273,7 +306,7 @@
       <form bindsubmit="uploadPhotos" report-submit="true">
         <button form-type="submit" type="primary">上传活动照片</button>
       </form>
-    </van-col> 
+    </van-col>
     <van-col span="11" offset="1" wx:if="{{od.photocount}}">
       <form bindsubmit="lookPhotos" report-submit="true">
         <button form-type="submit" type="primary">查看活动照片({{od.photocount}})</button>
@@ -284,21 +317,26 @@
 
 
 <!--快速注册对话框-->
-<van-dialog use-slot show="{{showLoginDlg}}" show-cancel-button bind:cancel="cancelLoginDlg" bind:confirm="confirmLoginDlg" title="请填写个人信息" confirmButtonText="确定" cancelButtonText="取消">
+<van-dialog use-slot show="{{showLoginDlg}}" show-cancel-button bind:cancel="cancelLoginDlg"
+  bind:confirm="confirmLoginDlg" title="请填写个人信息" confirmButtonText="确定" cancelButtonText="取消">
 
-  <van-field required value="{{userInfo.nickName}}" label="户外昵称：" placeholder="好听、易记、非真名" bind:change="changeNickname" bind:blur="blurNickname" error-message="{{nickErrMsg}}" size="{{size}}"/>
+  <van-field required value="{{userInfo.nickName}}" label="户外昵称：" placeholder="好听、易记、非真名" bind:change="changeNickname"
+    bind:blur="blurNickname" error-message="{{nickErrMsg}}" size="{{size}}" />
 
-  <van-field required label="性别：" value="{{userInfo.gender}}" size="{{size}}" error-message="{{genderErrMsg}}" disabled/>
+  <van-field required label="性别：" value="{{userInfo.gender}}" size="{{size}}" error-message="{{genderErrMsg}}"
+    disabled />
   <van-radio-group wx:for="{{Genders}}" wx:key="*this" value="{{userInfo.gender}}" bind:change="changeGender">
     <van-cell title="{{item}}" data-name="{{item}}" size="{{size}}" clickable bind:click="clickGender">
       <van-radio name="{{item}}" />
     </van-cell>
   </van-radio-group>
-  <van-button open-type="getUserInfo" type="primary" size="large" plain bindgetuserinfo="dlgGetUserinfo">填入微信昵称和性别</van-button>
+  <van-button open-type="getUserInfo" type="primary" size="large" plain bindgetuserinfo="dlgGetUserinfo">填入微信昵称和性别
+  </van-button>
 
-  <van-field required value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="真实、有效、方便领队联系" error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" size="{{size}}"/>
+  <van-field required value="{{userInfo.phone}}" label="手机号码：" type="number" maxlength="11" placeholder="真实、有效、方便领队联系"
+    error-message="{{phoneErrMsg}}" bind:change="changePhone" border="{{false}}" size="{{size}}" />
   <!-- <van-button open-type="getPhoneNumber" type="primary" size="large" plain bindgetuserinfo="dlgGetPhone">填入手机号码</van-button> 暂不提供 -->
-</van-dialog> 
+</van-dialog>
 
 
 <!--画布-->

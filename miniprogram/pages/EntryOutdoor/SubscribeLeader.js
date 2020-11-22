@@ -6,17 +6,18 @@ const message = require('../../utils/message.js')
 wx.cloud.init() 
 const db = wx.cloud.database({})
 const dbOutdoors = db.collection('Outdoors')
-const dbPersons = db.collection('Persons')
+const dbPersons = db.collection('Persons') 
 const _ = db.command
 
 Page({
 
   data: {
-    hasSubscribed: false, // 是否订阅领队
+    // hasSubscribed: false, // 是否订阅领队
     leaderid: null, // 领队id
     // 对该领队的订阅信息
     mine: { 
-      acceptNotice: true,
+      // acceptNotice: true, // 暂时不用，关注即代表接收消息
+      cancel:false, // 是否取消关注
       messageCount: 0, // 订阅消息数量
     }, 
 
@@ -40,10 +41,11 @@ Page({
     this.setData({
       outdoors: res.data.myOutdoors,
     }) 
-    if (res.data.subscribers && res.data.subscribers[app.globalData.personid]) {
+    let subs = res.data.subscribers
+    if (subs && subs[app.globalData.personid]) {
       this.setData({
-        mine: res.data.subscribers[app.globalData.personid], // 得到自己是否订阅了领队
-        hasSubscribed: true
+        mine: subs[app.globalData.personid], // 得到自己是否订阅了领队
+        // hasSubscribed: true
       })
       // 防止为null
       if (!this.data.mine.messageCount) {
@@ -55,20 +57,28 @@ Page({
 
     app.checkLogin()
   },
-
+ 
   save() {
     console.log("SubscribeLeader.save()",this.data.mine)
     // 领队用云函数
-    cloudfun.opPersonItem(this.data.leaderid, "subscribers." + app.globalData.personid, this.data.mine, "")
+    cloudfun.opPersonItem(this.data.leaderid, "subscribers." + app.globalData.personid, this.data.mine, "")    
   },
 
   // 订阅领队/取消订阅
   subscribeLeader() {
     console.log("SubscribeLeader.subscribeLeader()")
     this.setData({
-      hasSubscribed: !this.data.hasSubscribed,
+      // hasSubscribed: !this.data.hasSubscribed,
+      "mine.cancel":!this.data.mine.cancel
     })
-    console.log("Subscribed is: " + this.data.hasSubscribed)
+    console.log("Subscribed is: " + this.data.mine.cancel)
+    // 修改主页的界面
+    let pages = getCurrentPages() //获取当前页面js里面的pages里的所有信息。
+    let prevPage = pages[pages.length - 2]
+    prevPage.setData({
+      isSubscribed:!this.data.mine.cancel
+    })
+
     this.save()
   },
   

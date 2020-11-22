@@ -7,7 +7,7 @@ wx.cloud.init()
 const db = wx.cloud.database({})
 const dbPersons = db.collection('Persons')
 
-const getPersonData = async(personid) => {
+const getPersonData = async (personid) => {
   console.log("getPersonData()")
   console.log("personid:", personid)
   // return await dbPersons.doc(personid).get()
@@ -22,7 +22,7 @@ const getPersonData = async(personid) => {
 }
 
 // auto：是否自动获取步数
-const updateWalkStep = async(personid, auto) => {
+const updateWalkStep = async (personid, auto) => {
   console.log("updateWalkStep()", personid)
   let resLogin = await promisify.login({})
   console.log("resLogin:", resLogin)
@@ -35,7 +35,7 @@ const updateWalkStep = async(personid, auto) => {
   let auRes = await util.authorize("werun", message)
   console.log("authorize result:", auRes)
   if (auRes) {
-    let res = await promisify.getWeRunData({})  
+    let res = await promisify.getWeRunData({})
 
     const encryptedData = res.encryptedData
     let run = await cloudfun.decrypt(res.encryptedData, res.iv, resLogin.code)
@@ -66,7 +66,7 @@ const updateWalkStep = async(personid, auto) => {
   return null
 }
 
-const getUniqueNickname = async(nickName, personid) => {
+const getUniqueNickname = async (nickName, personid) => {
   if (nickName != null) {
     let res = await dbPersons.where({
       "userInfo.nickName": nickName
@@ -77,7 +77,7 @@ const getUniqueNickname = async(nickName, personid) => {
       return nickName
     }
   }
-  
+
   // 不然就随机取名
   var time = new Date().getTime().toString()
   var autoName = "驴友" + time.substr(-4)
@@ -85,9 +85,9 @@ const getUniqueNickname = async(nickName, personid) => {
 }
 
 // 是否包含特殊字符
-const includeSpecialChar = (str) =>{
+const includeSpecialChar = (str) => {
   var specials = "[`~!@#$^&*()=|{}':;',\\[\\].<>-—/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]"
-  for(var i in str) {
+  for (var i in str) {
     if (specials.indexOf(str[i]) >= 0) {
       return true
     }
@@ -98,26 +98,35 @@ const includeSpecialChar = (str) =>{
 // 这里判断昵称的唯一性和不能为空
 const checkNickname = async (nickName, personid) => {
   var nickErrMsg = ""
-  if (!nickName) { 
+  if (!nickName) {
     nickErrMsg = "昵称不能为空"
-    return { msg: nickErrMsg, result: false }
+    return {
+      msg: nickErrMsg,
+      result: false
+    }
   } else if (includeSpecialChar(nickName)) {
     nickErrMsg = "昵称不能包括汉字、数字和字母之外的特殊字符"
-    return { msg: nickErrMsg, result: false }
+    return {
+      msg: nickErrMsg,
+      result: false
+    }
   } else {
     let res = await dbPersons.where({
       "userInfo.nickName": nickName
     }).get()
     console.log(res.data)
-    if (res.data.length > 1 || (res.data.length == 1 && res.data[0]._id != personid) ) {
+    if (res.data.length > 1 || (res.data.length == 1 && res.data[0]._id != personid)) {
       nickErrMsg = "昵称已被占用不能使用"
     }
-    return { msg: nickErrMsg, result: nickErrMsg == "" }
+    return {
+      msg: nickErrMsg,
+      result: nickErrMsg == ""
+    }
   }
 }
 
 // 在Persons表中创建一条记录（个人账号）
-const createRecord = async(userInfo, openid) => {
+const createRecord = async (userInfo, openid) => {
   console.log("person.createRecord()")
   // 最后仍然得判断openid真的在Persons表中没有，才创建新的
   let res = await dbPersons.where({
@@ -144,14 +153,14 @@ const createRecord = async(userInfo, openid) => {
     }
   } else if (res.data.length == 1) { // 有的话，用读取的就好
     await cloudfun.opPersonItem(res.data[0]._id, "userInfo", userInfo, "")
-    return{
-        personid: res.data[0]._id,
-        userInfo: userInfo
+    return {
+      personid: res.data[0]._id,
+      userInfo: userInfo
     }
   } else { // 已经有多个账号，后台处理
     wx.setClipboardData({
       data: openid,
-      success: function(res) {
+      success: function (res) {
         wx.showModal({
           title: '检测到您有多个账号',
           content: '可能会导致后续问题，OpenID已经复制到内存中，请发给作者“攀爬”予以核实。',
@@ -183,7 +192,7 @@ const adjustGroup = (personid, groupOpenid) => {
 // 处理 Persons表中Outdoors内容
 // key: 确定是myOutdoors、caredOutdoors、entriedOutdoors中的哪一个
 // isQuit：是否为退出，还是添加
-const dealOutdoors = async(personid, key, value, isQuit) => {
+const dealOutdoors = async (personid, key, value, isQuit) => {
   console.log("person.dealOutdoors()")
   console.log(personid, key, value, isQuit)
   let res = await dbPersons.doc(personid).get()
@@ -204,6 +213,19 @@ const dealOutdoors = async(personid, key, value, isQuit) => {
   return outdoors
 }
 
+// 判断自己是否订阅（关注）了领队
+const isSubscribed = async (leaderid, personid) => {
+  let res = await dbPersons.doc(leaderid).get()
+  if (res.data.subscribers && res.data.subscribers[personid]) {
+    if (res.data.subscribers[personid].cancel) {
+      return false
+    } else {
+      return true
+    }
+  }
+  return false
+}
+
 module.exports = {
   updateWalkStep: updateWalkStep, // 更新步数
   getUniqueNickname: getUniqueNickname, // 得到唯一的户外昵称（不重名）
@@ -211,6 +233,7 @@ module.exports = {
   adjustGroup: adjustGroup, // 记录和调整加入的微信群的顺序
   checkNickname: checkNickname, //  判断昵称的唯一性和不能为空
   dealOutdoors: dealOutdoors, // 处理 Persons表中Outdoors内容
+  isSubscribed:isSubscribed, // 判断是否订阅（关注）了领队
 
   getPersonData: getPersonData,
 }

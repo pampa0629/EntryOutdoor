@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "订阅领队与微信通知",
+  "navigationBarTitleText": "关注领队",
   "usingComponents": {
     "van-icon": "/vant-weapp/icon/index",
     "van-button": "/vant-weapp/button/index",

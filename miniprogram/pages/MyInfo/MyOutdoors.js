@@ -92,7 +92,7 @@ Page({
     self.tapOneOutdoor(e.currentTarget.dataset.pos, "entriedOutdoors", self.data.entriedOutdoors);
   },
 
-  // 我关注的活动列表
+  // 我收藏的活动列表
   // 当每次新发起活动，修改活动，或者删除活动后，“我的活动”中的列表也应随之变化
   tapCaredOutdoors: function(e) {
     const self = this;
